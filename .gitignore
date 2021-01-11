@@ -1,0 +1,6 @@
+#Visual Studio solution cache
+*/.[Vv]s/*
+# .NET base output directory
+*/[Bb]in/*
+# .NET intermediate build output directory
+*/[Oo]bj/*
