@@ -1,0 +1,168 @@
+﻿<Window x:Class="RocketLeagueStats.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RocketLeagueStats" 
+        xmlns:components="clr-namespace:RocketLeagueStats.Components"
+        mc:Ignorable="d"
+        Title="Rocket League Stats"
+        MinWidth="800"
+        MinHeight="435"
+        Style="{DynamicResource windowStyle}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition  MinWidth="200" MaxWidth="300"/>
+            <ColumnDefinition  Width="4*"/>
+        </Grid.ColumnDefinitions>
+        <Border BorderBrush="AliceBlue"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnBack"
+                            Width="40"
+                            Content="⮜"
+                            Margin="10"
+                            Style="{DynamicResource buttonStyle}"
+                            Grid.Column="0"
+                            Click="BtnBack_Click"/>
+                    <Button x:Name="btnNext"
+                            Content="⮞"
+                            Width="40"
+                            Margin="10"
+                            Style="{DynamicResource buttonStyle}"
+                            Grid.Column="2"
+                            Click="BtnNext_Click"/>
+                    <TextBlock x:Name="tbReplayIndex" 
+                       Style="{DynamicResource textBlockStyle}" 
+                       Grid.Column="1"
+                       Height="Auto"
+                       Width="Auto"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                </Grid>
+                <ListView x:Name="lvReplays"
+                          Grid.Row="1"
+                          Style="{DynamicResource listViewStyle}"
+                          ItemContainerStyle="{DynamicResource listViewItemStyle}"
+                          SelectionChanged="LvReplays_SelectionChanged"
+                          Grid.Column="1">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Date" DisplayMemberBinding="{Binding Date}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Border>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Background="#0C88FC"
+                    BorderBrush="AliceBlue"
+                    BorderThickness="1"
+                    Grid.Column ="0">
+                    <TextBlock x:Name="lblBlueGoals"
+                               Style="{DynamicResource textBlockStyle}"
+                               FontSize="30"
+                               FontFamily="Futura Extra Bold"
+                               Foreground="Black"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Border>
+                <Border Background="#FC680C"
+                    BorderBrush="AliceBlue"
+                    BorderThickness="1"
+                    Grid.Column="2">
+                    <TextBlock x:Name="lblOrangeGoals"
+                               Style="{DynamicResource textBlockStyle}"
+                               FontSize="30"
+                               FontFamily="Futura ExtraBold"
+                               Foreground="Black"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Border>
+                <TextBlock x:Name="tbTitle" 
+                       Text="Rocket League Stats!" 
+                       FontSize="30" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="White"
+                       Grid.Column="1"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0" x:Name="blueSideGrid">
+                    
+                </Grid>
+                <StackPanel Grid.Column="1">
+                    <TextBlock x:Name="tbReplayTitle" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbId" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbPlaylist" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbLink" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbDate" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbSeason" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbUploader" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbWinner" Style="{DynamicResource textBlockStyle}"/>
+                </StackPanel>
+                <Grid Grid.Column="2" x:Name="orangeSideGrid">
+                    
+                </Grid>
+            </Grid>
+            <Border Grid.Row="2"
+                BorderBrush="AliceBlue"
+                BorderThickness="1">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnNavigator" 
+                            Content="Navigator" 
+                            Grid.Column="0" 
+                            Style="{DynamicResource buttonStyle}" 
+                            Click="BtnNavigator_Click"/>
+                    <Button x:Name="btnAdvancedInfo"
+                            Content="Advanced Info"
+                            Style="{DynamicResource buttonStyle}"
+                            Grid.Column="1"
+                            Click="BtnAdvancedInfo_Click"/>
+                    <Button x:Name="btnSaveReplaysToFile" 
+                            Content="Save"
+                            Grid.Column="3" 
+                            Style="{DynamicResource buttonStyle}" 
+                            Click="BtnSaveReplaysToFile_Click"/>
+                    <Button x:Name="btnLoadReplaysFromFile" 
+                            Content="Load"
+                            Grid.Column="2" 
+                            Style="{DynamicResource buttonStyle}"
+                            Click="BtnLoadReplaysFromFile_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

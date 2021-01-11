@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="RocketLeagueStats.Components.ChartDisplay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RocketLeagueStats.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <TabControl Style="{DynamicResource tabControlStyle}">
+        <TabItem Header="Core"
+                 Style="{DynamicResource tabItemStyle}">
+            <ScrollViewer>
+                <WrapPanel x:Name="coreWP" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </TabItem>
+        <TabItem Header="Boost"
+                 Style="{DynamicResource tabItemStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="boostWP" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </TabItem>
+        <TabItem Header="Movement"
+                 Style="{DynamicResource tabItemStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="movementWP" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </TabItem>
+        <TabItem Header="Positioning"
+                 Style="{DynamicResource tabItemStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="positioningWP" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </TabItem>
+        <TabItem Header="Demo"
+                 Style="{DynamicResource tabItemStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="demoWP" Orientation="Horizontal"/>
+            </ScrollViewer>
+        </TabItem>
+    </TabControl>
+</UserControl>

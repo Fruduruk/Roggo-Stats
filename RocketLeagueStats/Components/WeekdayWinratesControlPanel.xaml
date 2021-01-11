@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="RocketLeagueStats.Components.WeekdayWinratesControlPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RocketLeagueStats.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal">
+            <Button Content="Show weekday winrates"
+                    Grid.Row="2"
+                    x:Name="btnWeekDayWinrates"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Style="{DynamicResource buttonStyle}"
+                    Margin="5"
+                    Click="BtnWeekDayWinrates_Click"/>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Name/ID"
+                           Style="{DynamicResource textBlockStyle}"
+                           Grid.Column="0"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"/>
+                <TextBox x:Name="tbxNameOrId"
+                         Style="{DynamicResource textBoxStyle}"
+                         Grid.Column="1"
+                         MinWidth="200"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"/>
+            </Grid>
+        </StackPanel>
+        <ListView x:Name="lvStats"
+                  Grid.Row="1"
+                  Style="{DynamicResource listViewStyle}"
+                  ItemContainerStyle="{DynamicResource listViewItemStyle}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Games played" DisplayMemberBinding="{Binding Played}"/>
+                    <GridViewColumn Header="Games won" DisplayMemberBinding="{Binding Won}"/>
+                    <GridViewColumn Header="Winrate" DisplayMemberBinding="{Binding WinrateString}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

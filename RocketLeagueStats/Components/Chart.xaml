@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="RocketLeagueStats.Components.Chart"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RocketLeagueStats.Components"
+             mc:Ignorable="d" 
+             Name="ChartControl"
+             HorizontalAlignment="Left"
+             VerticalAlignment="Top"
+             d:DesignHeight="250" 
+             d:DesignWidth="350">
+    <Border BorderBrush="AliceBlue"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="tbTitle"
+                       Foreground="AliceBlue"
+                       FontSize="22"
+                       HorizontalAlignment="Center"
+                       Text="{Binding Title,ElementName=ChartControl}"/>
+            <Canvas x:Name="cvChart"
+                    Grid.Row="1"/>
+        </Grid>
+    </Border>
+</UserControl>
