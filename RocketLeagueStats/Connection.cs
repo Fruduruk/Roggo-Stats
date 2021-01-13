@@ -362,10 +362,10 @@ namespace RocketLeagueStats
             var url = APIUrlBuilder.GetSpecificReplayUrl(replay.ID);
             HttpResponseMessage response = await Instance.Client.GetAsync(url);
             string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
-            return GetAdvancedReplayFromString(dataString, replay);
+            return GetAdvancedReplayFromString(dataString);
         }
 
-        private AdvancedReplay GetAdvancedReplayFromString(string dataString, Replay thisReplay)
+        private AdvancedReplay GetAdvancedReplayFromString(string dataString)
         {
             dynamic jData = JsonConvert.DeserializeObject(dataString);
             var ara = new AdvancedReplayAssembler(jData);
