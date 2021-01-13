@@ -39,7 +39,6 @@ namespace RocketLeagueStats
         private Database ReplayDatabase { get; set; }
         public AuthTokenInfo TokenInfo { get; }
 
-        private int loadCount = 0;
         public Connection(AuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo;
