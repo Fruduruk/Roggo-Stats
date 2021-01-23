@@ -36,6 +36,7 @@ namespace RocketLeagueStats
         }
         NavigatorWindow Navigator { get; set; } = new NavigatorWindow();
         AdvancedInfoWindow DetailWindow { get; set; } = new AdvancedInfoWindow();
+        ServiceWindow Service { get; set; } = new ServiceWindow();
         private int Index
         {
             get
@@ -73,8 +74,10 @@ namespace RocketLeagueStats
         {
             Navigator.DontClose = false;
             DetailWindow.DontClose = false;
+            Service.DontClose = false;
             Navigator.Close();
             DetailWindow.Close();
+            Service.Close();
         }
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)
@@ -117,7 +120,7 @@ namespace RocketLeagueStats
 
         private void InitializePlayerBoxes(Replay replay)
         {
-            CreatePlayerBoxes(blueSideGrid,replay.Blue);
+            CreatePlayerBoxes(blueSideGrid, replay.Blue);
             CreatePlayerBoxes(orangeSideGrid, replay.Orange);
         }
 
@@ -189,5 +192,6 @@ namespace RocketLeagueStats
             DetailWindow.Show();
             DetailWindow.LoadReplaysAsync(Replays);
         }
+        private void BtnService_Click(object sender, RoutedEventArgs e) => Service.Show();
     }
 }

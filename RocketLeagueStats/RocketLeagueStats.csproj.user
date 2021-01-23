@@ -34,6 +34,9 @@
     <Compile Update="NavigatorWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ServiceWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="AdvancedInfoWindow.xaml">
@@ -64,6 +67,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="NavigatorWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ServiceWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

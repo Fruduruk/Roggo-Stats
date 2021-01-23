@@ -136,8 +136,9 @@
                 BorderThickness="1">
                 <Grid >
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
@@ -151,16 +152,21 @@
                             Style="{DynamicResource buttonStyle}"
                             Grid.Column="1"
                             Click="BtnAdvancedInfo_Click"/>
-                    <Button x:Name="btnSaveReplaysToFile" 
-                            Content="Save"
-                            Grid.Column="3" 
+                    <Button x:Name="btnService" 
+                            Content="Service"
+                            Grid.Column="2" 
                             Style="{DynamicResource buttonStyle}" 
-                            Click="BtnSaveReplaysToFile_Click"/>
+                            Click="BtnService_Click"/>
                     <Button x:Name="btnLoadReplaysFromFile" 
                             Content="Load"
-                            Grid.Column="2" 
+                            Grid.Column="3" 
                             Style="{DynamicResource buttonStyle}"
                             Click="BtnLoadReplaysFromFile_Click"/>
+                    <Button x:Name="btnSaveReplaysToFile" 
+                            Content="Save"
+                            Grid.Column="4" 
+                            Style="{DynamicResource buttonStyle}" 
+                            Click="BtnSaveReplaysToFile_Click"/>
                 </Grid>
             </Border>
         </Grid>
