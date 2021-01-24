@@ -1,11 +1,10 @@
-﻿using RocketLeagueStats.AdvancedModels;
-using RocketLeagueStats.AverageModels;
+﻿using RLStats_Classes.AdvancedModels;
+using RLStats_Classes.MainClasses;
+using RLStats_Classes.Models;
 using RocketLeagueStats.Components;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 
 namespace RocketLeagueStats
 {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using RLStats_Classes.Enums;
+using RLStats_Classes.MainClasses;
+using RLStats_Classes.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -89,9 +92,9 @@ namespace RocketLeagueStats
 
         private void InitializeSeasonComboBox()
         {
-            for (int i = 1; i <= Constants.CurrentSeason; i++)
+            for (int i = 1; i <= RLConstants.CurrentSeason; i++)
                 cbxSeason.Items.Add(i);
-            cbxSeason.SelectedItem = Constants.CurrentSeason;
+            cbxSeason.SelectedItem = RLConstants.CurrentSeason;
         }
         #endregion
         #region checkboxes

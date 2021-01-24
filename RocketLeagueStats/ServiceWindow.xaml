@@ -8,6 +8,15 @@
         Title="ServiceWindow"
         Style="{DynamicResource windowStyle}">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Button Style="{DynamicResource buttonStyle}"
+                Content="Start Service"
+                Click="Button_Click"/>
+        <Button Style="{DynamicResource buttonStyle}"
+                Content="Start Service"
+                Click="Button_Click"/>
     </Grid>
 </Window>

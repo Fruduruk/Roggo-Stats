@@ -1,8 +1,6 @@
-﻿using Microsoft.Win32;
+﻿using RLStats_Classes.MainClasses;
 using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace RocketLeagueStats
@@ -19,7 +17,7 @@ namespace RocketLeagueStats
 #if DEBUG
             try
             {
-                tbxToken.Text = Constants.DebugKey;
+                tbxToken.Text = RLConstants.DebugKey;
                 BtnLoginClick(null, null);
             }
             catch (Exception e)

@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RocketLeagueStats", "RocketLeagueStats.csproj", "{316E60D0-C8AB-4908-B0F1-BEB5A731335C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RocketLeagueStats", "RocketLeagueStats.csproj", "{316E60D0-C8AB-4908-B0F1-BEB5A731335C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replay Download Service", "..\Replay Download Service\Replay Download Service.csproj", "{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RLStats Classes", "..\RLStats Classes\RLStats Classes.csproj", "{4195EE01-4020-4392-A735-522983A6CE89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{316E60D0-C8AB-4908-B0F1-BEB5A731335C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{316E60D0-C8AB-4908-B0F1-BEB5A731335C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{316E60D0-C8AB-4908-B0F1-BEB5A731335C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4195EE01-4020-4392-A735-522983A6CE89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4195EE01-4020-4392-A735-522983A6CE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4195EE01-4020-4392-A735-522983A6CE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4195EE01-4020-4392-A735-522983A6CE89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

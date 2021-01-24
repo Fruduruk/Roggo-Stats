@@ -1,7 +1,8 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
+using RLStats_Classes.MainClasses;
+using RLStats_Classes.Models;
 using RocketLeagueStats.Components;
-using RocketLeagueStats.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
