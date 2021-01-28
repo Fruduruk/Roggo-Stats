@@ -5,6 +5,9 @@ namespace RLStats_Classes.Models
     public class Replay
     {
         public string ID { get; set; }
+        public string RocketLeagueID { get; set; }
+        public string SeasonType { get; set; }
+        public string Visibility { get; set; }
         public string Link { get; set; }
         public string Title { get; set; }
         public string Playlist { get; set; }

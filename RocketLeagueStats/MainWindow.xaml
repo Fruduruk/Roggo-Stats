@@ -120,6 +120,9 @@
                 <StackPanel Grid.Column="1">
                     <TextBlock x:Name="tbReplayTitle" Style="{DynamicResource textBlockStyle}"/>
                     <TextBlock x:Name="tbId" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbRLId" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbVisibility" Style="{DynamicResource textBlockStyle}"/>
+                    <TextBlock x:Name="tbSeasonType" Style="{DynamicResource textBlockStyle}"/>
                     <TextBlock x:Name="tbPlaylist" Style="{DynamicResource textBlockStyle}"/>
                     <TextBlock x:Name="tbLink" Style="{DynamicResource textBlockStyle}"/>
                     <TextBlock x:Name="tbDate" Style="{DynamicResource textBlockStyle}"/>

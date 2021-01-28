@@ -195,6 +195,12 @@ namespace RLStats_Classes.MainClasses
                 {
                     var replay = new Replay();
                     replay.ID = r.id;
+                    replay.RocketLeagueID = r.rocket_league_id;
+                    if (r.season_type is null)
+                        replay.SeasonType = "before Free2Play";
+                    else
+                        replay.SeasonType = r.season_type;
+                    replay.Visibility = r.visibility;
                     replay.Link = r.link;
                     replay.Title = r.replay_title;
                     replay.Playlist = r.playlist_id;

@@ -36,6 +36,10 @@ namespace RLStats_Classes.MainClasses
             r.Overtime = JData.overtime;
             r.Overtime_seconds = JData.overtime_seconds;
             r.Season = JData.season;
+            if (JData.season_type is null)
+                r.Season_type = "before Free2Play";
+            else
+                r.Season_type = JData.season_type;
             r.Date = Convert.ToDateTime(JData.date);
             r.Visibility = JData.visibility;
             r.Blue = GetTeam(JData.blue);

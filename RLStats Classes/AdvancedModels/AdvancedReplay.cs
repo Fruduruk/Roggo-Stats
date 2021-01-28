@@ -20,6 +20,7 @@ namespace RLStats_Classes.AdvancedModels
         public bool? Overtime { get; set; }
         public int? Overtime_seconds { get; set; }
         public int? Season { get; set; }
+        public string Season_type { get; set; }
         public DateTime Date { get; set; }
         public string Visibility { get; set; }
         public AdvancedTeam Blue { get; set; }
