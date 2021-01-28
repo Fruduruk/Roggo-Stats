@@ -14,38 +14,34 @@ namespace RLStats_Classes.MainClasses
     public class Connection
     {
 
-        private static Connection instance;
         public static event EventHandler<double> ProgressUpdated;
         public static event EventHandler<double> AdvancedProgressUpdated;
         public static event EventHandler<string> ProgressChanged;
         public static event EventHandler<int> DownloadStarted;
         public static event EventHandler<string> AdvancedProgressChanged;
-        public static Connection Instance
-        {
-            get
-            {
-                return instance;
-            }
-            set
-            {
-                instance = value;
-            }
-        }
-        private HttpClient Client { get; set; } = new HttpClient();
+        public static Connection Instance { get; set; }
         public static double ElapsedMilliseconds { get; private set; } = 0;
         public bool Cancel { get; set; }
         private Database ReplayDatabase { get; set; }
         public AuthTokenInfo TokenInfo { get; }
-
+        public bool IsInitialized { get; private set; } = false;
         public Connection(AuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo;
-            Client.DefaultRequestHeaders.Add("Authorization", tokenInfo.Token);
+            IsInitialized = true;
             ReplayDatabase = new Database();
         }
-        public static AuthTokenInfo GetTokenInfo(string token)
+
+        private HttpClient GetClientWithToken()
         {
             var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", TokenInfo.Token);
+            return client;
+        }
+
+        public static AuthTokenInfo GetTokenInfo(string token)
+        {
+            using var client = new HttpClient();
             var t = Task<string>.Run(async () =>
             {
                 try
@@ -122,7 +118,8 @@ namespace RLStats_Classes.MainClasses
             };
             while (!done)
             {
-                HttpResponseMessage response = await Instance.Client.GetAsync(url);
+                using var client = GetClientWithToken();
+                HttpResponseMessage response = await client.GetAsync(url);
                 string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
                 Thread.Sleep(1000 / TokenInfo.GetSpeed());
                 var currentPack = GetApiDataFromString(dataString);
@@ -160,10 +157,11 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<int> GetReplayCountOfUrlAsync(string url)
         {
-            HttpResponseMessage response1 = await Instance.Client.GetAsync(url);
-            string dataString1 = await new StreamReader(await response1.Content.ReadAsStreamAsync()).ReadToEndAsync();
-            var currentPack1 = GetApiDataFromString(dataString1);
-            return currentPack1.ReplayCount;
+            using var client = GetClientWithToken();
+            HttpResponseMessage response = await client.GetAsync(url);
+            string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
+            var currentPack = GetApiDataFromString(dataString);
+            return currentPack.ReplayCount;
         }
 
         private void OnProgressUpdate(double value)
@@ -357,8 +355,9 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)
         {
+            using var client = GetClientWithToken();
             var url = APIUrlBuilder.GetSpecificReplayUrl(replay.ID);
-            HttpResponseMessage response = await Instance.Client.GetAsync(url);
+            HttpResponseMessage response = await client.GetAsync(url);
             string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
             return GetAdvancedReplayFromString(dataString);
         }
