@@ -11,7 +11,7 @@ namespace RLStats_Classes.MainClasses
         public static byte[] CompressString(string text)
         {
             byte[] buffer = Encoding.UTF8.GetBytes(text);
-            var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
             {
                 gZipStream.Write(buffer, 0, buffer.Length);
@@ -30,21 +30,19 @@ namespace RLStats_Classes.MainClasses
         
         public static string DecompressBytes(byte[] compressedBytes)
         {
-            using (var memoryStream = new MemoryStream())
+            using var memoryStream = new MemoryStream();
+            int dataLength = BitConverter.ToInt32(compressedBytes, 0);
+            memoryStream.Write(compressedBytes, 4, compressedBytes.Length - 4);
+
+            var buffer = new byte[dataLength];
+
+            memoryStream.Position = 0;
+            using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
             {
-                int dataLength = BitConverter.ToInt32(compressedBytes, 0);
-                memoryStream.Write(compressedBytes, 4, compressedBytes.Length - 4);
-
-                var buffer = new byte[dataLength];
-
-                memoryStream.Position = 0;
-                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-                {
-                    gZipStream.Read(buffer, 0, buffer.Length);
-                }
-
-                return Encoding.UTF8.GetString(buffer);
+                gZipStream.Read(buffer, 0, buffer.Length);
             }
+
+            return Encoding.UTF8.GetString(buffer);
         }
     }
 }

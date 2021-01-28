@@ -48,7 +48,8 @@ namespace RLStats_Classes.MainClasses
                 {
                     client.DefaultRequestHeaders.Add("Authorization", token);
                     var response = await client.GetAsync("https://ballchasing.com/api/");
-                    return await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
+                    using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+                    return await reader.ReadToEndAsync();
                 }
                 catch
                 {
@@ -116,30 +117,38 @@ namespace RLStats_Classes.MainClasses
                 Replays = new List<Replay>(),
                 ReplayCount = replayCount
             };
+            using var client = GetClientWithToken();
             while (!done)
             {
-                using var client = GetClientWithToken();
                 HttpResponseMessage response = await client.GetAsync(url);
-                string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
-                Thread.Sleep(1000 / TokenInfo.GetSpeed());
-                var currentPack = GetApiDataFromString(dataString);
-                if (currentPack.Success)
+                if (response.IsSuccessStatusCode)
                 {
-                    allData.Success = true;
-                    if (urlBuilder.CheckForDate)
-                        currentPack.DeleteReplaysThatAreNotInTimeRange(urlBuilder.StartDate, urlBuilder.EndDate);
-                    allData.Replays.AddRange(currentPack.Replays);
-                    stepsDone++;
-                    ShowUpdate(steps, stepsDone, currentPack.Replays.Count);
-                    if (Cancel)
-                        break;
-                    if (currentPack.Next != null)
-                        url = currentPack.Next;
+                    using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+                    string dataString = await reader.ReadToEndAsync();
+                    Thread.Sleep(1000 / TokenInfo.GetSpeed());
+                    var currentPack = GetApiDataFromString(dataString);
+                    if (currentPack.Success)
+                    {
+                        allData.Success = true;
+                        if (urlBuilder.CheckForDate)
+                            currentPack.DeleteReplaysThatAreNotInTimeRange(urlBuilder.StartDate, urlBuilder.EndDate);
+                        allData.Replays.AddRange(currentPack.Replays);
+                        stepsDone++;
+                        ShowUpdate(steps, stepsDone, currentPack.Replays.Count);
+                        if (Cancel)
+                            break;
+                        if (currentPack.Next != null)
+                            url = currentPack.Next;
+                        else
+                            done = true;
+                    }
                     else
                         done = true;
                 }
                 else
-                    done = true;
+                {
+                    Thread.Sleep(5000);
+                }
             }
             if (!allData.Success)
             {
@@ -159,7 +168,8 @@ namespace RLStats_Classes.MainClasses
         {
             using var client = GetClientWithToken();
             HttpResponseMessage response = await client.GetAsync(url);
-            string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
+            using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+            string dataString = await reader.ReadToEndAsync();
             var currentPack = GetApiDataFromString(dataString);
             return currentPack.ReplayCount;
         }
@@ -298,14 +308,13 @@ namespace RLStats_Classes.MainClasses
         {
             var count = replaysToDownload.Count;
             var savingList = new List<AdvancedReplay>();
+            using var client = GetClientWithToken();
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 Replay r = replaysToDownload[i];
                 try
                 {
-                    var replay = await GetAdvancedReplayInfosAsync(r);
-                    //if (r.ID.Trim() != string.Empty)
-                    //    ReplayDatabase.SaveReplayAsync(replay);
+                    var replay = await GetAdvancedReplayInfosAsync(client, r);
                     Thread.Sleep(1000 / TokenInfo.GetSpeed());
                     advancedReplays.Add(replay);
                     savingList.Add(replay);
@@ -359,13 +368,20 @@ namespace RLStats_Classes.MainClasses
             }
         }
 
-        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)
+        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
-            using var client = GetClientWithToken();
             var url = APIUrlBuilder.GetSpecificReplayUrl(replay.ID);
             HttpResponseMessage response = await client.GetAsync(url);
-            string dataString = await new StreamReader(await response.Content.ReadAsStreamAsync()).ReadToEndAsync();
-            return GetAdvancedReplayFromString(dataString);
+            if (response.IsSuccessStatusCode)
+            {
+                using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+                string dataString = await reader.ReadToEndAsync();
+                return GetAdvancedReplayFromString(dataString);
+            }
+            else
+            {
+                throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
+            }
         }
 
         private AdvancedReplay GetAdvancedReplayFromString(string dataString)

@@ -10,11 +10,20 @@ namespace RLStats_Classes.MainClasses
 {
     public class Database
     {
-        public string SavingDirectory { get; private set; }
+        public string SavingDirectory
+        {
+            get
+            {
+                if (!Directory.Exists(savingDirectory))
+                    Directory.CreateDirectory(savingDirectory);
+                return savingDirectory;
+            }
+            private set => savingDirectory = value;
+        }
         //public string SavingFile { get; private set; }
         //private List<AdvancedReplay> Cache { get; set; }
 
-        private const string AdvancedReplayListName = "SavedReplays";
+        private string savingDirectory;
 
         public Database()
         {
@@ -26,10 +35,10 @@ namespace RLStats_Classes.MainClasses
                 Directory.CreateDirectory(SavingDirectory);
             }
         }
-       
+
         public async void SaveReplayListAsync(List<AdvancedReplay> replays)
         {
-            foreach(var replay in replays)
+            foreach (var replay in replays)
             {
                 await SaveReplayAsync(replay);
             }
@@ -42,10 +51,9 @@ namespace RLStats_Classes.MainClasses
             path += $@"\{replay.Id}.rply";
             var jsonString = JsonConvert.SerializeObject(replay);
             var compressedString = Compressor.CompressString(jsonString);
-            if (!File.Exists(path))
-            {
-                await File.WriteAllBytesAsync(path, compressedString);
-            }
+            if (File.Exists(path))
+                File.Delete(path);
+            await File.WriteAllBytesAsync(path, compressedString);
         }
         public async Task<AdvancedReplay> LoadReplayAsync(Replay r)
         {
@@ -69,7 +77,7 @@ namespace RLStats_Classes.MainClasses
         public async Task<string> GetReplayPath(Replay replay)
         {
             var directories = Directory.EnumerateDirectories(SavingDirectory);
-            foreach(var d in directories)
+            foreach (var d in directories)
             {
                 if (d.Contains(replay.Date.ToString("yy.MM.dd")))
                 {
