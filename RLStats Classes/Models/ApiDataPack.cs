@@ -13,13 +13,15 @@ namespace RLStats_Classes.Models
         public Exception Ex { get; set; }
         public string ReceivedString { get; set; } = string.Empty;
 
-        public void DeleteObsoleteReplays()
+        public int DeleteObsoleteReplays()
         {
             List<Replay> newReplayList = new List<Replay>();
             foreach (var replay in Replays)
                 if (!DataPackMerger.DoesListContainReplay(newReplayList, replay))
                     newReplayList.Add(replay);
+            int obsoleteCount = Replays.Count-newReplayList.Count;
             Replays = newReplayList;
+            return obsoleteCount;
         }
         public void DeleteReplaysWithoutSpecificNames(List<string> playerNames)
         {

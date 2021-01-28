@@ -25,6 +25,8 @@ namespace RLStats_Classes.MainClasses
         private Database ReplayDatabase { get; set; }
         public AuthTokenInfo TokenInfo { get; }
         public bool IsInitialized { get; private set; } = false;
+        public static int ObsoleteReplayCount { get; private set; }
+
         public Connection(AuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo;
@@ -94,7 +96,7 @@ namespace RLStats_Classes.MainClasses
             sw.Stop();
             OnProgressChange("Downoald done...");
             OnProgressChange("Delete obsolete replays");
-            dataPack.DeleteObsoleteReplays();
+            ObsoleteReplayCount = dataPack.DeleteObsoleteReplays();
             OnProgressChange("Delete replays without specific names");
             ElapsedMilliseconds = sw.ElapsedMilliseconds;
             Cancel = false;

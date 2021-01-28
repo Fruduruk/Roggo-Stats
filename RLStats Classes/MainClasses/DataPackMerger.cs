@@ -68,7 +68,7 @@ namespace RLStats_Classes.MainClasses
         public static bool DoesListContainReplay(List<Replay> replays, Replay r)
         {
             foreach (var replay in replays)
-                if (r.ID.Equals(replay.ID))
+                if (r.Equals(replay))
                     return true;
             return false;
         }

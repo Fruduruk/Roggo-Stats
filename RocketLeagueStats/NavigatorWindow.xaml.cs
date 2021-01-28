@@ -180,7 +180,7 @@ namespace RocketLeagueStats
             {
                 tbMessages.Text = dataPack.Ex.Message + "\n" + dataPack.ReceivedString;
             }
-            tbMessages.Text = (Connection.ElapsedMilliseconds / 1000).ToString("0.##") + " seconds";
+            tbMessages.Text = (Connection.ElapsedMilliseconds / 1000).ToString("0.##") + $" seconds\nDouble Replays: {Connection.ObsoleteReplayCount}";
         }
 
         private void ClearTextBoxes()
