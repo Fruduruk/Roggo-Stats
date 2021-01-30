@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RLStats Classes\RLStats Classes.csproj" />
+  </ItemGroup>
 </Project>
