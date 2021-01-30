@@ -28,6 +28,9 @@
     <Compile Update="Components\PlayerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Components\ReplayPickerControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Components\WeekdayWinratesControlPanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -58,6 +61,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Components\PlayerView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Components\ReplayPickerControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Components\WeekdayWinratesControlPanel.xaml">

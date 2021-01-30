@@ -5,7 +5,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class RLConstants
     {
-        public const int CurrentSeason = 14;
+        public const int CurrentSeason = 2;
 
         public static string DebugKey { get => GetDebugKey(); }
 

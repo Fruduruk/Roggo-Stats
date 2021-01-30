@@ -94,8 +94,9 @@
                     <ScaleTransform ScaleX="2" ScaleY="2"/>
                 </CheckBox.LayoutTransform>
             </CheckBox>
-            <Grid Grid.Row="7"
-                          Grid.Column="1">
+            <Grid x:Name="gDateTimeRange"
+                  Grid.Row="7"
+                  Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -133,6 +134,8 @@
                         Orientation="Horizontal">
                 <CheckBox Style="{DynamicResource checkBoxStyle}"
                           x:Name="cbSeasonType"
+                          IsChecked="True"
+                          Click="CbSeasonType_Click"
                           Content="Free2Play">
                         <CheckBox.LayoutTransform>
                             <ScaleTransform ScaleX="2" ScaleY="2"/>

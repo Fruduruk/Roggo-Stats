@@ -20,14 +20,14 @@ namespace RocketLeagueStats.Components
         public Playlist Playlist => (Playlist)cbxPlaylist.SelectedItem;
         public int Season => (int)cbxSeason.SelectedItem;
         public bool? Free2Play => cbSeasonType.IsChecked;
-        public bool? MatchResult => cbMatchResult.IsChecked;
+        public MatchResult MatchResult => (MatchResult)cbxMatchResult.SelectedItem;
         public bool? Pro => cbPro.IsChecked;
         
 
         public ReplayPickerControl()
         {
             InitializeComponent();
-            InitializeSeasonComboBox();
+            InitializeSeasonComboBox(true);
             InitializeDatePickers();
             InitializePlaylistCoboxBox();
             InitializeMatchResultCombobox();
@@ -124,6 +124,8 @@ namespace RocketLeagueStats.Components
             dpTimeStart.Visibility = vis;
             dpTimeEnd.Visibility = vis;
         }
+        private void CbSeasonType_Click(object sender, RoutedEventArgs e) => InitializeSeasonComboBox(cbSeasonType.IsChecked ?? true);
+
         private void CbTitle_Click(object sender, RoutedEventArgs e) => tbTitle.Visibility = GetVisibility(cbTitle.IsChecked);
 
         private void CbPlaylist_Click(object sender, RoutedEventArgs e) => cbxPlaylist.Visibility = GetVisibility(cbPlaylist.IsChecked);
@@ -133,6 +135,8 @@ namespace RocketLeagueStats.Components
         private void CbMatchResult_Click(object sender, RoutedEventArgs e) => cbxMatchResult.Visibility = GetVisibility(cbMatchResult.IsChecked);
 
         private void CbPro_Click(object sender, RoutedEventArgs e) => cbxPro.Visibility = GetVisibility(cbPro.IsChecked);
+
+        
         private Visibility GetVisibility(bool? isChecked)
         {
             return isChecked switch
@@ -162,7 +166,6 @@ namespace RocketLeagueStats.Components
             cbxMatchResult.Items.Add(MatchResult.Loss);
             cbxMatchResult.SelectedIndex = 0;
         }
-
         private void InitializePlaylistCoboxBox()
         {
             var playlists = Enum.GetValues(typeof(Playlist));
@@ -170,13 +173,15 @@ namespace RocketLeagueStats.Components
                 cbxPlaylist.Items.Add(p);
             cbxPlaylist.SelectedIndex = 0;
         }
-
-        private void InitializeSeasonComboBox()
+        private void InitializeSeasonComboBox(bool free2Play)
         {
-            for (int i = 1; i <= RLConstants.CurrentSeason; i++)
+            var season = ((free2Play) ? RLConstants.CurrentSeason : 14);
+            cbxSeason.Items.Clear();
+            for (int i = 1; i <= season; i++)
                 cbxSeason.Items.Add(i);
-            cbxSeason.SelectedItem = RLConstants.CurrentSeason;
+            cbxSeason.SelectedItem = season;
         }
+
         #endregion
     }
 }
