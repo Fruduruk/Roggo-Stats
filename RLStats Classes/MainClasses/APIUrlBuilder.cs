@@ -10,7 +10,7 @@ namespace RLStats_Classes.MainClasses
         public bool CheckForDate { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
-
+        public bool FreeToPlaySeason { get; set; }
 
         private string Base = BallchasingApiUrl;
         public static string GetSpecificReplayUrl(string id)
