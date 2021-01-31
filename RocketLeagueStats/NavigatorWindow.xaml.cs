@@ -72,7 +72,7 @@ namespace RocketLeagueStats
             if (TempDataPack.Success)
                 dataPack = TempDataPack;
             else
-                dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.GetBuilder());
+                dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.GetRequestFilter());
             GetReplaysClicked?.Invoke(this, dataPack);
 
             Hide();
@@ -96,7 +96,7 @@ namespace RocketLeagueStats
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
             ClearTextBoxes();
-            var dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.GetBuilder());
+            var dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.GetRequestFilter());
             if (dataPack.Success)
             {
                 tbDownloadedReplayCount.Text = dataPack.Replays.Count.ToString();

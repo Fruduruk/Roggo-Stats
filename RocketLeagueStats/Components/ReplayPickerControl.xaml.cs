@@ -222,45 +222,32 @@ namespace RocketLeagueStats.Components
         }
 
         #endregion
-        public APIRequestFilter GetBuilder()
+        public APIRequestFilter GetRequestFilter()
         {
-            APIRequestFilter builder = new APIRequestFilter();
+            APIRequestFilter filter = new APIRequestFilter();
+            filter.CheckName = cbName.IsChecked ?? false;
+            filter.Names = GetNames();
 
-            if (cbName.IsChecked == true)
-                foreach (var name in GetNames())
-                    builder.SetPlayerName(name);
+            filter.CheckTitle = cbTitle.IsChecked ?? false;
+            filter.Title = tbTitle.Text;
 
-            if (cbSteamID.IsChecked == true)
-                foreach (var id in GetSteamIDs())
-                    builder.SetSteamID(id);
+            filter.CheckPlaylist = cbPlaylist.IsChecked ?? false;
+            filter.Playlist = (Playlist)cbxPlaylist.SelectedItem;
 
-            if (cbTitle.IsChecked == true)
-                if (tbTitle.Text.Trim() != string.Empty)
-                    builder.SetTitle(tbTitle.Text);
+            filter.FreeToPlaySeason = cbSeasonType.IsChecked ?? true;
 
-            if (cbPlaylist.IsChecked == true)
-                builder.SetPlaylist((Playlist)cbxPlaylist.SelectedItem);
+            filter.CheckSeason = cbSeason.IsChecked ?? false;
+            filter.Season = (int)cbxSeason.SelectedItem;
 
-            switch (cbSeasonType.IsChecked)
-            {
-                case true:
-                case null:
-                    builder.FreeToPlaySeason = true;
-                    break;
-                case false:
-                    builder.FreeToPlaySeason = false;
-                    break;
-            }
+            filter.CheckMatchResult = cbMatchResult.IsChecked ?? false;
+            filter.MatchResult = (MatchResult)cbxMatchResult.SelectedItem;
 
-            if (cbSeason.IsChecked == true)
-                builder.SetSeason((int)cbxSeason.SelectedItem);
+            filter.Pro = (bool)cbxPro.SelectedItem;
 
-            if (cbMatchResult.IsChecked == true)
-                builder.SetMatchResult((MatchResult)cbxMatchResult.SelectedItem);
+            filter.CheckSteamID = cbSteamID.IsChecked ?? false;
+            filter.SteamIDs = GetSteamIDs();
 
-            if (cbPro.IsChecked == true)
-                builder.SetPro((bool)cbxPro.SelectedItem);
-
+            filter.CheckDate = cbDate.IsChecked ?? false;
             if (cbDate.IsChecked == true)
             {
                 if (dpTimeStart.SelectedDate.HasValue && dpTimeEnd.SelectedDate.HasValue)
@@ -269,11 +256,10 @@ namespace RocketLeagueStats.Components
                     {
                         dpTimeEnd.SelectedDate = dpTimeStart.SelectedDate;
                     }
-                    builder.SetStartDate(dpTimeStart.SelectedDate.Value);
-                    builder.SetEndDate(dpTimeEnd.SelectedDate.Value);
+                    filter.DateRange = new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate.Value, dpTimeEnd.SelectedDate.Value);
                 }
             }
-            return builder;
+            return filter;
         }
 
 

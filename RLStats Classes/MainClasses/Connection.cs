@@ -85,14 +85,14 @@ namespace RLStats_Classes.MainClasses
                 return info;
             }
         }
-        public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter builder)
+        public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter filter)
         {
             OnProgressChange("Download started...");
             OnProgressUpdate(0);
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            ApiDataPack dataPack = await GetDataPack(builder);
+            ApiDataPack dataPack = await GetDataPack(filter);
             sw.Stop();
             OnProgressChange("Downoald done...");
             OnProgressChange("Delete obsolete replays");
@@ -104,15 +104,15 @@ namespace RLStats_Classes.MainClasses
             return dataPack;
         }
 
-        private async Task<ApiDataPack> GetDataPack(APIRequestFilter urlBuilder)
+        private async Task<ApiDataPack> GetDataPack(APIRequestFilter filter)
         {
-            int replayCount = await GetReplayCountOfUrlAsync(urlBuilder.GetApiUrl());
+            int replayCount = await GetReplayCountOfUrlAsync(filter.GetApiUrl());
             double steps = Convert.ToDouble(replayCount) / 50;
             steps = Math.Round(steps, MidpointRounding.ToPositiveInfinity);
             double stepsDone = 0;
             ShowUpdate(steps, stepsDone, 0);
             OnDownloadStart(replayCount);
-            var url = urlBuilder.GetApiUrl();
+            var url = filter.GetApiUrl();
             bool done = false;
             ApiDataPack allData = new ApiDataPack
             {
@@ -132,8 +132,8 @@ namespace RLStats_Classes.MainClasses
                     if (currentPack.Success)
                     {
                         allData.Success = true;
-                        if (urlBuilder.CheckForDate)
-                            currentPack.DeleteReplaysThatAreNotInTimeRange(urlBuilder.StartDate, urlBuilder.EndDate);
+                        if (filter.CheckDate)
+                            currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2);
                         allData.Replays.AddRange(currentPack.Replays);
                         stepsDone++;
                         ShowUpdate(steps, stepsDone, currentPack.Replays.Count);
@@ -372,7 +372,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
-            var url = APIRequestFilter.GetSpecificReplayUrl(replay.ID);
+            var url = APIRequestBuilder.GetSpecificReplayUrl(replay.ID);
             HttpResponseMessage response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
