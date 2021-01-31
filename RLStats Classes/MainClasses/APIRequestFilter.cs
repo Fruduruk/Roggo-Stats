@@ -3,7 +3,7 @@ using System;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class APIUrlBuilder
+    public class APIRequestFilter
     {
         public const string BallchasingApiUrl = "https://ballchasing.com/api/replays";
         private bool anyAdded = false;

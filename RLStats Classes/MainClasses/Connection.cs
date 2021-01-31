@@ -85,7 +85,7 @@ namespace RLStats_Classes.MainClasses
                 return info;
             }
         }
-        public async Task<ApiDataPack> CollectReplaysAsync(APIUrlBuilder builder)
+        public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter builder)
         {
             OnProgressChange("Download started...");
             OnProgressUpdate(0);
@@ -104,7 +104,7 @@ namespace RLStats_Classes.MainClasses
             return dataPack;
         }
 
-        private async Task<ApiDataPack> GetDataPack(APIUrlBuilder urlBuilder)
+        private async Task<ApiDataPack> GetDataPack(APIRequestFilter urlBuilder)
         {
             int replayCount = await GetReplayCountOfUrlAsync(urlBuilder.GetApiUrl());
             double steps = Convert.ToDouble(replayCount) / 50;
@@ -372,7 +372,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
-            var url = APIUrlBuilder.GetSpecificReplayUrl(replay.ID);
+            var url = APIRequestFilter.GetSpecificReplayUrl(replay.ID);
             HttpResponseMessage response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {

@@ -189,9 +189,9 @@ namespace RocketLeagueStats.Components
         }
 
 #endregion
-        public APIUrlBuilder GetBuilder()
+        public APIRequestFilter GetBuilder()
         {
-            APIUrlBuilder builder = new APIUrlBuilder();
+            APIRequestFilter builder = new APIRequestFilter();
 
             if (cbName.IsChecked == true)
                 foreach (var name in GetNames())
