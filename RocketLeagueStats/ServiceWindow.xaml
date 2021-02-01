@@ -4,19 +4,41 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RocketLeagueStats"
+        xmlns:components="clr-namespace:RocketLeagueStats.Components"
         mc:Ignorable="d"
         Title="ServiceWindow"
         Style="{DynamicResource windowStyle}">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Button Style="{DynamicResource buttonStyle}"
-                Content="Start Service"
-                Click="Button_Click"/>
-        <Button Style="{DynamicResource buttonStyle}"
-                Content="Start Service"
-                Click="Button_Click"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="btnAddRule"
+                    Content="Add Rule"
+                    Style="{DynamicResource buttonStyle}"
+                    Margin="5"
+                    Grid.Row="0"
+                    Click="BtnAddRule_Click"/>
+            <Button x:Name="btnDeleteRule"
+                    Content="Delete Rule"
+                    Style="{DynamicResource buttonStyle}"
+                    Margin="5"
+                    Grid.Row="1"
+                    Click="BtnDeleteRule_Click"/>
+            <ListView x:Name="lvRules"
+                      Style="{DynamicResource listViewStyle}"
+                      Margin="5"
+                      SelectionChanged="LvRules_SelectionChanged"
+                      Grid.Row="2"
+                      />
+        </Grid>
+        <components:ReplayPickerControl x:Name="rpReplayPicker"
+                                        Grid.Column="1"/>
     </Grid>
 </Window>
