@@ -2,6 +2,7 @@
 using RLStats_Classes.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -39,6 +40,31 @@ namespace RocketLeagueStats
             lvFilters.ItemsSource = Filters;
             rpReplayPicker.gRuleName.Visibility = Visibility.Visible;
             DontClose = true;
+            Activated += ServiceWindow_Activated;
+            Deactivated += ServiceWindow_Deactivated;
+        }
+
+        private void ServiceWindow_Deactivated(object sender, System.EventArgs e)
+        {
+            SaveCurrentFilter();
+        }
+
+        private void ServiceWindow_Activated(object sender, System.EventArgs e)
+        {
+            LoadFilters();
+        }
+
+        private void LoadFilters()
+        {
+            var info = new ServiceInfoIO().GetServiceInfo();
+            if (info.Available)
+            {
+                Filters.Clear();
+                foreach (var f in info.Filters)
+                    Filters.Add(f);
+                if (Filters.Count > 0)
+                    SelectFilter(Filters[0]);
+            }
         }
 
         private void BtnAddFilter_Click(object sender, RoutedEventArgs e)
@@ -100,12 +126,13 @@ namespace RocketLeagueStats
 
         private void SaveServiceInfo()
         {
-            var serviceIO = new ServiceInfoIO();
-            var info = new ServiceInfo();
-            info.Available = true;
-            info.Filters = Filters;
-            info.TokenInfo = Connection.Instance.TokenInfo;
-            serviceIO.SaveServiceInfo(info);
+            var info = new ServiceInfo
+            {
+                Available = true,
+                Filters = Filters,
+                TokenInfo = Connection.Instance.TokenInfo
+            };
+            new ServiceInfoIO().SaveServiceInfo(info);
         }
     }
 }

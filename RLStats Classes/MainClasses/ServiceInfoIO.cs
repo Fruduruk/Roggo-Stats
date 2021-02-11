@@ -11,6 +11,7 @@ namespace RLStats_Classes.MainClasses
         private string ServiceFilePath { get; set; }
         public ServiceInfoIO()
         {
+            //Führt noch zu abstürzen, weil noch auf die Datei zugegriffen wird
             ServiceFilePath = ServiceDirectory + @"\serviceInfo.json";
             if (!Directory.Exists(ServiceDirectory))
                 Directory.CreateDirectory(ServiceDirectory);
