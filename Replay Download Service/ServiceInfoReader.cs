@@ -2,7 +2,6 @@
 using RLStats_Classes.Models;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Replay_Download_Service
 {

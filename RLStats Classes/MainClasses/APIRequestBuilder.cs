@@ -1,7 +1,6 @@
 ﻿using RLStats_Classes.Enums;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RLStats_Classes.MainClasses
 {

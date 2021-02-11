@@ -1,8 +1,6 @@
 ﻿using RLStats_Classes.MainClasses;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 

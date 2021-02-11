@@ -1,11 +1,9 @@
-﻿using RLStats_Classes.Enums;
-using RLStats_Classes.MainClasses;
+﻿using RLStats_Classes.MainClasses;
 using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Input;
 
 namespace RocketLeagueStats
 {
