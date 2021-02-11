@@ -3,7 +3,7 @@ using RLStats_Classes.Models;
 using System;
 using System.IO;
 
-namespace Replay_Download_Service
+namespace RLStats_Classes.MainClasses
 {
     public class ServiceInfoReader
     {
