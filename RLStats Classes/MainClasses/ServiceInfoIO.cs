@@ -32,5 +32,10 @@ namespace RLStats_Classes.MainClasses
                 return info;
             }
         }
+        public void SaveServiceInfo(ServiceInfo info)
+        {
+            var jsonString = JsonConvert.SerializeObject(info);
+            File.WriteAllText(ServiceFilePath, jsonString);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RLStats_Classes.MainClasses;
+using RLStats_Classes.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -93,7 +94,18 @@ namespace RocketLeagueStats
                     var index = lvFilters.SelectedIndex;
                     Filters[index] = rpReplayPicker.RequestFilter;
                     lvFilters.SelectedIndex = index;
+                    SaveServiceInfo();
                 }
+        }
+
+        private void SaveServiceInfo()
+        {
+            var serviceIO = new ServiceInfoIO();
+            var info = new ServiceInfo();
+            info.Available = true;
+            info.Filters = Filters;
+            info.TokenInfo = Connection.Instance.TokenInfo;
+            serviceIO.SaveServiceInfo(info);
         }
     }
 }
