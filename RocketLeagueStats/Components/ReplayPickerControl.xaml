@@ -17,12 +17,12 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Rule name:"
+            <TextBlock Text="Filter name:"
                        Style="{DynamicResource textBlockStyle}"/>
             <TextBox x:Name="tbxFilterName"
                      Style="{DynamicResource textBoxStyle}"
                      Grid.Column="1"
-                     Text="Rule"
+                     Text="Filter"
                      Margin="5"/>
         </Grid>
         <Grid Grid.Row="1">
