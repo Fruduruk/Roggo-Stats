@@ -22,7 +22,7 @@ namespace Replay_Download_Service
                 StoppingToken = stoppingToken;
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    SInfo = new ServiceInfoReader().GetServiceInfo();
+                    SInfo = new ServiceInfoIO().GetServiceInfo();
                     Logger.LogInformation($"Work started: {DateTime.Now}");
                     DoWork();
                 }

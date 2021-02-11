@@ -5,11 +5,11 @@ using System.IO;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class ServiceInfoReader
+    public class ServiceInfoIO
     {
         private string ServiceDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\RocketLeagueStatsService";
         private string ServiceFilePath { get; set; }
-        public ServiceInfoReader()
+        public ServiceInfoIO()
         {
             ServiceFilePath = ServiceDirectory + @"\serviceInfo.txt";
             if (!Directory.Exists(ServiceDirectory))
