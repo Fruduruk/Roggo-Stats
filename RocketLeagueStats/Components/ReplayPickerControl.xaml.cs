@@ -37,15 +37,10 @@ namespace RocketLeagueStats.Components
         {
             if (names is null)
                 return;
-            var isChecked = !names.Count.Equals(0);
-            cbName.IsChecked = isChecked;
             tbName.Text = string.Empty;
-            if (isChecked)
-            {
-                if (names != null)
-                    foreach (var name in names)
-                        tbName.Text += name.Trim() + " ";
-            }
+            if (names != null)
+                foreach (var name in names)
+                    tbName.Text += name.Trim() + " ";
         }
         private List<string> GetSteamIDs()
         {
@@ -68,14 +63,9 @@ namespace RocketLeagueStats.Components
                 return;
             else
             {
-                var isChecked = !ids.Count.Equals(0);
-                cbSteamID.IsChecked = isChecked;
                 tbSteamID.Text = string.Empty;
-                if (isChecked)
-                {
-                    foreach (var id in ids)
-                        tbName.Text += id.Trim() + " ";
-                }
+                foreach (var id in ids)
+                    tbSteamID.Text += id.Trim() + " ";
             }
         }
         private string GetTitle()
@@ -90,11 +80,7 @@ namespace RocketLeagueStats.Components
             if (title is null)
                 return;
             else
-            {
-                var isChecked = !title.Equals(string.Empty);
-                cbTitle.IsChecked = isChecked;
                 tbTitle.Text = title;
-            }
         }
         private Playlist GetPlaylist()
         {
@@ -105,7 +91,6 @@ namespace RocketLeagueStats.Components
         }
         private void SetPlaylist(Playlist playlist)
         {
-            cbPlaylist.IsChecked = true;
             cbxPlaylist.SelectedItem = playlist;
         }
         private int GetSeason()
@@ -117,7 +102,6 @@ namespace RocketLeagueStats.Components
         }
         private void SetSeason(int season)
         {
-            cbSeason.IsChecked = true;
             cbxSeason.SelectedItem = season;
         }
         private bool GetFree2Play()
@@ -141,7 +125,6 @@ namespace RocketLeagueStats.Components
         }
         private void SetMatchResult(MatchResult matchResult)
         {
-            cbMatchResult.IsChecked = true;
             cbxMatchResult.SelectedItem = matchResult;
         }
         private bool GetPro()
@@ -170,7 +153,6 @@ namespace RocketLeagueStats.Components
         }
         private void SetDateRange(DateTime startDate, DateTime endDate)
         {
-            cbDate.IsChecked = true;
             dpTimeStart.SelectedDate = startDate;
             dpTimeEnd.SelectedDate = endDate;
         }
