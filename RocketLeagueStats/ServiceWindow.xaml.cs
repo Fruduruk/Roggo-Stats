@@ -82,6 +82,11 @@ namespace RocketLeagueStats
 
         private void LvFilters_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
+            SaveCurrentFilter();
+        }
+
+        private void SaveCurrentFilter()
+        {
             if (Filters.Count > 0)
                 if (lvFilters.SelectedIndex >= 0)
                 {
