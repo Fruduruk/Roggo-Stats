@@ -30,7 +30,7 @@ namespace RLStats_Classes.MainClasses
         public void SetPlaylist(Playlist value)
         {
             AddBinding();
-            //Base += "playlist=" + ConvertPlaylist(value);
+            Base += "playlist=" + ConvertPlaylist(value);
             anyAdded = true;
         }
         public void SetSeason(int value)

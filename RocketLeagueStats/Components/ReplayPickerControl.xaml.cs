@@ -2,6 +2,7 @@
 using RLStats_Classes.MainClasses;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,11 +14,18 @@ namespace RocketLeagueStats.Components
     public partial class ReplayPickerControl : UserControl
     {
         private const char Separator = ' ';
+
+        public APIRequestFilter RequestFilter
+        {
+            get => GetRequestFilter();
+            set => SetRequestFilter(value);
+        }
+
         #region Properties
         private List<string> GetNames()
         {
             if (cbName.IsChecked == false)
-                return null;
+                return new List<string>();
             var namebox = tbName.Text.Trim();
             var nameArray = namebox.Split(Separator);
             var names = new List<string>();
@@ -26,130 +34,180 @@ namespace RocketLeagueStats.Components
                     names.Add(s);
             return names;
         }
-        public void SetNames(List<string> names)
+        private void SetNames(List<string> names)
         {
-            cbName.IsChecked = names != null;
+            if (names is null)
+                return;
+            var isChecked = !names.Count.Equals(0);
+            cbName.IsChecked = isChecked;
             tbName.Text = string.Empty;
-            if (names != null)
-                foreach (var name in names)
-                    tbName.Text += name + " ";
+            if (isChecked)
+            {
+                if (names != null)
+                    foreach (var name in names)
+                        tbName.Text += name.Trim() + " ";
+            }
         }
         private List<string> GetSteamIDs()
         {
             if (cbSteamID.IsChecked == false)
-                return null;
-            var idBox = tbSteamID.Text.Trim();
-            var idArray = idBox.Split(Separator);
-            var ids = new List<string>();
-            foreach (var s in idArray)
-                if (!s.Trim().Equals(string.Empty))
-                    ids.Add(s);
-            return ids;
+                return new List<string>();
+            else
+            {
+                var idBox = tbSteamID.Text.Trim();
+                var idArray = idBox.Split(Separator);
+                var ids = new List<string>();
+                foreach (var s in idArray)
+                    if (!s.Trim().Equals(string.Empty))
+                        ids.Add(s);
+                return ids;
+            }
         }
-        public void SetSteamIDs(List<string> ids)
+        private void SetSteamIDs(List<string> ids)
         {
-            cbSteamID.IsChecked = ids != null;
-            tbSteamID.Text = string.Empty;
-            if (ids != null)
-                foreach (var id in ids)
-                    tbName.Text += id + " ";
+            if (ids is null)
+                return;
+            else
+            {
+                var isChecked = !ids.Count.Equals(0);
+                cbSteamID.IsChecked = isChecked;
+                tbSteamID.Text = string.Empty;
+                if (isChecked)
+                {
+                    foreach (var id in ids)
+                        tbName.Text += id.Trim() + " ";
+                }
+            }
         }
-        public string GetTitle()
+        private string GetTitle()
         {
             if (cbTitle.IsChecked == false)
-                return null;
-            return tbTitle.Text.Trim();
+                return string.Empty;
+            else
+                return tbTitle.Text.Trim();
         }
-        public void SetTitle(string title)
+        private void SetTitle(string title)
         {
-            cbTitle.IsChecked = title != null;
-            if (title != null)
+            if (title is null)
+                return;
+            else
+            {
+                var isChecked = !title.Equals(string.Empty);
+                cbTitle.IsChecked = isChecked;
                 tbTitle.Text = title;
+            }
         }
-        public Playlist? GetPlaylist()
+        private Playlist GetPlaylist()
         {
-            if (cbPlaylist.IsChecked == false)
-                return null;
-            return (Playlist)cbxPlaylist.SelectedItem; ;
+            if (cbPlaylist.IsChecked.Equals(false))
+                return 0;
+            else
+                return (Playlist)cbxPlaylist.SelectedItem;
         }
-        public void SetPlaylist(Playlist? playlist)
+        private void SetPlaylist(Playlist playlist)
         {
-            cbPlaylist.IsChecked = playlist != null;
-            if (playlist != null)
-                cbxPlaylist.SelectedItem = playlist;
+            cbPlaylist.IsChecked = true;
+            cbxPlaylist.SelectedItem = playlist;
         }
-        public int? GetSeason()
+        private int GetSeason()
         {
-            if (cbSeason.IsChecked == false)
-                return null;
-            return (int)cbxSeason.SelectedItem;
+            if (cbSeason.IsChecked.Equals(true))
+                return (int)cbxSeason.SelectedItem;
+            else
+                return 0;
         }
-        public void SetSeason(int? season)
+        private void SetSeason(int season)
         {
-            cbSeason.IsChecked = season != null;
-            if (season != null)
-                cbxSeason.SelectedItem = season;
+            cbSeason.IsChecked = true;
+            cbxSeason.SelectedItem = season;
         }
-        public bool? GetFree2Play()
+        private bool GetFree2Play()
         {
-            if (cbSeason.IsChecked == false)
-                return null;
-            return cbSeasonType.IsChecked ?? true;
+            if (cbSeasonType.IsChecked.Equals(true))
+                return true;
+            else
+                return false;
         }
-        public void SetFree2Play(bool isFree2Play)
+        private void SetFree2Play(bool isFree2Play)
         {
             cbSeasonType.IsChecked = isFree2Play;
-            InitializeSeasonComboBox(isFree2Play);
+            InitializeSeasonComboBoxAndFree2PlayCheckBox(isFree2Play);
         }
-        public MatchResult? GetMatchResult()
+        private MatchResult GetMatchResult()
         {
-            if (cbMatchResult.IsChecked == false)
-                return null;
-            return (MatchResult)cbxMatchResult.SelectedItem;
+            if (cbMatchResult.IsChecked.Equals(true))
+                return (MatchResult)cbxMatchResult.SelectedItem;
+            else
+                return 0;
         }
-        public void SetMatchResult(MatchResult? matchResult)
+        private void SetMatchResult(MatchResult matchResult)
         {
-            cbMatchResult.IsChecked = matchResult != null;
-            if (matchResult != null)
-                cbxMatchResult.SelectedItem = matchResult;
+            cbMatchResult.IsChecked = true;
+            cbxMatchResult.SelectedItem = matchResult;
         }
-        public bool GetPro()
+        private bool GetPro()
         {
-            return cbPro.IsChecked ?? false;
+            if (cbPro.IsChecked.Equals(true))
+                return true;
+            else
+                return false;
         }
-        public void SetPro(bool hasProInIt)
+        private void SetPro(bool hasProInIt)
         {
             cbPro.IsChecked = hasProInIt;
         }
-        public Tuple<DateTime, DateTime> GetDateRange()
+        private Tuple<DateTime, DateTime> GetDateRange()
         {
-            if (cbDate.IsChecked == true)
+            if (cbDate.IsChecked.Equals(true))
                 return new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate ?? DateTime.Today, dpTimeEnd.SelectedDate ?? DateTime.Today);
-            else if (cbDate.IsChecked == false)
-                return null;
             else
                 return null;
         }
-        public void SetDateRange(DateTime? startDate, DateTime? endDate)
+        private void SetDateRange(DateTime startDate, DateTime endDate)
         {
-            if (startDate is null || endDate is null)
-                cbDate.IsChecked = false;
-            else
-            {
-                cbDate.IsChecked = true;
-                dpTimeStart.SelectedDate = startDate;
-                dpTimeEnd.SelectedDate = endDate;
-            }
+            cbDate.IsChecked = true;
+            dpTimeStart.SelectedDate = startDate;
+            dpTimeEnd.SelectedDate = endDate;
         }
         #endregion
         public ReplayPickerControl()
         {
             InitializeComponent();
-            InitializeSeasonComboBox(false);
+            SetEverythingDefault();
+        }
+        private void SetEverythingDefault()
+        {
+            cbName.IsChecked = false;
+            cbTitle.IsChecked = false;
+            cbPlaylist.IsChecked = false;
+            cbSeason.IsChecked = false;
+            cbMatchResult.IsChecked = false;
+            cbSteamID.IsChecked = false;
+            cbDate.IsChecked = false;
+
+            cbSeasonType.IsChecked = true;
+            cbPro.IsChecked = false;
+            tbName.Text = string.Empty;
+            tbTitle.Text = string.Empty;
+            tbSteamID.Text = string.Empty;
+            InitializeSeasonComboBoxAndFree2PlayCheckBox(true);
             InitializeDatePickers();
             InitializePlaylistCoboxBox();
             InitializeMatchResultCombobox();
             InitializeProCombobox();
+            //RefreshVisibilities();
+        }
+        private void RefreshVisibilities()
+        {
+            CbName_Click(null, null);
+            CbTitle_Click(null, null);
+            CbSeasonType_Click(null, null);
+            CbPlaylist_Click(null, null);
+            CbSeason_Click(null, null);
+            CbMatchResult_Click(null, null);
+            CbPro_Click(null, null);
+            CbSteamID_Click(null, null);
+            CbDate_Click(null, null);
         }
         #region Initializer
         private void InitializeDatePickers()
@@ -159,12 +217,14 @@ namespace RocketLeagueStats.Components
         }
         private void InitializeProCombobox()
         {
+            cbxPro.Items.Clear();
             cbxPro.Items.Add(true);
             cbxPro.Items.Add(false);
             cbxPro.SelectedIndex = 0;
         }
         private void InitializeMatchResultCombobox()
         {
+            cbxMatchResult.Items.Clear();
             cbxMatchResult.Items.Add(MatchResult.Win);
             cbxMatchResult.Items.Add(MatchResult.Loss);
             cbxMatchResult.SelectedIndex = 0;
@@ -172,11 +232,12 @@ namespace RocketLeagueStats.Components
         private void InitializePlaylistCoboxBox()
         {
             var playlists = Enum.GetValues(typeof(Playlist));
+            cbxPlaylist.Items.Clear();
             foreach (var p in playlists)
                 cbxPlaylist.Items.Add(p);
             cbxPlaylist.SelectedIndex = 0;
         }
-        private void InitializeSeasonComboBox(bool free2Play)
+        private void InitializeSeasonComboBoxAndFree2PlayCheckBox(bool free2Play)
         {
             var season = ((free2Play) ? RLConstants.CurrentSeason : 14);
             cbxSeason.Items.Clear();
@@ -202,19 +263,12 @@ namespace RocketLeagueStats.Components
             dpTimeStart.Visibility = vis;
             dpTimeEnd.Visibility = vis;
         }
-        private void CbSeasonType_Click(object sender, RoutedEventArgs e) => InitializeSeasonComboBox(cbSeasonType.IsChecked ?? true);
-
+        private void CbSeasonType_Click(object sender, RoutedEventArgs e) => InitializeSeasonComboBoxAndFree2PlayCheckBox(cbSeasonType.IsChecked ?? true);
         private void CbTitle_Click(object sender, RoutedEventArgs e) => tbTitle.Visibility = GetVisibility(cbTitle.IsChecked);
-
         private void CbPlaylist_Click(object sender, RoutedEventArgs e) => cbxPlaylist.Visibility = GetVisibility(cbPlaylist.IsChecked);
-
         private void CbSeason_Click(object sender, RoutedEventArgs e) => spSeason.Visibility = GetVisibility(cbSeason.IsChecked);
-
         private void CbMatchResult_Click(object sender, RoutedEventArgs e) => cbxMatchResult.Visibility = GetVisibility(cbMatchResult.IsChecked);
-
         private void CbPro_Click(object sender, RoutedEventArgs e) => cbxPro.Visibility = GetVisibility(cbPro.IsChecked);
-
-
         private Visibility GetVisibility(bool? isChecked)
         {
             return isChecked switch
@@ -224,35 +278,40 @@ namespace RocketLeagueStats.Components
                 _ => Visibility.Collapsed,
             };
         }
-
         #endregion
-        public APIRequestFilter GetRequestFilter()
+        private APIRequestFilter GetRequestFilter()
         {
             APIRequestFilter filter = new APIRequestFilter();
             filter.CheckName = cbName.IsChecked ?? false;
-            filter.Names = GetNames();
+            if (filter.CheckName)
+                filter.Names = GetNames();
 
             filter.CheckTitle = cbTitle.IsChecked ?? false;
-            filter.Title = tbTitle.Text;
+            if (filter.CheckTitle)
+                filter.Title = tbTitle.Text;
 
             filter.CheckPlaylist = cbPlaylist.IsChecked ?? false;
-            filter.Playlist = (Playlist)cbxPlaylist.SelectedItem;
+            if (filter.CheckPlaylist)
+                filter.Playlist = (Playlist)cbxPlaylist.SelectedItem;
 
             filter.FreeToPlaySeason = cbSeasonType.IsChecked ?? true;
 
             filter.CheckSeason = cbSeason.IsChecked ?? false;
-            filter.Season = (int)cbxSeason.SelectedItem;
+            if (filter.CheckSeason)
+                filter.Season = (int)(cbxSeason.SelectedItem ?? 0);
 
             filter.CheckMatchResult = cbMatchResult.IsChecked ?? false;
-            filter.MatchResult = (MatchResult)cbxMatchResult.SelectedItem;
+            if (filter.CheckMatchResult)
+                filter.MatchResult = (MatchResult)(cbxMatchResult.SelectedItem ?? MatchResult.Loss);
 
-            filter.Pro = (bool)cbxPro.SelectedItem;
+            filter.Pro = (bool)(cbxPro.SelectedItem ?? false);
 
             filter.CheckSteamID = cbSteamID.IsChecked ?? false;
-            filter.SteamIDs = GetSteamIDs();
+            if (filter.CheckSteamID)
+                filter.SteamIDs = GetSteamIDs();
 
             filter.CheckDate = cbDate.IsChecked ?? false;
-            if (cbDate.IsChecked == true)
+            if (filter.CheckDate)
             {
                 if (dpTimeStart.SelectedDate.HasValue && dpTimeEnd.SelectedDate.HasValue)
                 {
@@ -265,7 +324,45 @@ namespace RocketLeagueStats.Components
             }
             return filter;
         }
+        private void SetRequestFilter(APIRequestFilter rule)
+        {
+            SetEverythingDefault();
+            if (rule is null)
+                return;
+            tbxRuleName.Text = rule.FilterName;
 
+            cbName.IsChecked = rule.CheckName;
+            if (rule.CheckName)
+                SetNames(rule.Names);
 
+            cbTitle.IsChecked = rule.CheckTitle;
+            if (rule.CheckTitle)
+                SetTitle(rule.Title);
+
+            cbPlaylist.IsChecked = rule.CheckPlaylist;
+            if (rule.CheckPlaylist)
+                SetPlaylist(rule.Playlist);
+
+            cbMatchResult.IsChecked = rule.CheckMatchResult;
+            if (rule.CheckMatchResult)
+                SetMatchResult(rule.MatchResult);
+
+            SetPro(rule.Pro);
+
+            SetFree2Play(rule.FreeToPlaySeason);
+
+            cbSeason.IsChecked = rule.CheckSeason;
+            if (rule.CheckSeason)
+                SetSeason(rule.Season);
+
+            cbSteamID.IsChecked = rule.CheckSteamID;
+            if (rule.CheckSteamID)
+                SetSteamIDs(rule.SteamIDs);
+
+            cbDate.IsChecked = rule.CheckDate;
+            if (rule.CheckDate)
+                SetDateRange(rule.DateRange.Item1, rule.DateRange.Item2);
+            RefreshVisibilities();
+        }
     }
 }

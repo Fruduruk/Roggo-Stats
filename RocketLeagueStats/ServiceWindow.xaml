@@ -33,10 +33,18 @@
                     Click="BtnDeleteRule_Click"/>
             <ListView x:Name="lvRules"
                       Style="{DynamicResource listViewStyle}"
+                      ItemContainerStyle="{DynamicResource listViewItemStyle}"
                       Margin="5"
                       SelectionChanged="LvRules_SelectionChanged"
                       Grid.Row="2"
-                      />
+                      >
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Filter Name"
+                                        DisplayMemberBinding="{Binding FilterName}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </Grid>
         <components:ReplayPickerControl x:Name="rpReplayPicker"
                                         Grid.Column="1"/>

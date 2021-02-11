@@ -1,7 +1,8 @@
 ﻿using RLStats_Classes.MainClasses;
-using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -25,7 +26,8 @@ namespace RocketLeagueStats
                     Closing -= ServiceWindow_Closing;
             }
         }
-
+        public ObservableCollection<APIRequestFilter> Filters { get; set; } = new ObservableCollection<APIRequestFilter>();
+        public APIRequestFilter SelectedFilter { get; set; }
         public void ServiceWindow_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
@@ -35,56 +37,50 @@ namespace RocketLeagueStats
         public ServiceWindow()
         {
             InitializeComponent();
-
+            lvRules.ItemsSource = Filters;
+            rpReplayPicker.gRuleName.Visibility = Visibility.Visible;
             DontClose = true;
         }
 
         private void BtnAddRule_Click(object sender, RoutedEventArgs e)
         {
-            var filter = new APIRequestFilter();
-            lvRules.Items.Add(filter);
+            var filter = new APIRequestFilter
+            {
+                FilterName = "Rule"
+            };
+            Filters.Add(filter);
+            SelectFilter(filter);
+        }
+
+        private void SelectFilter(APIRequestFilter filter)
+        {
+            SelectedFilter = filter;
+            rpReplayPicker.RequestFilter = filter;
             lvRules.SelectedItem = filter;
         }
 
         private void BtnDeleteRule_Click(object sender, RoutedEventArgs e)
         {
-            if (lvRules.SelectedIndex != -1)
-                lvRules.Items.Remove(lvRules.Items[lvRules.SelectedIndex]);
+            if (SelectedFilter != null)
+            {
+                var lastIndex = Filters.IndexOf(SelectedFilter);
+                Filters.Remove(SelectedFilter);
+                if (Filters.Count > 0)
+                    if (lastIndex < Filters.Count)
+                        SelectFilter(Filters[lastIndex]);
+                    else
+                        SelectFilter(Filters[^1]);
+            }
         }
 
         private void LvRules_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lvRules.SelectedIndex != -1)
-                ShowRule(lvRules.SelectedItem);
-        }
-
-        private void ShowRule(object selectedItem)
-        {
-            if (selectedItem is APIRequestFilter rule)
-            {
-                rpReplayPicker.SetNames(rule.CheckName ? rule.Names : null);
-                rpReplayPicker.SetTitle(rule.CheckTitle ? rule.Title : null);
-                if (rule.CheckPlaylist)
-                    rpReplayPicker.SetPlaylist(rule.Playlist);
-                else
-                    rpReplayPicker.SetPlaylist(null);
-                if (rule.CheckMatchResult)
-                    rpReplayPicker.SetMatchResult(rule.MatchResult);
-                else
-                    rpReplayPicker.SetMatchResult(null);
-                if (rule.CheckSeason)
-                    rpReplayPicker.SetSeason(rule.Season);
-                else
-                    rpReplayPicker.SetSeason(null);
-                rpReplayPicker.SetPro(rule.Pro);
-                rpReplayPicker.SetSteamIDs(rule.CheckSteamID ? rule.SteamIDs : null);
-                rpReplayPicker.SetFree2Play(rule.FreeToPlaySeason);
-                if (rule.CheckDate)
-                    rpReplayPicker.SetDateRange(rule.DateRange.Item1, rule.DateRange.Item2);
-                else
-                    rpReplayPicker.SetDateRange(null, null);
-
-            }
+                Dispatcher.Invoke(() =>
+                {
+                    var filter = (APIRequestFilter)lvRules.SelectedItem;
+                    SelectFilter(filter);
+                });
         }
     }
 }

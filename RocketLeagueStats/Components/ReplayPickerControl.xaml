@@ -7,132 +7,160 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="gRuleName"
+              Visibility="Collapsed">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <CheckBox x:Name="cbName" 
-                      Content="Name"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="0"
-                      Click="CbName_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbTitle" 
-                      Content="Title"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="1" 
-                      Click="CbTitle_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbPlaylist" 
-                      Content="Playlist"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="2" 
-                      Click="CbPlaylist_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbSeason" 
-                      Content="Season"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="3"
-                      Click="CbSeason_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbMatchResult" 
-                      Content="MatchResult"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="4"
-                      Click="CbMatchResult_Click" RenderTransformOrigin="0.5,0.5">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbPro" 
-                      Content="Pro"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="5"
-                      Click="CbPro_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbSteamID" 
-                      Content="Steam ID"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="6"
-                      Click="CbSteamID_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <CheckBox x:Name="cbDate" 
-                      Content="Date/Range"
-                      Style="{DynamicResource checkBoxStyle}"
-                      Grid.Row="7"
-                      Click="CbDate_Click">
-                <CheckBox.LayoutTransform>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </CheckBox.LayoutTransform>
-            </CheckBox>
-            <Grid x:Name="gDateTimeRange"
+            <TextBlock Text="Rule name:"
+                       Style="{DynamicResource textBlockStyle}"/>
+            <TextBox x:Name="tbxRuleName"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.Column="1"
+                     Text="Rule"
+                     Margin="5"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox x:Name="cbName" 
+                          Content="Name"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="0"
+                          Checked="CbName_Click"
+                          Unchecked="CbName_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbTitle" 
+                          Content="Title"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="1" 
+                          Checked="CbTitle_Click"
+                          Unchecked="CbTitle_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbPlaylist" 
+                          Content="Playlist"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="2" 
+                          Checked="CbPlaylist_Click"
+                          Unchecked="CbPlaylist_Click">
+                    <CheckBox.LayoutTransform>
+                         <ScaleTransform ScaleX="2" ScaleY="2"/>
+                     </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbSeason" 
+                          Content="Season"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="3"
+                          Checked="CbSeason_Click"
+                          Unchecked="CbSeason_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbMatchResult" 
+                          Content="MatchResult"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="4"
+                          Checked="CbMatchResult_Click"
+                          Unchecked="CbMatchResult_Click" 
+                          RenderTransformOrigin="0.5,0.5">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbPro" 
+                          Content="Pro"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="5"
+                          Checked="CbPro_Click"
+                          Unchecked="CbPro_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbSteamID" 
+                          Content="Steam ID"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="6"
+                          Checked="CbSteamID_Click"
+                          Unchecked="CbSteamID_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <CheckBox x:Name="cbDate" 
+                          Content="Date/Range"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="7"
+                          Checked="CbDate_Click"
+                          Unchecked="CbDate_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <Grid x:Name="gDateTimeRange"
                   Grid.Row="7"
                   Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <DatePicker Name="dpTimeStart"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <DatePicker Name="dpTimeStart"
                                     Grid.Column="0"
                                     Style="{DynamicResource datePickerStyle}"
                                     Visibility="Collapsed"/>
-                <DatePicker Name="dpTimeEnd"
+                    <DatePicker Name="dpTimeEnd"
                                     Grid.Column="1"
                                     Style="{DynamicResource datePickerStyle}"
                                     Visibility="Collapsed"/>
-            </Grid>
-            <TextBox Name="tbName"
+                </Grid>
+                <TextBox Name="tbName"
                      Grid.Row="0"
                      Grid.Column="1"
                      Visibility="Collapsed"
                      Style="{DynamicResource textBoxStyle}"/>
-            <TextBox Name="tbTitle"
+                <TextBox Name="tbTitle"
                      Grid.Row="1"
                      Grid.Column="1"
                      Visibility="Collapsed"
                      Style="{DynamicResource textBoxStyle}"/>
-            <ComboBox Name="cbxPlaylist"
+                <ComboBox Name="cbxPlaylist"
                       Grid.Row="2"
                       Grid.Column="1"
                       Width="150"
                       HorizontalAlignment="Left"
                       Visibility="Collapsed"
                       Style="{DynamicResource comboBoxStyle}"/>
-            <StackPanel x:Name="spSeason"
+                <StackPanel x:Name="spSeason"
                         Grid.Row="3"
                         Grid.Column="1"
                         Visibility="Collapsed"
                         Orientation="Horizontal">
-                <CheckBox Style="{DynamicResource checkBoxStyle}"
+                    <CheckBox Style="{DynamicResource checkBoxStyle}"
                           x:Name="cbSeasonType"
                           IsChecked="True"
                           Click="CbSeasonType_Click"
@@ -140,33 +168,35 @@
                         <CheckBox.LayoutTransform>
                             <ScaleTransform ScaleX="2" ScaleY="2"/>
                         </CheckBox.LayoutTransform>
-                </CheckBox>
-                <ComboBox Name="cbxSeason"
+                    </CheckBox>
+                    <ComboBox Name="cbxSeason"
                           MinWidth="150"
                           Width="Auto"
                           HorizontalAlignment="Left"
                           Style="{DynamicResource comboBoxStyle}"/>
 
-            </StackPanel>
-            <ComboBox Name="cbxMatchResult"
+                </StackPanel>
+                <ComboBox Name="cbxMatchResult"
                       Grid.Row="4"
                       Grid.Column="1"
                       Width="150"
                       HorizontalAlignment="Left"
                       Visibility="Collapsed"
                       Style="{DynamicResource comboBoxStyle}"/>
-            <ComboBox Name="cbxPro"
+                <ComboBox Name="cbxPro"
                       Grid.Row="5"
                       Grid.Column="1"
                       Width="150"
                       HorizontalAlignment="Left"
                       Visibility="Collapsed"
                       Style="{DynamicResource comboBoxStyle}"/>
-            <TextBox Name="tbSteamID"
+                <TextBox Name="tbSteamID"
                      Grid.Row="6"
                      Grid.Column="1"
                      Visibility="Collapsed"
                      Style="{DynamicResource textBoxStyle}"/>
+            </Grid>
         </Grid>
+
     </Grid>
 </UserControl>
