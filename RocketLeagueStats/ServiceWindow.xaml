@@ -24,18 +24,19 @@
                     Style="{DynamicResource buttonStyle}"
                     Margin="5"
                     Grid.Row="0"
-                    Click="BtnAddRule_Click"/>
+                    Click="BtnAddFilter_Click"/>
             <Button x:Name="btnDeleteRule"
                     Content="Delete Rule"
                     Style="{DynamicResource buttonStyle}"
                     Margin="5"
                     Grid.Row="1"
-                    Click="BtnDeleteRule_Click"/>
-            <ListView x:Name="lvRules"
+                    Click="BtnDeleteFilter_Click"/>
+            <ListView x:Name="lvFilters"
                       Style="{DynamicResource listViewStyle}"
                       ItemContainerStyle="{DynamicResource listViewItemStyle}"
                       Margin="5"
-                      SelectionChanged="LvRules_SelectionChanged"
+                      MouseEnter="LvFilters_MouseEnter"
+                      SelectionChanged="LvFilters_SelectionChanged"
                       Grid.Row="2"
                       >
                 <ListView.View>

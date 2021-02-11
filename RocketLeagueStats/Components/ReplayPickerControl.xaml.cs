@@ -158,9 +158,15 @@ namespace RocketLeagueStats.Components
         private Tuple<DateTime, DateTime> GetDateRange()
         {
             if (cbDate.IsChecked.Equals(true))
-                return new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate ?? DateTime.Today, dpTimeEnd.SelectedDate ?? DateTime.Today);
-            else
-                return null;
+                if (dpTimeStart.SelectedDate.HasValue && dpTimeEnd.SelectedDate.HasValue)
+                {
+                    if (dpTimeEnd.SelectedDate.Value < dpTimeStart.SelectedDate.Value)
+                    {
+                        dpTimeEnd.SelectedDate = dpTimeStart.SelectedDate;
+                    }
+                    return new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate.Value, dpTimeEnd.SelectedDate.Value);
+                };
+            return new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate ?? DateTime.Today, dpTimeEnd.SelectedDate ?? DateTime.Today);
         }
         private void SetDateRange(DateTime startDate, DateTime endDate)
         {
@@ -194,7 +200,7 @@ namespace RocketLeagueStats.Components
             InitializePlaylistCoboxBox();
             InitializeMatchResultCombobox();
             InitializeProCombobox();
-            //RefreshVisibilities();
+            RefreshVisibilities();
         }
         private void RefreshVisibilities()
         {
@@ -281,29 +287,31 @@ namespace RocketLeagueStats.Components
         private APIRequestFilter GetRequestFilter()
         {
             APIRequestFilter filter = new APIRequestFilter();
+            filter.FilterName = tbxFilterName.Text.Trim();
+
             filter.CheckName = cbName.IsChecked ?? false;
             if (filter.CheckName)
                 filter.Names = GetNames();
 
             filter.CheckTitle = cbTitle.IsChecked ?? false;
             if (filter.CheckTitle)
-                filter.Title = tbTitle.Text;
+                filter.Title = GetTitle();
 
             filter.CheckPlaylist = cbPlaylist.IsChecked ?? false;
             if (filter.CheckPlaylist)
-                filter.Playlist = (Playlist)cbxPlaylist.SelectedItem;
+                filter.Playlist = GetPlaylist();
 
-            filter.FreeToPlaySeason = cbSeasonType.IsChecked ?? true;
+            filter.FreeToPlaySeason = GetFree2Play();
 
             filter.CheckSeason = cbSeason.IsChecked ?? false;
             if (filter.CheckSeason)
-                filter.Season = (int)(cbxSeason.SelectedItem ?? 0);
+                filter.Season = GetSeason();
 
             filter.CheckMatchResult = cbMatchResult.IsChecked ?? false;
             if (filter.CheckMatchResult)
-                filter.MatchResult = (MatchResult)(cbxMatchResult.SelectedItem ?? MatchResult.Loss);
+                filter.MatchResult = GetMatchResult();
 
-            filter.Pro = (bool)(cbxPro.SelectedItem ?? false);
+            filter.Pro = GetPro();
 
             filter.CheckSteamID = cbSteamID.IsChecked ?? false;
             if (filter.CheckSteamID)
@@ -311,16 +319,8 @@ namespace RocketLeagueStats.Components
 
             filter.CheckDate = cbDate.IsChecked ?? false;
             if (filter.CheckDate)
-            {
-                if (dpTimeStart.SelectedDate.HasValue && dpTimeEnd.SelectedDate.HasValue)
-                {
-                    if (dpTimeEnd.SelectedDate.Value < dpTimeStart.SelectedDate.Value)
-                    {
-                        dpTimeEnd.SelectedDate = dpTimeStart.SelectedDate;
-                    }
-                    filter.DateRange = new Tuple<DateTime, DateTime>(dpTimeStart.SelectedDate.Value, dpTimeEnd.SelectedDate.Value);
-                }
-            }
+                filter.DateRange = GetDateRange();
+
             return filter;
         }
         private void SetRequestFilter(APIRequestFilter rule)
@@ -328,7 +328,7 @@ namespace RocketLeagueStats.Components
             SetEverythingDefault();
             if (rule is null)
                 return;
-            tbxRuleName.Text = rule.FilterName;
+            tbxFilterName.Text = rule.FilterName;
 
             cbName.IsChecked = rule.CheckName;
             if (rule.CheckName)

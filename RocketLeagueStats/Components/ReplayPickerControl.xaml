@@ -19,7 +19,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Text="Rule name:"
                        Style="{DynamicResource textBlockStyle}"/>
-            <TextBox x:Name="tbxRuleName"
+            <TextBox x:Name="tbxFilterName"
                      Style="{DynamicResource textBoxStyle}"
                      Grid.Column="1"
                      Text="Rule"

@@ -35,16 +35,16 @@ namespace RocketLeagueStats
         public ServiceWindow()
         {
             InitializeComponent();
-            lvRules.ItemsSource = Filters;
+            lvFilters.ItemsSource = Filters;
             rpReplayPicker.gRuleName.Visibility = Visibility.Visible;
             DontClose = true;
         }
 
-        private void BtnAddRule_Click(object sender, RoutedEventArgs e)
+        private void BtnAddFilter_Click(object sender, RoutedEventArgs e)
         {
             var filter = new APIRequestFilter
             {
-                FilterName = "Rule"
+                FilterName = "Filter"
             };
             Filters.Add(filter);
             SelectFilter(filter);
@@ -54,10 +54,10 @@ namespace RocketLeagueStats
         {
             SelectedFilter = filter;
             rpReplayPicker.RequestFilter = filter;
-            lvRules.SelectedItem = filter;
+            lvFilters.SelectedItem = filter;
         }
 
-        private void BtnDeleteRule_Click(object sender, RoutedEventArgs e)
+        private void BtnDeleteFilter_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedFilter != null)
             {
@@ -71,14 +71,24 @@ namespace RocketLeagueStats
             }
         }
 
-        private void LvRules_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LvFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (lvRules.SelectedIndex != -1)
-                Dispatcher.Invoke(() =>
+            if (lvFilters.SelectedIndex != -1)
+            {
+                var filter = (APIRequestFilter)lvFilters.SelectedItem;
+                SelectFilter(filter);
+            }
+        }
+
+        private void LvFilters_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (Filters.Count > 0)
+                if (lvFilters.SelectedIndex >= 0)
                 {
-                    var filter = (APIRequestFilter)lvRules.SelectedItem;
-                    SelectFilter(filter);
-                });
+                    var index = lvFilters.SelectedIndex;
+                    Filters[index] = rpReplayPicker.RequestFilter;
+                    lvFilters.SelectedIndex = index;
+                }
         }
     }
 }
