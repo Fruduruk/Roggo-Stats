@@ -11,7 +11,7 @@ namespace RLStats_Classes.MainClasses
         private string ServiceFilePath { get; set; }
         public ServiceInfoIO()
         {
-            ServiceFilePath = ServiceDirectory + @"\serviceInfo.txt";
+            ServiceFilePath = ServiceDirectory + @"\serviceInfo.json";
             if (!Directory.Exists(ServiceDirectory))
                 Directory.CreateDirectory(ServiceDirectory);
             if (!File.Exists(ServiceFilePath))
