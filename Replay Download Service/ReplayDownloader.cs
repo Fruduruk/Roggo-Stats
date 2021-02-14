@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Replay_Download_Service
 {
-    internal class ReplayDownloader
+    public class ReplayDownloader
     {
         private static ILogger<Worker> Logger { get; set; }
         private static CancellationToken StoppingToken { get; set; }
@@ -31,9 +31,17 @@ namespace Replay_Download_Service
 
         private static void DoWork()
         {
-            var jsonString = JsonConvert.SerializeObject(SInfo);
-            Logger.LogInformation(JObject.Parse(jsonString).ToString());
+            var s = string.Empty;
+            foreach (var f in SInfo.Filters)
+                s += f.GetApiUrl() + "\n";
+            Logger.LogInformation(s);
             Thread.Sleep(5234);
+        }
+
+        private static void LogSerializedObject(object o)
+        {
+            var jsonString = JsonConvert.SerializeObject(o);
+            Logger.LogInformation(JObject.Parse(jsonString).ToString());
         }
     }
 }
