@@ -102,79 +102,33 @@ namespace RLStats_Classes.MainClasses
         }
         private static string ConvertPlaylist(Playlist value)
         {
-            string playlist = string.Empty;
-            switch (value)
+            var playlist = value switch
             {
-                case Playlist.UnrankedDuels:
-                    playlist = "unranked-duels";
-                    break;
-                case Playlist.UnrankedDoubles:
-                    playlist = "unranked-doubles";
-                    break;
-                case Playlist.UnrankedStandard:
-                    playlist = "unranked-standard";
-                    break;
-                case Playlist.UnrankedChaos:
-                    playlist = "unranked-chaos";
-                    break;
-                case Playlist.PrivateGame:
-                    playlist = "private";
-                    break;
-                case Playlist.Season:
-                    playlist = "season";
-                    break;
-                case Playlist.Offline:
-                    playlist = "offline";
-                    break;
-                case Playlist.RankedDuels:
-                    playlist = "ranked-duels";
-                    break;
-                case Playlist.RankedDoubles:
-                    playlist = "ranked-doubles";
-                    break;
-                case Playlist.RankedSoloStandard:
-                    playlist = "ranked-solo-standard";
-                    break;
-                case Playlist.RankedStandard:
-                    playlist = "ranked-standard";
-                    break;
-                case Playlist.Snowday:
-                    playlist = "snowday";
-                    break;
-                case Playlist.Rocketlabs:
-                    playlist = "rocketlabs";
-                    break;
-                case Playlist.Hoops:
-                    playlist = "hoops";
-                    break;
-                case Playlist.Rumble:
-                    playlist = "rumble";
-                    break;
-                case Playlist.Tournament:
-                    playlist = "tournament";
-                    break;
-                case Playlist.Dropshot:
-                    playlist = "dropshot";
-                    break;
-                case Playlist.RankedHoops:
-                    playlist = "ranked-hoops";
-                    break;
-                case Playlist.RankedRumble:
-                    playlist = "ranked-rumble";
-                    break;
-                case Playlist.RankedDropshot:
-                    playlist = "ranked-dropshot";
-                    break;
-                case Playlist.RankedSnowday:
-                    playlist = "ranked-snowday";
-                    break;
-                case Playlist.DropshotRumble:
-                    playlist = "dropshot-rumble";
-                    break;
-                case Playlist.Heatseeker:
-                    playlist = "heatseeker";
-                    break;
-            }
+                Playlist.UnrankedDuels => "unranked-duels",
+                Playlist.UnrankedDoubles => "unranked-doubles",
+                Playlist.UnrankedStandard => "unranked-standard",
+                Playlist.UnrankedChaos => "unranked-chaos",
+                Playlist.PrivateGame => "private",
+                Playlist.Season => "season",
+                Playlist.Offline => "offline",
+                Playlist.RankedDuels => "ranked-duels",
+                Playlist.RankedDoubles => "ranked-doubles",
+                Playlist.RankedSoloStandard => "ranked-solo-standard",
+                Playlist.RankedStandard => "ranked-standard",
+                Playlist.Snowday => "snowday",
+                Playlist.Rocketlabs => "rocketlabs",
+                Playlist.Hoops => "hoops",
+                Playlist.Rumble => "rumble",
+                Playlist.Tournament => "tournament",
+                Playlist.Dropshot => "dropshot",
+                Playlist.RankedHoops => "ranked-hoops",
+                Playlist.RankedRumble => "ranked-rumble",
+                Playlist.RankedDropshot => "ranked-dropshot",
+                Playlist.RankedSnowday => "ranked-snowday",
+                Playlist.DropshotRumble => "dropshot-rumble",
+                Playlist.Heatseeker => "heatseeker",
+                _ => string.Empty
+            };
             return playlist;
         }
     }
