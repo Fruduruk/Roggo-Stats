@@ -59,15 +59,15 @@ namespace RLStats_Classes.MainClasses
                 }
             });
             t.Wait();
-            string dataString = t.Result;
-            AuthTokenInfo info = new AuthTokenInfo(token);
+            var dataString = t.Result;
+            var info = new AuthTokenInfo(token);
             if (string.IsNullOrEmpty(dataString))
             {
                 info.Except = new Exception("This token is does not work.");
                 return info;
             }
             dynamic jData = JsonConvert.DeserializeObject(dataString);
-            if (jData.error is null)
+            if (jData != null && jData.error is null)
             {
                 if (jData.chaser != null)
                     info.Chaser = jData.chaser;
@@ -81,7 +81,8 @@ namespace RLStats_Classes.MainClasses
             }
             else
             {
-                info.Except = new Exception(jData.error.ToString());
+                if (jData != null) 
+                    info.Except = new Exception(jData.error.ToString());
                 return info;
             }
         }
@@ -90,11 +91,11 @@ namespace RLStats_Classes.MainClasses
             OnProgressChange("Download started...");
             OnProgressUpdate(0);
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
-            ApiDataPack dataPack = await GetDataPack(filter);
+            var dataPack = await GetDataPack(filter);
             sw.Stop();
-            OnProgressChange("Downoald done...");
+            OnProgressChange("Download done...");
             OnProgressChange("Delete obsolete replays");
             ObsoleteReplayCount = dataPack.DeleteObsoleteReplays();
             OnProgressChange("Delete replays without specific names");
@@ -106,15 +107,15 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<ApiDataPack> GetDataPack(APIRequestFilter filter)
         {
-            int replayCount = await GetReplayCountOfUrlAsync(filter.GetApiUrl());
-            double steps = Convert.ToDouble(replayCount) / 50;
+            var replayCount = await GetReplayCountOfUrlAsync(filter.GetApiUrl());
+            var steps = Convert.ToDouble(replayCount) / 50;
             steps = Math.Round(steps, MidpointRounding.ToPositiveInfinity);
             double stepsDone = 0;
             ShowUpdate(steps, stepsDone, 0);
             OnDownloadStart(replayCount);
             var url = filter.GetApiUrl();
-            bool done = false;
-            ApiDataPack allData = new ApiDataPack
+            var done = false;
+            var allData = new ApiDataPack
             {
                 Replays = new List<Replay>(),
                 ReplayCount = replayCount
@@ -122,11 +123,11 @@ namespace RLStats_Classes.MainClasses
             using var client = GetClientWithToken();
             while (!done)
             {
-                HttpResponseMessage response = await client.GetAsync(url);
+                var response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                    string dataString = await reader.ReadToEndAsync();
+                    var dataString = await reader.ReadToEndAsync();
                     Thread.Sleep(1000 / TokenInfo.GetSpeed());
                     var currentPack = GetApiDataFromString(dataString);
                     if (currentPack.Success)
@@ -152,11 +153,11 @@ namespace RLStats_Classes.MainClasses
                     Thread.Sleep(5000);
                 }
             }
-            if (!allData.Success)
-            {
-                allData.Ex = new Exception("no Data could be collected");
-                allData.ReplayCount = 0;
-            }
+
+            if (allData.Success) 
+                return allData;
+            allData.Ex = new Exception("no Data could be collected");
+            allData.ReplayCount = 0;
             return allData;
         }
 
@@ -169,9 +170,9 @@ namespace RLStats_Classes.MainClasses
         private async Task<int> GetReplayCountOfUrlAsync(string url)
         {
             using var client = GetClientWithToken();
-            HttpResponseMessage response = await client.GetAsync(url);
+            var response = await client.GetAsync(url);
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-            string dataString = await reader.ReadToEndAsync();
+            var dataString = await reader.ReadToEndAsync();
             var currentPack = GetApiDataFromString(dataString);
             return currentPack.ReplayCount;
         }
@@ -197,32 +198,33 @@ namespace RLStats_Classes.MainClasses
             DownloadStarted?.Invoke(this, value);
         }
 
-        private ApiDataPack GetApiDataFromString(string dataString)
+        private static ApiDataPack GetApiDataFromString(string dataString)
         {
             dynamic jData = JsonConvert.DeserializeObject(dataString);
             var replays = new List<Replay>();
             try
             {
-                foreach (var r in jData.list)
-                {
-                    var replay = new Replay();
-                    replay.ID = r.id;
-                    replay.RocketLeagueID = r.rocket_league_id;
-                    if (r.season_type is null)
-                        replay.SeasonType = "before Free2Play";
-                    else
-                        replay.SeasonType = r.season_type;
-                    replay.Visibility = r.visibility;
-                    replay.Link = r.link;
-                    replay.Title = r.replay_title;
-                    replay.Playlist = r.playlist_id;
-                    replay.Season = r.season;
-                    replay.Date = r.date;
-                    replay.Uploader = r.uploader.name;
-                    replay.Blue = GetTeam(r.blue);
-                    replay.Orange = GetTeam(r.orange);
-                    replays.Add(replay);
-                }
+                if (jData != null)
+                    foreach (var r in jData.list)
+                    {
+                        var replay = new Replay
+                        {
+                            ID = r.id,
+                            RocketLeagueID = r.rocket_league_id,
+                            SeasonType = r.season_type ?? "before Free2Play",
+                            Visibility = r.visibility,
+                            Link = r.link,
+                            Title = r.replay_title,
+                            Playlist = r.playlist_id,
+                            Season = r.season,
+                            Date = r.date,
+                            Uploader = r.uploader.name,
+                            Blue = GetTeam(r.blue),
+                            Orange = GetTeam(r.orange)
+                        };
+                        replays.Add(replay);
+                    }
+
                 if (replays.Count == 0)
                     throw new Exception("No replay found");
             }
@@ -265,9 +267,8 @@ namespace RLStats_Classes.MainClasses
                 var loadedReplays = new List<AdvancedReplay>();
                 await Task.Run(() =>
                 {
-                    for (int i = 0; i < replaysToLoadFromDatabase.Count; i++)
+                    foreach (var r in replaysToLoadFromDatabase)
                     {
-                        Replay r = replaysToLoadFromDatabase[i];
                         try
                         {
                             LoadAndAddToListAsync(loadedReplays, r, count);
@@ -277,6 +278,7 @@ namespace RLStats_Classes.MainClasses
                             count--;
                         }
                     }
+
                     while (loadedReplays.Count != count)
                     {
                         Thread.Sleep(100);
@@ -299,11 +301,11 @@ namespace RLStats_Classes.MainClasses
                 OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
                 OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
             }
-            if (advancedReplays.Count == totalCount)
-            {
-                OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
-                OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
-            }
+
+            if (advancedReplays.Count != totalCount) 
+                return;
+            OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
+            OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
         }
 
         private async Task<List<AdvancedReplay>> DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
@@ -313,7 +315,7 @@ namespace RLStats_Classes.MainClasses
             using var client = GetClientWithToken();
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
-                Replay r = replaysToDownload[i];
+                var r = replaysToDownload[i];
                 try
                 {
                     var replay = await GetAdvancedReplayInfosAsync(client, r);
@@ -336,11 +338,8 @@ namespace RLStats_Classes.MainClasses
             var count = replays.Count;
             await Task.Run(() =>
             {
-                for (int i = 0; i < replays.Count; i++)
-                {
-                    var replay = replays[i];
+                foreach (var replay in replays)
                     SortAndAddToListAsync(replaysToDownload, replaysToLoadFromDatabase, count, replay);
-                }
                 while (replaysToDownload.Count + replaysToLoadFromDatabase.Count != replays.Count)
                 {
                     Thread.Sleep(100);
@@ -363,21 +362,21 @@ namespace RLStats_Classes.MainClasses
                 OnAdvancedProgressUpdate((Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100);
                 OnAdvancedProgressChange($"Sort Replays: {currentCount}/{count}");
             }
-            if (currentCount == count)
-            {
-                OnAdvancedProgressUpdate((Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100);
-                OnAdvancedProgressChange($"Sort Replays: {currentCount}/{count}");
-            }
+
+            if (currentCount != count) 
+                return;
+            OnAdvancedProgressUpdate((Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100);
+            OnAdvancedProgressChange($"Sort Replays: {currentCount}/{count}");
         }
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.ID);
-            HttpResponseMessage response = await client.GetAsync(url);
+            var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
                 using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                string dataString = await reader.ReadToEndAsync();
+                var dataString = await reader.ReadToEndAsync();
                 return GetAdvancedReplayFromString(dataString);
             }
             else
@@ -386,34 +385,30 @@ namespace RLStats_Classes.MainClasses
             }
         }
 
-        private AdvancedReplay GetAdvancedReplayFromString(string dataString)
+        private static AdvancedReplay GetAdvancedReplayFromString(string dataString)
         {
             dynamic jData = JsonConvert.DeserializeObject(dataString);
             var ara = new AdvancedReplayAssembler(jData);
-            AdvancedReplay aReplay = ara.Assemble();
+            var aReplay = ara.Assemble();
             return aReplay;
         }
 
         private static Team GetTeam(dynamic r)
         {
-            Team t = new Team();
+            var t = new Team();
             if (r.goals != null)
                 t.Goals = r.goals;
             if (r.players != null)
                 foreach (var p in r.players)
                 {
-                    var player = new Player();
-                    player.Name = p.name;
-                    if (p.mvp != null)
-                        player.MVP = p.mvp;
-                    else
-                        player.MVP = false;
-                    if (p.score != null)
-                        player.Score = p.score;
-                    else
-                        player.Score = 0;
-                    player.StartTime = p.start_time;
-                    player.EndTime = p.end_time;
+                    var player = new Player
+                    {
+                        Name = p.name,
+                        MVP = p.mvp != null ? (bool) p.mvp : false,
+                        Score = p.score != null ? (int) p.score : 0,
+                        StartTime = p.start_time,
+                        EndTime = p.end_time
+                    };
                     t.Players.Add(player);
                 }
             return t;
