@@ -26,6 +26,7 @@ namespace RLStats_Classes.MainClasses
         public AuthTokenInfo TokenInfo { get; }
         public bool IsInitialized { get; private set; } = false;
         public static int ObsoleteReplayCount { get; private set; }
+        public Stopwatch CallWatch { get; set; } = new Stopwatch();
 
         public Connection(AuthTokenInfo tokenInfo)
         {
@@ -41,17 +42,49 @@ namespace RLStats_Classes.MainClasses
             return client;
         }
 
+        private async Task<HttpResponseMessage> GetAsync(string url)
+        {
+            HttpResponseMessage response;
+            using (var client = GetClientWithToken())
+            {
+                response = await GetAsync(client, url);
+            }
+            return response;
+        }
+
+        private async Task<HttpResponseMessage> GetAsync(HttpClient client, string url)
+        {
+            if (CallWatch.IsRunning)
+            {
+                double speed = TokenInfo.GetSpeed();
+                var timeToWait = (1000 / speed) + 20;
+                while (CallWatch.ElapsedMilliseconds < timeToWait)
+                    Thread.Sleep(10);
+                CallWatch.Stop();
+            }
+            CallWatch.Restart();
+            var response = await client.GetAsync(url);
+            return response;
+        }
+
         public static AuthTokenInfo GetTokenInfo(string token)
         {
-            using var client = new HttpClient();
             var t = Task<string>.Run(async () =>
             {
                 try
                 {
-                    client.DefaultRequestHeaders.Add("Authorization", token);
-                    var response = await client.GetAsync("https://ballchasing.com/api/");
-                    using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                    return await reader.ReadToEndAsync();
+                    HttpResponseMessage response;
+                    using (var client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.Add("Authorization", token);
+                        response = await client.GetAsync("https://ballchasing.com/api/");
+                    }
+                    string content;
+                    using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                    {
+                        content = await reader.ReadToEndAsync();
+                    }
+                    return content;
                 }
                 catch
                 {
@@ -81,7 +114,7 @@ namespace RLStats_Classes.MainClasses
             }
             else
             {
-                if (jData != null) 
+                if (jData != null)
                     info.Except = new Exception(jData.error.ToString());
                 return info;
             }
@@ -90,15 +123,11 @@ namespace RLStats_Classes.MainClasses
         {
             OnProgressChange("Download started...");
             OnProgressUpdate(0);
-
             var sw = new Stopwatch();
             sw.Start();
             var dataPack = await GetDataPack(filter);
             sw.Stop();
-            OnProgressChange("Download done...");
-            OnProgressChange("Delete obsolete replays");
             ObsoleteReplayCount = dataPack.DeleteObsoleteReplays();
-            OnProgressChange("Delete replays without specific names");
             ElapsedMilliseconds = sw.ElapsedMilliseconds;
             Cancel = false;
             GC.Collect();
@@ -123,12 +152,11 @@ namespace RLStats_Classes.MainClasses
             using var client = GetClientWithToken();
             while (!done)
             {
-                var response = await client.GetAsync(url);
+                var response = await GetAsync(client, url);
                 if (response.IsSuccessStatusCode)
                 {
                     using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
                     var dataString = await reader.ReadToEndAsync();
-                    Thread.Sleep(1000 / TokenInfo.GetSpeed());
                     var currentPack = GetApiDataFromString(dataString);
                     if (currentPack.Success)
                     {
@@ -154,7 +182,7 @@ namespace RLStats_Classes.MainClasses
                 }
             }
 
-            if (allData.Success) 
+            if (allData.Success)
                 return allData;
             allData.Ex = new Exception("no Data could be collected");
             allData.ReplayCount = 0;
@@ -169,8 +197,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<int> GetReplayCountOfUrlAsync(string url)
         {
-            using var client = GetClientWithToken();
-            var response = await client.GetAsync(url);
+            var response = await GetAsync(url);
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
             var dataString = await reader.ReadToEndAsync();
             var currentPack = GetApiDataFromString(dataString);
@@ -302,7 +329,7 @@ namespace RLStats_Classes.MainClasses
                 OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
             }
 
-            if (advancedReplays.Count != totalCount) 
+            if (advancedReplays.Count != totalCount)
                 return;
             OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
             OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
@@ -319,7 +346,6 @@ namespace RLStats_Classes.MainClasses
                 try
                 {
                     var replay = await GetAdvancedReplayInfosAsync(client, r);
-                    Thread.Sleep(1000 / TokenInfo.GetSpeed());
                     advancedReplays.Add(replay);
                     savingList.Add(replay);
                     OnAdvancedProgressUpdate((Convert.ToDouble(i + 1) / Convert.ToDouble(count)) * 100);
@@ -363,7 +389,7 @@ namespace RLStats_Classes.MainClasses
                 OnAdvancedProgressChange($"Sort Replays: {currentCount}/{count}");
             }
 
-            if (currentCount != count) 
+            if (currentCount != count)
                 return;
             OnAdvancedProgressUpdate((Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100);
             OnAdvancedProgressChange($"Sort Replays: {currentCount}/{count}");
@@ -372,7 +398,7 @@ namespace RLStats_Classes.MainClasses
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.ID);
-            var response = await client.GetAsync(url);
+            var response = await GetAsync(client, url);
             if (response.IsSuccessStatusCode)
             {
                 using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
@@ -404,8 +430,8 @@ namespace RLStats_Classes.MainClasses
                     var player = new Player
                     {
                         Name = p.name,
-                        MVP = p.mvp != null ? (bool) p.mvp : false,
-                        Score = p.score != null ? (int) p.score : 0,
+                        MVP = p.mvp != null ? (bool)p.mvp : false,
+                        Score = p.score != null ? (int)p.score : 0,
                         StartTime = p.start_time,
                         EndTime = p.end_time
                     };
