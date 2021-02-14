@@ -36,7 +36,7 @@ namespace RLStats_Classes.MainClasses
             }
         }
 
-        public async void SaveReplayListAsync(List<AdvancedReplay> replays)
+        public async Task SaveReplayListAsync(List<AdvancedReplay> replays)
         {
             foreach (var replay in replays)
             {

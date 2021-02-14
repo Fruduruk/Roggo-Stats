@@ -279,9 +279,8 @@ namespace RLStats_Classes.MainClasses
             var replaysToDownload = new List<Replay>();
             var replaysToLoadFromDatabase = new List<Replay>();
             await SortReplays(replays, replaysToDownload, replaysToLoadFromDatabase);
-            var savingList = await DownloadReplays(advancedReplays, replaysToDownload);
+            await DownloadReplays(advancedReplays, replaysToDownload);
             await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
-            ReplayDatabase.SaveReplayListAsync(savingList);
             OnAdvancedProgressChange($"Replays loaded: {advancedReplays.Count}");
             return advancedReplays;
         }
@@ -335,7 +334,7 @@ namespace RLStats_Classes.MainClasses
             OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
         }
 
-        private async Task<List<AdvancedReplay>> DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
+        private async Task DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
         {
             var count = replaysToDownload.Count;
             var savingList = new List<AdvancedReplay>();
@@ -348,6 +347,11 @@ namespace RLStats_Classes.MainClasses
                     var replay = await GetAdvancedReplayInfosAsync(client, r);
                     advancedReplays.Add(replay);
                     savingList.Add(replay);
+                    if ((i % 10).Equals(0) || i.Equals(count - 1)) //Save Replays in Database every 10 Replays and at the end
+                    {
+                        await ReplayDatabase.SaveReplayListAsync(savingList);
+                        savingList.Clear();
+                    }
                     OnAdvancedProgressUpdate((Convert.ToDouble(i + 1) / Convert.ToDouble(count)) * 100);
                     OnAdvancedProgressChange($"Download: {i + 1}/{count}");
                 }
@@ -356,7 +360,6 @@ namespace RLStats_Classes.MainClasses
                     count--;
                 }
             }
-            return savingList;
         }
 
         private async Task SortReplays(List<Replay> replays, List<Replay> replaysToDownload, List<Replay> replaysToLoadFromDatabase)
