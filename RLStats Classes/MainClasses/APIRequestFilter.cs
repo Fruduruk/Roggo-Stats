@@ -71,6 +71,8 @@ namespace RLStats_Classes.MainClasses
                 builder.SetMatchResult(MatchResult);
             if (CheckSteamID)
                 builder.SetSteamIDs(SteamIDs);
+            if(Pro)
+                builder.SetPro(Pro);
             if (CheckDate)
             {
                 //Ballchasing doesn't support date queries yet
