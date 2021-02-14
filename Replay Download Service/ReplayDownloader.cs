@@ -24,24 +24,18 @@ namespace Replay_Download_Service
                 {
                     SInfo = new ServiceInfoIO().GetServiceInfo();
                     Logger.LogInformation($"Work started: {DateTime.Now}");
-                    DoWork();
+                    StartDownloadCycle();
                 }
             }, stoppingToken);
         }
 
-        private static void DoWork()
+        private static void StartDownloadCycle()
         {
             var s = string.Empty;
             foreach (var f in SInfo.Filters)
                 s += f.GetApiUrl() + "\n";
             Logger.LogInformation(s);
             Thread.Sleep(5234);
-        }
-
-        private static void LogSerializedObject(object o)
-        {
-            var jsonString = JsonConvert.SerializeObject(o);
-            Logger.LogInformation(JObject.Parse(jsonString).ToString());
         }
     }
 }
