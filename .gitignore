@@ -4,3 +4,7 @@
 */[Bb]in/*
 # .NET intermediate build output directory
 */[Oo]bj/*
+# .Idea stuff
+*/.[Ii]dea/*
+#dotsettings
+*.dotsettings.user
