@@ -8,7 +8,7 @@ namespace RLStats_Classes.MainClasses
     {
         public const string BallchasingApiUrl = "https://ballchasing.com/api/replays";
         private bool anyAdded = false;
-        private string Base = BallchasingApiUrl;
+        private string Base { get; set; } = BallchasingApiUrl;
         public void SetPlayerName(string value)
         {
             AddBinding();
