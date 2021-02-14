@@ -59,14 +59,14 @@ namespace RLStats_Classes.MainClasses
         {
             AdvancedReplay replay = null;
             var replayPath = await GetReplayPath(r);
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 if (replayPath is null)
                     throw new Exception($"Couldn't load Replay: {r.ID}");
                 else
                 {
                     var path = replayPath;
-                    var compressedString = File.ReadAllBytes(path);
+                    var compressedString = await File.ReadAllBytesAsync(path);
                     replay = JsonConvert.DeserializeObject<AdvancedReplay>(Compressor.DecompressBytes(compressedString));
                 }
             });
