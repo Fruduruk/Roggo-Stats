@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RLStats_Classes.Models
 {
@@ -25,6 +26,11 @@ namespace RLStats_Classes.Models
             }
             else
                 return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Goals, Players);
         }
 
         public bool HasName(string name)

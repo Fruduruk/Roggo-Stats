@@ -34,6 +34,24 @@ namespace RLStats_Classes.Models
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(ID);
+            hashCode.Add(RocketLeagueID);
+            hashCode.Add(SeasonType);
+            hashCode.Add(Visibility);
+            hashCode.Add(Link);
+            hashCode.Add(Title);
+            hashCode.Add(Playlist);
+            hashCode.Add(Season);
+            hashCode.Add(Date);
+            hashCode.Add(Uploader);
+            hashCode.Add(Blue);
+            hashCode.Add(Orange);
+            return hashCode.ToHashCode();
+        }
+
         private bool CheckEquality(object ob1, object ob2)
         {
             if (ob1 is null)
