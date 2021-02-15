@@ -378,7 +378,7 @@ namespace RLStats_Classes.MainClasses
 
         private async void SortAndAddToListAsync(List<Replay> replaysToDownload, List<Replay> replaysToLoadFromDatabase, int count, Replay replay)
         {
-            if (await ReplayDatabase.GetReplayPath(replay) is null)
+            if (!ReplayDatabase.IsReplayInDatabase(replay))
                 lock (replaysToDownload)
                     replaysToDownload.Add(replay);
             else

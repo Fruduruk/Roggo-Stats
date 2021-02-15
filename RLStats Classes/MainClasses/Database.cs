@@ -32,7 +32,13 @@ namespace RLStats_Classes.MainClasses
                 Directory.CreateDirectory(SavingDirectory);
             }
         }
-
+        public bool IsReplayInDatabase(Replay replay)
+        {
+            var task = GetReplayPath(replay);
+            task.Wait();
+            var result = !(task.Result is null);
+            return result;
+        }
         public async Task SaveReplayListAsync(List<AdvancedReplay> replays)
         {
             foreach (var replay in replays)
@@ -60,18 +66,15 @@ namespace RLStats_Classes.MainClasses
             {
                 if (replayPath is null)
                     throw new Exception($"Couldn't load Replay: {r.ID}");
-                else
-                {
-                    var path = replayPath;
-                    var compressedString = await File.ReadAllBytesAsync(path);
-                    replay = JsonConvert.DeserializeObject<AdvancedReplay>(Compressor.DecompressBytes(compressedString));
-                }
+                var path = replayPath;
+                var compressedString = await File.ReadAllBytesAsync(path);
+                replay = JsonConvert.DeserializeObject<AdvancedReplay>(Compressor.DecompressBytes(compressedString));
             });
             if (replay is null)
                 throw new Exception("replay was null");
             return replay;
         }
-        public async Task<string> GetReplayPath(Replay replay)
+        private async Task<string> GetReplayPath(Replay replay)
         {
             var directories = Directory.EnumerateDirectories(SavingDirectory);
             foreach (var d in directories)
