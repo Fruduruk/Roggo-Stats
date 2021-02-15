@@ -20,15 +20,12 @@ namespace RLStats_Classes.MainClasses
             }
             private set => savingDirectory = value;
         }
-        //public string SavingFile { get; private set; }
-        //private List<AdvancedReplay> Cache { get; set; }
 
         private string savingDirectory;
 
         public Database()
         {
-            //Cache = new List<AdvancedReplay>();
-            SavingDirectory = Environment.GetEnvironmentVariable("temp") + @"\rl_replay_stats";
+            SavingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Rocket League Stats";
             Console.WriteLine(SavingDirectory);
             if (!Directory.Exists(SavingDirectory))
             {
