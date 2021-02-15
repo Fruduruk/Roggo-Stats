@@ -48,16 +48,23 @@ namespace RLStats_Classes.MainClasses
         }
         public async Task SaveReplayAsync(AdvancedReplay replay)
         {
-            string path = $@"{SavingDirectory}\{replay.Date.ToString("yy.MM.dd")}";
+            var path = CreateReplayPath(replay);
+            var jsonString = JsonConvert.SerializeObject(replay);
+            var compressedString = Compressor.CompressString(jsonString);
+            await File.WriteAllBytesAsync(path, compressedString);
+        }
+
+        private string CreateReplayPath(AdvancedReplay replay)
+        {
+            var path = $@"{SavingDirectory}\{replay.Date:yy.MM.dd}";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             path += $@"\{replay.Id}.rply";
-            var jsonString = JsonConvert.SerializeObject(replay);
-            var compressedString = Compressor.CompressString(jsonString);
             if (File.Exists(path))
                 File.Delete(path);
-            await File.WriteAllBytesAsync(path, compressedString);
+            return path;
         }
+
         public async Task<AdvancedReplay> LoadReplayAsync(Replay r)
         {
             AdvancedReplay replay = null;
