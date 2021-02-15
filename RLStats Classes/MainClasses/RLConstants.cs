@@ -15,7 +15,7 @@ namespace RLStats_Classes.MainClasses
         {
                 var key = File.ReadAllText(GetRLStatsDebugKeyFilePath());
                 if (!string.IsNullOrEmpty(key))
-                    return key;
+                    return key.Trim();
             throw new Exception($"No debug key found\n Paste a ballchasing.com authorization key into file: {GetRLStatsDebugKeyFilePath()}");
         }
 
