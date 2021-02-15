@@ -7,22 +7,38 @@ namespace RLStats_Classes.MainClasses
     {
         public const int CurrentSeason = 2;
 
-        public static string DebugKey { get => GetDebugKey(); }
+        public static string DebugKey => GetDebugKey();
+
+        public static string RLStatsFolder => GetRLStatsFolder();
 
         private static string GetDebugKey()
         {
-            var keyPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\rlStatsDebugKey.txt";
-            if (File.Exists(keyPath))
-            {
-                var key = File.ReadAllText(keyPath);
+                var key = File.ReadAllText(GetRLStatsDebugKeyFilePath());
                 if (!string.IsNullOrEmpty(key))
                     return key;
-            }
-            else
+            throw new Exception($"No debug key found\n Paste a ballchasing.com authorization key into file: {GetRLStatsDebugKeyFilePath()}");
+        }
+
+        private static string GetRLStatsFolder()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            path += @"\Rocket League Stats";
+            if (!Directory.Exists(path))
             {
-                File.Create(keyPath);
+                Directory.CreateDirectory(path);
+            } 
+            return path;
+        }
+
+        private static string GetRLStatsDebugKeyFilePath()
+        {
+            var keyPath = GetRLStatsFolder() + @"\rlStatsDebugKey.txt";
+            if (!File.Exists(keyPath))
+            {
+                var stream = File.Create(keyPath);
+                stream.Close();
             }
-            throw new Exception("No debug key found\n Paste a ballchasing.com authorization key into file: Documents\rlStatsDebugKey.txt");
+            return keyPath;
         }
     }
 }
