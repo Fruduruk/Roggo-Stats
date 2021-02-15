@@ -25,7 +25,7 @@ namespace RLStats_Classes.MainClasses
 
         public Database()
         {
-            SavingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Rocket League Stats";
+            SavingDirectory = RLConstants.RLStatsFolder + @"\Data";
             Console.WriteLine(SavingDirectory);
             if (!Directory.Exists(SavingDirectory))
             {

@@ -7,16 +7,15 @@ namespace RLStats_Classes.MainClasses
 {
     public class ServiceInfoIO
     {
-        private string ServiceDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\RocketLeagueStatsService";
+        private string ServiceDirectory { get; set; } = RLConstants.RLStatsFolder + @"\RocketLeagueStatsService";
         private string ServiceFilePath { get; set; }
         public ServiceInfoIO()
         {
-            //Führt noch zu abstürzen, weil noch auf die Datei zugegriffen wird
             ServiceFilePath = ServiceDirectory + @"\serviceInfo.json";
             if (!Directory.Exists(ServiceDirectory))
                 Directory.CreateDirectory(ServiceDirectory);
             if (!File.Exists(ServiceFilePath))
-                File.Create(ServiceFilePath);
+                File.Create(ServiceFilePath).Close();
         }
         public ServiceInfo GetServiceInfo()
         {

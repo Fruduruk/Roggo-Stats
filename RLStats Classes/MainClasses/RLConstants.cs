@@ -34,10 +34,7 @@ namespace RLStats_Classes.MainClasses
         {
             var keyPath = GetRLStatsFolder() + @"\rlStatsDebugKey.txt";
             if (!File.Exists(keyPath))
-            {
-                var stream = File.Create(keyPath);
-                stream.Close();
-            }
+                File.Create(keyPath).Close();
             return keyPath;
         }
     }
