@@ -15,7 +15,7 @@ namespace RLStats_Classes.MainClasses
             if (!Directory.Exists(ServiceDirectory))
                 Directory.CreateDirectory(ServiceDirectory);
             if (!File.Exists(ServiceFilePath))
-                File.Create(ServiceFilePath).Close();
+                File.Create(ServiceFilePath).Dispose();
         }
         public ServiceInfo GetServiceInfo()
         {
