@@ -2,13 +2,17 @@
 using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
     public class Database
     {
+        private ObservableCollection<Guid> IdCollection { get; }= new ObservableCollection<Guid>();
+        
         public DirectoryInfo SavingDirectory
         {
             get
@@ -27,7 +31,7 @@ namespace RLStats_Classes.MainClasses
             get
             {
                 if(!indexFile.Exists)
-                    indexFile.Create().Close();
+                    indexFile.Create().Dispose();
                 return indexFile;
             }
             private set => indexFile = value;
@@ -37,13 +41,15 @@ namespace RLStats_Classes.MainClasses
         public Database()
         {
             IndexFile = new FileInfo(SavingDirectory+ @"\index.dat");
+            IdCollection = LoadIdListFromFile();
+            IdCollection.CollectionChanged += IdList_CollectionChanged;
         }
+
+        private void IdList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SaveIdsInIndexFile(IdCollection);
+
         public bool IsReplayInDatabase(Replay replay)
         {
-            var task = GetReplayPath(replay);
-            task.Wait();
-            var result = !(task.Result is null);
-            return result;
+            return IdCollection.Contains(Guid.Parse(replay.ID));
         }
         public async Task SaveReplayListAsync(List<AdvancedReplay> replays)
         {
@@ -57,11 +63,12 @@ namespace RLStats_Classes.MainClasses
             var path = CreateReplayPath(replay);
             var compressedString = Compressor.ConvertObject(replay);
             await File.WriteAllBytesAsync(path, compressedString);
+            IdCollection.Add(Guid.Parse(replay.Id));
         }
 
         private string CreateReplayPath(AdvancedReplay replay)
         {
-            var path = $@"{SavingDirectory}\{replay.Date:yy.MM.dd}";
+            var path = $@"{SavingDirectory}\{replay.Id.Substring(0,1)}";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             path += $@"\{replay.Id}.rply";
@@ -91,7 +98,7 @@ namespace RLStats_Classes.MainClasses
             var directories = Directory.EnumerateDirectories(SavingDirectory.FullName);
             foreach (var d in directories)
             {
-                if (d.Contains(replay.Date.ToString("yy.MM.dd")))
+                if (new DirectoryInfo(d).Name.Equals(replay.ID.Substring(0, 1)))
                 {
                     var filenames = Directory.EnumerateFiles(d);
                     return await Task<string>.Run(() =>
@@ -105,5 +112,27 @@ namespace RLStats_Classes.MainClasses
             }
             return null;
         }
+
+        private void SaveIdsInIndexFile(IEnumerable<Guid> ids)
+        {
+            var bytes = Compressor.ConvertObject(ids.ToList());
+            File.WriteAllBytes(IndexFile.FullName,bytes);
+        }
+
+        private ObservableCollection<Guid> LoadIdListFromFile()
+        {
+            var bytes = File.ReadAllBytes(IndexFile.FullName);
+            try
+            {
+                var idList = Compressor.ConvertObject<List<Guid>>(bytes);
+                return new ObservableCollection<Guid>(idList);
+            }
+            catch
+            {
+                return new ObservableCollection<Guid>();
+            }
+            
+        }
+
     }
 }
