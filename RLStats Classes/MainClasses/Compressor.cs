@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -43,6 +44,20 @@ namespace RLStats_Classes.MainClasses
             }
 
             return Encoding.UTF8.GetString(buffer);
+        }
+
+        public static byte[] ConvertObject<T>(T obj) where T : new()
+        {
+            var jsonString = JsonConvert.SerializeObject(obj);
+            var compressedBytes = CompressString(jsonString);
+            return compressedBytes;
+        }
+
+        public static T ConvertObject<T>(byte[] bytes)
+        {
+            var decompressedBytesAsString = DecompressBytes(bytes);
+            var obj = JsonConvert.DeserializeObject<T>(decompressedBytesAsString);
+            return obj;
         }
     }
 }

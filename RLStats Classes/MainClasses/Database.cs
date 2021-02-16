@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RLStats_Classes.AdvancedModels;
+﻿using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
@@ -49,8 +48,7 @@ namespace RLStats_Classes.MainClasses
         public async Task SaveReplayAsync(AdvancedReplay replay)
         {
             var path = CreateReplayPath(replay);
-            var jsonString = JsonConvert.SerializeObject(replay);
-            var compressedString = Compressor.CompressString(jsonString);
+            var compressedString = Compressor.ConvertObject(replay);
             await File.WriteAllBytesAsync(path, compressedString);
         }
 
@@ -74,8 +72,8 @@ namespace RLStats_Classes.MainClasses
                 if (replayPath is null)
                     throw new Exception($"Couldn't load Replay: {r.ID}");
                 var path = replayPath;
-                var compressedString = await File.ReadAllBytesAsync(path);
-                replay = JsonConvert.DeserializeObject<AdvancedReplay>(Compressor.DecompressBytes(compressedString));
+                var compressedBytes = await File.ReadAllBytesAsync(path);
+                replay = Compressor.ConvertObject<AdvancedReplay>(compressedBytes);
             });
             if (replay is null)
                 throw new Exception("replay was null");
