@@ -9,27 +9,34 @@ namespace RLStats_Classes.MainClasses
 {
     public class Database
     {
-        public string SavingDirectory
+        public DirectoryInfo SavingDirectory
         {
             get
             {
-                if (!Directory.Exists(savingDirectory))
-                    Directory.CreateDirectory(savingDirectory);
+                if (!savingDirectory.Exists)
+                   savingDirectory.Create();
                 return savingDirectory;
             }
             private set => savingDirectory = value;
         }
 
-        private string savingDirectory;
+        private DirectoryInfo savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
 
+        public FileInfo IndexFile
+        {
+            get
+            {
+                if(!indexFile.Exists)
+                    indexFile.Create().Close();
+                return indexFile;
+            }
+            private set => indexFile = value;
+        }
+
+        private FileInfo indexFile;
         public Database()
         {
-            SavingDirectory = RLConstants.RLStatsFolder + @"\Data";
-            Console.WriteLine(SavingDirectory);
-            if (!Directory.Exists(SavingDirectory))
-            {
-                Directory.CreateDirectory(SavingDirectory);
-            }
+            IndexFile = new FileInfo(SavingDirectory+ @"\index.dat");
         }
         public bool IsReplayInDatabase(Replay replay)
         {
@@ -81,7 +88,7 @@ namespace RLStats_Classes.MainClasses
         }
         private async Task<string> GetReplayPath(Replay replay)
         {
-            var directories = Directory.EnumerateDirectories(SavingDirectory);
+            var directories = Directory.EnumerateDirectories(SavingDirectory.FullName);
             foreach (var d in directories)
             {
                 if (d.Contains(replay.Date.ToString("yy.MM.dd")))
