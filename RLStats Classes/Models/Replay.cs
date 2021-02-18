@@ -2,7 +2,7 @@
 
 namespace RLStats_Classes.Models
 {
-    public class Replay
+    public class Replay : IComparable
     {
         public string ID { get; set; }
         public string RocketLeagueID { get; set; }
@@ -50,6 +50,17 @@ namespace RLStats_Classes.Models
             hashCode.Add(Blue);
             hashCode.Add(Orange);
             return hashCode.ToHashCode();
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is null)
+                return 1;
+            if (obj is Replay replay)
+            {
+                return String.Compare(ID, replay.ID, StringComparison.OrdinalIgnoreCase);
+            }
+            else throw new ArgumentException("Object was not a replay");
         }
 
         private bool CheckEquality(object ob1, object ob2)
