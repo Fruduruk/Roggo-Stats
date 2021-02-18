@@ -376,7 +376,7 @@ namespace RLStats_Classes.MainClasses
             });
         }
 
-        private async void SortAndAddToListAsync(List<Replay> replaysToDownload, List<Replay> replaysToLoadFromDatabase, int count, Replay replay)
+        private void SortAndAddToListAsync(List<Replay> replaysToDownload, List<Replay> replaysToLoadFromDatabase, int count, Replay replay)
         {
             if (!ReplayDatabase.IsReplayInDatabase(replay))
                 lock (replaysToDownload)
