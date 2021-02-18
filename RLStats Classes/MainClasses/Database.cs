@@ -107,7 +107,11 @@ namespace RLStats_Classes.MainClasses
             AdvancedReplay advancedReplay = null;
             var replayPath = await GetReplayPath(r);
             if (replayPath is null)
-                throw new Exception($"Couldn't load Replay: {r.ID}");
+            {
+                lock (IdCollection)
+                    IdCollection.Remove(new Guid(r.ID));
+                return advancedReplay;
+            }
             var replayBatch = await GetReplayBatch(replayPath);
             foreach (var replay in replayBatch)
             {
@@ -115,7 +119,8 @@ namespace RLStats_Classes.MainClasses
                     advancedReplay = replay;
             }
             if (advancedReplay is null)
-                throw new Exception("replay was null");
+                lock (IdCollection)
+                    IdCollection.Remove(new Guid(r.ID));
             return advancedReplay;
         }
         private async Task<string> GetReplayPath(Replay replay)

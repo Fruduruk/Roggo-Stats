@@ -280,58 +280,74 @@ namespace RLStats_Classes.MainClasses
             var replaysToLoadFromDatabase = new List<Replay>();
             await SortReplays(replays, replaysToDownload, replaysToLoadFromDatabase);
             await DownloadReplays(advancedReplays, replaysToDownload);
-            await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
+            replaysToDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
+            if (!replaysToDownload.Count.Equals(0))
+                await DownloadReplays(advancedReplays, replaysToDownload);
+            OnAdvancedProgressUpdate(100);
             OnAdvancedProgressChange($"Replays loaded: {advancedReplays.Count}");
             return advancedReplays;
         }
 
-        private async Task LoadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToLoadFromDatabase)
+        private async Task<List<Replay>> LoadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToLoadFromDatabase)
         {
             if (!replaysToLoadFromDatabase.Count.Equals(0))
             {
                 var count = replaysToLoadFromDatabase.Count;
                 var loadedReplays = new List<AdvancedReplay>();
+                var tasks = new List<Task<(bool, Replay)>>();
                 await Task.Run(() =>
                 {
                     foreach (var r in replaysToLoadFromDatabase)
                     {
                         try
                         {
-                            LoadAndAddToListAsync(loadedReplays, r, count);
+                            var task = LoadAndAddToListAsync(loadedReplays, r, count);
+                            tasks.Add(task);
                         }
                         catch
                         {
                             count--;
                         }
                     }
-
-                    while (loadedReplays.Count != count)
+                    foreach (var task in tasks)
                     {
-                        Thread.Sleep(100);
+                        task.Wait();
                     }
                 });
                 advancedReplays.AddRange(loadedReplays);
+                var notLoadedReplays = new List<Replay>();
+                foreach (var task in tasks)
+                {
+                    if (task.Result.Item1.Equals(false))
+                    {
+                        notLoadedReplays.Add(task.Result.Item2);
+                    }
+                }
+                return notLoadedReplays;
             }
+            return new List<Replay>();
         }
 
-        private async void LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r, int totalCount)
+        private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r, int totalCount)
         {
-            var ar = await ReplayDatabase.LoadReplayAsync(r);
-            lock (advancedReplays)
-            {
-                advancedReplays.Add(ar);
-            }
-
             if (advancedReplays.Count % 10 == 0)
             {
                 OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
                 OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
             }
+            if (advancedReplays.Count.Equals(totalCount))
+            {
+                OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
+                OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
+            }
 
-            if (advancedReplays.Count != totalCount)
-                return;
-            OnAdvancedProgressUpdate((Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100);
-            OnAdvancedProgressChange($"Load saved files: {advancedReplays.Count}/{totalCount}");
+            var ar = await ReplayDatabase.LoadReplayAsync(r);
+            if (ar is null) return (false, r);
+            lock (advancedReplays)
+            {
+                advancedReplays.Add(ar);
+            }
+            return (true, r);
         }
 
         private async Task DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
