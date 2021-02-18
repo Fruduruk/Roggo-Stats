@@ -279,10 +279,9 @@ namespace RLStats_Classes.MainClasses
             var replaysToDownload = new List<Replay>();
             var replaysToLoadFromDatabase = new List<Replay>();
             await SortReplays(replays, replaysToDownload, replaysToLoadFromDatabase);
+            var replaysToReDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
+            replaysToDownload.AddRange(replaysToReDownload);
             await DownloadReplays(advancedReplays, replaysToDownload);
-            replaysToDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
-            if (!replaysToDownload.Count.Equals(0))
-                await DownloadReplays(advancedReplays, replaysToDownload);
             OnAdvancedProgressUpdate(100);
             OnAdvancedProgressChange($"Replays loaded: {advancedReplays.Count}");
             return advancedReplays;
