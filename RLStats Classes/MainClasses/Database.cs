@@ -39,9 +39,13 @@ namespace RLStats_Classes.MainClasses
 
         private FileInfo indexFile;
 
+        public int CacheSize { get; set; }= 4096;
+
         public int CacheHits { get; set; } = 0;
 
-        private ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
+        public int CacheMisses { get; set; } = 0;
+
+        public ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
 
         public Database()
         {
@@ -53,8 +57,10 @@ namespace RLStats_Classes.MainClasses
 
         private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            while (ReplayCache.Count > 512)
+            while (ReplayCache.Count > CacheSize)
+            {
                 ReplayCache.RemoveAt(0);
+            }
         }
 
         private void IdList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SaveIdsInIndexFile(IdCollection);
@@ -126,6 +132,7 @@ namespace RLStats_Classes.MainClasses
                         return aReplay;
                     }
                 }
+            CacheMisses++;
             var replayPath = await GetReplayPath(r);
             if (replayPath is null)
             {
