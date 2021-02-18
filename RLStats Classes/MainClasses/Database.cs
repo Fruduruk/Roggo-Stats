@@ -60,8 +60,15 @@ namespace RLStats_Classes.MainClasses
         }
         public async Task SaveReplayAsync(AdvancedReplay replay)
         {
+            if (IdCollection.Contains(Guid.Parse(replay.Id)))
+                return;
             var path = CreateReplayPath(replay);
             var replayBatch = await GetReplayBatch(path);
+            if (replayBatch.Any(savedReplay => savedReplay.Id.Equals(replay.Id)))
+            {
+                IdCollection.Add(Guid.Parse(replay.Id));
+                return;
+            }
             replayBatch.Add(replay);
             var bytes = Compressor.ConvertObject(replayBatch);
             await File.WriteAllBytesAsync(path, bytes);
