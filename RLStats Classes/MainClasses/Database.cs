@@ -147,15 +147,7 @@ namespace RLStats_Classes.MainClasses
                 {
                     lock (ReplayCache)
                     {
-                        bool alreadyIn = false;
-                        foreach (var cacheEntry in ReplayCache)
-                        {
-                            if (replay.Id.Equals(cacheEntry.Id))
-                            {
-                                alreadyIn = true;
-                                break;
-                            }
-                        }
+                        var alreadyIn = ReplayCache.Any(cacheEntry => replay.Id.Equals(cacheEntry.Id));
                         if (!alreadyIn)
                             ReplayCache.Add(replay);
                     }
