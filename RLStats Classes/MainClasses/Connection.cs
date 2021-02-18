@@ -275,6 +275,7 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<List<AdvancedReplay>> GetAdvancedReplayInfosAsync(List<Replay> replays)
         {
+            ReplayDatabase.CacheHits = 0;
             var advancedReplays = new List<AdvancedReplay>();
             var replaysToDownload = new List<Replay>();
             var replaysToLoadFromDatabase = new List<Replay>();
@@ -283,7 +284,7 @@ namespace RLStats_Classes.MainClasses
             replaysToDownload.AddRange(replaysToReDownload);
             await DownloadReplays(advancedReplays, replaysToDownload);
             OnAdvancedProgressUpdate(100);
-            OnAdvancedProgressChange($"Replays loaded: {advancedReplays.Count}");
+            OnAdvancedProgressChange($"Replays loaded: {advancedReplays.Count}        Cachehits: {ReplayDatabase.CacheHits}");
             return advancedReplays;
         }
 

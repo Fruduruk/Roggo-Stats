@@ -38,11 +38,23 @@ namespace RLStats_Classes.MainClasses
         }
 
         private FileInfo indexFile;
+
+        public int CacheHits { get; set; } = 0;
+
+        private ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
+
         public Database()
         {
             IndexFile = new FileInfo(SavingDirectory + @"\index.dat");
             IdCollection = LoadIdListFromFile();
             IdCollection.CollectionChanged += IdList_CollectionChanged;
+            ReplayCache.CollectionChanged += ReplayCache_CollectionChanged;
+        }
+
+        private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            while (ReplayCache.Count > 512)
+                ReplayCache.RemoveAt(0);
         }
 
         private void IdList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SaveIdsInIndexFile(IdCollection);
@@ -105,6 +117,15 @@ namespace RLStats_Classes.MainClasses
         public async Task<AdvancedReplay> LoadReplayAsync(Replay r)
         {
             AdvancedReplay advancedReplay = null;
+            lock (ReplayCache)
+                foreach (var aReplay in ReplayCache)
+                {
+                    if (aReplay.Id.Equals(r.ID))
+                    {
+                        CacheHits++;
+                        return aReplay;
+                    }
+                }
             var replayPath = await GetReplayPath(r);
             if (replayPath is null)
             {
@@ -121,6 +142,24 @@ namespace RLStats_Classes.MainClasses
             if (advancedReplay is null)
                 lock (IdCollection)
                     IdCollection.Remove(new Guid(r.ID));
+            else
+                foreach (var replay in replayBatch)
+                {
+                    lock (ReplayCache)
+                    {
+                        bool alreadyIn = false;
+                        foreach (var cacheEntry in ReplayCache)
+                        {
+                            if (replay.Id.Equals(cacheEntry.Id))
+                            {
+                                alreadyIn = true;
+                                break;
+                            }
+                        }
+                        if (!alreadyIn)
+                            ReplayCache.Add(replay);
+                    }
+                }
             return advancedReplay;
         }
         private async Task<string> GetReplayPath(Replay replay)
