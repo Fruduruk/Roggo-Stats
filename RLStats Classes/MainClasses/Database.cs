@@ -63,8 +63,8 @@ namespace RLStats_Classes.MainClasses
             var path = CreateReplayPath(replay);
             var replayBatch = await GetReplayBatch(path);
             replayBatch.Add(replay);
-            var compressedString = Compressor.ConvertObject(replayBatch);
-            await File.WriteAllBytesAsync(path, compressedString);
+            var bytes = Compressor.ConvertObject(replayBatch);
+            await File.WriteAllBytesAsync(path, bytes);
             IdCollection.Add(Guid.Parse(replay.Id));
         }
 
