@@ -17,27 +17,27 @@ namespace RLStats_Classes.MainClasses
         {
             get
             {
-                if (!savingDirectory.Exists)
-                    savingDirectory.Create();
-                return savingDirectory;
+                if (!_savingDirectory.Exists)
+                    _savingDirectory.Create();
+                return _savingDirectory;
             }
-            private set => savingDirectory = value;
+            private set => _savingDirectory = value;
         }
 
-        private DirectoryInfo savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
+        private DirectoryInfo _savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
 
         public FileInfo IndexFile
         {
             get
             {
-                if (!indexFile.Exists)
-                    indexFile.Create().Dispose();
-                return indexFile;
+                if (!_indexFile.Exists)
+                    _indexFile.Create().Dispose();
+                return _indexFile;
             }
-            private set => indexFile = value;
+            private set => _indexFile = value;
         }
 
-        private FileInfo indexFile;
+        private FileInfo _indexFile;
 
         public int CacheSize { get; set; }= 4096;
 
