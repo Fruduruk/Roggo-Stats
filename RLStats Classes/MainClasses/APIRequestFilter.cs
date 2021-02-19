@@ -13,7 +13,7 @@ namespace RLStats_Classes.MainClasses
         public bool CheckPlaylist { get; set; }
         public bool CheckSeason { get; set; }
         public bool CheckMatchResult { get; set; }
-        public bool CheckSteamID { get; set; }
+        public bool CheckSteamId { get; set; }
         public bool CheckDate { get; set; }
         #endregion
         #region Properties
@@ -42,7 +42,7 @@ namespace RLStats_Classes.MainClasses
             CheckPlaylist = false;
             CheckSeason = false;
             CheckMatchResult = false;
-            CheckSteamID = false;
+            CheckSteamId = false;
             CheckDate = false;
 
             Names = new List<string>();
@@ -69,7 +69,7 @@ namespace RLStats_Classes.MainClasses
                 builder.SetSeason(Season);
             if (CheckMatchResult)
                 builder.SetMatchResult(MatchResult);
-            if (CheckSteamID)
+            if (CheckSteamId)
                 builder.SetSteamIds(SteamIDs);
             if(Pro)
                 builder.SetPro(Pro);
@@ -89,7 +89,7 @@ namespace RLStats_Classes.MainClasses
             this.CheckPlaylist = f.CheckPlaylist;
             this.CheckSeason = f.CheckSeason;
             this.CheckMatchResult = f.CheckMatchResult;
-            this.CheckSteamID = f.CheckSteamID;
+            this.CheckSteamId = f.CheckSteamId;
             this.CheckDate = f.CheckDate;
 
             this.Names = f.Names;

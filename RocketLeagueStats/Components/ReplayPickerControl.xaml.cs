@@ -295,8 +295,8 @@ namespace RocketLeagueStats.Components
 
             filter.Pro = GetPro();
 
-            filter.CheckSteamID = cbSteamID.IsChecked ?? false;
-            if (filter.CheckSteamID)
+            filter.CheckSteamId = cbSteamID.IsChecked ?? false;
+            if (filter.CheckSteamId)
                 filter.SteamIDs = GetSteamIDs();
 
             filter.CheckDate = cbDate.IsChecked ?? false;
@@ -336,8 +336,8 @@ namespace RocketLeagueStats.Components
             if (rule.CheckSeason)
                 SetSeason(rule.Season);
 
-            cbSteamID.IsChecked = rule.CheckSteamID;
-            if (rule.CheckSteamID)
+            cbSteamID.IsChecked = rule.CheckSteamId;
+            if (rule.CheckSteamId)
                 SetSteamIDs(rule.SteamIDs);
 
             cbDate.IsChecked = rule.CheckDate;
