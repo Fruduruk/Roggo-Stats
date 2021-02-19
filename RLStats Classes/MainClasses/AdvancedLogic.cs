@@ -15,7 +15,7 @@ namespace RLStats_Classes.MainClasses
             var weekWinrates = new List<WinratePack>();
             foreach (var weekDay in Enum.GetValues(typeof(DayOfWeek)))
             {
-                List<AdvancedReplay> commonWeekDayReplays = new List<AdvancedReplay>();
+                var commonWeekDayReplays = new List<AdvancedReplay>();
                 foreach (var r in replays)
                     if (r.Date.DayOfWeek.Equals(weekDay))
                         commonWeekDayReplays.Add(r);
@@ -27,8 +27,8 @@ namespace RLStats_Classes.MainClasses
             (List<AdvancedReplay> replays, string nameOrId)
         {
             var mapWinrates = new List<WinratePack>();
-            List<AdvancedReplay> goodReplays = GetAllReplaysWithMapName(replays);
-            List<string> names = GetMapNames(goodReplays);
+            var goodReplays = GetAllReplaysWithMapName(replays);
+            var names = GetMapNames(goodReplays);
             foreach (var s in names)
             {
                 List<AdvancedReplay> commonMapReplays = new List<AdvancedReplay>();
@@ -47,11 +47,11 @@ namespace RLStats_Classes.MainClasses
             double won = 0;
             foreach (var r in commonMapReplays)
             {
-                string playersTeam = GetPlayersTeamColor(nameOrId, r);
+                var playersTeam = GetPlayersTeamColor(nameOrId, r);
                 if (!playersTeam.Equals(string.Empty))
                 {
                     played = played + 1;
-                    string teamThatWon = string.Empty;
+                    var teamThatWon = string.Empty;
                     if (r.Orange.Stats.Core.Goals != r.Blue.Stats.Core.Goals)
                     {
                         if (r.Orange.Stats.Core.Goals > r.Blue.Stats.Core.Goals)
@@ -69,9 +69,9 @@ namespace RLStats_Classes.MainClasses
             return wp;
         }
 
-        private string GetPlayersTeamColor(string nameOrID, AdvancedReplay r)
+        private string GetPlayersTeamColor(string nameOrId, AdvancedReplay r)
         {
-            string playersTeam = string.Empty;
+            var playersTeam = string.Empty;
             try
             {
                 if (r.Blue != null)
@@ -79,11 +79,11 @@ namespace RLStats_Classes.MainClasses
                         foreach (var p in r.Blue.Players)
                         {
                             if (p.Name != null)
-                                if (p.Name.Equals(nameOrID))
+                                if (p.Name.Equals(nameOrId))
                                     playersTeam = r.Blue.Color;
                             if (p.Id.ID != null)
                                 if (p.Id.Platform.Equals("steam"))
-                                    if (p.Id.ID.Equals(nameOrID))
+                                    if (p.Id.ID.Equals(nameOrId))
                                         playersTeam = r.Orange.Color;
                         }
                 if (playersTeam != null)
@@ -92,11 +92,11 @@ namespace RLStats_Classes.MainClasses
                             foreach (var p in r.Orange.Players)
                             {
                                 if (p.Name != null)
-                                    if (p.Name.Equals(nameOrID))
+                                    if (p.Name.Equals(nameOrId))
                                         playersTeam = r.Orange.Color;
                                 if (p.Id.ID != null)
                                     if (p.Id.Platform.Equals("steam"))
-                                        if (p.Id.ID.Equals(nameOrID))
+                                        if (p.Id.ID.Equals(nameOrId))
                                             playersTeam = r.Orange.Color;
                             }
 
@@ -110,7 +110,7 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<Dictionary<string, AveragePlayerStats>> GetAveragesAsync(List<AdvancedReplay> advancedReplays, List<string> names)
         {
-            Dictionary<string, AveragePlayerStats> allAveragePlayerStats = new Dictionary<string, AveragePlayerStats>();
+            var allAveragePlayerStats = new Dictionary<string, AveragePlayerStats>();
             foreach (var name in names)
             {
                 CalculateAveragesAndAddToListAsync(advancedReplays, allAveragePlayerStats, name);
@@ -127,7 +127,7 @@ namespace RLStats_Classes.MainClasses
 
         private async void CalculateAveragesAndAddToListAsync(List<AdvancedReplay> advancedReplays, Dictionary<string, AveragePlayerStats> allAveragePlayerStats, string name)
         {
-            AveragePlayerStats averageStatsForOnePlayer = await GetAverageStatsForOnePlayer(advancedReplays, name);
+            var averageStatsForOnePlayer = await GetAverageStatsForOnePlayer(advancedReplays, name);
             lock (allAveragePlayerStats)
             {
                 allAveragePlayerStats.Add(name, averageStatsForOnePlayer);
@@ -136,15 +136,15 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<AveragePlayerStats> GetAverageStatsForOnePlayer(List<AdvancedReplay> advancedReplays, string name)
         {
-            List<PlayerStats> allStatsForOnePlayer = new List<PlayerStats>();
-            AveragePlayerStats averageStatsForOnePlayer = new AveragePlayerStats();
+            var allStatsForOnePlayer = new List<PlayerStats>();
+            var averageStatsForOnePlayer = new AveragePlayerStats();
             await Task.Run(() =>
             {
                 foreach (var replay in advancedReplays)
                 {
                     if (replay.Contains(name))
                     {
-                        PlayerStats playerStats = replay.GetPlayerStats(name);
+                        var playerStats = replay.GetPlayerStats(name);
                         if (playerStats != null)
                             allStatsForOnePlayer.Add(playerStats);
                     }
@@ -156,7 +156,7 @@ namespace RLStats_Classes.MainClasses
 
         private List<string> GetMapNames(List<AdvancedReplay> legitReplays)
         {
-            List<string> names = new List<string>();
+            var names = new List<string>();
             foreach (var r in legitReplays)
             {
                 var mapname = r.Map_name;
@@ -168,7 +168,7 @@ namespace RLStats_Classes.MainClasses
         }
         private List<AdvancedReplay> GetAllReplaysWithMapName(List<AdvancedReplay> replays)
         {
-            List<AdvancedReplay> goodReplays = new List<AdvancedReplay>();
+            var goodReplays = new List<AdvancedReplay>();
             foreach (var r in replays)
                 if (r.Map_name != null)
                     goodReplays.Add(r);
