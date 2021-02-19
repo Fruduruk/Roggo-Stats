@@ -237,7 +237,7 @@ namespace RLStats_Classes.MainClasses
                         var replay = new Replay
                         {
                             ID = r.id,
-                            RocketLeagueID = r.rocket_league_id,
+                            RocketLeagueId = r.rocket_league_id,
                             SeasonType = r.season_type ?? "before Free2Play",
                             Visibility = r.visibility,
                             Link = r.link,

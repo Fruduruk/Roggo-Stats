@@ -5,7 +5,7 @@ namespace RLStats_Classes.Models
     public class Replay : IComparable
     {
         public string ID { get; set; }
-        public string RocketLeagueID { get; set; }
+        public string RocketLeagueId { get; set; }
         public string SeasonType { get; set; }
         public string Visibility { get; set; }
         public string Link { get; set; }
@@ -38,7 +38,7 @@ namespace RLStats_Classes.Models
         {
             var hashCode = new HashCode();
             hashCode.Add(ID);
-            hashCode.Add(RocketLeagueID);
+            hashCode.Add(RocketLeagueId);
             hashCode.Add(SeasonType);
             hashCode.Add(Visibility);
             hashCode.Add(Link);
