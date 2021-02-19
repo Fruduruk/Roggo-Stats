@@ -2,6 +2,6 @@
 {
     public class PlayerCore : Core
     {
-        public bool? MVP { get; set; }
+        public bool? Mvp { get; set; }
     }
 }

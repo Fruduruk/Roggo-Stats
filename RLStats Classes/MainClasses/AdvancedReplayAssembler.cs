@@ -199,7 +199,7 @@ namespace RLStats_Classes.MainClasses
                 Saves = core.saves,
                 Assists = core.assists,
                 Score = core.score,
-                MVP = core.mvp,
+                Mvp = core.mvp,
                 Shooting_percentage = core.shooting_percentage
             };
         }
