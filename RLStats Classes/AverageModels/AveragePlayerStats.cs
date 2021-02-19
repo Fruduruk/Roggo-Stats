@@ -12,9 +12,9 @@ namespace RLStats_Classes.AverageModels
         public AveragePlayerPositioning AveragePositioning { get; set; }
         public AveragePlayerDemo AverageDemo { get; set; }
 
-        public static AVGT GetAverage<AVGT,T>(List<PlayerStats> allStatsForOnePlayer) where AVGT : new() where T : new()
+        public static TAvgt GetAverage<TAvgt,T>(List<PlayerStats> allStatsForOnePlayer) where TAvgt : new() where T : new()
         {
-            AVGT avgt = new AVGT();
+            TAvgt avgt = new TAvgt();
             var properties = typeof(T).GetProperties();
             foreach (var p in properties)
             {
@@ -39,7 +39,7 @@ namespace RLStats_Classes.AverageModels
                         }
                     }
                 }
-                var avgProperties = typeof(AVGT).GetProperties();
+                var avgProperties = typeof(TAvgt).GetProperties();
                 foreach (var avgP in avgProperties)
                     if (avgP.Name.Equals(p.Name))
                     {
