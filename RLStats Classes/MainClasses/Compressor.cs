@@ -8,7 +8,6 @@ namespace RLStats_Classes.MainClasses
 {
     public class Compressor
     {
-
         public static byte[] CompressString(string text)
         {
             byte[] buffer = Encoding.UTF8.GetBytes(text);
@@ -31,19 +30,20 @@ namespace RLStats_Classes.MainClasses
         
         public static string DecompressBytes(byte[] compressedBytes)
         {
-            using var memoryStream = new MemoryStream();
-            int dataLength = BitConverter.ToInt32(compressedBytes, 0);
-            memoryStream.Write(compressedBytes, 4, compressedBytes.Length - 4);
-
-            var buffer = new byte[dataLength];
-
-            memoryStream.Position = 0;
-            using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+            using (var memoryStream = new MemoryStream())
             {
-                gZipStream.Read(buffer, 0, buffer.Length);
-            }
+                var dataLength = BitConverter.ToInt32(compressedBytes, 0);
+                memoryStream.Write(compressedBytes, 4, compressedBytes.Length - 4);
 
-            return Encoding.UTF8.GetString(buffer);
+                var buffer = new byte[dataLength];
+
+                memoryStream.Position = 0;
+                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                {
+                    gZipStream.Read(buffer, 0, buffer.Length);
+                }
+                return Encoding.UTF8.GetString(buffer);
+            }
         }
 
         public static byte[] ConvertObject<T>(T obj) where T : new()
