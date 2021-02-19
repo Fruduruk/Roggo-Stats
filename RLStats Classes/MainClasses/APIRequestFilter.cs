@@ -70,7 +70,7 @@ namespace RLStats_Classes.MainClasses
             if (CheckMatchResult)
                 builder.SetMatchResult(MatchResult);
             if (CheckSteamID)
-                builder.SetSteamIDs(SteamIDs);
+                builder.SetSteamIds(SteamIDs);
             if(Pro)
                 builder.SetPro(Pro);
             if (CheckDate)

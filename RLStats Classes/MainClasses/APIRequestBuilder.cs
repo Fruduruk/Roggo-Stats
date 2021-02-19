@@ -4,16 +4,17 @@ using System.Collections.Generic;
 
 namespace RLStats_Classes.MainClasses
 {
+    // ReSharper disable once InconsistentNaming
     public class APIRequestBuilder
     {
         public const string BallchasingApiUrl = "https://ballchasing.com/api/replays";
-        private bool anyAdded = false;
+        private bool _anyAdded = false;
         private string Base { get; set; } = BallchasingApiUrl;
         public void SetPlayerName(string value)
         {
             AddBinding();
             Base += "player-name=" + value;
-            anyAdded = true;
+            _anyAdded = true;
         }
         public void SetPlayerNames(List<string> names)
         {
@@ -24,19 +25,19 @@ namespace RLStats_Classes.MainClasses
         {
             AddBinding();
             Base += "title=" + value;
-            anyAdded = true;
+            _anyAdded = true;
         }
         public void SetPlaylist(Playlist value)
         {
             AddBinding();
             Base += "playlist=" + ConvertPlaylist(value);
-            anyAdded = true;
+            _anyAdded = true;
         }
         public void SetSeason(int value)
         {
             AddBinding();
             Base += "season=" + value.ToString();
-            anyAdded = true;
+            _anyAdded = true;
         }
         public void SetMatchResult(MatchResult value)
         {
@@ -50,18 +51,18 @@ namespace RLStats_Classes.MainClasses
                     Base += "match-result=loss";
                     break;
             }
-            anyAdded = true;
+            _anyAdded = true;
         }
-        public void SetSteamID(string value)
+        public void SetSteamId(string value)
         {
             AddBinding();
             Base += "player-id=steam:" + value;
-            anyAdded = true;
+            _anyAdded = true;
         }
-        public void SetSteamIDs(List<string> steamIDs)
+        public void SetSteamIds(List<string> steamIDs)
         {
             foreach (var id in steamIDs)
-                SetSteamID(id);
+                SetSteamId(id);
         }
         public void SetPro(bool value)
         {
@@ -70,7 +71,7 @@ namespace RLStats_Classes.MainClasses
                 Base += "pro=true";
             else
                 Base += "pro=false";
-            anyAdded = true;
+            _anyAdded = true;
         }
         public void SetStartDate(DateTime startDate)
         {
@@ -93,9 +94,9 @@ namespace RLStats_Classes.MainClasses
         public void Clear()
         {
             Base = BallchasingApiUrl;
-            anyAdded = false;
+            _anyAdded = false;
         }
-        private void AddBinding() => Base += (anyAdded ? "&" : "?");
+        private void AddBinding() => Base += (_anyAdded ? "&" : "?");
         public static string GetSpecificReplayUrl(string id)
         {
             return $"{BallchasingApiUrl}/{id}";
