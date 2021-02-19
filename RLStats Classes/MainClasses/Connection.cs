@@ -236,7 +236,7 @@ namespace RLStats_Classes.MainClasses
                     {
                         var replay = new Replay
                         {
-                            ID = r.id,
+                            Id = r.id,
                             RocketLeagueId = r.rocket_league_id,
                             SeasonType = r.season_type ?? "before Free2Play",
                             Visibility = r.visibility,
@@ -418,7 +418,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
         {
-            var url = APIRequestBuilder.GetSpecificReplayUrl(replay.ID);
+            var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await GetAsync(client, url);
             if (response.IsSuccessStatusCode)
             {

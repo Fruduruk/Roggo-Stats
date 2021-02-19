@@ -4,7 +4,7 @@ namespace RLStats_Classes.Models
 {
     public class Replay : IComparable
     {
-        public string ID { get; set; }
+        public string Id { get; set; }
         public string RocketLeagueId { get; set; }
         public string SeasonType { get; set; }
         public string Visibility { get; set; }
@@ -23,7 +23,7 @@ namespace RLStats_Classes.Models
             if (obj == null || GetType() != obj.GetType())
                 return false;
             var that = obj as Replay;
-            if (that.ID.Equals(ID))
+            if (that.Id.Equals(Id))
                 return true;
             if (CheckEquality(SeasonType, that.SeasonType))
                 if (Season.Equals(that.Season))
@@ -37,7 +37,7 @@ namespace RLStats_Classes.Models
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
-            hashCode.Add(ID);
+            hashCode.Add(Id);
             hashCode.Add(RocketLeagueId);
             hashCode.Add(SeasonType);
             hashCode.Add(Visibility);
@@ -58,7 +58,7 @@ namespace RLStats_Classes.Models
                 return 1;
             if (obj is Replay replay)
             {
-                return String.Compare(ID, replay.ID, StringComparison.OrdinalIgnoreCase);
+                return String.Compare(Id, replay.Id, StringComparison.OrdinalIgnoreCase);
             }
             else throw new ArgumentException("Object was not a replay");
         }

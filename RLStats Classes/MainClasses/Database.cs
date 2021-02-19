@@ -67,7 +67,7 @@ namespace RLStats_Classes.MainClasses
 
         public bool IsReplayInDatabase(Replay replay)
         {
-            return IdCollection.Contains(Guid.Parse(replay.ID));
+            return IdCollection.Contains(Guid.Parse(replay.Id));
         }
         public async Task SaveReplayListAsync(List<AdvancedReplay> replays)
         {
@@ -126,7 +126,7 @@ namespace RLStats_Classes.MainClasses
             lock (ReplayCache)
                 foreach (var aReplay in ReplayCache)
                 {
-                    if (aReplay.Id.Equals(r.ID))
+                    if (aReplay.Id.Equals(r.Id))
                     {
                         CacheHits++;
                         return aReplay;
@@ -137,18 +137,18 @@ namespace RLStats_Classes.MainClasses
             if (replayPath is null)
             {
                 lock (IdCollection)
-                    IdCollection.Remove(new Guid(r.ID));
+                    IdCollection.Remove(new Guid(r.Id));
                 return advancedReplay;
             }
             var replayBatch = await GetReplayBatch(replayPath);
             foreach (var replay in replayBatch)
             {
-                if (replay.Id.Equals(r.ID))
+                if (replay.Id.Equals(r.Id))
                     advancedReplay = replay;
             }
             if (advancedReplay is null)
                 lock (IdCollection)
-                    IdCollection.Remove(new Guid(r.ID));
+                    IdCollection.Remove(new Guid(r.Id));
             else
                 foreach (var replay in replayBatch)
                 {
@@ -166,13 +166,13 @@ namespace RLStats_Classes.MainClasses
             var directories = Directory.EnumerateDirectories(SavingDirectory.FullName);
             foreach (var d in directories)
             {
-                if (new DirectoryInfo(d).Name.Equals(replay.ID.Substring(0, 1)))
+                if (new DirectoryInfo(d).Name.Equals(replay.Id.Substring(0, 1)))
                 {
                     var filenames = Directory.EnumerateFiles(d);
                     return await Task.Run(() =>
                     {
                         foreach (var s in filenames)
-                            if (new FileInfo(s).Name.StartsWith(replay.ID.Substring(1, 1)))
+                            if (new FileInfo(s).Name.StartsWith(replay.Id.Substring(1, 1)))
                                 return s;
                         return null;
                     });

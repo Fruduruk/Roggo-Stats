@@ -104,7 +104,7 @@ namespace RocketLeagueStats
         {
             tbReplayIndex.Text = (Index + 1).ToString() + "/" + Replays.Count.ToString();
             tbDate.Text = "Date: " + replay.Date;
-            tbId.Text = "ID: " + replay.ID;
+            tbId.Text = "ID: " + replay.Id;
             tbRLId.Text = $"RocketLeagueID: {replay.RocketLeagueId}";
             tbSeasonType.Text = $"Seasontype: {replay.SeasonType}";
             tbVisibility.Text = $"Visibility: {replay.Visibility}";
