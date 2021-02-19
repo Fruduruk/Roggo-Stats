@@ -18,7 +18,7 @@ namespace RLStats_Classes.AverageModels
             var properties = typeof(T).GetProperties();
             foreach (var p in properties)
             {
-                List<double> values = new List<double>();
+                var values = new List<double>();
                 foreach (var stats in allStatsForOnePlayer)
                 {
                     var playerStatsProperties = typeof(PlayerStats).GetProperties();
@@ -28,14 +28,21 @@ namespace RLStats_Classes.AverageModels
                         {
                             var propertyValue = psp.GetValue(stats);
                             var v = p.GetValue(propertyValue);
-                            if (v is double d)
-                                AddIfItHasValue(values, d);
-                            else if (v is bool b)
-                                AddIfItHasValue(values, b);
-                            else if (v is int i)
-                                AddIfItHasValue(values, i);
-                            else if (v is float f)
-                                AddIfItHasValue(values, f);
+                            switch (v)
+                            {
+                                case double d:
+                                    AddIfItHasValue(values, d);
+                                    break;
+                                case bool b:
+                                    AddIfItHasValue(values, b);
+                                    break;
+                                case int i:
+                                    AddIfItHasValue(values, i);
+                                    break;
+                                case float f:
+                                    AddIfItHasValue(values, f);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -51,12 +58,14 @@ namespace RLStats_Classes.AverageModels
         }
         public static AveragePlayerStats GetAveragePlayerStats(List<PlayerStats> allStatsForOnePlayer)
         {
-            AveragePlayerStats average = new AveragePlayerStats();
-            average.AverageCore = GetAverage<AveragePlayerCore, PlayerCore>(allStatsForOnePlayer);
-            average.AverageBoost = GetAverage<AveragePlayerBoost,PlayerBoost>(allStatsForOnePlayer);
-            average.AverageMovement = GetAverage<AveragePlayerMovement,PlayerMovement>(allStatsForOnePlayer);
-            average.AveragePositioning = GetAverage<AveragePlayerPositioning,PlayerPositioning>(allStatsForOnePlayer);
-            average.AverageDemo = GetAverage<AveragePlayerDemo, Demo>(allStatsForOnePlayer);
+            var average = new AveragePlayerStats
+            {
+                AverageCore = GetAverage<AveragePlayerCore, PlayerCore>(allStatsForOnePlayer),
+                AverageBoost = GetAverage<AveragePlayerBoost, PlayerBoost>(allStatsForOnePlayer),
+                AverageMovement = GetAverage<AveragePlayerMovement, PlayerMovement>(allStatsForOnePlayer),
+                AveragePositioning = GetAverage<AveragePlayerPositioning, PlayerPositioning>(allStatsForOnePlayer),
+                AverageDemo = GetAverage<AveragePlayerDemo, Demo>(allStatsForOnePlayer)
+            };
             return average;
         }
         private static void AddIfItHasValue(List<double> list, double? value)
