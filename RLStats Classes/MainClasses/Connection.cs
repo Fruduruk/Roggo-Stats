@@ -107,7 +107,7 @@ namespace RLStats_Classes.MainClasses
                 if (jData.name != null)
                     info.Name = jData.name;
                 if (jData.steam_id != null)
-                    info.SteamID = jData.steam_id;
+                    info.SteamId = jData.steam_id;
                 if (jData.type != null)
                     info.Type = jData.type;
                 return info;

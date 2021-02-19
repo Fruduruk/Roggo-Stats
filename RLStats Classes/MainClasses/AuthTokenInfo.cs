@@ -12,7 +12,7 @@ namespace RLStats_Classes.MainClasses
         public string Token { get; }
         public Exception Except { get; set; }
         public bool Chaser { get; set; }
-        public string SteamID { get; set; }
+        public string SteamId { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
         /// <summary>
@@ -23,21 +23,15 @@ namespace RLStats_Classes.MainClasses
         {
             if (Type is null)
                 throw new Exception("Type was null");
-            switch (Type)
+            return Type switch
             {
-                case "gc":
-                    return 16;
-                case "champion":
-                    return 8;
-                case "diamond":
-                    return 4;
-                case "gold":
-                    return 2;
-                case "regular":
-                    return 2;
-                default:
-                    throw new Exception("Unknown type: "+Type);
-            }
+                "gc" => 16,
+                "champion" => 8,
+                "diamond" => 4,
+                "gold" => 2,
+                "regular" => 2,
+                _ => throw new Exception("Unknown type: " + Type)
+            };
         }
         /// <summary>
         /// returns hour limit measured in calls per hour
@@ -47,21 +41,15 @@ namespace RLStats_Classes.MainClasses
         {
             if (Type is null)
                 return 1;
-            switch (Type)
+            return Type switch
             {
-                case "gc":
-                    return 0;
-                case "champion":
-                    return 0;
-                case "diamond":
-                    return 2000;
-                case "gold":
-                    return 1000;
-                case "regular":
-                    return 500;
-                default:
-                    return 1;
-            }
+                "gc" => 0,
+                "champion" => 0,
+                "diamond" => 2000,
+                "gold" => 1000,
+                "regular" => 500,
+                _ => 1
+            };
         }
     }
 
