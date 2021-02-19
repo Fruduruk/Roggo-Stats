@@ -161,7 +161,7 @@ namespace RLStats_Classes.MainClasses
             {
                 var mapname = r.Map_name;
                 if (!names.Contains(mapname))
-                    names.Add(mapname);
+                        names.Add(mapname);
             }
 
             return names;
