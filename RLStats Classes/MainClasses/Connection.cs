@@ -162,7 +162,7 @@ namespace RLStats_Classes.MainClasses
                     {
                         allData.Success = true;
                         if (filter.CheckDate)
-                            currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2);
+                            currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
                         allData.Replays.AddRange(currentPack.Replays);
                         stepsDone++;
                         ShowUpdate(steps, stepsDone, currentPack.Replays.Count);
