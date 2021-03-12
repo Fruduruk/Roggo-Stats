@@ -58,9 +58,13 @@ namespace RLStats_Classes.MainClasses
             if (CallWatch.IsRunning)
             {
                 double speed = TokenInfo.GetSpeed();
-                var timeToWait = (1000 / speed) + 20;
-                while (CallWatch.ElapsedMilliseconds < timeToWait)
-                    Thread.Sleep(10);
+                var timeToWait = (1000 / speed);
+                var hasToWait = CallWatch.ElapsedMilliseconds < timeToWait;
+                if (hasToWait)
+                {
+                    var actualTimeToWait = Math.Round(timeToWait,MidpointRounding.ToPositiveInfinity) - CallWatch.ElapsedMilliseconds;
+                    Thread.Sleep((int)actualTimeToWait);
+                }
                 CallWatch.Stop();
             }
             CallWatch.Restart();
