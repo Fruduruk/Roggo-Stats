@@ -132,7 +132,7 @@ namespace RocketLeagueStats
             {
                 Available = true,
                 Filters = Filters,
-                TokenInfo = AuthTokenInfo
+                TokenInfo = new ServiceTokenInfo(AuthTokenInfo.Token)
             };
             new ServiceInfoIO().SaveServiceInfo(info);
         }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Text;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class AuthTokenInfo
+    public class AuthTokenInfo : IAuthTokenInfo
     {
         public AuthTokenInfo(string token)
         {
@@ -16,22 +17,6 @@ namespace RLStats_Classes.MainClasses
         public string SteamId { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append($"Name: {Name}");
-            builder.AppendLine();
-            builder.Append($"SteamId: {SteamId}");
-            builder.AppendLine();
-            builder.Append($"Type: {Type}");
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// Returns speed measured in calls per second
-        /// </summary>
-        /// <returns></returns>
         public int GetSpeed()
         {
             if (Type is null)
@@ -46,10 +31,6 @@ namespace RLStats_Classes.MainClasses
                 _ => throw new Exception("Unknown type: " + Type)
             };
         }
-        /// <summary>
-        /// returns hour limit measured in calls per hour
-        /// </summary>
-        /// <returns></returns>
         public int GetHourLimit()
         {
             if (Type is null)

@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -23,12 +24,12 @@ namespace RLStats_Classes.MainClasses
         public static double ElapsedMilliseconds { get; private set; } = 0;
         public bool Cancel { get; set; }
         private Database ReplayDatabase { get; set; }
-        public AuthTokenInfo TokenInfo { get; }
+        public IAuthTokenInfo TokenInfo { get; }
         public bool IsInitialized { get; private set; } = false;
         public static int ObsoleteReplayCount { get; private set; }
         public Stopwatch CallWatch { get; set; } = new Stopwatch();
 
-        public Connection(AuthTokenInfo tokenInfo)
+        public Connection(IAuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo;
             IsInitialized = true;

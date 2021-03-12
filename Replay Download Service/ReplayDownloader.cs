@@ -38,7 +38,6 @@ namespace Replay_Download_Service
                 return;
             }
 
-            Logger.LogInformation(serviceInfo.TokenInfo.ToString());
             var connection = new Connection(serviceInfo.TokenInfo);
         }
     }
