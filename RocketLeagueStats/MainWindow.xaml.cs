@@ -34,7 +34,7 @@ namespace RocketLeagueStats
         }
         NavigatorWindow Navigator { get; set; } = new NavigatorWindow();
         AdvancedInfoWindow DetailWindow { get; set; } = new AdvancedInfoWindow();
-        ServiceWindow Service { get; set; } = new ServiceWindow();
+        ServiceWindow Service { get; set; }
         private int Index
         {
             get
@@ -53,6 +53,7 @@ namespace RocketLeagueStats
         {
             DataContext = this;
             InitializeComponent();
+            Service = new ServiceWindow(tokenInfo);
             Connection.Instance = new Connection(tokenInfo);
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;

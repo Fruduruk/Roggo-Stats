@@ -13,6 +13,7 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class ServiceWindow : Window
     {
+        public AuthTokenInfo AuthTokenInfo { get; }
         private bool dontClose;
         public bool DontClose
         {
@@ -34,8 +35,9 @@ namespace RocketLeagueStats
             this.Hide();
         }
 
-        public ServiceWindow()
+        public ServiceWindow(AuthTokenInfo authTokenInfo)
         {
+            AuthTokenInfo = authTokenInfo;
             InitializeComponent();
             lvFilters.ItemsSource = Filters;
             rpReplayPicker.gRuleName.Visibility = Visibility.Visible;
@@ -130,7 +132,7 @@ namespace RocketLeagueStats
             {
                 Available = true,
                 Filters = Filters,
-                TokenInfo = Connection.Instance.TokenInfo
+                TokenInfo = AuthTokenInfo
             };
             new ServiceInfoIO().SaveServiceInfo(info);
         }
