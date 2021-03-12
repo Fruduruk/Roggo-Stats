@@ -34,7 +34,7 @@ namespace RLStats_Classes.MainClasses
         public int GetHourLimit()
         {
             if (Type is null)
-                return 1;
+                throw new Exception("Type was null");
             return Type switch
             {
                 "gc" => 0,
@@ -42,7 +42,7 @@ namespace RLStats_Classes.MainClasses
                 "diamond" => 2000,
                 "gold" => 1000,
                 "regular" => 500,
-                _ => 1
+                _ => throw new Exception("Unknown type: " + Type)
             };
         }
     }
