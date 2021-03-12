@@ -5,6 +5,7 @@ namespace RLStats_Classes.MainClasses.Interfaces
     public interface IAuthTokenInfo
     {
         public string Token { get; }
+        public string Type { get; set; }
         /// <summary>
         /// Returns speed measured in calls per second
         /// </summary>

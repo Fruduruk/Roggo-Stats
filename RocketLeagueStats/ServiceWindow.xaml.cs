@@ -133,6 +133,9 @@ namespace RocketLeagueStats
                 Available = true,
                 Filters = Filters,
                 TokenInfo = new ServiceTokenInfo(AuthTokenInfo.Token)
+                {
+                    Type = AuthTokenInfo.Type
+                }
             };
             new ServiceInfoIO().SaveServiceInfo(info);
         }
