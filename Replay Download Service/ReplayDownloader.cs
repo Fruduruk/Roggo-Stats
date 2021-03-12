@@ -13,7 +13,6 @@ namespace Replay_Download_Service
     {
         private static ILogger<Worker> Logger { get; set; }
         private static CancellationToken StoppingToken { get; set; }
-        private static ServiceInfo SInfo { get; set; }
         internal static Task ExecuteServiceAsync(ILogger<Worker> logger, CancellationToken stoppingToken)
         {
             return Task.Run(() =>
@@ -22,20 +21,25 @@ namespace Replay_Download_Service
                 StoppingToken = stoppingToken;
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    SInfo = new ServiceInfoIO().GetServiceInfo();
+                    var sInfo = new ServiceInfoIO().GetServiceInfo();
                     Logger.LogInformation($"Work started: {DateTime.Now}");
-                    StartDownloadCycle();
+                    StartDownloadCycle(sInfo);
+                    Thread.Sleep(1000);
                 }
             }, stoppingToken);
         }
 
-        private static void StartDownloadCycle()
+        private static void StartDownloadCycle(ServiceInfo serviceInfo)
         {
-            var s = string.Empty;
-            foreach (var f in SInfo.Filters)
-                s += f.GetApiUrl() + "\n";
-            Logger.LogInformation(s);
-            Thread.Sleep(5234);
+            if (!serviceInfo.Available)
+            {
+                Logger.LogInformation("Service is not available. Cannot get information out of serice info file");
+                Thread.Sleep(10000);
+                return;
+            }
+
+            Logger.LogInformation(serviceInfo.TokenInfo.ToString());
+            var connection = new Connection(serviceInfo.TokenInfo);
         }
     }
 }

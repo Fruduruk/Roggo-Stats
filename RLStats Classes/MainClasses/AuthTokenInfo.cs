@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -15,6 +16,18 @@ namespace RLStats_Classes.MainClasses
         public string SteamId { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append($"Name: {Name}");
+            builder.AppendLine();
+            builder.Append($"SteamId: {SteamId}");
+            builder.AppendLine();
+            builder.Append($"Type: {Type}");
+            return builder.ToString();
+        }
+
         /// <summary>
         /// Returns speed measured in calls per second
         /// </summary>
