@@ -2,6 +2,7 @@
 {
     public interface IDownloadProgress
     {
+        bool Initial { get; }
         int ChunksToDownload { get; }
         int DownloadedChunks { get; }
         int PacksToDownload { get; }

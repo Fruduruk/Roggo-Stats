@@ -18,6 +18,7 @@ namespace RLStats_Classes.MainClasses
         public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;
         public static event EventHandler<IAdvancedDownloadProgress> AdvancedDownloadProgressUpdated;
         public static Connection Instance { get; set; }
+        public bool Initial { get; private set; } = true;
         public int ChunksToDownload { get; private set; } = 0;
         public int DownloadedChunks { get; private set; } = 0;
         public int PacksToDownload { get; private set; } = 0;
@@ -129,7 +130,10 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter filter)
         {
+            Initial = true;
             DownloadMessage = "Download started...";
+            PacksToDownload = 0;
+            ChunksToDownload = 0;
             DownloadedPacks = 0;
             DownloadedChunks = 0;
             OnDownloadProgressUpdate(this);
@@ -137,7 +141,6 @@ namespace RLStats_Classes.MainClasses
             sw.Start();
             var dataPack = await GetDataPack(filter);
             sw.Stop();
-            ObsoleteReplayCount = dataPack.DeleteObsoleteReplays();
             ElapsedMilliseconds = sw.ElapsedMilliseconds;
             Cancel = false;
             GC.Collect();
@@ -153,7 +156,7 @@ namespace RLStats_Classes.MainClasses
             DownloadedChunks = 0;
             DownloadMessage = $"Progress: {DownloadedChunks}/{ChunksToDownload}";
             OnDownloadProgressUpdate(this);
-            OnDownloadProgressUpdate(this);
+            Initial = false;
             var url = filter.GetApiUrl();
             var done = false;
             var allData = new ApiDataPack
@@ -176,11 +179,12 @@ namespace RLStats_Classes.MainClasses
                         allData.Success = true;
                         if (filter.CheckDate)
                             currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
+                        ObsoleteReplayCount += currentPack.DeleteObsoleteReplays();
                         allData.Replays.AddRange(currentPack.Replays);
                         DownloadedChunks++;
                         DownloadMessage = $"Progress: {DownloadedChunks}/{ChunksToDownload}" +
                                           (currentPack.Replays.Count != 0 ? "\t+" + currentPack.Replays.Count : "");
-                        DownloadedPacks += currentPack.Replays.Count;
+                        DownloadedPacks = currentPack.Replays.Count;
                         OnDownloadProgressUpdate(this);
                         if (Cancel)
                             break;

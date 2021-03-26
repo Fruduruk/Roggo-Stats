@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Media;
 using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
@@ -61,6 +62,22 @@ namespace RocketLeagueStats
             {
                 tbReplayCount.Text = e.ChunksToDownload.ToString();
                 tbMessages.Text = e.DownloadMessage;
+                if (!(e.ChunksToDownload.Equals(0) || e.PacksToDownload.Equals(0)))
+                    if (e.Initial)
+                    {
+                        loadingGrid.Clear();
+                        loadingGrid.InitializeGrid(e.PacksToDownload, e.ChunksToDownload);
+                    }
+                    else
+                    {
+                        loadingGrid.AddChunk(Brushes.Gray);
+                        var notLoadedCount = e.PacksToDownload - e.DownloadedPacks;
+                        for (int i = 0; i < e.DownloadedPacks; i++)
+                            loadingGrid.AddPack(Brushes.GreenYellow);
+                        for (int i = 0; i < notLoadedCount; i++)
+                            loadingGrid.AddPack(Brushes.OrangeRed);
+                    }
+
             });
         }
 
@@ -72,7 +89,6 @@ namespace RocketLeagueStats
             else
                 dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
             GetReplaysClicked?.Invoke(this, dataPack);
-
             Hide();
         }
 
