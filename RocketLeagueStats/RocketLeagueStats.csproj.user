@@ -22,6 +22,9 @@
     <Compile Update="Components\ComparePlayersControlPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Components\LoadingGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Components\MapWinratesControlPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -55,6 +58,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Components\ComparePlayersControlPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Components\LoadingGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Components\MapWinratesControlPage.xaml">

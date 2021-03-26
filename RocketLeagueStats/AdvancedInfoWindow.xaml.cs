@@ -5,6 +5,7 @@ using RocketLeagueStats.Components;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
 {
@@ -61,8 +62,7 @@ namespace RocketLeagueStats
         {
             InitializeComponent();
             DontClose = true;
-            Connection.AdvancedProgressUpdated += Connection_AdvancedProgressUpdated;
-            Connection.AdvancedProgressChanged += Connection_AdvancedProgressChanged;
+            Connection.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             ControlPages = new List<IRLSControlPage>()
             {
                 mapWinratesCP,
@@ -76,17 +76,14 @@ namespace RocketLeagueStats
             Logic = new AdvancedLogic();
         }
 
+        private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
+        {
+            Dispatcher.Invoke(() => tbInfo.Text = e.DownloadMessage);
+        }
+
         private void Page_NotificationMessageTriggered(object sender, string e)
         {
             tbInfo.Text = e;
-        }
-
-        private void Connection_AdvancedProgressChanged(object sender, string e) => Dispatcher.Invoke(() => tbInfo.Text = e);
-
-        private void Connection_AdvancedProgressUpdated(object sender, double e)
-        {
-            if (0 <= e && e <= 100)
-                Dispatcher.Invoke(() => pbDownload.Value = e);
         }
 
         public async void LoadReplaysAsync(List<Replay> replays)

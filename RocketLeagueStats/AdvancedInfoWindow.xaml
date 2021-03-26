@@ -37,8 +37,7 @@
             <TextBlock x:Name="tbInfo"
                        Style="{DynamicResource textBlockStyle}"
                        Grid.Row="0"/>
-            <ProgressBar x:Name="pbDownload"
-                         Style="{DynamicResource progressBarStyle}"
+            <components:LoadingGrid x:Name="loadingGrid"
                          Grid.Row="1"/>
         </Grid>
     </Grid>

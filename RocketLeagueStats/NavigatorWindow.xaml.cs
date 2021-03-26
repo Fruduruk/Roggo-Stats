@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
 {
@@ -45,9 +46,7 @@ namespace RocketLeagueStats
         {
             DataContext = this;
             InitializeComponent();
-            Connection.ProgressUpdated += Instance_OnProgressUpdate;
-            Connection.DownloadStarted += Connection_DownloadStarted;
-            Connection.ProgressChanged += Connection_ProgressChanged;
+            Connection.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             DontClose = true;
             TempDataPack = new ApiDataPack()
             {
@@ -56,13 +55,14 @@ namespace RocketLeagueStats
             };
         }
 
-        private void Instance_OnProgressUpdate(object sender, double e)
+        private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
         {
-            if (0 <= e && e <= 100)
-                pbDownload.Value = e;
+            Dispatcher.Invoke(() =>
+            {
+                tbReplayCount.Text = e.ChunksToDownload.ToString();
+                tbMessages.Text = e.DownloadMessage;
+            });
         }
-        private void Connection_ProgressChanged(object sender, string e) => tbMessages.Text = e;
-        private void Connection_DownloadStarted(object sender, int e) => tbReplayCount.Text = e.ToString();
 
         private async void BtnGetReplays_Click(object sender, RoutedEventArgs e)
         {
