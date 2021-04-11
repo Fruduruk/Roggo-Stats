@@ -43,5 +43,19 @@ namespace RLStats_Classes.Models
         {
             Replays = DataPackMerger.GetReplaysForTimeZone(Replays, start, end);
         }
+
+        public void TrimReplaysToCap(int filterReplayCap)
+        {
+            if(Replays.Count <= filterReplayCap)
+                return;
+            var replays = new List<Replay>();
+            for (var i = 0; i < filterReplayCap; i++)
+            {
+                var replay = Replays[i];
+                replays.Add(replay);
+            }
+
+            Replays = replays;
+        }
     }
 }

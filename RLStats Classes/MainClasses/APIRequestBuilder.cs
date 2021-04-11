@@ -75,17 +75,15 @@ namespace RLStats_Classes.MainClasses
         }
         public void SetStartDate(DateTime startDate)
         {
-            //Doesn't work on Ballchasing.com
-            //AddBinding();
-            //Base += "replay-date-after=" + DateTimeHelper.ToRfc3339String(startDate);
-            //anyAdded = true;
+            AddBinding();
+            Base += "replay-date-after=" + DateTimeHelper.ToRfc3339String(startDate);
+            _anyAdded = true;
         }
         public void SetEndDate(DateTime endDate)
         {
-            //Doesn't work on Ballchasing.com
-            //AddBinding();
-            //Base += "replay-date-before=" + DateTimeHelper.ToRfc3339String(endDate);
-            //anyAdded = true;
+            AddBinding();
+            Base += "replay-date-before=" + DateTimeHelper.ToRfc3339String(endDate);
+            _anyAdded = true;
         }
         public string GetApiUrl()
         {

@@ -31,6 +31,9 @@ namespace RLStats_Classes.MainClasses
         public bool IsInitialized { get; private set; } = false;
         public static int ObsoleteReplayCount { get; private set; }
         public Stopwatch CallWatch { get; set; } = new Stopwatch();
+        public int DownloadedReplays { get; set; } = 0;
+        public int ReplaysToDownload { get; set; } = 0;
+
 
         public Connection(IAuthTokenInfo tokenInfo)
         {
@@ -130,12 +133,9 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter filter)
         {
+            ClearProgressUpdateVariables();
             Initial = true;
             DownloadMessage = "Download started...";
-            PacksToDownload = 0;
-            ChunksToDownload = 0;
-            DownloadedPacks = 0;
-            DownloadedChunks = 0;
             OnDownloadProgressUpdate(this);
             var sw = new Stopwatch();
             sw.Start();
@@ -147,9 +147,30 @@ namespace RLStats_Classes.MainClasses
             return dataPack;
         }
 
+        private void ClearProgressUpdateVariables()
+        {
+            PacksToDownload = 0;
+            ChunksToDownload = 0;
+            DownloadedPacks = 0;
+            DownloadedChunks = 0;
+            ReplaysToDownload = 0;
+            DownloadedReplays = 0;
+            DownloadMessage = string.Empty;
+        }
+
         private async Task<ApiDataPack> GetDataPack(APIRequestFilter filter)
         {
             PacksToDownload = await GetReplayCountOfUrlAsync(filter.GetApiUrl());
+            ReplaysToDownload = PacksToDownload;
+            if (PacksToDownload.Equals(0))
+                return new ApiDataPack()
+                {
+                    Success = false,
+                    Ex = new Exception("No Replays found."),
+                    ReceivedString = string.Empty,
+                    ReplayCount = 0,
+                    Replays = new List<Replay>()
+                };
             var steps = Convert.ToDouble(PacksToDownload) / 50;
             steps = Math.Round(steps, MidpointRounding.ToPositiveInfinity);
             ChunksToDownload = Convert.ToInt32(steps);
@@ -173,10 +194,11 @@ namespace RLStats_Classes.MainClasses
                     using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
                     var dataString = await reader.ReadToEndAsync();
                     var currentPack = GetApiDataFromString(dataString);
-                    PacksToDownload = currentPack.Replays.Count;
                     if (currentPack.Success)
                     {
+                        PacksToDownload = currentPack.Replays.Count;
                         allData.Success = true;
+                        DownloadedReplays += currentPack.Replays.Count;
                         if (filter.CheckDate)
                             currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
                         ObsoleteReplayCount += currentPack.DeleteObsoleteReplays();
@@ -185,6 +207,11 @@ namespace RLStats_Classes.MainClasses
                         DownloadMessage = $"Progress: {DownloadedChunks}/{ChunksToDownload}" +
                                           (currentPack.Replays.Count != 0 ? "\t+" + currentPack.Replays.Count : "");
                         DownloadedPacks = currentPack.Replays.Count;
+                        if (!filter.ReplayCap.Equals(0))
+                            if (DownloadedPacks >= filter.ReplayCap)
+                                done = true;
+                        if (DownloadedReplays >= ReplaysToDownload)
+                            done = true;
                         OnDownloadProgressUpdate(this);
                         if (Cancel)
                             break;
@@ -208,7 +235,11 @@ namespace RLStats_Classes.MainClasses
             }
 
             if (allData.Success)
+            {
+                if (!filter.ReplayCap.Equals(0))
+                    allData.TrimReplaysToCap(filter.ReplayCap);
                 return allData;
+            }
             allData.Ex = new Exception("no Data could be collected");
             allData.ReplayCount = 0;
             return allData;
@@ -294,12 +325,17 @@ namespace RLStats_Classes.MainClasses
             await DownloadReplays(advancedReplays, replaysToDownload);
             ReplayDatabase.ReplayCache.Clear();
             DownloadMessage = $"Replays loaded: {advancedReplays.Count}\tcache hits: {ReplayDatabase.CacheHits}\tcache misses: {ReplayDatabase.CacheMisses}";
-            OnDownloadProgressUpdate(this);
+            OnAdvancedDownloadProgressUpdate(this);
             return advancedReplays;
         }
 
         private async Task<List<Replay>> LoadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToLoadFromDatabase)
         {
+            ClearProgressUpdateVariables();
+            ReplaysToDownload = replaysToLoadFromDatabase.Count;
+            Initial = true;
+            OnAdvancedDownloadProgressUpdate(this);
+            Initial = false;
             if (!replaysToLoadFromDatabase.Count.Equals(0))
             {
                 var count = replaysToLoadFromDatabase.Count;
@@ -340,17 +376,11 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r, int totalCount)
         {
-            if (advancedReplays.Count % 10 == 0)
+            if ((advancedReplays.Count % 10 == 0)|| advancedReplays.Count.Equals(totalCount))
             {
-                //ProgressInPercent = (Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100;
+                DownloadedReplays = advancedReplays.Count;
                 DownloadMessage = $"Load saved files: {advancedReplays.Count}/{totalCount}";
-                OnDownloadProgressUpdate(this);
-            }
-            if (advancedReplays.Count.Equals(totalCount))
-            {
-                //ProgressInPercent = (Convert.ToDouble(advancedReplays.Count) / Convert.ToDouble(totalCount)) * 100;
-                DownloadMessage = $"Load saved files: {advancedReplays.Count}/{totalCount}";
-                OnDownloadProgressUpdate(this);
+                OnAdvancedDownloadProgressUpdate(this);
             }
 
             var ar = await ReplayDatabase.LoadReplayAsync(r);
@@ -364,7 +394,11 @@ namespace RLStats_Classes.MainClasses
 
         private async Task DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
         {
-            var count = replaysToDownload.Count;
+            ClearProgressUpdateVariables();
+            ReplaysToDownload = replaysToDownload.Count;
+            Initial = true;
+            OnAdvancedDownloadProgressUpdate(this);
+            Initial = false;
             var savingList = new List<AdvancedReplay>();
             using var client = GetClientWithToken();
             for (int i = 0; i < replaysToDownload.Count; i++)
@@ -375,18 +409,19 @@ namespace RLStats_Classes.MainClasses
                     var replay = await GetAdvancedReplayInfosAsync(client, r);
                     advancedReplays.Add(replay);
                     savingList.Add(replay);
-                    if ((i % 10).Equals(0) || i.Equals(count - 1)) //Save Replays in Database every 10 Replays and at the end
+                    if ((i % 10).Equals(0) || i.Equals(ReplaysToDownload - 1)) //Save Replays in Database every 10 Replays and at the end
                     {
                         await ReplayDatabase.SaveReplayListAsync(savingList);
                         savingList.Clear();
                     }
-                    //ProgressInPercent = (Convert.ToDouble(i + 1) / Convert.ToDouble(count)) * 100;
-                    DownloadMessage = $"Download: {i + 1}/{count}";
-                    OnDownloadProgressUpdate(this);
+
+                    DownloadedReplays = i + 1;
+                    DownloadMessage = $"Download: {i + 1}/{ReplaysToDownload}";
+                    OnAdvancedDownloadProgressUpdate(this);
                 }
                 catch
                 {
-                    count--;
+                    ReplaysToDownload--;
                 }
             }
         }

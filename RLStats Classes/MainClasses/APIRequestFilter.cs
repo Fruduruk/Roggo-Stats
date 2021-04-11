@@ -6,6 +6,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class APIRequestFilter
     {
+        public int ReplayCap { get; set; } = 0;
         public string FilterName { get; set; }
         #region Checks
         public bool CheckName { get; set; }
@@ -35,6 +36,7 @@ namespace RLStats_Classes.MainClasses
 
         private void SetDefaultValues()
         {
+            ReplayCap = 0;
             FilterName = string.Empty;
 
             CheckName = false;
@@ -75,7 +77,8 @@ namespace RLStats_Classes.MainClasses
                 builder.SetPro(Pro);
             if (CheckDate)
             {
-                //Ballchasing doesn't support date queries yet
+                builder.SetStartDate(DateRange.Item1);
+                builder.SetEndDate(DateRange.Item2.AddDays(1));
             }
             return builder.GetApiUrl();
         }

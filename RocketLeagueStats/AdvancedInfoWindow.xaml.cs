@@ -5,6 +5,7 @@ using RocketLeagueStats.Components;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Media;
 using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
@@ -62,23 +63,36 @@ namespace RocketLeagueStats
         {
             InitializeComponent();
             DontClose = true;
-            Connection.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
+            Connection.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
             ControlPages = new List<IRLSControlPage>()
             {
                 mapWinratesCP,
                 weekdayWinratesCP,
                 comparePlayersCP
             };
-            foreach(var page in ControlPages)
+            foreach (var page in ControlPages)
             {
                 page.NotificationMessageTriggered += Page_NotificationMessageTriggered;
             }
             Logic = new AdvancedLogic();
         }
 
-        private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
+        private void Connection_AdvancedDownloadProgressUpdated(object sender, IAdvancedDownloadProgress e)
         {
-            Dispatcher.Invoke(() => tbInfo.Text = e.DownloadMessage);
+            Dispatcher.Invoke(() =>
+            {
+                tbInfo.Text = e.DownloadMessage;
+                if (!e.ReplaysToDownload.Equals(0))
+                    if (e.Initial)
+                    {
+                        loadingGrid.Clear();
+                        loadingGrid.InitializeGrid(0, e.ReplaysToDownload);
+                    }
+                    else
+                    {
+                        loadingGrid.AddChunk(Brushes.GreenYellow);
+                    }
+            });
         }
 
         private void Page_NotificationMessageTriggered(object sender, string e)

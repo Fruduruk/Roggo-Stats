@@ -12,8 +12,6 @@ namespace RocketLeagueStats.Components
     {
         public double PackCount { get; private set; }
         public double ChunkCount { get; private set; }
-        private double PacksDrawn { get; set; } = 0;
-        private double ChunksDrawn { get; set; } = 0;
         private double ChunkHeight { get; set; } = 0;
         private double ChunkWidth { get; set; } = 0;
         private WrapPanel CurrentChunk { get; set; }
@@ -42,7 +40,6 @@ namespace RocketLeagueStats.Components
             CurrentChunk = new WrapPanel{Width = ChunkWidth, Height = ChunkHeight};
             CurrentChunk.Background = backgroundColor;
             loadingPanel.Children.Add(CurrentChunk);
-            ChunksDrawn++;
         }
 
         public void InitializeGrid(int maxPackCount, int maxChunkCount)
