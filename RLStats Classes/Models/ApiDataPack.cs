@@ -23,22 +23,7 @@ namespace RLStats_Classes.Models
             Replays = newReplayList;
             return obsoleteCount;
         }
-        public void DeleteReplaysWithoutSpecificNames(List<string> playerNames)
-        {
-            List<Replay> newReplays = new List<Replay>();
 
-            foreach (var r in Replays)
-            {
-                int counter = 0;
-                foreach (var name in playerNames)
-                    if (r.HasNameInIt(name))
-                        counter++;
-                if(counter.Equals(playerNames.Count))
-                    newReplays.Add(r);
-            }
-
-            Replays = newReplays;
-        }
         public void DeleteReplaysThatAreNotInTimeRange(DateTime start, DateTime end)
         {
             Replays = DataPackMerger.GetReplaysForTimeZone(Replays, start, end);
