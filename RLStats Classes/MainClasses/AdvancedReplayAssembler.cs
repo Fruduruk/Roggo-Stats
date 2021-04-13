@@ -1,6 +1,7 @@
 ﻿using RLStats_Classes.AdvancedModels;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -47,6 +48,14 @@ namespace RLStats_Classes.MainClasses
             r.Playlist_name = JData.playlist_name;
             r.Map_name = JData.map_name;
             return r;
+        }
+
+        public static AdvancedReplay GetAdvancedReplayFromString(string dataString)
+        {
+            dynamic jData = JsonConvert.DeserializeObject(dataString);
+            var ara = new AdvancedReplayAssembler(jData);
+            var aReplay = ara.Assemble();
+            return aReplay;
         }
 
         private AdvancedTeam GetTeam(dynamic dTeam)

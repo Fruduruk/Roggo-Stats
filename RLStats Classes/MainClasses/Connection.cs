@@ -30,7 +30,7 @@ namespace RLStats_Classes.MainClasses
         public IAuthTokenInfo TokenInfo { get; }
         public bool IsInitialized { get; private set; } = false;
         public static int ObsoleteReplayCount { get; private set; }
-        public Stopwatch CallWatch { get; set; } = new Stopwatch();
+        public Stopwatch CallWatch { get; } = new Stopwatch();
         public int DownloadedReplays { get; set; } = 0;
         public int ReplaysToDownload { get; set; } = 0;
 
@@ -273,22 +273,7 @@ namespace RLStats_Classes.MainClasses
                 if (jData != null)
                     foreach (var r in jData.list)
                     {
-                        var replay = new Replay
-                        {
-                            Id = r.id,
-                            RocketLeagueId = r.rocket_league_id,
-                            SeasonType = r.season_type ?? "before Free2Play",
-                            Visibility = r.visibility,
-                            Link = r.link,
-                            Title = r.replay_title,
-                            Playlist = r.playlist_id,
-                            Season = r.season,
-                            Date = r.date,
-                            Uploader = r.uploader.name,
-                            Blue = GetTeam(r.blue),
-                            Orange = GetTeam(r.orange)
-                        };
-                        replays.Add(replay);
+                        replays.Add(new ReplayAssembler(r).Assemble());
                     }
 
                 if (replays.Count == 0)
@@ -468,47 +453,11 @@ namespace RLStats_Classes.MainClasses
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await GetAsync(client, url);
-            if (response.IsSuccessStatusCode)
-            {
-                using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                var dataString = await reader.ReadToEndAsync();
-                return GetAdvancedReplayFromString(dataString);
-            }
-            else
-            {
+            if (!response.IsSuccessStatusCode)
                 throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
-            }
+            using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+            var dataString = await reader.ReadToEndAsync();
+            return AdvancedReplayAssembler.GetAdvancedReplayFromString(dataString);
         }
-
-        private static AdvancedReplay GetAdvancedReplayFromString(string dataString)
-        {
-            dynamic jData = JsonConvert.DeserializeObject(dataString);
-            var ara = new AdvancedReplayAssembler(jData);
-            var aReplay = ara.Assemble();
-            return aReplay;
-        }
-
-        private static Team GetTeam(dynamic r)
-        {
-            var t = new Team();
-            if (r.goals != null)
-                t.Goals = r.goals;
-            if (r.players != null)
-                foreach (var p in r.players)
-                {
-                    var player = new Player
-                    {
-                        Name = p.name,
-                        MVP = p.mvp != null ? (bool)p.mvp : false,
-                        Score = p.score != null ? (int)p.score : 0,
-                        StartTime = p.start_time,
-                        EndTime = p.end_time
-                    };
-                    t.Players.Add(player);
-                }
-            return t;
-        }
-
-
     }
 }
