@@ -15,6 +15,7 @@ namespace RocketLeagueStats
         private MainWindow MW { get; set; }
         public APILoginWindow()
         {
+            //var api = new BallchasingAPI(RLConstants.DebugKey);
             InitializeComponent();
 #if DEBUG
             try
@@ -34,7 +35,7 @@ namespace RocketLeagueStats
         }
         private void BtnLoginClick(object sender, RoutedEventArgs e)
         {
-            var tokenInfo = Connection.GetTokenInfo(tbxToken.Text.Trim());
+            var tokenInfo = TokenInfoProvider.GetTokenInfo(tbxToken.Text.Trim());
             if (tokenInfo.Except != null)
             {
                 tbInfo.Text = tokenInfo.Except.Message;

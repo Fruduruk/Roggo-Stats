@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
 using RLStats_Classes.AdvancedModels;
+using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -17,6 +16,7 @@ namespace RLStats_Classes.MainClasses
 
         public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;
         public static event EventHandler<IAdvancedDownloadProgress> AdvancedDownloadProgressUpdated;
+        private readonly BallchasingApi _api;
         public static Connection Instance { get; set; }
         public bool Initial { get; private set; } = true;
         public int ChunksToDownload { get; private set; } = 0;
@@ -26,109 +26,16 @@ namespace RLStats_Classes.MainClasses
         public string DownloadMessage { get; private set; } = string.Empty;
         public static double ElapsedMilliseconds { get; private set; } = 0;
         public bool Cancel { get; set; }
-        private Database ReplayDatabase { get; set; }
-        public IAuthTokenInfo TokenInfo { get; }
-        public bool IsInitialized { get; private set; } = false;
+        private Database ReplayDatabase { get; set; } = new Database();
         public static int ObsoleteReplayCount { get; private set; }
-        public Stopwatch CallWatch { get; } = new Stopwatch();
         public int DownloadedReplays { get; set; } = 0;
         public int ReplaysToDownload { get; set; } = 0;
 
-
         public Connection(IAuthTokenInfo tokenInfo)
         {
-            TokenInfo = tokenInfo;
-            IsInitialized = true;
-            ReplayDatabase = new Database();
-        }
-
-        private HttpClient GetClientWithToken()
-        {
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", TokenInfo.Token);
-            return client;
-        }
-
-        private async Task<HttpResponseMessage> GetAsync(string url)
-        {
-            HttpResponseMessage response;
-            using (var client = GetClientWithToken())
-            {
-                response = await GetAsync(client, url);
-            }
-            return response;
-        }
-
-        private async Task<HttpResponseMessage> GetAsync(HttpClient client, string url)
-        {
-            if (CallWatch.IsRunning)
-            {
-                double speed = TokenInfo.GetSpeed();
-                var timeToWait = (1000 / speed);
-                var hasToWait = CallWatch.ElapsedMilliseconds < timeToWait;
-                if (hasToWait)
-                {
-                    var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) - CallWatch.ElapsedMilliseconds;
-                    Thread.Sleep((int)actualTimeToWait);
-                }
-                CallWatch.Stop();
-            }
-            CallWatch.Restart();
-            var response = await client.GetAsync(url);
-            return response;
-        }
-
-        public static AuthTokenInfo GetTokenInfo(string token)
-        {
-            var t = Task<string>.Run(async () =>
-            {
-                try
-                {
-                    HttpResponseMessage response;
-                    using (var client = new HttpClient())
-                    {
-                        client.DefaultRequestHeaders.Add("Authorization", token);
-                        response = await client.GetAsync("https://ballchasing.com/api/");
-                    }
-                    string content;
-                    using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
-                    {
-                        content = await reader.ReadToEndAsync();
-                    }
-                    return content;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
-            });
-            t.Wait();
-            var dataString = t.Result;
-            var info = new AuthTokenInfo(token);
-            if (string.IsNullOrEmpty(dataString))
-            {
-                info.Except = new Exception("This token is does not work.");
-                return info;
-            }
-            dynamic jData = JsonConvert.DeserializeObject(dataString);
-            if (jData != null && jData.error is null)
-            {
-                if (jData.chaser != null)
-                    info.Chaser = jData.chaser;
-                if (jData.name != null)
-                    info.Name = jData.name;
-                if (jData.steam_id != null)
-                    info.SteamId = jData.steam_id;
-                if (jData.type != null)
-                    info.Type = jData.type;
-                return info;
-            }
-            else
-            {
-                if (jData != null)
-                    info.Except = new Exception(jData.error.ToString());
-                return info;
-            }
+            if (tokenInfo is null)
+                throw new ArgumentNullException(nameof(tokenInfo));
+            _api = new BallchasingApi(tokenInfo);
         }
 
         public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter filter)
@@ -185,10 +92,9 @@ namespace RLStats_Classes.MainClasses
                 Replays = new List<Replay>(),
                 ReplayCount = PacksToDownload
             };
-            using var client = GetClientWithToken();
             while (!done)
             {
-                var response = await GetAsync(client, url);
+                var response = await _api.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
@@ -247,7 +153,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<int> GetReplayCountOfUrlAsync(string url)
         {
-            var response = await GetAsync(url);
+            var response = await _api.GetAsync(url);
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
             var dataString = await reader.ReadToEndAsync();
             var currentPack = GetApiDataFromString(dataString);
@@ -385,13 +291,12 @@ namespace RLStats_Classes.MainClasses
             OnAdvancedDownloadProgressUpdate(this);
             Initial = false;
             var savingList = new List<AdvancedReplay>();
-            using var client = GetClientWithToken();
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 var r = replaysToDownload[i];
                 try
                 {
-                    var replay = await GetAdvancedReplayInfosAsync(client, r);
+                    var replay = await GetAdvancedReplayInfosAsync(r);
                     advancedReplays.Add(replay);
                     savingList.Add(replay);
                     if ((i % 10).Equals(0) || i.Equals(ReplaysToDownload - 1)) //Save Replays in Database every 10 Replays and at the end
@@ -449,10 +354,10 @@ namespace RLStats_Classes.MainClasses
             OnDownloadProgressUpdate(this);
         }
 
-        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(HttpClient client, Replay replay)
+        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
-            var response = await GetAsync(client, url);
+            var response = await _api.GetAsync(url);
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
