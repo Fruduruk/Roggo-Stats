@@ -47,7 +47,7 @@ namespace RocketLeagueStats
         {
             DataContext = this;
             InitializeComponent();
-            Connection.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
+            ReplayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             DontClose = true;
             TempDataPack = new ApiDataPack()
             {
@@ -87,7 +87,7 @@ namespace RocketLeagueStats
             if (TempDataPack.Success)
                 dataPack = TempDataPack;
             else
-                dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
+                dataPack = await ReplayProvider.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
             GetReplaysClicked?.Invoke(this, dataPack);
             Hide();
         }
@@ -110,7 +110,7 @@ namespace RocketLeagueStats
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
             ClearTextBoxes();
-            var dataPack = await Connection.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
+            var dataPack = await ReplayProvider.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
             if (dataPack.Success)
             {
                 tbDownloadedReplayCount.Text = dataPack.Replays.Count.ToString();
@@ -121,7 +121,7 @@ namespace RocketLeagueStats
             {
                 tbMessages.Text = dataPack.Ex.Message + "\n" + dataPack.ReceivedString;
             }
-            tbMessages.Text = (Connection.ElapsedMilliseconds / 1000).ToString("0.##") + $" seconds\nDouble Replays: {Connection.ObsoleteReplayCount}";
+            tbMessages.Text = (ReplayProvider.ElapsedMilliseconds / 1000).ToString("0.##") + $" seconds\nDouble Replays: {ReplayProvider.ObsoleteReplayCount}";
         }
 
         private void ClearTextBoxes()
@@ -132,7 +132,7 @@ namespace RocketLeagueStats
         }
 
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e) => Connection.Instance.Cancel = true;
+        private void BtnCancel_Click(object sender, RoutedEventArgs e) => ReplayProvider.Instance.Cancel = true;
 
 
     }

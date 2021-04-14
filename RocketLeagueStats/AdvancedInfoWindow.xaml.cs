@@ -63,7 +63,7 @@ namespace RocketLeagueStats
         {
             InitializeComponent();
             DontClose = true;
-            Connection.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
+            ReplayProvider.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
             ControlPages = new List<IRLSControlPage>()
             {
                 mapWinratesCP,
@@ -102,7 +102,7 @@ namespace RocketLeagueStats
 
         public async void LoadReplaysAsync(List<Replay> replays)
         {
-            AdvancedReplays = await Connection.Instance.GetAdvancedReplayInfosAsync(replays);
+            AdvancedReplays = await ReplayProvider.Instance.GetAdvancedReplayInfosAsync(replays);
         }
     }
 }

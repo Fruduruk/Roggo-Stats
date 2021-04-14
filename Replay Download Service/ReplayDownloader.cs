@@ -38,7 +38,7 @@ namespace Replay_Download_Service
                 return;
             }
 
-            var connection = new Connection(serviceInfo.TokenInfo);
+            var connection = new ReplayProvider(serviceInfo.TokenInfo);
         }
     }
 }

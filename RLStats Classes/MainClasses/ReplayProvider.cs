@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class Connection : IDownloadProgress, IAdvancedDownloadProgress
+    public class ReplayProvider : IDownloadProgress, IAdvancedDownloadProgress
     {
 
         public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;
         public static event EventHandler<IAdvancedDownloadProgress> AdvancedDownloadProgressUpdated;
         private readonly BallchasingApi _api;
-        public static Connection Instance { get; set; }
+        public static ReplayProvider Instance { get; set; }
         public bool Initial { get; private set; } = true;
         public int ChunksToDownload { get; private set; } = 0;
         public int DownloadedChunks { get; private set; } = 0;
@@ -31,7 +31,7 @@ namespace RLStats_Classes.MainClasses
         public int DownloadedReplays { get; set; } = 0;
         public int ReplaysToDownload { get; set; } = 0;
 
-        public Connection(IAuthTokenInfo tokenInfo)
+        public ReplayProvider(IAuthTokenInfo tokenInfo)
         {
             if (tokenInfo is null)
                 throw new ArgumentNullException(nameof(tokenInfo));

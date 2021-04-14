@@ -54,7 +54,7 @@ namespace RocketLeagueStats
             DataContext = this;
             InitializeComponent();
             Service = new ServiceWindow(tokenInfo);
-            Connection.Instance = new Connection(tokenInfo);
+            ReplayProvider.Instance = new ReplayProvider(tokenInfo);
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
         }
