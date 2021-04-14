@@ -69,28 +69,34 @@ namespace RLStats_Classes.MainClasses
         {
             return IdCollection.Contains(Guid.Parse(replay.Id));
         }
-        public async Task SaveReplayListAsync(List<AdvancedReplay> replays)
+        public void SaveReplayList(List<AdvancedReplay> replays)
         {
             foreach (var replay in replays)
             {
-                await SaveReplayAsync(replay);
+                SaveReplayAsync(replay);
             }
         }
-        public async Task SaveReplayAsync(AdvancedReplay replay)
+        public async void SaveReplayAsync(AdvancedReplay replay)
         {
-            if (IdCollection.Contains(Guid.Parse(replay.Id)))
-                return;
-            var path = CreateReplayPath(replay);
-            var replayBatch = await GetReplayBatch(path);
-            if (replayBatch.Any(savedReplay => savedReplay.Id.Equals(replay.Id)))
+            await Task.Run(() =>
             {
-                IdCollection.Add(Guid.Parse(replay.Id));
-                return;
-            }
-            replayBatch.Add(replay);
-            var bytes = Compressor.ConvertObject(replayBatch);
-            await File.WriteAllBytesAsync(path, bytes);
-            IdCollection.Add(Guid.Parse(replay.Id));
+                lock (IdCollection)
+                {
+                    if (IdCollection.Contains(Guid.Parse(replay.Id)))
+                        return;
+                    var path = CreateReplayPath(replay);
+                    var replayBatch = GetReplayBatch(path).GetAwaiter().GetResult();
+                    if (replayBatch.Any(savedReplay => savedReplay.Id.Equals(replay.Id)))
+                    {
+                        IdCollection.Add(Guid.Parse(replay.Id));
+                        return;
+                    }
+                    replayBatch.Add(replay);
+                    var bytes = Compressor.ConvertObject(replayBatch);
+                    File.WriteAllBytesAsync(path, bytes).Wait();
+                    IdCollection.Add(Guid.Parse(replay.Id));
+                }
+            });
         }
 
         private async Task<List<AdvancedReplay>> GetReplayBatch(string path)

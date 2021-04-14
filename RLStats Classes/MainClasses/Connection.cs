@@ -290,7 +290,6 @@ namespace RLStats_Classes.MainClasses
             Initial = true;
             OnAdvancedDownloadProgressUpdate(this);
             Initial = false;
-            var savingList = new List<AdvancedReplay>();
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 var r = replaysToDownload[i];
@@ -298,12 +297,7 @@ namespace RLStats_Classes.MainClasses
                 {
                     var replay = await GetAdvancedReplayInfosAsync(r);
                     advancedReplays.Add(replay);
-                    savingList.Add(replay);
-                    if ((i % 10).Equals(0) || i.Equals(ReplaysToDownload - 1)) //Save Replays in Database every 10 Replays and at the end
-                    {
-                        await ReplayDatabase.SaveReplayListAsync(savingList);
-                        savingList.Clear();
-                    }
+                    ReplayDatabase.SaveReplayAsync(replay);
 
                     DownloadedReplays = i + 1;
                     DownloadMessage = $"Download: {i + 1}/{ReplaysToDownload}";

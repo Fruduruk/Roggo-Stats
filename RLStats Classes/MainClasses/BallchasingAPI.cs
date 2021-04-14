@@ -10,7 +10,7 @@ namespace RLStats_Classes.MainClasses
     public class BallchasingApi
     {
         public IAuthTokenInfo TokenInfo { get; }
-        private readonly Stopwatch _stopWatch = new Stopwatch();
+        private readonly Stopwatch _stopWatch = new();
         private readonly HttpClient _client;
         public BallchasingApi(IAuthTokenInfo tokenInfo)
         {
@@ -32,21 +32,34 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<HttpResponseMessage> GetAsync(string url)
         {
-            if (_stopWatch.IsRunning)
+            return await Task.Run(async () =>
             {
-                double speed = TokenInfo.GetSpeed();
-                var timeToWait = (1000 / speed);
-                var hasToWait = _stopWatch.ElapsedMilliseconds < timeToWait;
-                if (hasToWait)
+                WaitForYourTurn();
+                return await _client.GetAsync(url);
+            });
+        }
+
+        private void WaitForYourTurn()
+        {
+            lock (_stopWatch)
+            {
+                if (_stopWatch.IsRunning)
                 {
-                    var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) - _stopWatch.ElapsedMilliseconds;
-                    Thread.Sleep((int)actualTimeToWait);
+                    double speed = TokenInfo.GetSpeed();
+                    var timeToWait = (1000 / speed) * 1.1;
+                    var hasToWait = _stopWatch.ElapsedMilliseconds < timeToWait;
+                    if (hasToWait)
+                    {
+                        var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) -
+                                               _stopWatch.ElapsedMilliseconds;
+                        Thread.Sleep((int)actualTimeToWait);
+                    }
+
+                    _stopWatch.Stop();
                 }
-                _stopWatch.Stop();
+
+                _stopWatch.Restart();
             }
-            _stopWatch.Restart();
-            var response = await _client.GetAsync(url);
-            return response;
         }
     }
 }
