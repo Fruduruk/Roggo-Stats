@@ -4,6 +4,7 @@ using RLStats_Classes.Models;
 using RocketLeagueStats.Components;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using RLStats_Classes.MainClasses.Interfaces;
@@ -15,6 +16,7 @@ namespace RocketLeagueStats
         private bool dontClose;
         private List<AdvancedReplay> advancedReplays = new List<AdvancedReplay>();
         private AdvancedLogic logic;
+        private readonly IAdvancedReplayProvider _advancedReplayProvider;
         private List<IRLSControlPage> ControlPages { get; set; }
         public AdvancedLogic Logic
         {
@@ -59,8 +61,9 @@ namespace RocketLeagueStats
             GC.Collect();
             this.Hide();
         }
-        public AdvancedInfoWindow()
+        public AdvancedInfoWindow(IAdvancedReplayProvider advancedReplayProvider)
         {
+            _advancedReplayProvider = advancedReplayProvider;
             InitializeComponent();
             DontClose = true;
             AdvancedReplayProvider.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
@@ -102,7 +105,8 @@ namespace RocketLeagueStats
 
         public async void LoadReplaysAsync(List<Replay> replays)
         {
-            AdvancedReplays = await AdvancedReplayProvider.GetAdvancedReplayInfosAsync(replays);
+            var iList = await _advancedReplayProvider.GetAdvancedReplayInfosAsync(replays);
+            AdvancedReplays = iList.ToList();
         }
     }
 }

@@ -20,6 +20,8 @@ namespace RocketLeagueStats
         public event EventHandler<ApiDataPack> GetReplaysClicked;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private readonly IReplayProvider _replayProvider;
+
         public List<Replay> ShownReplays
         {
             get { return shownReplays; }
@@ -43,8 +45,9 @@ namespace RocketLeagueStats
             }
         }
 
-        public NavigatorWindow()
+        public NavigatorWindow(IReplayProvider replayProvider)
         {
+            _replayProvider = replayProvider;
             DataContext = this;
             InitializeComponent();
             ReplayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
@@ -87,7 +90,7 @@ namespace RocketLeagueStats
             if (TempDataPack.Success)
                 dataPack = TempDataPack;
             else
-                dataPack = await ReplayProvider.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
+                dataPack = await _replayProvider.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
             GetReplaysClicked?.Invoke(this, dataPack);
             Hide();
         }
@@ -110,7 +113,7 @@ namespace RocketLeagueStats
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
             ClearTextBoxes();
-            var dataPack = await ReplayProvider.Instance.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
+            var dataPack = await _replayProvider.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
             if (dataPack.Success)
             {
                 tbDownloadedReplayCount.Text = dataPack.Replays.Count.ToString();
@@ -131,9 +134,6 @@ namespace RocketLeagueStats
             tbDownloadedReplayCount.Text = string.Empty;
         }
 
-
-        private void BtnCancel_Click(object sender, RoutedEventArgs e) => ReplayProvider.Instance.Cancel = true;
-
-
+        private void BtnCancel_Click(object sender, RoutedEventArgs e) => _replayProvider.CancelDownload();
     }
 }

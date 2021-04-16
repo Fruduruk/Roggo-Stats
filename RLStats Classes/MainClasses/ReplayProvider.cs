@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class ReplayProvider : ReplayProviderBase, IDownloadProgress
+    public class ReplayProvider : ReplayProviderBase, IReplayProvider, IDownloadProgress
     {
 
         public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;
@@ -21,10 +21,12 @@ namespace RLStats_Classes.MainClasses
         public int DownloadedPacks { get; private set; } = 0;
         public string DownloadMessage { get; private set; } = string.Empty;
         public static double ElapsedMilliseconds { get; private set; } = 0;
-        public bool Cancel { get; set; }
         public static int ObsoleteReplayCount { get; private set; }
         public int DownloadedReplays { get; set; } = 0;
         public int ReplaysToDownload { get; set; } = 0;
+
+        private bool _cancelDownload;
+
 
         public ReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
         
@@ -39,9 +41,14 @@ namespace RLStats_Classes.MainClasses
             var dataPack = await GetDataPack(filter);
             sw.Stop();
             ElapsedMilliseconds = sw.ElapsedMilliseconds;
-            Cancel = false;
+            _cancelDownload = false;
             GC.Collect();
             return dataPack;
+        }
+
+        public void CancelDownload()
+        {
+            _cancelDownload = true;
         }
 
         private void ClearProgressUpdateVariables()
@@ -109,7 +116,7 @@ namespace RLStats_Classes.MainClasses
                         if (DownloadedReplays >= ReplaysToDownload)
                             done = true;
                         OnDownloadProgressUpdate(this);
-                        if (Cancel)
+                        if (_cancelDownload)
                             break;
                         if (currentPack.Next != null)
                             url = currentPack.Next;

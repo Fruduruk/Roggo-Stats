@@ -21,7 +21,7 @@ namespace RocketLeagueStats
         private List<Replay> replays = new List<Replay>();
         private int index;
 
-        List<Replay> Replays
+        private List<Replay> Replays
         {
             get => replays;
             set
@@ -32,15 +32,12 @@ namespace RocketLeagueStats
                     lvReplays.Items.Add(replay);
             }
         }
-        NavigatorWindow Navigator { get; set; } = new NavigatorWindow();
-        AdvancedInfoWindow DetailWindow { get; set; } = new AdvancedInfoWindow();
-        ServiceWindow Service { get; set; }
+        private NavigatorWindow Navigator { get; set; }
+        private AdvancedInfoWindow DetailWindow { get; set; }
+        private ServiceWindow Service { get; set; }
         private int Index
         {
-            get
-            {
-                return index;
-            }
+            get => index;
             set
             {
                 index = value;
@@ -54,7 +51,8 @@ namespace RocketLeagueStats
             DataContext = this;
             InitializeComponent();
             Service = new ServiceWindow(tokenInfo);
-            ReplayProvider.Instance = new ReplayProvider(tokenInfo);
+            Navigator = new NavigatorWindow(new ReplayProvider(tokenInfo));
+            DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo));
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
         }
