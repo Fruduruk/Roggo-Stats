@@ -15,21 +15,8 @@ namespace RocketLeagueStats
     {
         private bool dontClose;
         private List<AdvancedReplay> advancedReplays = new List<AdvancedReplay>();
-        private AdvancedLogic logic;
         private readonly IAdvancedReplayProvider _advancedReplayProvider;
         private List<IRLSControlPage> ControlPages { get; set; }
-        public AdvancedLogic Logic
-        {
-            get => logic;
-            set
-            {
-                logic = value;
-                foreach (IRLSControlPage page in ControlPages)
-                {
-                    page.Logic = value;
-                }
-            }
-        }
         public List<AdvancedReplay> AdvancedReplays
         {
             get => advancedReplays;
@@ -77,7 +64,6 @@ namespace RocketLeagueStats
             {
                 page.NotificationMessageTriggered += Page_NotificationMessageTriggered;
             }
-            Logic = new AdvancedLogic();
         }
 
         private void Connection_AdvancedDownloadProgressUpdated(object sender, IAdvancedDownloadProgress e)

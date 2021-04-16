@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats.Components
 {
@@ -14,17 +15,21 @@ namespace RocketLeagueStats.Components
     public partial class ComparePlayersControlPage : UserControl, IRLSControlPage
     {
         public event EventHandler<string> NotificationMessageTriggered;
-        public AdvancedLogic Logic { get; set; }
+        public IStatsComparer _comparer;
+
         public List<AdvancedReplay> AdvancedReplays { get; set; }
 
         public ComparePlayersControlPage()
         {
             InitializeComponent();
+            _comparer = new AdvancedLogic();
         }
+
         private void Notify(string message)
         {
             NotificationMessageTriggered?.Invoke(this, message);
         }
+
         private async void BtnPlayerCompareClickAsync(object sender, RoutedEventArgs e)
         {
             if (!lvNamesSteamIDs.Items.IsEmpty)
@@ -35,7 +40,7 @@ namespace RocketLeagueStats.Components
                     if (!names.Contains(s))
                         names.Add(s);
                 }
-                var averagePlayerStatList = await Logic.GetAveragesAsync(AdvancedReplays, names);
+                var averagePlayerStatList = await _comparer.GetAveragesAsync(AdvancedReplays, names);
                 chartDisplay.AvgPlayerStatList = averagePlayerStatList;
                 chartDisplay.Refresh();
             }
@@ -52,14 +57,14 @@ namespace RocketLeagueStats.Components
                     lvNamesSteamIDs.Items.Remove(lvNamesSteamIDs.SelectedItem);
         }
 
-        private void BtnAddNameOrSteamID_Click(object sender, RoutedEventArgs e) => AddNameToNameAndSteamIDListView();
+        private void BtnAddNameOrSteamID_Click(object sender, RoutedEventArgs e) => AddNameToNameAndSteamIdListView();
 
         private void TbxAddNameOrSteamID_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                AddNameToNameAndSteamIDListView();
+                AddNameToNameAndSteamIdListView();
         }
-        private void AddNameToNameAndSteamIDListView()
+        private void AddNameToNameAndSteamIdListView()
         {
             if (tbxAddNameOrSteamID.Text.Trim() != string.Empty)
             {

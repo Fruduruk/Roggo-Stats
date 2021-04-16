@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class AdvancedLogic
+    public class AdvancedLogic : IStatsComparer
     {
         public List<WinratePack> CalculateWeekDayWinrates(List<AdvancedReplay> replays, string nameOrId)
         {
@@ -23,6 +24,7 @@ namespace RLStats_Classes.MainClasses
             }
             return weekWinrates;
         }
+
         public List<WinratePack> CalculateMapWinRates
             (List<AdvancedReplay> replays, string nameOrId)
         {
@@ -108,24 +110,27 @@ namespace RLStats_Classes.MainClasses
             return playersTeam;
         }
 
-        public async Task<Dictionary<string, AveragePlayerStats>> GetAveragesAsync(List<AdvancedReplay> advancedReplays, List<string> names)
+        public async Task<Dictionary<string, AveragePlayerStats>> GetAveragesAsync(IEnumerable<AdvancedReplay> advancedReplays, IEnumerable<string> names)
         {
+            var nameList = new List<string>(names);
+            var replays = new List<AdvancedReplay>(advancedReplays);
             var allAveragePlayerStats = new Dictionary<string, AveragePlayerStats>();
-            foreach (var name in names)
+            var taskList = new List<Task>();
+            foreach (var name in nameList)
             {
-                CalculateAveragesAndAddToListAsync(advancedReplays, allAveragePlayerStats, name);
+                var task = CalculateAveragesAndAddToListAsync(replays, allAveragePlayerStats, name);
+                taskList.Add(task);
             }
             await Task.Run(() =>
             {
-                while (allAveragePlayerStats.Count != names.Count)
-                {
-                    Thread.Sleep(10);
-                }
+                foreach(var task in taskList)
+                    if (!task.IsCompleted)
+                        task.Wait();
             });
             return allAveragePlayerStats;
         }
 
-        private async void CalculateAveragesAndAddToListAsync(List<AdvancedReplay> advancedReplays, Dictionary<string, AveragePlayerStats> allAveragePlayerStats, string name)
+        private async Task CalculateAveragesAndAddToListAsync(List<AdvancedReplay> advancedReplays, Dictionary<string, AveragePlayerStats> allAveragePlayerStats, string name)
         {
             var averageStatsForOnePlayer = await GetAverageStatsForOnePlayer(advancedReplays, name);
             lock (allAveragePlayerStats)
