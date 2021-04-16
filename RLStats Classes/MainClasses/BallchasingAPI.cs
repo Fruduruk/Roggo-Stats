@@ -9,13 +9,19 @@ namespace RLStats_Classes.MainClasses
 {
     public class BallchasingApi
     {
+        public static BallchasingApi Instance { get; private set; }
         public IAuthTokenInfo TokenInfo { get; }
         private readonly Stopwatch _stopWatch = new();
         private readonly HttpClient _client;
-        public BallchasingApi(IAuthTokenInfo tokenInfo)
+        private BallchasingApi(IAuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo ?? throw new ArgumentNullException(nameof(tokenInfo));
             _client = GetClientWithToken();
+        }
+
+        public static void CreateInstance(IAuthTokenInfo tokenInfo)
+        {
+            Instance = new BallchasingApi(tokenInfo);
         }
 
         ~BallchasingApi()
