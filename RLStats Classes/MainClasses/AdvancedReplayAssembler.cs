@@ -1,7 +1,7 @@
-﻿using RLStats_Classes.AdvancedModels;
+﻿using Newtonsoft.Json;
+using RLStats_Classes.AdvancedModels;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace RLStats_Classes.MainClasses
 {

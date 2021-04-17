@@ -1,11 +1,11 @@
 ﻿using RLStats_Classes.MainClasses;
+using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
-using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
 {

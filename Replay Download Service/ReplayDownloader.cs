@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RLStats_Classes.MainClasses;
 using RLStats_Classes.Models;
 using System;

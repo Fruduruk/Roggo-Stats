@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace RLStats_Classes.MainClasses.Interfaces
+﻿namespace RLStats_Classes.MainClasses.Interfaces
 {
     public interface IAuthTokenInfo
     {

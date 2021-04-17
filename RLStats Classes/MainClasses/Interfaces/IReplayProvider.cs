@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using RLStats_Classes.Models;
 using System.Threading.Tasks;
-using RLStats_Classes.Models;
 
 namespace RLStats_Classes.MainClasses.Interfaces
 {

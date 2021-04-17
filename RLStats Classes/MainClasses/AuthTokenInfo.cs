@@ -1,6 +1,5 @@
-﻿using System;
-using System.Text;
-using RLStats_Classes.MainClasses.Interfaces;
+﻿using RLStats_Classes.MainClasses.Interfaces;
+using System;
 
 namespace RLStats_Classes.MainClasses
 {

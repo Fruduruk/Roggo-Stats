@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace RLStats_Classes.MainClasses
 {

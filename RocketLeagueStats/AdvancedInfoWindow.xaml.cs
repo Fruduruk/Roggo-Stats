@@ -1,5 +1,6 @@
 ﻿using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses;
+using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 using RocketLeagueStats.Components;
 using System;
@@ -7,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RocketLeagueStats
 {
