@@ -2,6 +2,7 @@
 using RLStats_Classes.MainClasses;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,8 +22,8 @@ namespace RocketLeagueStats.Components
 
         public ComparePlayersControlPage()
         {
+            _comparer = new StatsComparer();
             InitializeComponent();
-            _comparer = new AdvancedLogic();
         }
 
         private void Notify(string message)

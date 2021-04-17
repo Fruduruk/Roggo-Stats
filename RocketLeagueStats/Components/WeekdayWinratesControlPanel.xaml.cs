@@ -2,6 +2,7 @@
 using RLStats_Classes.MainClasses;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using RLStats_Classes.MainClasses.Interfaces;
@@ -15,9 +16,10 @@ namespace RocketLeagueStats.Components
     {
         public event EventHandler<string> NotificationMessageTriggered;
         public List<AdvancedReplay> AdvancedReplays { get; set; }
-        private IStatsComparer _comparer;
+        private readonly IStatsComparer _comparer;
         public WeekdayWinratesControlPanel()
         {
+            _comparer = new StatsComparer();
             InitializeComponent();
         }
         private void Notify(string message)
@@ -29,7 +31,7 @@ namespace RocketLeagueStats.Components
         {
             if (!tbxNameOrId.Text.Trim().Equals(string.Empty))
             {
-                var mapWinrates = _comparer.CalculateWeekDayWinrates(AdvancedReplays, tbxNameOrId.Text.Trim());
+                var mapWinrates = _comparer.CalculateWeekDayWinrates(AdvancedReplays, tbxNameOrId.Text.Trim()).ToList();
                 mapWinrates.Sort();
                 lvStats.Items.Clear();
                 foreach (var winrate in mapWinrates)

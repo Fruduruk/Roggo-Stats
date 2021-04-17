@@ -1,58 +1,62 @@
 ﻿using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.AverageModels;
 using RLStats_Classes.ChartModels;
+using RLStats_Classes.MainClasses.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
-using RLStats_Classes.MainClasses.Interfaces;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class AdvancedLogic : IStatsComparer
+    public class StatsComparer : IStatsComparer
     {
-        public List<WinratePack> CalculateWeekDayWinrates(List<AdvancedReplay> replays, string nameOrId)
+        public IEnumerable<WinratePack> CalculateWeekDayWinrates(IEnumerable<AdvancedReplay> advancedReplays, string nameOrSteamId)
         {
+            if (advancedReplays is null)
+                throw new NullReferenceException();
+            if (string.IsNullOrEmpty(nameOrSteamId))
+                throw new NullReferenceException();
             var weekWinrates = new List<WinratePack>();
             foreach (var weekDay in Enum.GetValues(typeof(DayOfWeek)))
             {
                 var commonWeekDayReplays = new List<AdvancedReplay>();
-                foreach (var r in replays)
+                var replayArray = advancedReplays.ToArray();
+                foreach (var r in replayArray)
                     if (r.Date.DayOfWeek.Equals(weekDay))
                         commonWeekDayReplays.Add(r);
-                weekWinrates.Add(GetWinratePack(nameOrId, weekDay.ToString(), commonWeekDayReplays));
+                weekWinrates.Add(GetWinratePack(nameOrSteamId, weekDay.ToString(), commonWeekDayReplays));
             }
             return weekWinrates;
         }
 
-        public List<WinratePack> CalculateMapWinRates
-            (List<AdvancedReplay> replays, string nameOrId)
+        public IEnumerable<WinratePack> CalculateMapWinRates(IEnumerable<AdvancedReplay> advancedReplays, string nameOrSteamId)
         {
             var mapWinrates = new List<WinratePack>();
-            var goodReplays = GetAllReplaysWithMapName(replays);
+            var goodReplays = GetAllReplaysWithMapName(advancedReplays.ToList());
             var names = GetMapNames(goodReplays);
             foreach (var s in names)
             {
-                List<AdvancedReplay> commonMapReplays = new List<AdvancedReplay>();
+                var commonMapReplays = new List<AdvancedReplay>();
                 foreach (var r in goodReplays)
                     if (r.Map_name.Equals(s))
                         commonMapReplays.Add(r);
-                mapWinrates.Add(GetWinratePack(nameOrId, s, commonMapReplays));
+                mapWinrates.Add(GetWinratePack(nameOrSteamId, s, commonMapReplays));
             }
             return mapWinrates;
         }
 
-        private WinratePack GetWinratePack(string nameOrId, string winratePackName, List<AdvancedReplay> commonMapReplays)
+        private WinratePack GetWinratePack(string nameOrId, string winratePackName, List<AdvancedReplay> commonReplays)
         {
             var wp = new WinratePack();
             double played = 0;
             double won = 0;
-            foreach (var r in commonMapReplays)
+            foreach (var r in commonReplays)
             {
                 var playersTeam = GetPlayersTeamColor(nameOrId, r);
                 if (!playersTeam.Equals(string.Empty))
                 {
-                    played = played + 1;
+                    played = 1 + played;
                     var teamThatWon = string.Empty;
                     if (r.Orange.Stats.Core.Goals != r.Blue.Stats.Core.Goals)
                     {
@@ -61,7 +65,7 @@ namespace RLStats_Classes.MainClasses
                         else
                             teamThatWon = r.Blue.Color;
                         if (teamThatWon.Equals(playersTeam))
-                            won = won + 1;
+                            won = 1 + won;
                     }
                 }
             }
@@ -110,11 +114,11 @@ namespace RLStats_Classes.MainClasses
             return playersTeam;
         }
 
-        public async Task<Dictionary<string, AveragePlayerStats>> GetAveragesAsync(IEnumerable<AdvancedReplay> advancedReplays, IEnumerable<string> names)
+        public async Task<IEnumerable<AveragePlayerStats>> GetAveragesAsync(IEnumerable<AdvancedReplay> advancedReplays, IEnumerable<string> names)
         {
             var nameList = new List<string>(names);
             var replays = new List<AdvancedReplay>(advancedReplays);
-            var allAveragePlayerStats = new Dictionary<string, AveragePlayerStats>();
+            var allAveragePlayerStats = new List<AveragePlayerStats>();
             var taskList = new List<Task>();
             foreach (var name in nameList)
             {
@@ -129,17 +133,17 @@ namespace RLStats_Classes.MainClasses
             });
             return allAveragePlayerStats;
         }
-
-        private async Task CalculateAveragesAndAddToListAsync(List<AdvancedReplay> advancedReplays, Dictionary<string, AveragePlayerStats> allAveragePlayerStats, string name)
+        
+        private async Task CalculateAveragesAndAddToListAsync(IList<AdvancedReplay> advancedReplays, IList<AveragePlayerStats> allAveragePlayerStats, string name)
         {
             var averageStatsForOnePlayer = await GetAverageStatsForOnePlayer(advancedReplays, name);
             lock (allAveragePlayerStats)
             {
-                allAveragePlayerStats.Add(name, averageStatsForOnePlayer);
+                allAveragePlayerStats.Add(averageStatsForOnePlayer);
             }
         }
 
-        public async Task<AveragePlayerStats> GetAverageStatsForOnePlayer(List<AdvancedReplay> advancedReplays, string name)
+        private async Task<AveragePlayerStats> GetAverageStatsForOnePlayer(IList<AdvancedReplay> advancedReplays, string name)
         {
             var allStatsForOnePlayer = new List<PlayerStats>();
             var averageStatsForOnePlayer = new AveragePlayerStats();
@@ -154,7 +158,7 @@ namespace RLStats_Classes.MainClasses
                             allStatsForOnePlayer.Add(playerStats);
                     }
                 }
-                averageStatsForOnePlayer = AveragePlayerStats.GetAveragePlayerStats(allStatsForOnePlayer);
+                averageStatsForOnePlayer = AveragePlayerStats.GetAveragePlayerStats(allStatsForOnePlayer, name);
             });
             return averageStatsForOnePlayer;
         }

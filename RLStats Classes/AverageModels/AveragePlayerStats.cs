@@ -6,6 +6,7 @@ namespace RLStats_Classes.AverageModels
 {
     public class AveragePlayerStats
     {
+        public string PlayerName { get; set; }
         public AveragePlayerCore AverageCore { get; set; }
         public AveragePlayerBoost AverageBoost { get; set; }
         public AveragePlayerMovement AverageMovement { get; set; }
@@ -56,10 +57,11 @@ namespace RLStats_Classes.AverageModels
             }
             return avgt;
         }
-        public static AveragePlayerStats GetAveragePlayerStats(List<PlayerStats> allStatsForOnePlayer)
+        public static AveragePlayerStats GetAveragePlayerStats(List<PlayerStats> allStatsForOnePlayer, string playerName)
         {
             var average = new AveragePlayerStats
             {
+                PlayerName = playerName,
                 AverageCore = GetAverage<AveragePlayerCore, PlayerCore>(allStatsForOnePlayer),
                 AverageBoost = GetAverage<AveragePlayerBoost, PlayerBoost>(allStatsForOnePlayer),
                 AverageMovement = GetAverage<AveragePlayerMovement, PlayerMovement>(allStatsForOnePlayer),

@@ -7,7 +7,7 @@ namespace RocketLeagueStats.Components
 {
     public partial class ChartDisplay : UserControl
     {
-        public Dictionary<string, AveragePlayerStats> AvgPlayerStatList { get; set; } = new Dictionary<string, AveragePlayerStats>();
+        public IEnumerable<AveragePlayerStats> AvgPlayerStatList { get; set; } = new List<AveragePlayerStats>();
         public ChartDisplay()
         {
             InitializeComponent();
@@ -25,21 +25,20 @@ namespace RocketLeagueStats.Components
             wrapPanel.Children.Clear();
             foreach (PropertyInfo avgPlayerStatsProperty in typeof(T).GetProperties())
             {
-                Chart chart = new Chart();
+                var chart = new Chart();
                 chart.Title = avgPlayerStatsProperty.Name.Replace('_', ' ');
-                Dictionary<string, double> barValues = new Dictionary<string, double>();
-                foreach (KeyValuePair<string, AveragePlayerStats> pair in AvgPlayerStatList)
+                var barValues = new Dictionary<string, double>();
+                foreach (var playerStats in AvgPlayerStatList)
                 {
                     bool found = false;
-                    AveragePlayerStats avgStats = pair.Value;
-                    foreach (PropertyInfo avgsp in avgStats.GetType().GetProperties())
+                    foreach (var avgsp in playerStats.GetType().GetProperties())
                     {
-                        object svgStatsPropertyValue = avgsp.GetValue(avgStats);
-                        foreach (PropertyInfo avgCP in svgStatsPropertyValue.GetType().GetProperties())
+                        object svgStatsPropertyValue = avgsp.GetValue(playerStats);
+                        foreach (var avgCP in svgStatsPropertyValue.GetType().GetProperties())
                         {
                             if (avgCP.Name.Equals(avgPlayerStatsProperty.Name))
                             {
-                                barValues.Add(pair.Key, (double)avgCP.GetValue(svgStatsPropertyValue));
+                                barValues.Add(playerStats.PlayerName, (double)avgCP.GetValue(svgStatsPropertyValue));
                                 found = true;
                                 break;
                             }
