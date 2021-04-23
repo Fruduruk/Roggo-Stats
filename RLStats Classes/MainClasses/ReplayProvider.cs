@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class ReplayProvider : ReplayProviderBase, IReplayProvider, IDownloadProgress
+    public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
 
         public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;

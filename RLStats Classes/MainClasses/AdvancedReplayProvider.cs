@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider, IAdvancedDownloadProgress
+    public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
     {
         public static event EventHandler<IAdvancedDownloadProgress> AdvancedDownloadProgressUpdated;
         public bool Initial { get; private set; }

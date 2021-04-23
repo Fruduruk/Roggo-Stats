@@ -15,11 +15,11 @@ namespace RLStats_Classes.Models
 
         public int DeleteObsoleteReplays()
         {
-            List<Replay> newReplayList = new List<Replay>();
+            var newReplayList = new List<Replay>();
             foreach (var replay in Replays)
                 if (!DataPackMerger.DoesListContainReplay(newReplayList, replay))
                     newReplayList.Add(replay);
-            int obsoleteCount = Replays.Count-newReplayList.Count;
+            var obsoleteCount = Replays.Count-newReplayList.Count;
             Replays = newReplayList;
             return obsoleteCount;
         }

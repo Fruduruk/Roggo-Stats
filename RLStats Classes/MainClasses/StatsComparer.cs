@@ -4,6 +4,7 @@ using RLStats_Classes.ChartModels;
 using RLStats_Classes.MainClasses.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -56,7 +57,7 @@ namespace RLStats_Classes.MainClasses
                 var playersTeam = GetPlayersTeamColor(nameOrId, r);
                 if (!playersTeam.Equals(string.Empty))
                 {
-                    played = 1 + played;
+                    played++;
                     var teamThatWon = string.Empty;
                     if (r.Orange.Stats.Core.Goals != r.Blue.Stats.Core.Goals)
                     {
@@ -90,7 +91,7 @@ namespace RLStats_Classes.MainClasses
                             if (p.Id.ID != null)
                                 if (p.Id.Platform.Equals("steam"))
                                     if (p.Id.ID.Equals(nameOrId))
-                                        playersTeam = r.Orange.Color;
+                                        playersTeam = r.Blue.Color;
                         }
                 if (playersTeam != null)
                     if (r.Orange != null)
