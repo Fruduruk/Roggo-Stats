@@ -1,7 +1,9 @@
 ﻿using RLStats_Classes.AverageModels;
+using RLStats_Classes.MainClasses;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Controls;
+using RLStats_WPF;
 
 namespace RocketLeagueStats.Components
 {
@@ -23,48 +25,16 @@ namespace RocketLeagueStats.Components
 
         private void ReDrawCharts<T>(Panel wrapPanel)
         {
+            var chartProvider = new ChartProvider(AvgPlayerStatList);
+
             wrapPanel.Children.Clear();
-            var charts = GetCharts<T>();
-            foreach (var chart in charts)
+            var chartsCreators = chartProvider.GetChartCreators<T>();
+            foreach (var chartCreator in chartsCreators)
             {
+                var chart = new Chart(chartCreator);
+                chart.ReDraw();
                 wrapPanel.Children.Add(chart);
             }
-        }
-
-        private IEnumerable<Chart> GetCharts<T>()
-        {
-            var chartList = new List<Chart>();
-            
-            foreach (var avgPlayerStatsProperty in typeof(T).GetProperties())
-            {
-                var chart = new Chart();
-                chart.Title = avgPlayerStatsProperty.Name.Replace('_', ' ');
-                var barValues = new Dictionary<string, double>();
-                foreach (var playerStats in AvgPlayerStatList)
-                {
-                    var found = false;
-                    foreach (var avgsp in playerStats.GetType().GetProperties())
-                    {
-                        object svgStatsPropertyValue = avgsp.GetValue(playerStats);
-                        foreach (var avgCP in svgStatsPropertyValue.GetType().GetProperties())
-                        {
-                            if (avgCP.Name.Equals(avgPlayerStatsProperty.Name))
-                            {
-                                barValues.Add(playerStats.PlayerName, (double)avgCP.GetValue(svgStatsPropertyValue));
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found)
-                            break;
-                    }
-                }
-                chart.ChartBarValues = barValues;
-                chartList.Add(chart);
-                chart.ReDraw();
-            }
-
-            return chartList;
         }
     }
 }

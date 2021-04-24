@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RocketLeagueStats", "RocketLeagueStats.csproj", "{316E60D0-C8AB-4908-B0F1-BEB5A731335C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replay Download Service", "..\Replay Download Service\Replay Download Service.csproj", "{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Replay Download Service", "..\Replay Download Service\Replay Download Service.csproj", "{206C7202-CCE2-4B70-A88A-CFB711E1A1FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RLStats Classes", "..\RLStats Classes\RLStats Classes.csproj", "{4195EE01-4020-4392-A735-522983A6CE89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RLStats Classes", "..\RLStats Classes\RLStats Classes.csproj", "{4195EE01-4020-4392-A735-522983A6CE89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RLStats WPF", "..\RLStats WPF\RLStats WPF.csproj", "{8171CDFF-8D4C-45CA-AE87-49429D02034F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{4195EE01-4020-4392-A735-522983A6CE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4195EE01-4020-4392-A735-522983A6CE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4195EE01-4020-4392-A735-522983A6CE89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8171CDFF-8D4C-45CA-AE87-49429D02034F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8171CDFF-8D4C-45CA-AE87-49429D02034F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8171CDFF-8D4C-45CA-AE87-49429D02034F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8171CDFF-8D4C-45CA-AE87-49429D02034F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
