@@ -11,14 +11,14 @@ namespace RocketLeagueStats.Components
     /// </summary>
     public partial class Chart : UserControl
     {
-        private double YLineLength { get => Height -60; }
-        private double XLineLength { get => Width - 90; }
+        private double YLineLength => Height -60;
+        private double XLineLength => Width - 90;
         private const double HeaderHeight = 30;
 
         public string Title
         {
-            get { return (string)GetValue(TitleProperty); }
-            set { SetValue(TitleProperty, value); }
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
         }
 
 
@@ -34,6 +34,7 @@ namespace RocketLeagueStats.Components
             Width = width;
             InitializeComponent();
         }
+
         public void ReDraw()
         {
             cvChart.Children.Clear();

@@ -14,23 +14,35 @@ namespace RocketLeagueStats.Components
         }
         public void Refresh()
         {
-            DrawCharts<AveragePlayerCore>(coreWP);
-            DrawCharts<AveragePlayerBoost>(boostWP);
-            DrawCharts<AveragePlayerMovement>(movementWP);
-            DrawCharts<AveragePlayerPositioning>(positioningWP);
-            DrawCharts<AveragePlayerDemo>(demoWP);
+            ReDrawCharts<AveragePlayerCore>(coreWP);
+            ReDrawCharts<AveragePlayerBoost>(boostWP);
+            ReDrawCharts<AveragePlayerMovement>(movementWP);
+            ReDrawCharts<AveragePlayerPositioning>(positioningWP);
+            ReDrawCharts<AveragePlayerDemo>(demoWP);
         }
-        public void DrawCharts<T>(WrapPanel wrapPanel)
+
+        private void ReDrawCharts<T>(Panel wrapPanel)
         {
             wrapPanel.Children.Clear();
-            foreach (PropertyInfo avgPlayerStatsProperty in typeof(T).GetProperties())
+            var charts = GetCharts<T>();
+            foreach (var chart in charts)
+            {
+                wrapPanel.Children.Add(chart);
+            }
+        }
+
+        private IEnumerable<Chart> GetCharts<T>()
+        {
+            var chartList = new List<Chart>();
+            
+            foreach (var avgPlayerStatsProperty in typeof(T).GetProperties())
             {
                 var chart = new Chart();
                 chart.Title = avgPlayerStatsProperty.Name.Replace('_', ' ');
                 var barValues = new Dictionary<string, double>();
                 foreach (var playerStats in AvgPlayerStatList)
                 {
-                    bool found = false;
+                    var found = false;
                     foreach (var avgsp in playerStats.GetType().GetProperties())
                     {
                         object svgStatsPropertyValue = avgsp.GetValue(playerStats);
@@ -48,9 +60,11 @@ namespace RocketLeagueStats.Components
                     }
                 }
                 chart.ChartBarValues = barValues;
-                wrapPanel.Children.Add(chart);
+                chartList.Add(chart);
                 chart.ReDraw();
             }
+
+            return chartList;
         }
     }
 }
