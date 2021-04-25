@@ -1,10 +1,6 @@
 ﻿using RLStats_WPF;
-using System.Collections.Generic;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace RocketLeagueStats.Components
 {
@@ -24,7 +20,7 @@ namespace RocketLeagueStats.Components
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register("Title", typeof(string), typeof(Chart), new PropertyMetadata("Chart"));
 
-        public Chart(ChartCreator creator, double height = 375, double width = 700)
+        public Chart(ChartCreator creator, double height = (375+100), double width = 700)
         {
             _creator = creator;
             _creator.Height = height;
@@ -38,7 +34,7 @@ namespace RocketLeagueStats.Components
         public void ReDraw()
         {
             BackgroundPanel.Children.Clear();
-            var canvas = _creator.CreateCanvas();
+            var canvas = _creator.CreateCanvas(true);
             BackgroundPanel.Children.Add(canvas);
         }
     }

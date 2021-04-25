@@ -17,7 +17,7 @@ namespace RLStats_WPF
         public double Height { get; set; }
         public double Width { get; set; }
 
-        private double YLineLength => Height - 60;
+        private double YLineLength => Height - (60 + 100);
         private double XLineLength => Width - 90;
         public ChartCreator(string title, Dictionary<string, double> barValues)
         {
@@ -25,21 +25,24 @@ namespace RLStats_WPF
             Title = title;
         }
 
-        public Canvas CreateCanvas()
+        public Canvas CreateCanvas(bool addTitle = false)
         {
             var canvas = new Canvas();
             canvas.Height = Height;
             canvas.Width = Width;
+
             DrawLines(canvas);
             DrawNamesAndValues(canvas);
             DrawColumns(canvas);
+            if (addTitle)
+                DrawTitle(canvas);
             DrawYUnit(canvas);
             return canvas;
         }
 
-        public string CreatePngImageAsStream(string fileName)
+        public string CreatePngImageAsStream(string fileName, bool addTitle = false)
         {
-            var canvas = CreateCanvas();
+            var canvas = CreateCanvas(addTitle);
             if (canvas is null) throw new Exception("Canvas was null.");
             var converter = new CanvasToImageConverter();
             var wBitmap = converter.SaveAsWriteableBitmap(canvas);
@@ -51,7 +54,21 @@ namespace RLStats_WPF
 
         private void DrawYUnit(Canvas canvas)
         {
-            canvas.Children.Add(GetCanvasLabel(GetHighestValue().ToString("0.##"), new Point(0, 0)));
+            canvas.Children.Add(GetCanvasLabel(GetHighestValue().ToString("0.##"), new Point(0, 100)));
+        }
+
+        private void DrawTitle(Canvas canvas)
+        {
+            var label = new Label
+            {
+                FontSize = 40,
+                Foreground = Brushes.AliceBlue,
+                Opacity = 0.5,
+                Content = Title
+            };
+            Canvas.SetLeft(label, Width * 0.05);
+            Canvas.SetTop(label, Height * 0.05);
+            canvas.Children.Add(label);
         }
 
         private void DrawColumns(Canvas canvas)
@@ -69,22 +86,26 @@ namespace RLStats_WPF
             var x = GetX(i);
             var canvasStart = ConvertToCanvas(new Point(x, 0));
             var canvasEnd = ConvertToCanvas(new Point(x, ConvertValueToPixel(pairValue)));
-            Line line = new Line();
-            line.Stroke = GetBrush(i);
-            line.StrokeThickness = 20;
-            line.X1 = canvasStart.X;
-            line.Y1 = canvasStart.Y;
-            line.X2 = canvasEnd.X;
-            line.Y2 = canvasEnd.Y;
+            var line = new Line
+            {
+                Stroke = GetBrush(i),
+                StrokeThickness = 20,
+                X1 = canvasStart.X,
+                Y1 = canvasStart.Y,
+                X2 = canvasEnd.X,
+                Y2 = canvasEnd.Y
+            };
             canvas.Children.Add(line);
         }
 
         private Label GetCanvasLabel(string content, Point point)
         {
-            Label label = new Label();
-            label.FontSize = 15;
-            label.Foreground = Brushes.AliceBlue;
-            label.Content = content;
+            var label = new Label
+            {
+                FontSize = 15,
+                Foreground = Brushes.AliceBlue,
+                Content = content
+            };
             Canvas.SetLeft(label, point.X);
             Canvas.SetTop(label, point.Y);
             return label;
