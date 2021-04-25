@@ -37,13 +37,16 @@ namespace RLStats_WPF
             return canvas;
         }
 
-        public Stream CreatePngImageAsStream()
+        public string CreatePngImageAsStream(string fileName)
         {
             var canvas = CreateCanvas();
+            if (canvas is null) throw new Exception("Canvas was null.");
             var converter = new CanvasToImageConverter();
             var wBitmap = converter.SaveAsWriteableBitmap(canvas);
-            var stream = wBitmap.GetPngImageAsStream();
-            return stream;
+            if (wBitmap is null) throw new Exception("Writable Bitmap was null.");
+            var result = wBitmap.SaveAsPngFile(fileName);
+            if (result is null) throw new Exception("Stream was null.");
+            return result;
         }
 
         private void DrawYUnit(Canvas canvas)

@@ -12,6 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RLStats Classes\RLStats Classes.csproj" />
+    <ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
   </ItemGroup>
 </Project>

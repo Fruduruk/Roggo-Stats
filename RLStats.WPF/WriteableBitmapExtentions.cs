@@ -1,6 +1,5 @@
-﻿using System.IO;
-using System.IO.Enumeration;
-using System.Text.Json;
+﻿using System;
+using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace RLStats_WPF
@@ -17,13 +16,24 @@ namespace RLStats_WPF
             encoder.Save(stream);
         }
 
-        public static MemoryStream GetPngImageAsStream(this WriteableBitmap wbitmap)
+        public static string SaveAsPngFile(this WriteableBitmap wbitmap, string fileName)
         {
-            var stream = new MemoryStream();
+            var path = GetTempFolder();
+            var name = fileName ?? Guid.NewGuid().ToString();
+            var result = $"{path}{name}.png";
+            using var stream = new FileStream(result, FileMode.Create);
             var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(wbitmap));
             encoder.Save(stream);
-            return stream;
+
+            return result;
+        }
+
+        private static string GetTempFolder()
+        {
+            var tempPath = Path.GetTempPath();
+            var info = Directory.CreateDirectory(tempPath + @"rlCharts\");
+            return info.FullName;
         }
     }
 }

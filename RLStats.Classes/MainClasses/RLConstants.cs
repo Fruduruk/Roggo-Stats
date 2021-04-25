@@ -5,7 +5,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class RLConstants
     {
-        public const int CurrentSeason = 2;
+        public const int CurrentSeason = 3;
 
         public static string DebugKey => GetDebugKey();
 
@@ -13,9 +13,9 @@ namespace RLStats_Classes.MainClasses
 
         private static string GetDebugKey()
         {
-                var key = File.ReadAllText(GetRLStatsDebugKeyFilePath());
-                if (!string.IsNullOrEmpty(key))
-                    return key.Trim();
+            var key = File.ReadAllText(GetRLStatsDebugKeyFilePath());
+            if (!string.IsNullOrEmpty(key))
+                return key.Trim();
             throw new Exception($"No debug key found\n Paste a ballchasing.com authorization key into file: {GetRLStatsDebugKeyFilePath()}");
         }
 
@@ -26,7 +26,7 @@ namespace RLStats_Classes.MainClasses
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-            } 
+            }
             return path;
         }
 
