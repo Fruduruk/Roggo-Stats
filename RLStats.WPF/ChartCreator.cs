@@ -19,8 +19,10 @@ namespace RLStats_WPF
 
         private double YLineLength => Height - (60 + 100);
         private double XLineLength => Width - 90;
-        public ChartCreator(string title, Dictionary<string, double> barValues)
+        public ChartCreator(string title, Dictionary<string, double> barValues, double height, double width)
         {
+            Height = height;
+            Width = width;
             _barValues = barValues;
             Title = title;
         }

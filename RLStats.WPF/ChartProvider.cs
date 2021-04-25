@@ -13,19 +13,22 @@ namespace RLStats_WPF
             AvgPlayerStatList = statList;
         }
 
-        public IEnumerable<ChartCreator> GetChartCreators<T>()
+        public IEnumerable<ChartCreator> GetChartCreators<T>(double height = (375 + 100), double width = 700)
         {
             var chartList = new List<ChartCreator>();
 
             foreach (var avgPlayerStatsProperty in typeof(T).GetProperties())
             {
                 var barValues = GetChartBarValuesForStatProperty(avgPlayerStatsProperty);
-                var chart = new ChartCreator(avgPlayerStatsProperty.Name.Replace('_', ' '), barValues);
+                var title = avgPlayerStatsProperty.Name.Replace('_', ' ');
+                var chart = new ChartCreator(title, barValues, height, width);
                 chartList.Add(chart);
             }
 
             return chartList;
         }
+
+
 
         private Dictionary<string, double> GetChartBarValuesForStatProperty(PropertyInfo avgPlayerStatsProperty)
         {
