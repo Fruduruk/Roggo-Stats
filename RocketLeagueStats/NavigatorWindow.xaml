@@ -22,38 +22,50 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <components:ReplayPickerControl x:Name="rpcReplayPicker"/>
+                <TabControl TabStripPlacement="Top"
+                            Grid.Column="0"
+                            Style="{DynamicResource tabControlStyleForReplayPicker}">
+                    <TabItem Header="Replays"
+                             Style="{DynamicResource tabItemStyleForReplayPicker}">
+                        <components:ReplayPickerControl x:Name="rpcReplayPicker"/>
+                    </TabItem>
+                    <TabItem Header="Compare to"
+                             Style="{DynamicResource tabItemStyleForReplayPicker}">
+                        <components:ReplayPickerControl x:Name="RpcReplayToComparePicker"/>
+                    </TabItem>
+                </TabControl>
+
                 <components:LoadingGrid Grid.Column="1" x:Name="loadingGrid"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" 
                 BorderBrush="AliceBlue"
                 BorderThickness="1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Button x:Name="btnFetch" 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnFetch" 
                         Content="Fetch"
                         Click="BtnFetch_Click"
                         Style="{DynamicResource buttonStyle}"
                         Margin="5"
                         Grid.Column="1"/>
-                    <Button x:Name="btnGetReplays"
+                <Button x:Name="btnGetReplays"
                             Click="BtnGetReplays_Click"
                             Content="Get replays"
                             Margin="5"
                             Style="{DynamicResource buttonStyle}"
                             Grid.Column="0"/>
-                    <Button x:Name="btnCancel"
+                <Button x:Name="btnCancel"
                             Content="Cancel"
                             Margin="5"
                             Style="{DynamicResource buttonStyle}"
                             Grid.Column="2" 
                             Click="BtnCancel_Click"/>
-                </Grid>
+            </Grid>
         </Border>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

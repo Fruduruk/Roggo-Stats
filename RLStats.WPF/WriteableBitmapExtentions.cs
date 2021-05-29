@@ -16,24 +16,15 @@ namespace RLStats_WPF
             encoder.Save(stream);
         }
 
-        public static string SaveAsPngFile(this WriteableBitmap wbitmap, string fileName)
+        public static string SaveAsPngFile(this WriteableBitmap wbitmap, string filePah)
         {
-            var path = GetTempFolder();
-            var name = fileName ?? Guid.NewGuid().ToString();
-            var result = $"{path}{name}.png";
+            var result = $"{filePah}.png";
             using var stream = new FileStream(result, FileMode.Create);
             var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(wbitmap));
             encoder.Save(stream);
 
             return result;
-        }
-
-        private static string GetTempFolder()
-        {
-            var tempPath = Path.GetTempPath();
-            var info = Directory.CreateDirectory(tempPath + @"rlCharts\");
-            return info.FullName;
         }
     }
 }

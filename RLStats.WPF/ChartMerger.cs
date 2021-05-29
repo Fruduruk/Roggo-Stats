@@ -13,14 +13,14 @@ namespace RLStats_WPF
             _charts = new List<ChartCreator>(charts);
         }
 
-        public string CreatePngImageAsStream(string fileName, int maxColumns = 4)
+        public string CreatePngImageAsStream(string filePath, int maxColumns = 4)
         {
             var columns = (_charts.Count > maxColumns) ? maxColumns : _charts.Count;
             var canvas = CreateGreatCanvas(columns);
             var converter = new CanvasToImageConverter();
             var wBitmap = converter.SaveAsWriteableBitmap(canvas);
             if (wBitmap is null) throw new Exception("Writable Bitmap was null.");
-            var result = wBitmap.SaveAsPngFile(fileName);
+            var result = wBitmap.SaveAsPngFile(filePath);
             if (result is null) throw new Exception("Stream was null.");
             return result;
         }

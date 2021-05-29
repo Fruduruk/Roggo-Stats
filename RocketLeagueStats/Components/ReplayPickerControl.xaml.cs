@@ -21,6 +21,27 @@ namespace RocketLeagueStats.Components
         }
 
         #region Properties
+        public bool IsEmpty => GetEmptynessOfThisFilter();
+
+        private bool GetEmptynessOfThisFilter()
+        {
+            if (cbName.IsChecked == true)
+                return false;
+            if (cbTitle.IsChecked == true)
+                return false;
+            if (cbPlaylist.IsChecked == true)
+                return false;
+            if (cbSeason.IsChecked == true)
+                return false;
+            if (cbMatchResult.IsChecked == true)
+                return false;
+            if (cbSteamID.IsChecked == true)
+                return false;
+            if (cbDate.IsChecked == true)
+                return false;
+            return true;
+        }
+
         private List<string> GetNames()
         {
             if (cbName.IsChecked == false)

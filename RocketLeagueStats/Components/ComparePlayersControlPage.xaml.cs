@@ -19,6 +19,7 @@ namespace RocketLeagueStats.Components
         public IStatsComparer _comparer;
 
         public List<AdvancedReplay> AdvancedReplays { get; set; }
+        public List<AdvancedReplay> AdvancedReplaysToCompare { get; set; }
 
         public ComparePlayersControlPage()
         {
@@ -41,8 +42,15 @@ namespace RocketLeagueStats.Components
                     if (!names.Contains(s))
                         names.Add(s);
                 }
-                var averagePlayerStatList = await _comparer.GetAveragesAsync(AdvancedReplays, names);
-                chartDisplay.AvgPlayerStatList = averagePlayerStatList;
+                chartDisplay.AvgPlayerStatList = await _comparer.GetAveragesAsync(AdvancedReplays, names);
+                if (AdvancedReplaysToCompare is not null && AdvancedReplaysToCompare.Count > 0)
+                {
+                    chartDisplay.AvgPlayerStatListToCompare = await _comparer.GetAveragesAsync(AdvancedReplaysToCompare, names);
+                }
+                else
+                {
+                    chartDisplay.AvgPlayerStatListToCompare = null;
+                }
                 chartDisplay.Refresh();
             }
             else

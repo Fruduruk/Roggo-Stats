@@ -4,7 +4,9 @@ using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace RocketLeagueStats
@@ -14,30 +16,32 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class NavigatorWindow : Window, INotifyPropertyChanged
     {
-        private bool dontClose;
-        private List<Replay> shownReplays;
+        private bool _dontClose;
+        private List<Replay> _shownReplays;
 
-        public event EventHandler<ApiDataPack> GetReplaysClicked;
+        public event EventHandler<(ApiDataPack, ApiDataPack)> GetReplaysClicked;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private readonly IReplayProvider _replayProvider;
+        private readonly IAuthTokenInfo _tokenInfo;
+        private readonly List<IReplayProvider> _providers = new();
 
         public List<Replay> ShownReplays
         {
-            get { return shownReplays; }
+            get { return _shownReplays; }
             set
             {
-                shownReplays = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShownReplays"));
+                _shownReplays = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShownReplays)));
             }
         }
         public ApiDataPack TempDataPack { get; private set; }
+        public ApiDataPack TempDataPackToCompare { get; private set; }
         public bool DontClose
         {
-            get => dontClose;
+            get => _dontClose;
             set
             {
-                dontClose = value;
+                _dontClose = value;
                 if (value)
                     Closing += NavigatorWindow_Closing;
                 else
@@ -45,12 +49,12 @@ namespace RocketLeagueStats
             }
         }
 
-        public NavigatorWindow(IReplayProvider replayProvider)
+        public NavigatorWindow(IAuthTokenInfo tokenInfo)
         {
-            _replayProvider = replayProvider;
+            _tokenInfo = tokenInfo;
             DataContext = this;
             InitializeComponent();
-            ReplayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
+            //_replayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             DontClose = true;
             TempDataPack = new ApiDataPack()
             {
@@ -80,18 +84,15 @@ namespace RocketLeagueStats
                         for (int i = 0; i < notLoadedCount; i++)
                             loadingGrid.AddPack(Brushes.OrangeRed);
                     }
-
             });
         }
 
         private async void BtnGetReplays_Click(object sender, RoutedEventArgs e)
         {
-            ApiDataPack dataPack;
-            if (TempDataPack.Success)
-                dataPack = TempDataPack;
-            else
-                dataPack = await _replayProvider.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
-            GetReplaysClicked?.Invoke(this, dataPack);
+            if (!TempDataPack.Success)
+                await LoadReplaysIntoTemp();
+
+            GetReplaysClicked?.Invoke(this, (TempDataPack, TempDataPackToCompare));
             Hide();
         }
 
@@ -100,31 +101,51 @@ namespace RocketLeagueStats
             e.Cancel = true;
             this.Hide();
         }
-        private Visibility GetVisibility(bool? isChecked)
-        {
-            return isChecked switch
-            {
-                true => Visibility.Visible,
-                false => Visibility.Collapsed,
-                _ => Visibility.Collapsed,
-            };
-        }
 
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
-            ClearTextBoxes();
-            var dataPack = await _replayProvider.CollectReplaysAsync(rpcReplayPicker.RequestFilter);
-            if (dataPack.Success)
+            await LoadReplaysIntoTemp();
+        }
+
+        private async Task LoadReplaysIntoTemp()
+        {
+            TempDataPack = null;
+            TempDataPackToCompare = null;
+            var provider1 = new ReplayProvider(_tokenInfo);
+            _providers.Add(provider1);
+            var task = DownloadReplays(provider1, rpcReplayPicker.RequestFilter);
+            if (!RpcReplayToComparePicker.IsEmpty)
             {
-                tbDownloadedReplayCount.Text = dataPack.Replays.Count.ToString();
-                ShownReplays = dataPack.Replays;
-                TempDataPack = dataPack;
+                var provider2 = new ReplayProvider(_tokenInfo);
+                _providers.Add(provider2);
+                TempDataPackToCompare = await DownloadReplays(provider2, RpcReplayToComparePicker.RequestFilter);
+                _providers.Remove(provider2);
+            }
+            TempDataPack = await task;
+            _providers.Remove(provider1);
+        }
+
+        private async Task<ApiDataPack> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)
+        {
+            ClearTextBoxes();
+            provider.DownloadProgressUpdated += (sender, e) =>
+            {
+                tbMessages.Text = e.DownloadMessage;
+            };
+            var response = await provider.CollectReplaysAsync(filter);
+            if (response.DataPack.Success)
+            {
+                ShownReplays = response.DataPack.Replays;
+                TempDataPack = response.DataPack;
             }
             else
             {
-                tbMessages.Text = dataPack.Ex.Message + "\n" + dataPack.ReceivedString;
+                tbMessages.Text = response.DataPack.Ex.Message + "\n" + response.DataPack.ReceivedString;
             }
-            tbMessages.Text = (ReplayProvider.ElapsedMilliseconds / 1000).ToString("0.##") + $" seconds\nDouble Replays: {ReplayProvider.ObsoleteReplayCount}";
+
+            tbMessages.Text = (response.ElapsedMilliseconds / 1000).ToString("0.##") +
+                              $" seconds\nDouble Replays: {ReplayProvider.ObsoleteReplayCount}";
+            return response.DataPack;
         }
 
         private void ClearTextBoxes()
@@ -134,6 +155,12 @@ namespace RocketLeagueStats
             tbDownloadedReplayCount.Text = string.Empty;
         }
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e) => _replayProvider.CancelDownload();
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var provider in _providers)
+            {
+                provider.CancelDownload();
+            }
+        }
     }
 }

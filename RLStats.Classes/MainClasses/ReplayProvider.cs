@@ -13,14 +13,13 @@ namespace RLStats_Classes.MainClasses
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
 
-        public static event EventHandler<IDownloadProgress> DownloadProgressUpdated;
+        public event EventHandler<IDownloadProgress> DownloadProgressUpdated;
         public bool Initial { get; private set; } = true;
         public int ChunksToDownload { get; private set; } = 0;
         public int DownloadedChunks { get; private set; } = 0;
         public int PacksToDownload { get; private set; } = 0;
         public int DownloadedPacks { get; private set; } = 0;
         public string DownloadMessage { get; private set; } = string.Empty;
-        public static double ElapsedMilliseconds { get; private set; } = 0;
         public static int ObsoleteReplayCount { get; private set; }
         public int DownloadedReplays { get; set; } = 0;
         public int ReplaysToDownload { get; set; } = 0;
@@ -30,8 +29,9 @@ namespace RLStats_Classes.MainClasses
 
         public ReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
         
-        public async Task<ApiDataPack> CollectReplaysAsync(APIRequestFilter filter)
+        public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter)
         {
+            var response = new CollectReplaysResponse();
             ClearProgressUpdateVariables();
             Initial = true;
             DownloadMessage = "Download started...";
@@ -40,10 +40,11 @@ namespace RLStats_Classes.MainClasses
             sw.Start();
             var dataPack = await GetDataPack(filter);
             sw.Stop();
-            ElapsedMilliseconds = sw.ElapsedMilliseconds;
+            response.DataPack = dataPack;
+            response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             _cancelDownload = false;
             GC.Collect();
-            return dataPack;
+            return response;
         }
 
         public void CancelDownload()

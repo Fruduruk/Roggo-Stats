@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace RocketLeagueStats
@@ -14,21 +15,36 @@ namespace RocketLeagueStats
     public partial class AdvancedInfoWindow : Window
     {
         private bool dontClose;
-        private List<AdvancedReplay> advancedReplays = new List<AdvancedReplay>();
+        private List<AdvancedReplay> _advancedReplays = new List<AdvancedReplay>();
+        private List<AdvancedReplay> _advancedReplaysToCompare = new List<AdvancedReplay>();
         private readonly IAdvancedReplayProvider _advancedReplayProvider;
         private List<IRLSControlPage> ControlPages { get; set; }
         public List<AdvancedReplay> AdvancedReplays
         {
-            get => advancedReplays;
+            get => _advancedReplays;
             set
             {
-                advancedReplays = value;
+                _advancedReplays = value;
                 foreach (var page in ControlPages)
                 {
                     page.AdvancedReplays = value;
                 }
             }
         }
+
+        public List<AdvancedReplay> AdvancedReplaysToCompare
+        {
+            get => _advancedReplaysToCompare;
+            set
+            {
+                _advancedReplaysToCompare = value;
+                foreach (var page in ControlPages)
+                {
+                    page.AdvancedReplaysToCompare = value;
+                }
+            }
+        }
+
         public bool DontClose
         {
             get => dontClose;
@@ -45,6 +61,7 @@ namespace RocketLeagueStats
         {
             e.Cancel = true;
             AdvancedReplays.Clear();
+            AdvancedReplaysToCompare.Clear();
             GC.Collect();
             this.Hide();
         }
@@ -89,10 +106,15 @@ namespace RocketLeagueStats
             tbInfo.Text = e;
         }
 
-        public async void LoadReplaysAsync(List<Replay> replays)
+        public async void LoadReplaysAsync(IEnumerable<Replay> replays, IEnumerable<Replay> replaysToCompare = null)
         {
-            var iList = await _advancedReplayProvider.GetAdvancedReplayInfosAsync(replays);
+            var iList = await _advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(replays));
             AdvancedReplays = iList.ToList();
+            if (replaysToCompare is not null)
+            {
+                iList = await _advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(replaysToCompare));
+                AdvancedReplaysToCompare = iList.ToList();
+            }
         }
     }
 }

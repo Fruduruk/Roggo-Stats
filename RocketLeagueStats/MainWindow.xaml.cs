@@ -18,31 +18,33 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Replay> replays = new List<Replay>();
-        private int index;
+        private List<Replay> _replays = new();
+        private int _index;
 
         private List<Replay> Replays
         {
-            get => replays;
+            get => _replays;
             set
             {
-                replays = value;
+                _replays = value;
                 lvReplays.Items.Clear();
-                foreach (var replay in replays)
+                foreach (var replay in _replays)
                     lvReplays.Items.Add(replay);
             }
         }
+
+        private List<Replay> ReplaysToCompare { get; set; } = null;
         private NavigatorWindow Navigator { get; set; }
         private AdvancedInfoWindow DetailWindow { get; set; }
         private ServiceWindow Service { get; set; }
         private int Index
         {
-            get => index;
+            get => _index;
             set
             {
-                index = value;
+                _index = value;
                 if (Replays.Count != 0)
-                    ShowReplay(Replays[index]);
+                    ShowReplay(Replays[_index]);
             }
         }
 
@@ -51,20 +53,20 @@ namespace RocketLeagueStats
             DataContext = this;
             InitializeComponent();
             Service = new ServiceWindow(tokenInfo);
-            Navigator = new NavigatorWindow(new ReplayProvider(tokenInfo));
+            Navigator = new NavigatorWindow(tokenInfo);
             DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo));
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
         }
 
-        private void Navigator_GetReplaysClicked(object sender, ApiDataPack e)
+        private void Navigator_GetReplaysClicked(object sender, (ApiDataPack pack, ApiDataPack packToCompare) packs)
         {
-            if (e.Success)
-            {
-                Index = 0;
-                Replays = e.Replays;
-                ShowReplay(Replays[0]);
-            }
+            var (pack, packToCompare) = packs;
+            if (!pack.Success) return;
+            Index = 0;
+            Replays = pack.Replays;
+            ReplaysToCompare = packToCompare?.Replays;
+            ShowReplay(Replays[0]);
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -147,11 +149,13 @@ namespace RocketLeagueStats
 
         private void BtnSaveReplaysToFile_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new SaveFileDialog();
-            dialog.Title = "Save replays";
-            dialog.DefaultExt = "rpls";
-            dialog.FileName = "replays";
-            dialog.Filter = "RPLS files (*.rpls)|*.rpls|All files(*.*)|*.*";
+            var dialog = new SaveFileDialog
+            {
+                Title = "Save replays",
+                DefaultExt = "rpls",
+                FileName = "replays",
+                Filter = "RPLS files (*.rpls)|*.rpls|All files(*.*)|*.*"
+            };
             dialog.FileOk += SaveDialog_FileOk;
             dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             dialog.ShowDialog();
@@ -159,8 +163,7 @@ namespace RocketLeagueStats
 
         private void BtnLoadReplaysFromFile_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog();
-            dialog.Title = "Load replays";
+            var dialog = new OpenFileDialog { Title = "Load replays" };
             dialog.FileOk += LoadDialog_FileOk; ;
             dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             dialog.Filter = "RPLS files (*.rpls)|*.rpls|All files(*.*)|*.*";
@@ -190,7 +193,7 @@ namespace RocketLeagueStats
         private void BtnAdvancedInfo_Click(object sender, RoutedEventArgs e)
         {
             DetailWindow.Show();
-            DetailWindow.LoadReplaysAsync(Replays);
+            DetailWindow.LoadReplaysAsync(Replays, ReplaysToCompare);
         }
         private void BtnService_Click(object sender, RoutedEventArgs e) => Service.Show();
     }

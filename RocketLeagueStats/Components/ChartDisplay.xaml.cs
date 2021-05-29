@@ -10,6 +10,7 @@ namespace RocketLeagueStats.Components
     public partial class ChartDisplay : UserControl
     {
         public IEnumerable<AveragePlayerStats> AvgPlayerStatList { get; set; } = new List<AveragePlayerStats>();
+        public IEnumerable<AveragePlayerStats> AvgPlayerStatListToCompare { get; set; }
         public ChartDisplay()
         {
             InitializeComponent();
@@ -25,7 +26,11 @@ namespace RocketLeagueStats.Components
 
         private void ReDrawCharts<T>(Panel wrapPanel)
         {
-            var chartProvider = new ChartProvider(AvgPlayerStatList);
+            ChartProvider chartProvider;
+            if (AvgPlayerStatListToCompare is null)
+                chartProvider = new ChartProvider(AvgPlayerStatList);
+            else
+                chartProvider = new ChartProvider(AvgPlayerStatList, AvgPlayerStatListToCompare);
 
             wrapPanel.Children.Clear();
             var chartsCreators = chartProvider.GetChartCreators<T>();

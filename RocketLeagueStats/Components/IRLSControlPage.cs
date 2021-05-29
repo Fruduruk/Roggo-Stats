@@ -8,5 +8,6 @@ namespace RocketLeagueStats.Components
     {
         public event EventHandler<string> NotificationMessageTriggered;
         public List<AdvancedReplay> AdvancedReplays { get; set; }
+        public List<AdvancedReplay> AdvancedReplaysToCompare { get; set; }
     }
 }
