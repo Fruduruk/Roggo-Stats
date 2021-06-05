@@ -224,7 +224,7 @@ namespace RLStats_WPF
                 {
                     valueString = "too big";
                 }
-                PlaceName(canvas, i, pair.Key, valueString,_barValues.Count > 2);
+                PlaceName(canvas, i, pair.Key, valueString,_barValues.Count > 1);
             }
         }
 
