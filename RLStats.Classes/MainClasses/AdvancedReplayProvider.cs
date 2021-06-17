@@ -12,7 +12,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
     {
-        private Database ReplayDatabase { get; } = new Database();
+        private IRLStatsDatabase ReplayDatabase { get; } = new FileDatabase();
 
         public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
 

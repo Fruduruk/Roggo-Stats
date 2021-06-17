@@ -1,5 +1,7 @@
 ﻿using RLStats_Classes.AdvancedModels;
+using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
-    public class Database
+    public class FileDatabase : IRLStatsDatabase
     {
         private ObservableCollection<Guid> IdCollection { get; } = new ObservableCollection<Guid>();
 
-        public DirectoryInfo SavingDirectory
+        private DirectoryInfo SavingDirectory
         {
             get
             {
@@ -21,12 +23,12 @@ namespace RLStats_Classes.MainClasses
                     _savingDirectory.Create();
                 return _savingDirectory;
             }
-            private set => _savingDirectory = value;
+            set => _savingDirectory = value;
         }
 
         private DirectoryInfo _savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
 
-        public FileInfo IndexFile
+        private FileInfo IndexFile
         {
             get
             {
@@ -34,7 +36,7 @@ namespace RLStats_Classes.MainClasses
                     _indexFile.Create().Dispose();
                 return _indexFile;
             }
-            private set => _indexFile = value;
+            set => _indexFile = value;
         }
 
         private FileInfo _indexFile;
@@ -47,7 +49,7 @@ namespace RLStats_Classes.MainClasses
 
         public ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
 
-        public Database()
+        public FileDatabase()
         {
             IndexFile = new FileInfo(SavingDirectory + @"\index.dat");
             IdCollection = LoadIdListFromFile();
@@ -69,6 +71,7 @@ namespace RLStats_Classes.MainClasses
         {
             return IdCollection.Contains(Guid.Parse(replay.Id));
         }
+
         public void SaveReplayList(List<AdvancedReplay> replays)
         {
             foreach (var replay in replays)
@@ -76,6 +79,7 @@ namespace RLStats_Classes.MainClasses
                 SaveReplayAsync(replay);
             }
         }
+
         public async void SaveReplayAsync(AdvancedReplay replay)
         {
             await Task.Run(() =>
