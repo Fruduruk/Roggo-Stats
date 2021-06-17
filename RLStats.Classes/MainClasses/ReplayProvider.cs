@@ -19,16 +19,18 @@ namespace RLStats_Classes.MainClasses
             var response = new CollectReplaysResponse();
             CreateNewProgressState();
             ProgressState.Initial = true;
-            ProgressState.CurrentMessage = "Download started...";
+            ProgressState.CurrentMessage = "Downloading.";
             var sw = new Stopwatch();
             sw.Start();
             var (replays, doubleReplays) = await GetDataPack(filter);
             sw.Stop();
+            ProgressState.CurrentMessage = "Downlad finished.";
             response.DoubleReplays = doubleReplays;
             response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             _cancelDownload = false;
             GC.Collect();
+            ProgressState.Initial = false;
             return response;
         }
 
@@ -42,6 +44,7 @@ namespace RLStats_Classes.MainClasses
             var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
             var done = false;
             var allReplays = new List<Replay>();
+            ProgressState.TotalCount = totalReplayCount;
 
             //check if there are replays to download
             if (totalReplayCount.Equals(0))
@@ -57,10 +60,15 @@ namespace RLStats_Classes.MainClasses
                 if (!dataPack.Success)
                     return (Array.Empty<Replay>(), 0);
 
+                var replayCountBefore = dataPack.Replays.Count;
+
                 //delete false replays
                 if (filter.CheckDate)
                     dataPack.Replays.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
                 doubleReplays += dataPack.Replays.DeleteObsoleteReplays();
+
+                ProgressState.FalsePartCount += replayCountBefore - dataPack.Replays.Count;
+                ProgressState.PartCount += dataPack.Replays.Count;
 
                 //add the rest to the replay batch
                 allReplays.AddRange(dataPack.Replays);
@@ -75,7 +83,10 @@ namespace RLStats_Classes.MainClasses
 
                 //check if cancel is requested
                 if (_cancelDownload)
+                {
+                    ProgressState.CurrentMessage = "Cancel requested.\nDownload stopped.";
                     break;
+                }
 
                 //check if there are more replays to download
                 if (dataPack.Next != null)
@@ -83,7 +94,6 @@ namespace RLStats_Classes.MainClasses
                 else
                     done = true;
             }
-                
             return (allReplays.ToArray(), doubleReplays);
         }
     }

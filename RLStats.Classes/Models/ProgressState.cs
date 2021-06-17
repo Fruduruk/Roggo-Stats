@@ -9,6 +9,7 @@ namespace RLStats_Classes.Models
         private string _currentMessage;
         private int _totalCount;
         private int _partCount;
+        private int _falsePartCount;
 
         public bool Initial
         {
@@ -46,6 +47,16 @@ namespace RLStats_Classes.Models
             set
             {
                 _partCount = value;
+                OnSomethingChanged();
+            }
+        }
+
+        public int FalsePartCount
+        {
+            get => _falsePartCount;
+            set
+            {
+                _falsePartCount = value;
                 OnSomethingChanged();
             }
         }
