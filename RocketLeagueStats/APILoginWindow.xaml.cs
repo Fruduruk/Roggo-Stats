@@ -12,9 +12,13 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class APILoginWindow : Window
     {
+        private string _filePath = string.Empty;
         private MainWindow MW { get; set; }
         public APILoginWindow()
         {
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length == 2)
+                _filePath = args[1];
             //var api = new BallchasingAPI(RLConstants.DebugKey);
             InitializeComponent();
 #if DEBUG
@@ -47,13 +51,13 @@ namespace RocketLeagueStats
                 {
                     Thread.Sleep(2000);
 #endif
-                    Dispatcher.Invoke(() =>
-                    {
-                        this.Hide();
-                        MW = new MainWindow(tokenInfo);
-                        MW.Closed += MW_Closed;
-                        MW.Show();
-                    });
+                Dispatcher.Invoke(() =>
+                {
+                    this.Hide();
+                    MW = new MainWindow(tokenInfo, _filePath);
+                    MW.Closed += MW_Closed;
+                    MW.Show();
+                });
 #if RELEASE
                 });
 #endif

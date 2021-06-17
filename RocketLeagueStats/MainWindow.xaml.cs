@@ -1,8 +1,12 @@
 ﻿using Microsoft.Win32;
+
 using Newtonsoft.Json;
+
 using RLStats_Classes.MainClasses;
 using RLStats_Classes.Models;
+
 using RocketLeagueStats.Components;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +52,7 @@ namespace RocketLeagueStats
             }
         }
 
-        public MainWindow(AuthTokenInfo tokenInfo)
+        public MainWindow(AuthTokenInfo tokenInfo, string filePath)
         {
             DataContext = this;
             InitializeComponent();
@@ -57,6 +61,17 @@ namespace RocketLeagueStats
             DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo));
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                try
+                {
+                    LoadFile(filePath);
+                }
+                catch
+                {
+                    MessageBox.Show("Couldn't load file");
+                }
+            }
         }
 
         private void Navigator_GetReplaysClicked(object sender, (List<Replay> replays, List<Replay> replaysToCompare) pack)
@@ -171,7 +186,12 @@ namespace RocketLeagueStats
         private void LoadDialog_FileOk(object sender, CancelEventArgs e)
         {
             var dialog = (OpenFileDialog)sender;
-            var compressedBytes = File.ReadAllBytes(dialog.FileName);
+            LoadFile(dialog.FileName);
+        }
+
+        private void LoadFile(string fileName)
+        {
+            var compressedBytes = File.ReadAllBytes(fileName);
             var jsonString = Compressor.DecompressBytes(compressedBytes);
             Replays = JsonConvert.DeserializeObject<List<Replay>>(jsonString);
         }
