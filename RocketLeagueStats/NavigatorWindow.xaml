@@ -34,8 +34,19 @@
                         <components:ReplayPickerControl x:Name="RpcReplayToComparePicker"/>
                     </TabItem>
                 </TabControl>
-
-                <components:LoadingGrid Grid.Column="1" x:Name="loadingGrid"/>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <ProgressBar x:Name="pb1"
+                                 Grid.Row="0"
+                                 Style="{DynamicResource progressBarStyle}"></ProgressBar>
+                    <ProgressBar x:Name="pb2"
+                                 Grid.Row="1"
+                                 Style="{DynamicResource progressBarStyle}"></ProgressBar>
+                </Grid>
+                <!--<components:LoadingGrid Grid.Column="1" x:Name="loadingGrid"/>-->
             </Grid>
         </Border>
         <Border Grid.Row="1" 

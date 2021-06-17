@@ -1,10 +1,13 @@
-﻿using RLStats_Classes.MainClasses;
+﻿using Newtonsoft.Json;
+
+using RLStats_Classes.MainClasses;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Windows;
@@ -109,17 +112,41 @@ namespace RocketLeagueStats
             TempReplays = null;
             TempReplaysToCompare = null;
             var provider1 = new ReplayProvider(_tokenInfo);
+            provider1.DownloadProgressUpdated += Provider1_DownloadProgressUpdated;
             _providers.Add(provider1);
             var task = DownloadReplays(provider1, rpcReplayPicker.RequestFilter);
             if (!RpcReplayToComparePicker.IsEmpty)
             {
                 var provider2 = new ReplayProvider(_tokenInfo);
+                provider2.DownloadProgressUpdated += Provider2_DownloadProgressUpdated;
                 _providers.Add(provider2);
                 TempReplaysToCompare = await DownloadReplays(provider2, RpcReplayToComparePicker.RequestFilter);
+                provider2.DownloadProgressUpdated -= Provider2_DownloadProgressUpdated;
                 _providers.Remove(provider2);
             }
             TempReplays = await task;
             _providers.Remove(provider1);
+            provider1.DownloadProgressUpdated -= Provider1_DownloadProgressUpdated;
+        }
+
+        private void Provider1_DownloadProgressUpdated(object sender, ProgressState e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                pb1.Maximum = e.TotalCount - e.FalsePartCount;
+                pb1.Value = e.PartCount;
+            });
+            Debug.WriteLine("Provider 1:\n" + JsonConvert.SerializeObject(e));
+        }
+
+        private void Provider2_DownloadProgressUpdated(object sender, ProgressState e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                pb2.Maximum = e.TotalCount - e.FalsePartCount;
+                pb2.Value = e.PartCount;
+            });
+            Debug.WriteLine("Provider 2:\n"+JsonConvert.SerializeObject(e));
         }
 
         private async Task<List<Replay>> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)
