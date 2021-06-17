@@ -54,7 +54,7 @@
                 <CheckBox x:Name="cbTitle" 
                           Content="Title"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="1" 
+                          Grid.Row="1" Grid.Column="0"
                           Checked="CbTitle_Click"
                           Unchecked="CbTitle_Click">
                     <CheckBox.LayoutTransform>
@@ -64,7 +64,7 @@
                 <CheckBox x:Name="cbPlaylist" 
                           Content="Playlist"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="2" 
+                          Grid.Row="2" Grid.Column="0"
                           Checked="CbPlaylist_Click"
                           Unchecked="CbPlaylist_Click">
                     <CheckBox.LayoutTransform>
@@ -74,7 +74,7 @@
                 <CheckBox x:Name="cbSeason" 
                           Content="Season"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="3"
+                          Grid.Row="3" Grid.Column="0"
                           Checked="CbSeason_Click"
                           Unchecked="CbSeason_Click">
                     <CheckBox.LayoutTransform>
@@ -84,7 +84,7 @@
                 <CheckBox x:Name="cbMatchResult" 
                           Content="MatchResult"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="4"
+                          Grid.Row="4" Grid.Column="0"
                           Checked="CbMatchResult_Click"
                           Unchecked="CbMatchResult_Click" 
                           RenderTransformOrigin="0.5,0.5">
@@ -95,7 +95,7 @@
                 <CheckBox x:Name="cbPro" 
                           Content="Pro"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="5"
+                          Grid.Row="5" Grid.Column="0"
                           Checked="CbPro_Click"
                           Unchecked="CbPro_Click">
                     <CheckBox.LayoutTransform>
@@ -105,7 +105,7 @@
                 <CheckBox x:Name="cbSteamID" 
                           Content="Steam ID"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="6"
+                          Grid.Row="6" Grid.Column="0"
                           Checked="CbSteamID_Click"
                           Unchecked="CbSteamID_Click">
                     <CheckBox.LayoutTransform>
@@ -115,7 +115,7 @@
                 <CheckBox x:Name="cbDate" 
                           Content="Date/Range"
                           Style="{DynamicResource checkBoxStyle}"
-                          Grid.Row="7"
+                          Grid.Row="7" Grid.Column="0"
                           Checked="CbDate_Click"
                           Unchecked="CbDate_Click">
                     <CheckBox.LayoutTransform>

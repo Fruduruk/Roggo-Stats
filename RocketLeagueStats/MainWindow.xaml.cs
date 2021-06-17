@@ -59,13 +59,11 @@ namespace RocketLeagueStats
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
         }
 
-        private void Navigator_GetReplaysClicked(object sender, (ApiDataPack pack, ApiDataPack packToCompare) packs)
+        private void Navigator_GetReplaysClicked(object sender, (List<Replay> replays, List<Replay> replaysToCompare) pack)
         {
-            var (pack, packToCompare) = packs;
-            if (!pack.Success) return;
             Index = 0;
-            Replays = pack.Replays;
-            ReplaysToCompare = packToCompare?.Replays;
+            Replays = pack.replays;
+            ReplaysToCompare = pack.replaysToCompare;
             ShowReplay(Replays[0]);
         }
 

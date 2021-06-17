@@ -1,9 +1,13 @@
 ﻿using RLStats_Classes.MainClasses.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using RLStats_Classes.Models;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -66,6 +70,62 @@ namespace RLStats_Classes.MainClasses
 
                 _stopWatch.Restart();
             }
+        }
+
+        public async Task<ApiDataPack> GetApiDataPack(string url)
+        {
+            var response = await GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+                var dataString = await reader.ReadToEndAsync();
+                var pack = GetApiDataFromString(dataString);
+                return pack;
+            }
+            return new ApiDataPack
+            {
+                Success = false
+            };
+        }
+
+        public async Task<int> GetTotalReplayCountOfUrlAsync(string url)
+        {
+            var pack = await GetApiDataPack(url);
+            if (pack.Success)
+                return pack.ReplayCount;
+            return 0;
+        }
+
+        private static ApiDataPack GetApiDataFromString(string dataString)
+        {
+            dynamic jData = JsonConvert.DeserializeObject(dataString);
+            var replays = new List<Replay>();
+            try
+            {
+                if (jData != null)
+                    foreach (var r in jData.list)
+                    {
+                        replays.Add(new ReplayAssembler(r).Assemble());
+                    }
+
+                if (replays.Count == 0)
+                    throw new Exception("No replay found");
+            }
+            catch
+            {
+                return new ApiDataPack()
+                {
+                    Success = false,
+                    ReceivedString = dataString
+                };
+            }
+            return new ApiDataPack()
+            {
+                Replays = replays,
+                ReplayCount = jData.count,
+                Next = jData.next,
+                Success = true,
+            };
         }
     }
 }

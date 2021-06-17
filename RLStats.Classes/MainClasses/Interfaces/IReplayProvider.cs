@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses.Interfaces
 {
-    public interface IReplayProvider : IDownloadProgress
+    public interface IReplayProvider
     {
-        event EventHandler<IDownloadProgress> DownloadProgressUpdated;
+        event EventHandler<ProgressState> DownloadProgressUpdated;
         Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter requestFilter);
         void CancelDownload();
     }

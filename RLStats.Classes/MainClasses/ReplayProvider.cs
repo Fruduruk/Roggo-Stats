@@ -1,200 +1,90 @@
-﻿using Newtonsoft.Json;
-using RLStats_Classes.MainClasses.Interfaces;
+﻿using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
 {
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
-
-        public event EventHandler<IDownloadProgress> DownloadProgressUpdated;
-        public bool Initial { get; private set; } = true;
-        public int ChunksToDownload { get; private set; } = 0;
-        public int DownloadedChunks { get; private set; } = 0;
-        public int PacksToDownload { get; private set; } = 0;
-        public int DownloadedPacks { get; private set; } = 0;
-        public string DownloadMessage { get; private set; } = string.Empty;
-        public static int ObsoleteReplayCount { get; private set; }
-        public int DownloadedReplays { get; set; } = 0;
-        public int ReplaysToDownload { get; set; } = 0;
-
         private bool _cancelDownload;
 
-
         public ReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
-        
+
         public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter)
         {
             var response = new CollectReplaysResponse();
-            ClearProgressUpdateVariables();
-            Initial = true;
-            DownloadMessage = "Download started...";
-            OnDownloadProgressUpdate(this);
+            CreateNewProgressState();
+            ProgressState.Initial = true;
+            ProgressState.CurrentMessage = "Download started...";
             var sw = new Stopwatch();
             sw.Start();
-            var dataPack = await GetDataPack(filter);
+            var (replays, doubleReplays) = await GetDataPack(filter);
             sw.Stop();
-            response.DataPack = dataPack;
+            response.DoubleReplays = doubleReplays;
+            response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             _cancelDownload = false;
             GC.Collect();
             return response;
         }
 
-        public void CancelDownload()
-        {
-            _cancelDownload = true;
-        }
+        public void CancelDownload() => _cancelDownload = true;
 
-        private void ClearProgressUpdateVariables()
+        private async Task<(Replay[], int doubleReplays)> GetDataPack(APIRequestFilter filter)
         {
-            PacksToDownload = 0;
-            ChunksToDownload = 0;
-            DownloadedPacks = 0;
-            DownloadedChunks = 0;
-            ReplaysToDownload = 0;
-            DownloadedReplays = 0;
-            DownloadMessage = string.Empty;
-        }
-
-        private async Task<ApiDataPack> GetDataPack(APIRequestFilter filter)
-        {
-            PacksToDownload = await GetReplayCountOfUrlAsync(filter.GetApiUrl());
-            ReplaysToDownload = PacksToDownload;
-            if (PacksToDownload.Equals(0))
-                return new ApiDataPack()
-                {
-                    Success = false,
-                    Ex = new Exception("No Replays found."),
-                    ReceivedString = string.Empty,
-                    ReplayCount = 0,
-                    Replays = new List<Replay>()
-                };
-            var steps = Convert.ToDouble(PacksToDownload) / 50;
-            steps = Math.Round(steps, MidpointRounding.ToPositiveInfinity);
-            ChunksToDownload = Convert.ToInt32(steps);
-            DownloadedChunks = 0;
-            DownloadMessage = $"Progress: {DownloadedChunks}/{ChunksToDownload}";
-            OnDownloadProgressUpdate(this);
-            Initial = false;
+            //init variables
+            int doubleReplays = 0;
             var url = filter.GetApiUrl();
+            var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
             var done = false;
-            var allData = new ApiDataPack
-            {
-                Replays = new List<Replay>(),
-                ReplayCount = PacksToDownload
-            };
+            var allReplays = new List<Replay>();
+
+            //check if there are replays to download
+            if (totalReplayCount.Equals(0))
+                return (Array.Empty<Replay>(), 0);
+
+            //var steps = Convert.ToDouble(totalReplayCount) / 50;
+            //steps = Math.Round(steps, MidpointRounding.ToPositiveInfinity);
+
             while (!done)
             {
-                var response = await Api.GetAsync(url);
-                if (response.IsSuccessStatusCode)
-                {
-                    using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                    var dataString = await reader.ReadToEndAsync();
-                    var currentPack = GetApiDataFromString(dataString);
-                    if (currentPack.Success)
+                //download new pack
+                var dataPack = await Api.GetApiDataPack(url);
+                if (!dataPack.Success)
+                    return (Array.Empty<Replay>(), 0);
+
+                //delete false replays
+                if (filter.CheckDate)
+                    dataPack.Replays.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
+                doubleReplays += dataPack.Replays.DeleteObsoleteReplays();
+
+                //add the rest to the replay batch
+                allReplays.AddRange(dataPack.Replays);
+
+                //check if replay count exceeds replay cap
+                if (!filter.ReplayCap.Equals(0))
+                    if (allReplays.Count >= filter.ReplayCap)
                     {
-                        PacksToDownload = currentPack.Replays.Count;
-                        allData.Success = true;
-                        DownloadedReplays += currentPack.Replays.Count;
-                        if (filter.CheckDate)
-                            currentPack.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
-                        ObsoleteReplayCount += currentPack.DeleteObsoleteReplays();
-                        allData.Replays.AddRange(currentPack.Replays);
-                        DownloadedChunks++;
-                        DownloadMessage = $"Progress: {DownloadedChunks}/{ChunksToDownload}" +
-                                          (currentPack.Replays.Count != 0 ? "\t+" + currentPack.Replays.Count : "");
-                        DownloadedPacks = currentPack.Replays.Count;
-                        if (!filter.ReplayCap.Equals(0))
-                            if (DownloadedPacks >= filter.ReplayCap)
-                                done = true;
-                        if (DownloadedReplays >= ReplaysToDownload)
-                            done = true;
-                        OnDownloadProgressUpdate(this);
-                        if (_cancelDownload)
-                            break;
-                        if (currentPack.Next != null)
-                            url = currentPack.Next;
-                        else
-                            done = true;
-                    }
-                    else
-                    {
-                        DownloadedPacks = 0;
-                        DownloadMessage = "Fetching replay pack failed";
-                        OnDownloadProgressUpdate(this);
+                        allReplays.TrimReplaysToCap(filter.ReplayCap);
                         done = true;
                     }
-                }
+
+                //check if cancel is requested
+                if (_cancelDownload)
+                    break;
+
+                //check if there are more replays to download
+                if (dataPack.Next != null)
+                    url = dataPack.Next;
                 else
-                {
-                    Thread.Sleep(5000);
-                }
+                    done = true;
             }
-
-            if (allData.Success)
-            {
-                if (!filter.ReplayCap.Equals(0))
-                    allData.TrimReplaysToCap(filter.ReplayCap);
-                return allData;
-            }
-            allData.Ex = new Exception("no Data could be collected");
-            allData.ReplayCount = 0;
-            return allData;
+                
+            return (allReplays.ToArray(), doubleReplays);
         }
-
-        private async Task<int> GetReplayCountOfUrlAsync(string url)
-        {
-            var response = await Api.GetAsync(url);
-            using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-            var dataString = await reader.ReadToEndAsync();
-            var currentPack = GetApiDataFromString(dataString);
-            return currentPack.ReplayCount;
-        }
-
-        private void OnDownloadProgressUpdate(IDownloadProgress downloadProgress)
-        {
-            DownloadProgressUpdated?.Invoke(this, downloadProgress);
-        }
-
-        private static ApiDataPack GetApiDataFromString(string dataString)
-        {
-            dynamic jData = JsonConvert.DeserializeObject(dataString);
-            var replays = new List<Replay>();
-            try
-            {
-                if (jData != null)
-                    foreach (var r in jData.list)
-                    {
-                        replays.Add(new ReplayAssembler(r).Assemble());
-                    }
-
-                if (replays.Count == 0)
-                    throw new Exception("No replay found");
-            }
-            catch (Exception e)
-            {
-                return new ApiDataPack()
-                {
-                    Success = false,
-                    ReceivedString = dataString,
-                    Ex = e
-                };
-            }
-            return new ApiDataPack()
-            {
-                Replays = replays,
-                ReplayCount = jData.count,
-                Next = jData.next,
-                Success = true,
-            };
-        }
-
     }
 }

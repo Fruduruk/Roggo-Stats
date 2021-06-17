@@ -1,9 +1,11 @@
 ﻿using RLStats_Classes.MainClasses;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,7 +21,7 @@ namespace RocketLeagueStats
         private bool _dontClose;
         private List<Replay> _shownReplays;
 
-        public event EventHandler<(ApiDataPack, ApiDataPack)> GetReplaysClicked;
+        public event EventHandler<(List<Replay>, List<Replay>)> GetReplaysClicked;
         public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly IAuthTokenInfo _tokenInfo;
@@ -34,8 +36,8 @@ namespace RocketLeagueStats
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShownReplays)));
             }
         }
-        public ApiDataPack TempDataPack { get; private set; }
-        public ApiDataPack TempDataPackToCompare { get; private set; }
+        public List<Replay> TempReplays { get; private set; }
+        public List<Replay> TempReplaysToCompare { get; private set; }
         public bool DontClose
         {
             get => _dontClose;
@@ -56,43 +58,38 @@ namespace RocketLeagueStats
             InitializeComponent();
             //_replayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             DontClose = true;
-            TempDataPack = new ApiDataPack()
-            {
-                Success = false,
-                Ex = new Exception("There was no TempDataPack")
-            };
         }
 
-        private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                tbReplayCount.Text = e.ChunksToDownload.ToString();
-                tbMessages.Text = e.DownloadMessage;
-                if (!(e.ChunksToDownload.Equals(0) || e.PacksToDownload.Equals(0)))
-                    if (e.Initial)
-                    {
-                        loadingGrid.Clear();
-                        loadingGrid.InitializeGrid(e.PacksToDownload, e.ChunksToDownload);
-                    }
-                    else
-                    {
-                        loadingGrid.AddChunk(Brushes.Gray);
-                        var notLoadedCount = e.PacksToDownload - e.DownloadedPacks;
-                        for (int i = 0; i < e.DownloadedPacks; i++)
-                            loadingGrid.AddPack(Brushes.GreenYellow);
-                        for (int i = 0; i < notLoadedCount; i++)
-                            loadingGrid.AddPack(Brushes.OrangeRed);
-                    }
-            });
-        }
+        //private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
+        //{
+        //    Dispatcher.Invoke(() =>
+        //    {
+        //        tbReplayCount.Text = e.ChunksToDownload.ToString();
+        //        tbMessages.Text = e.DownloadMessage;
+        //        if (!(e.ChunksToDownload.Equals(0) || e.PacksToDownload.Equals(0)))
+        //            if (e.Initial)
+        //            {
+        //                loadingGrid.Clear();
+        //                loadingGrid.InitializeGrid(e.PacksToDownload, e.ChunksToDownload);
+        //            }
+        //            else
+        //            {
+        //                loadingGrid.AddChunk(Brushes.Gray);
+        //                var notLoadedCount = e.PacksToDownload - e.DownloadedPacks;
+        //                for (int i = 0; i < e.DownloadedPacks; i++)
+        //                    loadingGrid.AddPack(Brushes.GreenYellow);
+        //                for (int i = 0; i < notLoadedCount; i++)
+        //                    loadingGrid.AddPack(Brushes.OrangeRed);
+        //            }
+        //    });
+        //}
 
         private async void BtnGetReplays_Click(object sender, RoutedEventArgs e)
         {
-            if (!TempDataPack.Success)
+            if (TempReplays is null)
                 await LoadReplaysIntoTemp();
 
-            GetReplaysClicked?.Invoke(this, (TempDataPack, TempDataPackToCompare));
+            GetReplaysClicked?.Invoke(this, (TempReplays, TempReplaysToCompare));
             Hide();
         }
 
@@ -109,8 +106,8 @@ namespace RocketLeagueStats
 
         private async Task LoadReplaysIntoTemp()
         {
-            TempDataPack = null;
-            TempDataPackToCompare = null;
+            TempReplays = null;
+            TempReplaysToCompare = null;
             var provider1 = new ReplayProvider(_tokenInfo);
             _providers.Add(provider1);
             var task = DownloadReplays(provider1, rpcReplayPicker.RequestFilter);
@@ -118,34 +115,26 @@ namespace RocketLeagueStats
             {
                 var provider2 = new ReplayProvider(_tokenInfo);
                 _providers.Add(provider2);
-                TempDataPackToCompare = await DownloadReplays(provider2, RpcReplayToComparePicker.RequestFilter);
+                TempReplaysToCompare = await DownloadReplays(provider2, RpcReplayToComparePicker.RequestFilter);
                 _providers.Remove(provider2);
             }
-            TempDataPack = await task;
+            TempReplays = await task;
             _providers.Remove(provider1);
         }
 
-        private async Task<ApiDataPack> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)
+        private async Task<List<Replay>> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)
         {
             ClearTextBoxes();
             provider.DownloadProgressUpdated += (sender, e) =>
             {
-                tbMessages.Text = e.DownloadMessage;
+                tbMessages.Text = e.CurrentMessage;
             };
             var response = await provider.CollectReplaysAsync(filter);
-            if (response.DataPack.Success)
-            {
-                ShownReplays = response.DataPack.Replays;
-                TempDataPack = response.DataPack;
-            }
-            else
-            {
-                tbMessages.Text = response.DataPack.Ex.Message + "\n" + response.DataPack.ReceivedString;
-            }
+            ShownReplays = new List<Replay>(response.Replays);
 
             tbMessages.Text = (response.ElapsedMilliseconds / 1000).ToString("0.##") +
-                              $" seconds\nDouble Replays: {ReplayProvider.ObsoleteReplayCount}";
-            return response.DataPack;
+                              $" seconds";
+            return new List<Replay>(response.Replays);
         }
 
         private void ClearTextBoxes()

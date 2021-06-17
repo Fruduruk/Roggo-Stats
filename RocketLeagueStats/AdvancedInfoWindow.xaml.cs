@@ -70,7 +70,7 @@ namespace RocketLeagueStats
             _advancedReplayProvider = advancedReplayProvider;
             InitializeComponent();
             DontClose = true;
-            AdvancedReplayProvider.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
+            //AdvancedReplayProvider.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
             ControlPages = new List<IRLSControlPage>()
             {
                 mapWinratesCP,
@@ -83,23 +83,23 @@ namespace RocketLeagueStats
             }
         }
 
-        private void Connection_AdvancedDownloadProgressUpdated(object sender, IAdvancedDownloadProgress e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                tbInfo.Text = e.DownloadMessage;
-                if (!e.ReplaysToDownload.Equals(0))
-                    if (e.Initial)
-                    {
-                        loadingGrid.Clear();
-                        loadingGrid.InitializeGrid(0, e.ReplaysToDownload);
-                    }
-                    else
-                    {
-                        loadingGrid.AddChunk(Brushes.GreenYellow);
-                    }
-            });
-        }
+        //private void Connection_AdvancedDownloadProgressUpdated(object sender, IAdvancedDownloadProgress e)
+        //{
+        //    Dispatcher.Invoke(() =>
+        //    {
+        //        tbInfo.Text = e.DownloadMessage;
+        //        if (!e.ReplaysToDownload.Equals(0))
+        //            if (e.Initial)
+        //            {
+        //                loadingGrid.Clear();
+        //                loadingGrid.InitializeGrid(0, e.ReplaysToDownload);
+        //            }
+        //            else
+        //            {
+        //                loadingGrid.AddChunk(Brushes.GreenYellow);
+        //            }
+        //    });
+        //}
 
         private void Page_NotificationMessageTriggered(object sender, string e)
         {

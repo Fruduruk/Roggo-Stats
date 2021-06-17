@@ -1,6 +1,7 @@
 ﻿using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,28 +12,9 @@ namespace RLStats_Classes.MainClasses
 {
     public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
     {
-        public static event EventHandler<IAdvancedDownloadProgress> AdvancedDownloadProgressUpdated;
-        public bool Initial { get; private set; }
-        public int ReplaysToDownload { get; private set; }
-        public int DownloadedReplays { get; private set; }
-        public string DownloadMessage { get; private set; }
         private Database ReplayDatabase { get; } = new Database();
 
-        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo)
-        {
-        }
-
-        private void OnAdvancedDownloadProgressUpdate(IAdvancedDownloadProgress advancedDownloadProgress)
-        {
-            AdvancedDownloadProgressUpdated?.Invoke(this, advancedDownloadProgress);
-        }
-
-        private void ClearProgressUpdateVariables()
-        {
-            ReplaysToDownload = 0;
-            DownloadedReplays = 0;
-            DownloadMessage = string.Empty;
-        }
+        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
 
         public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays)
         {
@@ -46,20 +28,12 @@ namespace RLStats_Classes.MainClasses
             replaysToDownload.AddRange(replaysToReDownload);
             await DownloadReplays(advancedReplays, replaysToDownload);
             ReplayDatabase.ReplayCache.Clear();
-            DownloadMessage =
-                $"Replays loaded: {advancedReplays.Count}\tcache hits: {ReplayDatabase.CacheHits}\tcache misses: {ReplayDatabase.CacheMisses}";
-            OnAdvancedDownloadProgressUpdate(this);
             return advancedReplays;
         }
 
         private async Task<List<Replay>> LoadReplays(List<AdvancedReplay> advancedReplays,
             List<Replay> replaysToLoadFromDatabase)
         {
-            ClearProgressUpdateVariables();
-            ReplaysToDownload = replaysToLoadFromDatabase.Count;
-            Initial = true;
-            OnAdvancedDownloadProgressUpdate(this);
-            Initial = false;
             if (!replaysToLoadFromDatabase.Count.Equals(0))
             {
                 var count = replaysToLoadFromDatabase.Count;
@@ -104,13 +78,6 @@ namespace RLStats_Classes.MainClasses
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r,
             int totalCount)
         {
-            if ((advancedReplays.Count % 10 == 0) || advancedReplays.Count.Equals(totalCount))
-            {
-                DownloadedReplays = advancedReplays.Count;
-                DownloadMessage = $"Load saved files: {advancedReplays.Count}/{totalCount}";
-                OnAdvancedDownloadProgressUpdate(this);
-            }
-
             var ar = await ReplayDatabase.LoadReplayAsync(r);
             if (ar is null) return (false, r);
             lock (advancedReplays)
@@ -123,28 +90,12 @@ namespace RLStats_Classes.MainClasses
 
         private async Task DownloadReplays(List<AdvancedReplay> advancedReplays, List<Replay> replaysToDownload)
         {
-            ClearProgressUpdateVariables();
-            ReplaysToDownload = replaysToDownload.Count;
-            Initial = true;
-            OnAdvancedDownloadProgressUpdate(this);
-            Initial = false;
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 var r = replaysToDownload[i];
-                try
-                {
-                    var replay = await GetAdvancedReplayInfosAsync(r);
-                    advancedReplays.Add(replay);
-                    ReplayDatabase.SaveReplayAsync(replay);
-
-                    DownloadedReplays = i + 1;
-                    DownloadMessage = $"Download: {i + 1}/{ReplaysToDownload}";
-                    OnAdvancedDownloadProgressUpdate(this);
-                }
-                catch
-                {
-                    ReplaysToDownload--;
-                }
+                var replay = await GetAdvancedReplayInfosAsync(r);
+                advancedReplays.Add(replay);
+                ReplayDatabase.SaveReplayAsync(replay);
             }
         }
 
@@ -174,18 +125,9 @@ namespace RLStats_Classes.MainClasses
                     replaysToLoadFromDatabase.Add(replay);
 
             var currentCount = replaysToLoadFromDatabase.Count + replaysToDownload.Count;
-            if (currentCount % 10 == 0)
-            {
-                //ProgressInPercent = (Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100;
-                DownloadMessage = $"Sort Replays: {currentCount}/{count}";
-                OnAdvancedDownloadProgressUpdate(this);
-            }
 
             if (currentCount != count)
                 return;
-            //ProgressInPercent = (Convert.ToDouble(currentCount) / Convert.ToDouble(count)) * 100;
-            DownloadMessage = $"Sort Replays: {currentCount}/{count}";
-            OnAdvancedDownloadProgressUpdate(this);
         }
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)

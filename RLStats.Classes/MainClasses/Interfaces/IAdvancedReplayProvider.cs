@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses.Interfaces
 {
-    public interface IAdvancedReplayProvider : IAdvancedDownloadProgress
+    public interface IAdvancedReplayProvider
     {
         Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays);
     }
