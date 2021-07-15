@@ -131,22 +131,24 @@ namespace RocketLeagueStats
 
         private void Provider1_DownloadProgressUpdated(object sender, ProgressState e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                pb1.Maximum = e.TotalCount - e.FalsePartCount;
-                pb1.Value = e.PartCount;
-            });
-            Debug.WriteLine("Provider 1:\n" + JsonConvert.SerializeObject(e));
+            //Dispatcher.Invoke(() =>
+            //{
+            //    pb1.Maximum = e.TotalCount - e.FalsePartCount;
+            //    pb1.Value = e.PartCount;
+            //    tbMessages.Text = "Provider 1: " + e.CurrentMessage;
+            //});
+            //Debug.WriteLine("Provider 1:\n" + JsonConvert.SerializeObject(e));
         }
 
         private void Provider2_DownloadProgressUpdated(object sender, ProgressState e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                pb2.Maximum = e.TotalCount - e.FalsePartCount;
-                pb2.Value = e.PartCount;
-            });
-            Debug.WriteLine("Provider 2:\n"+JsonConvert.SerializeObject(e));
+            //Dispatcher.Invoke(() =>
+            //{
+            //    pb2.Maximum = e.TotalCount - e.FalsePartCount;
+            //    pb2.Value = e.PartCount;
+            //    tbMessages.Text = "Provider 2: " + e.CurrentMessage;
+            //});
+            //Debug.WriteLine("Provider 2:\n"+JsonConvert.SerializeObject(e));
         }
 
         private async Task<List<Replay>> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)
