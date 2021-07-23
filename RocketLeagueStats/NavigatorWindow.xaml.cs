@@ -8,11 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace RocketLeagueStats
 {
@@ -32,7 +29,7 @@ namespace RocketLeagueStats
 
         public List<Replay> ShownReplays
         {
-            get { return _shownReplays; }
+            get => _shownReplays;
             set
             {
                 _shownReplays = value;
@@ -59,33 +56,8 @@ namespace RocketLeagueStats
             _tokenInfo = tokenInfo;
             DataContext = this;
             InitializeComponent();
-            //_replayProvider.DownloadProgressUpdated += Connection_DownloadProgressUpdated;
             DontClose = true;
         }
-
-        //private void Connection_DownloadProgressUpdated(object sender, IDownloadProgress e)
-        //{
-        //    Dispatcher.Invoke(() =>
-        //    {
-        //        tbReplayCount.Text = e.ChunksToDownload.ToString();
-        //        tbMessages.Text = e.DownloadMessage;
-        //        if (!(e.ChunksToDownload.Equals(0) || e.PacksToDownload.Equals(0)))
-        //            if (e.Initial)
-        //            {
-        //                loadingGrid.Clear();
-        //                loadingGrid.InitializeGrid(e.PacksToDownload, e.ChunksToDownload);
-        //            }
-        //            else
-        //            {
-        //                loadingGrid.AddChunk(Brushes.Gray);
-        //                var notLoadedCount = e.PacksToDownload - e.DownloadedPacks;
-        //                for (int i = 0; i < e.DownloadedPacks; i++)
-        //                    loadingGrid.AddPack(Brushes.GreenYellow);
-        //                for (int i = 0; i < notLoadedCount; i++)
-        //                    loadingGrid.AddPack(Brushes.OrangeRed);
-        //            }
-        //    });
-        //}
 
         private async void BtnGetReplays_Click(object sender, RoutedEventArgs e)
         {
@@ -99,7 +71,7 @@ namespace RocketLeagueStats
         public void NavigatorWindow_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
-            this.Hide();
+            Hide();
         }
 
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
@@ -111,44 +83,42 @@ namespace RocketLeagueStats
         {
             TempReplays = null;
             TempReplaysToCompare = null;
-            var provider1 = new ReplayProvider(_tokenInfo);
-            provider1.DownloadProgressUpdated += Provider1_DownloadProgressUpdated;
-            _providers.Add(provider1);
-            var task = DownloadReplays(provider1, rpcReplayPicker.RequestFilter);
+            var mainProvider = new ReplayProvider(_tokenInfo);
+            mainProvider.DownloadProgressUpdated += MainProvider_DownloadProgressUpdated;
+            _providers.Add(mainProvider);
+            var task = DownloadReplays(mainProvider, rpcReplayPicker.RequestFilter);
             if (!RpcReplayToComparePicker.IsEmpty)
             {
-                var provider2 = new ReplayProvider(_tokenInfo);
-                provider2.DownloadProgressUpdated += Provider2_DownloadProgressUpdated;
-                _providers.Add(provider2);
-                TempReplaysToCompare = await DownloadReplays(provider2, RpcReplayToComparePicker.RequestFilter);
-                provider2.DownloadProgressUpdated -= Provider2_DownloadProgressUpdated;
-                _providers.Remove(provider2);
+                var secondProvider = new ReplayProvider(_tokenInfo);
+                secondProvider.DownloadProgressUpdated += SecondProvider_DownloadProgressUpdated;
+                _providers.Add(secondProvider);
+                TempReplaysToCompare = await DownloadReplays(secondProvider, RpcReplayToComparePicker.RequestFilter);
+                secondProvider.DownloadProgressUpdated -= SecondProvider_DownloadProgressUpdated;
+                _providers.Remove(secondProvider);
             }
             TempReplays = await task;
-            _providers.Remove(provider1);
-            provider1.DownloadProgressUpdated -= Provider1_DownloadProgressUpdated;
+            _providers.Remove(mainProvider);
+            mainProvider.DownloadProgressUpdated -= MainProvider_DownloadProgressUpdated;
         }
 
-        private void Provider1_DownloadProgressUpdated(object sender, ProgressState e)
+        private void MainProvider_DownloadProgressUpdated(object sender, ProgressState e)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    pb1.Maximum = e.TotalCount - e.FalsePartCount;
-            //    pb1.Value = e.PartCount;
-            //    tbMessages.Text = "Provider 1: " + e.CurrentMessage;
-            //});
-            //Debug.WriteLine("Provider 1:\n" + JsonConvert.SerializeObject(e));
+            Dispatcher.Invoke(() =>
+            {
+                MainLoadingGrid.UpdateView(e);
+                tbMessages.Text = "Provider 1: " + e.CurrentMessage;
+            });
+            Debug.WriteLine("Provider 1:\n" + JsonConvert.SerializeObject(e));
         }
 
-        private void Provider2_DownloadProgressUpdated(object sender, ProgressState e)
+        private void SecondProvider_DownloadProgressUpdated(object sender, ProgressState e)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    pb2.Maximum = e.TotalCount - e.FalsePartCount;
-            //    pb2.Value = e.PartCount;
-            //    tbMessages.Text = "Provider 2: " + e.CurrentMessage;
-            //});
-            //Debug.WriteLine("Provider 2:\n"+JsonConvert.SerializeObject(e));
+            Dispatcher.Invoke(() =>
+            {
+                SecondLoadingGrid.UpdateView(e);
+                tbMessages.Text = "Provider 2: " + e.CurrentMessage;
+            });
+            Debug.WriteLine("Provider 2:\n" + JsonConvert.SerializeObject(e));
         }
 
         private async Task<List<Replay>> DownloadReplays(IReplayProvider provider, APIRequestFilter filter)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RLStats_Classes.Models
 {
@@ -61,9 +63,9 @@ namespace RLStats_Classes.Models
             }
         }
 
-        private void OnSomethingChanged()
+        private void OnSomethingChanged([CallerMemberName] string callerName = "")
         {
-            SomethingChanged?.Invoke(this, EventArgs.Empty);
+            SomethingChanged?.Invoke(this, new PropertyChangedEventArgs(callerName));
         }
     }
 }

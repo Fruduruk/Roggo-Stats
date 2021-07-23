@@ -39,14 +39,10 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <components:LoadingGrid Grid.Row="0"/>
-                    <components:LoadingGrid Grid.Row="1"/>
-                    <!--<ProgressBar x:Name="pb1"
-                                 Grid.Row="0"
-                                 Style="{DynamicResource progressBarStyle}"></ProgressBar>
-                    <ProgressBar x:Name="pb2"
-                                 Grid.Row="1"
-                                 Style="{DynamicResource progressBarStyle}"></ProgressBar>-->
+                    <components:LoadingGrid Grid.Row="0"
+                                            x:Name="MainLoadingGrid"/>
+                    <components:LoadingGrid Grid.Row="1"
+                                            x:Name="SecondLoadingGrid"/>
                 </Grid>
             </Grid>
         </Border>

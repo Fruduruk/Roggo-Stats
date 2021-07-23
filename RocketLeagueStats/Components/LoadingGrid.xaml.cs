@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 
-using System.Diagnostics;
-using System.Threading.Tasks;
+using RLStats_Classes.Models;
+
 using System.Windows.Controls;
 
 namespace RocketLeagueStats.Components
@@ -13,16 +13,15 @@ namespace RocketLeagueStats.Components
     {
         public LoadingGrid()
         {
-            
+            InitializeComponent();
         }
 
-        private void loadingCanvas_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+        public void UpdateView(ProgressState e)
         {
-            var canvas = sender as Canvas;
-            if(canvas is not null)
+            Dispatcher.Invoke(() =>
             {
-                
-            }
+                MainTextBlock.Text = JsonConvert.SerializeObject(e, Formatting.Indented);
+            });
         }
     }
 }

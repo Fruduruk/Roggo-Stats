@@ -19,6 +19,7 @@ namespace RLStats_Classes.MainClasses
             var response = new CollectReplaysResponse();
             CreateNewProgressState();
             ProgressState.Initial = true;
+            ProgressState.Initial = false;
             ProgressState.CurrentMessage = "Downloading.";
             var sw = new Stopwatch();
             sw.Start();
