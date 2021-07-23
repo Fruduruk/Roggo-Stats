@@ -139,7 +139,7 @@ namespace RocketLeagueStats
             CreatePlayerBoxes(orangeSideGrid, replay.Orange);
         }
 
-        private void CreatePlayerBoxes(Grid grid, Team team)
+        private static void CreatePlayerBoxes(Grid grid, Team team)
         {
             grid.Children.Clear();
             grid.RowDefinitions.Clear();

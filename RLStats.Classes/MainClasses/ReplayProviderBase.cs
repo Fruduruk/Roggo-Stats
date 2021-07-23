@@ -2,6 +2,7 @@
 using RLStats_Classes.Models;
 
 using System;
+using System.ComponentModel;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -18,17 +19,22 @@ namespace RLStats_Classes.MainClasses
             if (BallchasingApi.Instance is null)
                 BallchasingApi.CreateInstance(tokenInfo);
             Api = BallchasingApi.Instance;
-            CreateNewProgressState();
+            InitializeNewProgress();
         }
 
-        protected void CreateNewProgressState()
+        protected void InitializeNewProgress()
         {
             if (ProgressState is not null)
                 ProgressState.SomethingChanged -= OnDownloadProgressUpdate;
             ProgressState = new ProgressState();
             ProgressState.SomethingChanged += OnDownloadProgressUpdate;
-            void OnDownloadProgressUpdate(object sender, EventArgs e) =>
+            void OnDownloadProgressUpdate(object sender, PropertyChangedEventArgs e)
+            {
                 DownloadProgressUpdated?.Invoke(this, ProgressState);
+            }
+            ProgressState.Initial = true;
+            OnDownloadProgressUpdate(this, new PropertyChangedEventArgs("Initial"));
+            ProgressState.Initial = false;
         }
     }
 }

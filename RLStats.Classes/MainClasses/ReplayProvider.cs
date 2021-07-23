@@ -17,9 +17,7 @@ namespace RLStats_Classes.MainClasses
         public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter)
         {
             var response = new CollectReplaysResponse();
-            CreateNewProgressState();
-            ProgressState.Initial = true;
-            ProgressState.Initial = false;
+            InitializeNewProgress();
             ProgressState.CurrentMessage = "Downloading.";
             var sw = new Stopwatch();
             sw.Start();
@@ -31,7 +29,6 @@ namespace RLStats_Classes.MainClasses
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             _cancelDownload = false;
             GC.Collect();
-            ProgressState.Initial = false;
             return response;
         }
 

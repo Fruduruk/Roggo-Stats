@@ -51,7 +51,6 @@ namespace RLStats_Classes.Models
             hashCode.Add(Orange);
             return hashCode.ToHashCode();
         }
-
         public int CompareTo(object? obj)
         {
             if (obj is null)
@@ -63,7 +62,7 @@ namespace RLStats_Classes.Models
             else throw new ArgumentException("Object was not a replay");
         }
 
-        private bool CheckEquality(object ob1, object ob2)
+        private static bool CheckEquality(object ob1, object ob2)
         {
             if (ob1 is null)
             {

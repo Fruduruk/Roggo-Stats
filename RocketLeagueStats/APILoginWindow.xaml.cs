@@ -12,7 +12,7 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class APILoginWindow : Window
     {
-        private string _filePath = string.Empty;
+        private readonly string _filePath = string.Empty;
         private MainWindow MW { get; set; }
         public APILoginWindow()
         {

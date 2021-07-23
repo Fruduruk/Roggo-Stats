@@ -1,5 +1,8 @@
-﻿using RLStats_Classes.AdvancedModels;
+﻿using Newtonsoft.Json;
+
+using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -39,7 +42,7 @@ namespace RLStats_Classes.MainClasses
 
         private FileInfo _indexFile;
 
-        public int CacheSize { get; set; }= 4096;
+        public int CacheSize { get; set; } = 4096;
 
         public int CacheHits { get; set; } = 0;
 
@@ -189,16 +192,16 @@ namespace RLStats_Classes.MainClasses
 
         private void SaveIdsInIndexFile(IEnumerable<Guid> ids)
         {
-            var bytes = Compressor.ConvertObject(ids.ToList());
-            File.WriteAllBytes(IndexFile.FullName, bytes);
+            var text = JsonConvert.SerializeObject(ids.ToList(), Formatting.Indented);
+            File.WriteAllText(IndexFile.FullName, text);
         }
 
         private ObservableCollection<Guid> LoadIdListFromFile()
         {
-            var bytes = File.ReadAllBytes(IndexFile.FullName);
+            var text = File.ReadAllText(IndexFile.FullName);
             try
             {
-                var idList = Compressor.ConvertObject<List<Guid>>(bytes);
+                var idList = JsonConvert.DeserializeObject<List<Guid>>(text);
                 return new ObservableCollection<Guid>(idList);
             }
             catch

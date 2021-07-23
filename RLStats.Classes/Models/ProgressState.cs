@@ -6,22 +6,13 @@ namespace RLStats_Classes.Models
 {
     public class ProgressState
     {
-        public event EventHandler SomethingChanged;
-        private bool _initial;
+        public event PropertyChangedEventHandler SomethingChanged;
         private string _currentMessage;
         private int _totalCount;
         private int _partCount;
         private int _falsePartCount;
 
-        public bool Initial
-        {
-            get => _initial;
-            set
-            {
-                _initial = value;
-                OnSomethingChanged();
-            }
-        }
+        public bool Initial { get; set; }
 
         public string CurrentMessage
         {

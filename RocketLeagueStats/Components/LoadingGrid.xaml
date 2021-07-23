@@ -8,7 +8,8 @@
              d:DesignHeight="100" d:DesignWidth="100">
     <Grid>
         <TextBlock x:Name="MainTextBlock"
-                       Text="Frudd"
-                       Foreground="AliceBlue"/>
+                   Text="Frudd"
+                   TextWrapping="Wrap"
+                   Foreground="AliceBlue"/>
     </Grid>
 </UserControl>

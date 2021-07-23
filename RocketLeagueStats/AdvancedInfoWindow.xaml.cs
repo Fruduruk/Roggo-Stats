@@ -1,14 +1,13 @@
 ﻿using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.MainClasses;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+
 using RocketLeagueStats.Components;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace RocketLeagueStats
 {
@@ -70,7 +69,7 @@ namespace RocketLeagueStats
             _advancedReplayProvider = advancedReplayProvider;
             InitializeComponent();
             DontClose = true;
-            //AdvancedReplayProvider.AdvancedDownloadProgressUpdated += Connection_AdvancedDownloadProgressUpdated;
+            _advancedReplayProvider.DownloadProgressUpdated += AdvancedReplayProvider_DownloadProgressUpdated;
             ControlPages = new List<IRLSControlPage>()
             {
                 mapWinratesCP,
@@ -83,23 +82,10 @@ namespace RocketLeagueStats
             }
         }
 
-        //private void Connection_AdvancedDownloadProgressUpdated(object sender, IAdvancedDownloadProgress e)
-        //{
-        //    Dispatcher.Invoke(() =>
-        //    {
-        //        tbInfo.Text = e.DownloadMessage;
-        //        if (!e.ReplaysToDownload.Equals(0))
-        //            if (e.Initial)
-        //            {
-        //                loadingGrid.Clear();
-        //                loadingGrid.InitializeGrid(0, e.ReplaysToDownload);
-        //            }
-        //            else
-        //            {
-        //                loadingGrid.AddChunk(Brushes.GreenYellow);
-        //            }
-        //    });
-        //}
+        private void AdvancedReplayProvider_DownloadProgressUpdated(object sender, ProgressState e)
+        {
+            MainLoadingGrid.UpdateView(e);
+        }
 
         private void Page_NotificationMessageTriggered(object sender, string e)
         {
