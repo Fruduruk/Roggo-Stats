@@ -1,4 +1,7 @@
 ﻿using Newtonsoft.Json;
+
+using RLStats_Classes.Encryption;
+
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -8,9 +11,11 @@ namespace RLStats_Classes.MainClasses
 {
     public class Compressor
     {
-        public static byte[] CompressString(string text)
+        private static readonly byte[] _key = Encoding.UTF8.GetBytes("Co+m/pr9e,s2[sor");
+        #region bytes
+        public static byte[] CompressBytes(byte[] bytes, bool encrypt = true)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(text);
+            byte[] buffer = bytes;
             using var memoryStream = new MemoryStream();
             using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
             {
@@ -25,11 +30,11 @@ namespace RLStats_Classes.MainClasses
             var gZipBuffer = new byte[compressedData.Length + 4];
             Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length);
             Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
-            return gZipBuffer;
+            return encrypt ? AESEncryptor.EncryptByteArray(_key, gZipBuffer) : gZipBuffer;
         }
-        
-        public static string DecompressBytes(byte[] compressedBytes)
+        public static byte[] DecompressBytes(byte[] compressedBytes, bool decrypt = true)
         {
+            compressedBytes = decrypt ? AESEncryptor.DecryptByteArray(_key, compressedBytes) : compressedBytes;
             using (var memoryStream = new MemoryStream())
             {
                 var dataLength = BitConverter.ToInt32(compressedBytes, 0);
@@ -42,10 +47,16 @@ namespace RLStats_Classes.MainClasses
                 {
                     gZipStream.Read(buffer, 0, buffer.Length);
                 }
-                return Encoding.UTF8.GetString(buffer);
+                return buffer;
             }
         }
+        #endregion
+        #region string
+        public static byte[] CompressString(string text) => CompressBytes(Encoding.UTF8.GetBytes(text));
 
+        public static string DecompressBytesToString(byte[] compressedBytes) => Encoding.UTF8.GetString(DecompressBytes(compressedBytes));
+        #endregion
+        #region objects
         public static byte[] ConvertObject<T>(T obj) where T : new()
         {
             var jsonString = JsonConvert.SerializeObject(obj);
@@ -55,9 +66,10 @@ namespace RLStats_Classes.MainClasses
 
         public static T ConvertObject<T>(byte[] bytes)
         {
-            var decompressedBytesAsString = DecompressBytes(bytes);
+            var decompressedBytesAsString = DecompressBytesToString(bytes);
             var obj = JsonConvert.DeserializeObject<T>(decompressedBytesAsString);
             return obj;
         }
+        #endregion
     }
 }

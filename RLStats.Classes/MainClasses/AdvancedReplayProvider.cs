@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using static RLStats_Classes.MainClasses.TaskDisposer;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -35,6 +36,7 @@ namespace RLStats_Classes.MainClasses
             await DownloadReplays(advancedReplays, replaysToDownload);
             ProgressState.CurrentMessage = "Loading done.";
             ReplayDatabase.ReplayCache.Clear();
+            ProgressState.CurrentMessage = $"Cache Hits: {ReplayDatabase.CacheHits} Cache Misses: {ReplayDatabase.CacheMisses}";
             return advancedReplays;
         }
 
@@ -66,7 +68,8 @@ namespace RLStats_Classes.MainClasses
                         notLoadedReplays.Add(replay);
                     }
                 }
-
+                DisposeTasks(tasks);
+                GC.Collect(3);
                 return notLoadedReplays;
             }
 

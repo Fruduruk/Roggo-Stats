@@ -1,8 +1,7 @@
-﻿using System;
-using RLStats_Classes.MainClasses;
+﻿using RLStats_Classes.MainClasses;
+
+using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace RocketLeagueStats
@@ -19,25 +18,22 @@ namespace RocketLeagueStats
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
                 _filePath = args[1];
-            //var api = new BallchasingAPI(RLConstants.DebugKey);
             InitializeComponent();
-#if DEBUG
-            try
+            var key = RLConstants.BallchasingToken;
+            if (string.IsNullOrEmpty(key))
             {
-                tbxToken.Text = RLConstants.DebugKey;
-                BtnLoginClick(null, null);
+                tbInfo.Text = "Paste your ballchasing key here";
             }
-            catch (Exception e)
+            else
             {
-                tbInfo.Text = e.Message;
+                tbxToken.Text = key;
+                Connect();
             }
-#endif
         }
-        private void MW_Closed(object sender, System.EventArgs e)
-        {
-            this.Close();
-        }
-        private void BtnLoginClick(object sender, RoutedEventArgs e)
+        private void MW_Closed(object sender, EventArgs e) => Close();
+        private void BtnLoginClick(object sender, RoutedEventArgs e) => Connect();
+
+        private void Connect()
         {
             var tokenInfo = TokenInfoProvider.GetTokenInfo(tbxToken.Text.Trim());
             if (tokenInfo.Except != null)
@@ -46,33 +42,28 @@ namespace RocketLeagueStats
             }
             else if (tokenInfo.Chaser)
             {
-#if RELEASE
-                Task.Run(() =>
-                {
-                    Thread.Sleep(2000);
-#endif
                 Dispatcher.Invoke(() =>
                 {
-                    this.Hide();
+                    Hide();
                     MW = new MainWindow(tokenInfo, _filePath);
                     MW.Closed += MW_Closed;
                     MW.Show();
                 });
-#if RELEASE
-                });
-#endif
                 tbInfo.Text = "Token approved! Welcome " + tokenInfo.Type + " chaser";
+                RLConstants.BallchasingToken = tokenInfo.Token;
             }
             else
             {
                 tbInfo.Text = "You are not a chaser. I can't let you in.";
             }
         }
+
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             try
             {
-                Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+                var p = Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+                p.Dispose();
                 e.Handled = true;
             }
             catch

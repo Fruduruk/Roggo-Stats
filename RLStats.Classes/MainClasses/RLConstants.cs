@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Text;
+
+using RLStats_Classes.Encryption;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -7,34 +10,49 @@ namespace RLStats_Classes.MainClasses
     {
         public const int CurrentSeason = 3;
 
-        public static string DebugKey => GetDebugKey();
+        private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d");
+
+        public static string BallchasingToken
+        {
+            get => ReadKey(GetBallchasingKeyFilePath());
+            set => WriteKey(GetBallchasingKeyFilePath(), value);
+        }
 
         public static string RLStatsFolder => GetRLStatsFolder();
 
-        private static string GetDebugKey()
+        private static string ReadKey(string filePath)
         {
-            var key = File.ReadAllText(GetRLStatsDebugKeyFilePath());
-            if (!string.IsNullOrEmpty(key))
-                return key.Trim();
-            throw new Exception($"No debug key found\n Paste a ballchasing.com authorization key into file: {GetRLStatsDebugKeyFilePath()}");
+            try
+            {
+                var bytes = File.ReadAllBytes(filePath);
+                bytes = AESEncryptor.DecryptByteArray(_key, bytes);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static void WriteKey(string filePath, string ballchasingKey)
+        {
+            if (string.IsNullOrEmpty(ballchasingKey) || string.IsNullOrEmpty(filePath))
+                throw new ArgumentNullException();
+            var bytes = Encoding.UTF8.GetBytes(ballchasingKey);
+            bytes = AESEncryptor.EncryptByteArray(_key, bytes);
+            File.WriteAllBytes(filePath, bytes);
         }
 
         private static string GetRLStatsFolder()
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            path += @"\Rocket League Stats";
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Rocket League Stats");
+            _ = Directory.CreateDirectory(path);
             return path;
         }
 
-        private static string GetRLStatsDebugKeyFilePath()
+        private static string GetBallchasingKeyFilePath()
         {
-            var keyPath = GetRLStatsFolder() + @"\rlStatsDebugKey.txt";
-            if (!File.Exists(keyPath))
-                File.Create(keyPath).Dispose();
+            var keyPath = Path.Combine(GetRLStatsFolder(), "ballchasingKey");
             return keyPath;
         }
     }

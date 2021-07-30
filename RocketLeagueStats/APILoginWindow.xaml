@@ -14,31 +14,32 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Label HorizontalAlignment="Right"
+        <!--<Label HorizontalAlignment="Right"
                FontSize="13"
                Foreground="AliceBlue"
                Width="Auto">
             <Hyperlink NavigateUri="https://ballchasing.com/upload"
+                       
                        RequestNavigate="Hyperlink_RequestNavigate">
                 Get API Token
             </Hyperlink>
-        </Label>
+        </Label>-->
 
         <TextBox x:Name="tbxToken"
                  Style="{DynamicResource textBoxStyle}"
-                 Grid.Row="2"
-                 Margin="5"
+                 Grid.Row="0"
+                 Margin="10"
                  HorizontalAlignment="Stretch"/>
-        <TextBlock x:Name="tbInfo"
-                   Style="{DynamicResource textBlockStyle}"
-                   Grid.Row="1"
-                   TextWrapping="Wrap"/>
         <Button x:Name="btnLogin"
                 Style="{DynamicResource buttonStyle}"
                 Margin="10"
-                Grid.Row="3"
+                Grid.Row="1"
                 Content="START"
                 Click="BtnLoginClick"
                 HorizontalAlignment="Stretch"/>
+        <TextBlock x:Name="tbInfo"
+                   Style="{DynamicResource textBlockStyle}"
+                   Grid.Row="3"
+                   TextWrapping="Wrap"/>
     </Grid>
 </Window>
