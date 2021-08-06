@@ -56,7 +56,7 @@ namespace RLStats_Classes.MainClasses
                 if (_stopWatch.IsRunning)
                 {
                     double speed = TokenInfo.GetSpeed();
-                    var timeToWait = (1000 / speed) * 1.1;
+                    var timeToWait = (1000d / speed) * 1.1;
                     var hasToWait = _stopWatch.ElapsedMilliseconds < timeToWait;
                     if (hasToWait)
                     {

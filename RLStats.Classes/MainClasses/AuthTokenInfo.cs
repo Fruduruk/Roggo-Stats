@@ -16,7 +16,7 @@ namespace RLStats_Classes.MainClasses
         public string SteamId { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
-        public int GetSpeed()
+        public double GetSpeed()
         {
             if (Type is null)
                 throw new Exception("Type was null");
@@ -30,7 +30,7 @@ namespace RLStats_Classes.MainClasses
                 _ => throw new Exception("Unknown type: " + Type)
             };
         }
-        public int GetHourLimit()
+        public double GetHourLimit()
         {
             if (Type is null)
                 throw new Exception("Type was null");

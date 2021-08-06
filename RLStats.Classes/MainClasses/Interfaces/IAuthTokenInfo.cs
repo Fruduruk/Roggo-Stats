@@ -8,12 +8,12 @@
         /// Returns speed measured in calls per second
         /// </summary>
         /// <returns></returns>
-        public int GetSpeed();
+        public double GetSpeed();
 
         /// <summary>
         /// returns hour limit measured in calls per hour
         /// </summary>
         /// <returns></returns>
-        public int GetHourLimit();
+        public double GetHourLimit();
     }
 }

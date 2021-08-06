@@ -17,7 +17,7 @@ namespace RLStats_Classes.MainClasses
 
         public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
 
-        public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays)
+        public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false)
         {
             InitializeNewProgress();
             ReplayDatabase.CacheHits = 0;
@@ -29,7 +29,7 @@ namespace RLStats_Classes.MainClasses
             await SortReplays(new List<Replay>(replays), replaysToDownload, replaysToLoadFromDatabase);
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Loading advanced replays from database.";
-            var replaysToReDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase);
+            var replaysToReDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase, singleThreaded);
             replaysToDownload.AddRange(replaysToReDownload);
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Downloading advanced replays.";
@@ -37,11 +37,13 @@ namespace RLStats_Classes.MainClasses
             ProgressState.CurrentMessage = "Loading done.";
             ReplayDatabase.ReplayCache.Clear();
             ProgressState.CurrentMessage = $"Cache Hits: {ReplayDatabase.CacheHits} Cache Misses: {ReplayDatabase.CacheMisses}";
+            ProgressState.LastCall = true;
             return advancedReplays;
         }
 
         private async Task<List<Replay>> LoadReplays(List<AdvancedReplay> advancedReplays,
-            List<Replay> replaysToLoadFromDatabase)
+            List<Replay> replaysToLoadFromDatabase,
+            bool singleThreaded)
         {
             if (!replaysToLoadFromDatabase.Count.Equals(0))
             {
@@ -55,11 +57,14 @@ namespace RLStats_Classes.MainClasses
                     {
                         var task = LoadAndAddToListAsync(loadedReplays, r);
                         tasks.Add(task);
+                        if (singleThreaded)
+                            task.Wait();
                     }
 
                     results = await Task.WhenAll(tasks);
                 });
                 advancedReplays.AddRange(loadedReplays);
+                LastUpdateCall("Loaded advanced replays from database.", loadedReplays.Count);
                 var notLoadedReplays = new List<Replay>();
                 foreach (var (success, replay) in results)
                 {
@@ -105,6 +110,7 @@ namespace RLStats_Classes.MainClasses
                 ReplayDatabase.SaveReplayAsync(replay);
                 ProgressState.PartCount++;
             }
+            LastUpdateCall("Downlaoded advanced Replays", replaysToDownload.Count);
         }
 
         private async Task SortReplays(List<Replay> replays, List<Replay> replaysToDownload,
@@ -123,6 +129,7 @@ namespace RLStats_Classes.MainClasses
                     Thread.Sleep(100);
                 }
             });
+            LastUpdateCall("Sorted replays", replays.Count);
         }
 
         private void SortAndAddToList(List<Replay> replaysToDownload, List<Replay> replaysToLoadFromDatabase,

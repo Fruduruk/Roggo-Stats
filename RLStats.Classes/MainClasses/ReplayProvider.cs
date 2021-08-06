@@ -23,7 +23,7 @@ namespace RLStats_Classes.MainClasses
             sw.Start();
             var (replays, doubleReplays) = await GetDataPack(filter);
             sw.Stop();
-            ProgressState.CurrentMessage = "Downlad finished.";
+            LastUpdateCall("Downlad finished.", replays.Length);
             response.DoubleReplays = doubleReplays;
             response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;

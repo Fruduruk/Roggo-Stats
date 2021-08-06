@@ -10,6 +10,6 @@ namespace RLStats_Classes.MainClasses.Interfaces
     public interface IAdvancedReplayProvider
     {
         event EventHandler<ProgressState> DownloadProgressUpdated;
-        Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays);
+        Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false);
     }
 }

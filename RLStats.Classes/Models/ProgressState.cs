@@ -14,6 +14,8 @@ namespace RLStats_Classes.Models
 
         public bool Initial { get; set; }
 
+        public bool LastCall { get; set; }
+
         public string CurrentMessage
         {
             get => _currentMessage;

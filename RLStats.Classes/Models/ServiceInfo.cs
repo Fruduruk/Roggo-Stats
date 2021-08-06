@@ -1,6 +1,6 @@
 ﻿using RLStats_Classes.MainClasses;
+
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace RLStats_Classes.Models
 {
@@ -8,7 +8,7 @@ namespace RLStats_Classes.Models
     {
         public ServiceTokenInfo TokenInfo { get; set; }
         public IList<APIRequestFilter> Filters { get; set; } = new List<APIRequestFilter>();
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public bool Available { get; set; } = true;
     }
 }

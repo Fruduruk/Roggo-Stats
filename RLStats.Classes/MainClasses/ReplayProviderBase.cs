@@ -36,5 +36,14 @@ namespace RLStats_Classes.MainClasses
             OnDownloadProgressUpdate(this, new PropertyChangedEventArgs("Initial"));
             ProgressState.Initial = false;
         }
+
+        protected void LastUpdateCall(string message, int count)
+        {
+            ProgressState.FalsePartCount = 0;
+            ProgressState.PartCount = count;
+            ProgressState.TotalCount = count;
+            ProgressState.CurrentMessage = message;
+            ProgressState.LastCall = true;
+        }
     }
 }

@@ -45,7 +45,7 @@ namespace RLStats_Classes.MainClasses
 
         private static string GetRLStatsFolder()
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Rocket League Stats");
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "Rocket League Stats");
             _ = Directory.CreateDirectory(path);
             return path;
         }
