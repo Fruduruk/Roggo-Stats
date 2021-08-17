@@ -36,6 +36,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -192,6 +193,20 @@
                       Style="{DynamicResource comboBoxStyle}"/>
                 <TextBox Name="tbSteamID"
                      Grid.Row="6"
+                     Grid.Column="1"
+                     Visibility="Collapsed"
+                     Style="{DynamicResource textBoxStyle}"/>
+                <CheckBox x:Name="cbAlsoDownloadReplayFiles" 
+                          Content="Also download replay files"
+                          Style="{DynamicResource checkBoxStyle}"
+                          Grid.Row="8" Grid.Column="0"
+                          Checked="CbAlsoDownloadReplayFiles_Click">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                <TextBox Name="tbxAlsoDownloadReplayFiles"
+                     Grid.Row="8"
                      Grid.Column="1"
                      Visibility="Collapsed"
                      Style="{DynamicResource textBoxStyle}"/>

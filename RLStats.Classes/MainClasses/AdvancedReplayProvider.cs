@@ -19,6 +19,8 @@ namespace RLStats_Classes.MainClasses
 
         public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false)
         {
+            if (Api.StoppingToken.IsCancellationRequested)
+                return new List<AdvancedReplay>();
             InitializeNewProgress();
             ReplayDatabase.CacheHits = 0;
             ReplayDatabase.CacheMisses = 0;
@@ -27,10 +29,14 @@ namespace RLStats_Classes.MainClasses
             var replaysToLoadFromDatabase = new List<Replay>();
             ProgressState.CurrentMessage = "Sorting advanced replays.";
             await SortReplays(new List<Replay>(replays), replaysToDownload, replaysToLoadFromDatabase);
+            if (Api.StoppingToken.IsCancellationRequested)
+                return new List<AdvancedReplay>();
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Loading advanced replays from database.";
             var replaysToReDownload = await LoadReplays(advancedReplays, replaysToLoadFromDatabase, singleThreaded);
             replaysToDownload.AddRange(replaysToReDownload);
+            if (Api.StoppingToken.IsCancellationRequested)
+                return new List<AdvancedReplay>();
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Downloading advanced replays.";
             await DownloadReplays(advancedReplays, replaysToDownload);
@@ -83,16 +89,16 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r)
         {
-            var ar = await ReplayDatabase.LoadReplayAsync(r);
+            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r,Api.StoppingToken);
             
-            if (ar is null)
+            if (advancedReplay is null)
             {
                 ProgressState.FalsePartCount++;
                 return (false, r);
             }
             lock (advancedReplays)
             {
-                advancedReplays.Add(ar);
+                advancedReplays.Add(advancedReplay);
             }
             ProgressState.PartCount++;
 
@@ -109,6 +115,8 @@ namespace RLStats_Classes.MainClasses
                 advancedReplays.Add(replay);
                 ReplayDatabase.SaveReplayAsync(replay);
                 ProgressState.PartCount++;
+                if (Api.StoppingToken.IsCancellationRequested)
+                    break;
             }
             LastUpdateCall("Downlaoded advanced Replays", replaysToDownload.Count);
         }

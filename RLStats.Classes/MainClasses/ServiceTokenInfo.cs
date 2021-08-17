@@ -1,5 +1,6 @@
 ﻿using RLStats_Classes.MainClasses.Interfaces;
 using System;
+using System.Diagnostics;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -14,17 +15,9 @@ namespace RLStats_Classes.MainClasses
         }
         public double GetSpeed()
         {
-            if (Type is null)
-                throw new Exception("Type was null");
-            return Type switch
-            {
-                "gc" => 0.5d,
-                "champion" => 0.5d,
-                "diamond" => 0.27d,
-                "gold" => 0.13d,
-                "regular" => 0.13d,
-                _ => throw new Exception("Unknown type: " + Type)
-            };
+            if (Debugger.IsAttached)
+                return 16d;
+            return 0.067d;
         }
         public double GetHourLimit()
         {
