@@ -20,11 +20,12 @@ namespace Replay_Download_Service
     {
         private const int ProgressBarLength = 90;
         private const string BlockValueString = "■";
+
         private static string LogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceLog.txt");
+        private static string UpdateLogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceUpdateLog.txt");
         private static Stopwatch UpdateWatch { get; set; } = new Stopwatch();
         private static ILogger<Worker> Logger { get; set; }
         private static CancellationToken StoppingToken { get; set; }
-        private static void LogObject(object o) => Log(JsonConvert.SerializeObject(o, Formatting.Indented));
 
         public static Task ExecuteServiceAsync(ILogger<Worker> logger, CancellationToken stoppingToken)
         {
@@ -36,11 +37,12 @@ namespace Replay_Download_Service
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     var sInfo = new ServiceInfoIO().GetServiceInfo();
-                    Log($"Cycle started: {DateTime.Now}");
+                    Log($"CycleInterval: {sInfo.CycleIntervalInHours}");
+                    Log($"Cycle started.");
                     await StartDownloadCycle(sInfo);
                     Log("Cycle finished.");
-                    Log($"Next cycle starts at {DateTime.Now.AddHours(1)}");
-                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    Log($"Next cycle starts at {DateTime.Now.AddHours(sInfo.CycleIntervalInHours)}");
+                    await Task.Delay(TimeSpan.FromHours(sInfo.CycleIntervalInHours), stoppingToken);
                 }
             }, stoppingToken);
         }
@@ -61,9 +63,9 @@ namespace Replay_Download_Service
 
             foreach (var filter in serviceInfo.Filters)
             {
-                //await Task.Delay(TimeSpan.FromSeconds(5), StoppingToken);
+                Log($"Started collecting replays from \"{filter.FilterName}\"");
                 var response = await replayProvider.CollectReplaysAsync(filter);
-                Log($"Collected {response.Replays.Count()} replays from filter \"{filter.FilterName}\" in {response.ElapsedMilliseconds / 1000d} seconds.");
+                Log($"Collected {response.Replays.Count()} replays from \"{filter.FilterName}\" in {response.ElapsedMilliseconds / 1000d} seconds.");
                 var watch = Stopwatch.StartNew();
                 var advancedReplays = await advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(response.Replays));
                 Log($"Collected {advancedReplays.Count} advanced replays from filter \"{filter.FilterName}\" in {watch.ElapsedMilliseconds / 1000d} seconds.");
@@ -88,6 +90,7 @@ namespace Replay_Download_Service
 
         private static void Log(string text, bool debug = false)
         {
+            text = $"{DateTime.Now}: {text}";
             if (debug)
                 Logger.LogDebug(text);
             else
@@ -110,5 +113,21 @@ namespace Replay_Download_Service
                 return builder.ToString();
             }
         }
+
+        //private static void AppendLogLine(string text)
+        //{
+        //    Logger.LogInformation(text);
+        //    File.AppendAllLines(LogPath, new string[] { text });
+        //}
+
+        //private static void UpdateLastLogLine(string text)
+        //{
+        //    lock (LogPath)
+        //    {
+        //        var lines = File.ReadAllLines(LogPath);
+        //        lines[lines.Length - 1] = text;
+        //        File.WriteAllLines(LogPath, lines);
+        //    }
+        //}
     }
 }

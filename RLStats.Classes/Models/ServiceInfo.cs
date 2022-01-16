@@ -8,6 +8,7 @@ namespace RLStats_Classes.Models
     {
         public ServiceTokenInfo TokenInfo { get; set; }
         public IList<APIRequestFilter> Filters { get; set; } = new List<APIRequestFilter>();
+        public double CycleIntervalInHours { get; set; }
         [Newtonsoft.Json.JsonIgnore]
         public bool Available { get; set; } = true;
     }
