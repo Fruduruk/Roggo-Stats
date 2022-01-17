@@ -1,11 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>RLStats_Classes</RootNamespace>
     <PackageId>RLStats.Classes</PackageId>
+	<Authors>Fruduruk</Authors>
+    <Product>RLStats.Classes</Product>
+    <Description>All the main classes for the ballchasing.com connection.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>2.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
