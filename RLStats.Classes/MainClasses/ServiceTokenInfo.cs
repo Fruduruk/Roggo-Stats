@@ -15,7 +15,9 @@ namespace RLStats_Classes.MainClasses
         }
         public double GetSpeed()
         {
-            return 0.034d;
+            if (Debugger.IsAttached)
+                return 16d;
+            return 0.067d;
         }
         public double GetHourLimit()
         {

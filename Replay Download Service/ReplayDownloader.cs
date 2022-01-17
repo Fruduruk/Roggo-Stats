@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿
+using Ionic.Zip;
+
+using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
@@ -16,12 +19,13 @@ using System.Threading.Tasks;
 
 namespace Replay_Download_Service
 {
-    public class ReplayDownloader
+    public static class ReplayDownloader
     {
         private const int ProgressBarLength = 90;
         private const string BlockValueString = "■";
 
-        private static string LogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceLog.txt");
+        private static string ServiceLogsZipPath { get; set; } = Path.Combine(RLConstants.RLStatsFolder, "ServiceLogs.zip");
+        private static string LogPath => Path.Combine(RLConstants.RLStatsFolder, "ServiceLog.txt");
         private static string UpdateLogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceUpdateLog.txt");
         private static Stopwatch UpdateWatch { get; set; } = new Stopwatch();
         private static ILogger<Worker> Logger { get; set; }
@@ -37,12 +41,18 @@ namespace Replay_Download_Service
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     var sInfo = new ServiceInfoIO().GetServiceInfo();
+                    if (File.Exists(LogPath))
+                        ZipOldLog();
+
                     Log($"CycleInterval: {sInfo.CycleIntervalInHours}");
                     Log($"Cycle started.");
                     await StartDownloadCycle(sInfo);
                     Log("Cycle finished.");
                     Log($"Next cycle starts at {DateTime.Now.AddHours(sInfo.CycleIntervalInHours)}");
+
                     await Task.Delay(TimeSpan.FromHours(sInfo.CycleIntervalInHours), stoppingToken);
+
+                    //await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                 }
             }, stoppingToken);
         }
@@ -99,7 +109,7 @@ namespace Replay_Download_Service
             var progressBar = (!e.TotalCount.Equals(0)) ? GetProgressBar((double)e.PartCount / (double)(e.TotalCount - e.FalsePartCount)) : string.Empty;
             var outOf = $"{e.PartCount}/{e.TotalCount - e.FalsePartCount}";
             var text = $"{e.CurrentMessage} {outOf} {progressBar}";
-            if (UpdateWatch.ElapsedMilliseconds > 5000 || e.LastCall)
+            if (UpdateWatch.ElapsedMilliseconds > 100 || e.LastCall)
             {
                 UpdateWatch.Restart();
                 Log(text, true);
@@ -130,6 +140,18 @@ namespace Replay_Download_Service
                     builder.Append(" ");
                 return builder.ToString();
             }
+        }
+
+        private static void ZipOldLog()
+        {
+            ZipFile archive;
+            if (!File.Exists(ServiceLogsZipPath))
+                archive = new ZipFile(ServiceLogsZipPath);
+            else
+                archive = ZipFile.Read(ServiceLogsZipPath);
+            archive.AddEntry($"{DateTime.Now:yyyy-MM-dd hh-mm-ss}.txt", File.ReadAllText(LogPath));
+            archive.Save();
+            File.Delete(LogPath);
         }
 
         //private static void AppendLogLine(string text)
