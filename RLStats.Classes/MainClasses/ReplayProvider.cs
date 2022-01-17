@@ -4,6 +4,7 @@ using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
@@ -30,6 +31,12 @@ namespace RLStats_Classes.MainClasses
             _cancelDownload = false;
             GC.Collect();
             return response;
+        }
+
+        public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter, CancellationToken cancellationToken)
+        {
+            Api.StoppingToken = cancellationToken;
+            return await CollectReplaysAsync(filter);
         }
 
         public void CancelDownload() => _cancelDownload = true;
@@ -80,7 +87,7 @@ namespace RLStats_Classes.MainClasses
                     }
 
                 //check if cancel is requested
-                if (_cancelDownload)
+                if (_cancelDownload || Api.StoppingToken.IsCancellationRequested)
                 {
                     ProgressState.CurrentMessage = "Cancel requested.\nDownload stopped.";
                     break;

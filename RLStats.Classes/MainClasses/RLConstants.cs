@@ -8,7 +8,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class RLConstants
     {
-        public const int CurrentSeason = 3;
+        public const int CurrentSeason = 4;
 
         private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d");
 
@@ -19,6 +19,7 @@ namespace RLStats_Classes.MainClasses
         }
 
         public static string RLStatsFolder => GetRLStatsFolder();
+
 
         private static string ReadKey(string filePath)
         {

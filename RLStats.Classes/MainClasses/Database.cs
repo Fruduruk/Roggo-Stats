@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RLStats_Classes.MainClasses
@@ -127,9 +128,11 @@ namespace RLStats_Classes.MainClasses
             return path;
         }
 
-        public async Task<AdvancedReplay> LoadReplayAsync(Replay r)
+        public async Task<AdvancedReplay> LoadReplayAsync(Replay r, CancellationToken cancellationToken)
         {
             AdvancedReplay advancedReplay = null;
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             lock (ReplayCache)
                 foreach (var cacheEntry in ReplayCache)
                 {
@@ -140,7 +143,8 @@ namespace RLStats_Classes.MainClasses
                         return cacheEntry;
                     }
                 }
-
+            if (cancellationToken.IsCancellationRequested)
+                return null;
 
             CacheMisses++;
             var replayPath = await GetReplayPath(r);
@@ -150,7 +154,11 @@ namespace RLStats_Classes.MainClasses
                     _ = IdCollection.Remove(new Guid(r.Id));
                 return advancedReplay;
             }
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             var replayBatch = await GetReplayBatch(replayPath);
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             foreach (var replay in replayBatch)
             {
                 if (replay.Id.Equals(r.Id))

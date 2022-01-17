@@ -60,20 +60,38 @@ namespace Replay_Download_Service
             replayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
             var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo);
             advancedReplayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
+            var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo);
+            replayFileProvider.DownloadProgressUpdated += DownloadProgressUpdated;
 
             foreach (var filter in serviceInfo.Filters)
             {
+                //Download replay data
                 Log($"Started collecting replays from \"{filter.FilterName}\"");
-                var response = await replayProvider.CollectReplaysAsync(filter);
+                var response = await replayProvider.CollectReplaysAsync(filter, StoppingToken);
                 Log($"Collected {response.Replays.Count()} replays from \"{filter.FilterName}\" in {response.ElapsedMilliseconds / 1000d} seconds.");
+
+                //Download advanced replay data
                 var watch = Stopwatch.StartNew();
                 var advancedReplays = await advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(response.Replays));
                 Log($"Collected {advancedReplays.Count} advanced replays from filter \"{filter.FilterName}\" in {watch.ElapsedMilliseconds / 1000d} seconds.");
+
+                //Download replay files
+                if (filter.AlsoSaveReplayFiles)
+                {
+                    watch = Stopwatch.StartNew();
+                    var nameIdPairs = new List<(string name, string id)>();
+                    foreach (var replay in response.Replays)
+                        nameIdPairs.Add((replay.RocketLeagueId, replay.Id));
+
+                    await replayFileProvider.DownloadAndSaveReplayFilesAsync(filter.ReplayFilePath, nameIdPairs, StoppingToken);
+                    Log($"Collected {advancedReplays.Count} replay files from filter \"{filter.FilterName}\" in {watch.ElapsedMilliseconds / 1000d} seconds.");
+                }
                 advancedReplays.Clear();
             }
 
             replayProvider.DownloadProgressUpdated -= DownloadProgressUpdated;
             advancedReplayProvider.DownloadProgressUpdated -= DownloadProgressUpdated;
+            replayFileProvider.DownloadProgressUpdated -= DownloadProgressUpdated;
         }
 
         private static void DownloadProgressUpdated(object sender, ProgressState e)

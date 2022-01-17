@@ -10,6 +10,12 @@ namespace RLStats_Classes.MainClasses
         public const string BallchasingApiUrl = "https://ballchasing.com/api/replays";
         private bool _anyAdded = false;
         private string Base { get; set; } = BallchasingApiUrl;
+
+        public static string GetReplayFileUrl(string replayId)
+        {
+            return $"{BallchasingApiUrl}/{replayId}/file";
+        }
+
         public void SetPlayerName(string value)
         {
             AddBinding();
