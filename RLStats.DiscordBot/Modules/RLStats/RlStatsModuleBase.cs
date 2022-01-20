@@ -124,7 +124,7 @@ namespace Discord_Bot.Modules.RLStats
 
                 var dMessage = await Context.Channel.SendMessageAsync($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
 
-                var response = await ReplayProvider.CollectReplaysAsync(filter);
+                var response = await ReplayProvider.CollectReplaysAsync(filter, false);
 
                 var advancedReplays = await AdvancedReplayProvider.GetAdvancedReplayInfosAsync(response.Replays.ToList());
 
@@ -308,7 +308,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             var averages = new List<AveragePlayerStats>();
             var dateRange = ConvertTimeRangeToDateTimeRange(timeRange);
-            averages.AddRange(await AverageStatsForTime(names.ToArray(), dateRange));
+            averages.AddRange(await AverageStatsForTime(names.ToArray(), dateRange, playedTogether: playedTogether));
 
             return averages;
         }

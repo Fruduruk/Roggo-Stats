@@ -85,6 +85,10 @@ namespace RLStats_Classes.MainClasses
                 builder.SetStartDate(DateRange.Item1);
                 builder.SetEndDate(DateRange.Item2.AddDays(1));
             }
+
+            //Always sort them by upload date
+            builder.SetSortByUploadDate();
+
             return builder.GetApiUrl();
         }
     }

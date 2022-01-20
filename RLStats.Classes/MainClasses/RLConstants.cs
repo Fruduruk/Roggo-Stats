@@ -8,7 +8,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class RLConstants
     {
-        public const int CurrentSeason = 4;
+        public const int CurrentSeason = 5;
 
         private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d");
 
@@ -20,6 +20,7 @@ namespace RLStats_Classes.MainClasses
 
         public static string RLStatsFolder => GetRLStatsFolder();
 
+        public static string ReplayCacheFolder => GetReplayCacheFolder();
 
         private static string ReadKey(string filePath)
         {
@@ -48,6 +49,14 @@ namespace RLStats_Classes.MainClasses
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), "Rocket League Stats");
             _ = Directory.CreateDirectory(path);
+            return path;
+        }
+
+        private static string GetReplayCacheFolder()
+        {
+            var path = Path.Combine(GetRLStatsFolder(), "ReplayCache");
+            var dir = Directory.CreateDirectory(path);
+            dir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
             return path;
         }
 
