@@ -80,12 +80,12 @@ namespace Replay_Download_Service
                 {
                     //Download replay data
                     Log($"Started collecting replays from \"{filter.FilterName}\"");
-                    var response = await replayProvider.CollectReplaysAsync(filter, StoppingToken, true);
+                    var response = await replayProvider.CollectReplaysAsync(filter, StoppingToken, checkCache: true);
                     Log($"Collected {response.Replays.Count()} replays from \"{filter.FilterName}\" in {response.ElapsedMilliseconds / 1000d} seconds.");
 
                     //Download advanced replay data
                     var watch = Stopwatch.StartNew();
-                    var advancedReplays = await advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(response.Replays), true);
+                    var advancedReplays = await advancedReplayProvider.GetAdvancedReplayInfosAsync(new List<Replay>(response.Replays), singleThreaded: true);
                     Log($"Collected {advancedReplays.Count} advanced replays from filter \"{filter.FilterName}\" in {watch.ElapsedMilliseconds / 1000d} seconds.");
 
 

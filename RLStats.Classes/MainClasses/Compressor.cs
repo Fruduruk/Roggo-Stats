@@ -52,21 +52,21 @@ namespace RLStats_Classes.MainClasses
         }
         #endregion
         #region string
-        public static byte[] CompressString(string text) => CompressBytes(Encoding.UTF8.GetBytes(text));
+        public static byte[] CompressString(string text, bool encrypt = true) => CompressBytes(Encoding.UTF8.GetBytes(text), encrypt);
 
-        public static string DecompressBytesToString(byte[] compressedBytes) => Encoding.UTF8.GetString(DecompressBytes(compressedBytes));
+        public static string DecompressBytesToString(byte[] compressedBytes, bool decrypt = true) => Encoding.UTF8.GetString(DecompressBytes(compressedBytes, decrypt));
         #endregion
         #region objects
-        public static byte[] ConvertObject<T>(T obj) where T : new()
+        public static byte[] ConvertObject<T>(T obj, bool encrypt = true) where T : new()
         {
             var jsonString = JsonConvert.SerializeObject(obj);
-            var compressedBytes = CompressString(jsonString);
+            var compressedBytes = CompressString(jsonString, encrypt);
             return compressedBytes;
         }
 
-        public static T ConvertObject<T>(byte[] bytes)
+        public static T ConvertObject<T>(byte[] bytes, bool decrypt = true)
         {
-            var decompressedBytesAsString = DecompressBytesToString(bytes);
+            var decompressedBytesAsString = DecompressBytesToString(bytes, decrypt);
             var obj = JsonConvert.DeserializeObject<T>(decompressedBytesAsString);
             return obj;
         }
