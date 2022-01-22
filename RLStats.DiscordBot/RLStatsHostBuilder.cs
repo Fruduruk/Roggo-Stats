@@ -3,6 +3,7 @@ using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 
+using Discord_Bot.Configuration;
 using Discord_Bot.Services;
 
 using Microsoft.Extensions.Configuration;
@@ -51,12 +52,13 @@ namespace Discord_Bot
                     config.CaseSensitiveCommands = false;
                     config.LogLevel = LogSeverity.Verbose;
                     config.DefaultRunMode = RunMode.Async;
-                    config.CaseSensitiveCommands = false;
                 })
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
+                    services.AddSingleton(new RecentlyAddedEntries());
                     services.AddHostedService<CommandHandler>();
+                    services.AddHostedService<RecurringReportsService>();
                 })
                 .UseConsoleLifetime();
             _builder = builder;

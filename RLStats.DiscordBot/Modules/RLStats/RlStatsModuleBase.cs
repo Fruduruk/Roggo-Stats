@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +44,20 @@ namespace Discord_Bot.Modules.RLStats
                 return false;
             else
             {
-                throw new Exception($"{together} is not a valid together parameter. Use y or n");
+                throw new ArgumentOutOfRangeException($"{together} is not a valid together parameter. Use y or n");
+            }
+        }
+
+        protected bool CanConvertTogetherToBool(string together)
+        {
+            try
+            {
+                _ = ConvertTogetherToBool(together);
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false;
             }
         }
         protected void AddNameOrSteamIds(string[] namesOrIds, APIRequestFilter filter)
@@ -266,7 +280,13 @@ namespace Discord_Bot.Modules.RLStats
             }
         }
 
-        protected async Task Compare<T>(string time, string[] names, bool playedTogether = true)
+        /// <summary>
+        /// Converts d,w,m or y to time ranges.
+        /// </summary>
+        /// <param name="time">d,w,m or y</param>
+        /// <returns>The first one is the start time range the second the end time range.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throws if time is not d,w,m or y</exception>
+        protected (TimeRange, TimeRange) ConvertToTimeRanges(string time)
         {
             TimeRange startTimeRange;
             TimeRange endTimeRange;
@@ -293,15 +313,40 @@ namespace Discord_Bot.Modules.RLStats
                     endTimeRange = TimeRange.LastYear;
                     break;
                 default:
-                    await Context.Channel.SendMessageAsync($"{time} is not a valid time parameter. Use d,w,m or y.");
-                    return;
+                    throw new ArgumentOutOfRangeException($"{time} is not a valid time parameter. Use d,w,m or y.");
             }
+            return (startTimeRange, endTimeRange);
+        }
 
-            var stats = await GetAverageStatsForTimeRange(names, startTimeRange, playedTogether);
+        protected bool CanConvertTime(string time)
+        {
+            try
+            {
+                _ = ConvertToTimeRanges(time);
+                return true;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false;
+            }
+        }
 
-            var statsToCompare = await GetAverageStatsForTimeRange(names, endTimeRange, playedTogether);
+        protected async Task Compare<T>(string time, string[] names, bool playedTogether = true)
+        {
+            try
+            {
+                var (startTimeRange, endTimeRange) = ConvertToTimeRanges(time);
 
-            await OutputEpicAsync<T>(statsToCompare, stats);
+                var stats = await GetAverageStatsForTimeRange(names, startTimeRange, playedTogether);
+
+                var statsToCompare = await GetAverageStatsForTimeRange(names, endTimeRange, playedTogether);
+
+                await OutputEpicAsync<T>(statsToCompare, stats);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                await Context.Channel.SendMessageAsync(e.Message);
+            }
         }
 
         protected async Task<IEnumerable<AveragePlayerStats>> GetAverageStatsForTimeRange(IEnumerable<string> names, TimeRange timeRange, bool playedTogether)
@@ -370,6 +415,51 @@ namespace Discord_Bot.Modules.RLStats
                 if (nameOrId.ToLower().Equals("danschl"))
                     nameOrSteamIds[i] = "76561198095673686";
             }
+        }
+
+        protected async Task<bool> CheckParameters(string together, string time = null, params string[] names)
+        {
+            var paramsCorrect = true;
+            var builder = new StringBuilder("False parameters:");
+            try
+            {
+                if (names is null || names.Length == 0)
+                {
+                    throw new ArgumentOutOfRangeException("No name was given");
+                }
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                builder.Append('\n')
+                    .Append(e.Message);
+                paramsCorrect = false;
+            }
+            try
+            {
+                _ = ConvertTogetherToBool(together);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                builder.Append('\n')
+                    .Append(e.Message);
+                paramsCorrect = false;
+            }
+            if (time != null)
+            {
+                try
+                {
+                    _ = ConvertToTimeRanges(time);
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    builder.Append('\n')
+                        .Append(e.Message);
+                    paramsCorrect = false;
+                }
+            }
+            if (!paramsCorrect)
+                await Context.Channel.SendMessageAsync(builder.ToString());
+            return paramsCorrect;
         }
     }
 
