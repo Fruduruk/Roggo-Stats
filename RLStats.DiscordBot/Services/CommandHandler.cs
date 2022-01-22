@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using System;
 using System.Reflection;
@@ -12,14 +13,14 @@ using System.Threading.Tasks;
 
 namespace Discord_Bot.Services
 {
-    public class CommandHandler : InitializedService
+    public class CommandHandler : DiscordClientService
     {
         private readonly IServiceProvider _provider;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _service;
         private readonly IConfiguration _config;
 
-        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, CommandService service, IConfiguration config)
+        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, ILogger<DiscordClientService> logger, CommandService service, IConfiguration config) : base(client, logger)
         {
             _provider = provider;
             _client = client;
@@ -27,7 +28,7 @@ namespace Discord_Bot.Services
             _config = config;
         }
 
-        public override async Task InitializeAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _client.MessageReceived += OnMessageReceived;
 
@@ -113,5 +114,7 @@ namespace Discord_Bot.Services
 
             await context.Channel.SendMessageAsync(null, false, titleEmbedBuilder.Build());
         }
+
+        
     }
 }
