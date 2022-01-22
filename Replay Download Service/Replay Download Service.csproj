@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<UserSecretsId>dotnet-Replay_Download_Service-BFD8C9E1-E9F5-42ED-A2CE-574E131BEA7C</UserSecretsId>
 		<RootNamespace>Replay_Download_Service</RootNamespace>
 	</PropertyGroup>
