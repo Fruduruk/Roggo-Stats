@@ -16,12 +16,14 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
         public void StoreReplaysInCache(CollectReplaysResponse response, APIRequestFilter filter)
         {
             var fileName = $"{Guid.NewGuid()}.7z";
-            if (HasCacheFile(filter))
+            var hasCacheFile = HasCacheFile(filter);
+            if (hasCacheFile)
                 fileName = GetFileName(filter);
             var filePath = Path.Combine(RLConstants.ReplayCacheFolder, fileName);
 
             File.WriteAllBytes(filePath, Compressor.ConvertObject(new List<Replay>(response.Replays), false));
-            IndexCollection.Add(new CacheEntry { FileName = fileName, URL = filter.GetApiUrl() });
+            if (!hasCacheFile)
+                IndexCollection.Add(new CacheEntry { FileName = fileName, URL = filter.GetApiUrl() });
         }
 
         private string GetFileName(APIRequestFilter filter)

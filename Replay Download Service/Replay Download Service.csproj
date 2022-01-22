@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>dotnet-Replay_Download_Service-BFD8C9E1-E9F5-42ED-A2CE-574E131BEA7C</UserSecretsId>
-    <RootNamespace>Replay_Download_Service</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<UserSecretsId>dotnet-Replay_Download_Service-BFD8C9E1-E9F5-42ED-A2CE-574E131BEA7C</UserSecretsId>
+		<RootNamespace>Replay_Download_Service</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DotNetZip" Version="1.16.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DotNetZip" Version="1.16.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
+	</ItemGroup>
 </Project>
