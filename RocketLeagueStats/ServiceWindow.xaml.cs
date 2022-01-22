@@ -1,5 +1,7 @@
 ﻿using RLStats_Classes.MainClasses;
 using RLStats_Classes.Models;
+
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -14,6 +16,7 @@ namespace RocketLeagueStats
     {
         public AuthTokenInfo AuthTokenInfo { get; }
         private bool dontClose;
+
         public bool DontClose
         {
             get => dontClose;
@@ -27,6 +30,29 @@ namespace RocketLeagueStats
             }
         }
         public ObservableCollection<APIRequestFilter> Filters { get; set; } = new ObservableCollection<APIRequestFilter>();
+        public double CycleIntervalInHours
+        {
+            get => IsDouble(hoursToWaitAfterCycleTextBox.Text) ? Convert.ToDouble(hoursToWaitAfterCycleTextBox.Text) : 0;
+
+            set => hoursToWaitAfterCycleTextBox.Text = value.ToString();
+        }
+
+        private bool IsDouble(string text)
+        {
+            bool hasComma = false;
+
+            foreach (var c in text)
+            {
+                if (!char.IsDigit(c))
+                {
+                    if (c.Equals(',') && !hasComma)
+                        hasComma = true;
+                    else return false;
+                }
+            }
+            return true;
+        }
+
         public APIRequestFilter SelectedFilter { get; set; }
         public void ServiceWindow_Closing(object sender, CancelEventArgs e)
         {
@@ -60,6 +86,7 @@ namespace RocketLeagueStats
             var info = new ServiceInfoIO().GetServiceInfo();
             if (info.Available)
             {
+                CycleIntervalInHours = info.CycleIntervalInHours;
                 Filters.Clear();
                 foreach (var f in info.Filters)
                     Filters.Add(f);
@@ -129,6 +156,7 @@ namespace RocketLeagueStats
         {
             var info = new ServiceInfo
             {
+                CycleIntervalInHours = CycleIntervalInHours,
                 Available = true,
                 Filters = Filters,
                 TokenInfo = new ServiceTokenInfo(AuthTokenInfo.Token)

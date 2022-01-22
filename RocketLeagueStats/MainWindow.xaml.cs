@@ -139,7 +139,7 @@ namespace RocketLeagueStats
             CreatePlayerBoxes(orangeSideGrid, replay.Orange);
         }
 
-        private void CreatePlayerBoxes(Grid grid, Team team)
+        private static void CreatePlayerBoxes(Grid grid, Team team)
         {
             grid.Children.Clear();
             grid.RowDefinitions.Clear();
@@ -192,7 +192,7 @@ namespace RocketLeagueStats
         private void LoadFile(string fileName)
         {
             var compressedBytes = File.ReadAllBytes(fileName);
-            var jsonString = Compressor.DecompressBytes(compressedBytes);
+            var jsonString = Compressor.DecompressBytesToString(compressedBytes);
             Replays = JsonConvert.DeserializeObject<List<Replay>>(jsonString);
         }
 

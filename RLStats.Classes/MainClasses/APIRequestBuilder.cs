@@ -10,6 +10,12 @@ namespace RLStats_Classes.MainClasses
         public const string BallchasingApiUrl = "https://ballchasing.com/api/replays";
         private bool _anyAdded = false;
         private string Base { get; set; } = BallchasingApiUrl;
+
+        public static string GetReplayFileUrl(string replayId)
+        {
+            return $"{BallchasingApiUrl}/{replayId}/file";
+        }
+
         public void SetPlayerName(string value)
         {
             AddBinding();
@@ -85,6 +91,12 @@ namespace RLStats_Classes.MainClasses
             Base += "replay-date-before=" + DateTimeHelper.ToRfc3339String(endDate);
             _anyAdded = true;
         }
+        public void SetSortByUploadDate()
+        {
+            AddBinding();
+            Base += "sort-by=created";
+            _anyAdded = true;
+        }
         public string GetApiUrl()
         {
             return Base;
@@ -94,7 +106,9 @@ namespace RLStats_Classes.MainClasses
             Base = BallchasingApiUrl;
             _anyAdded = false;
         }
+
         private void AddBinding() => Base += (_anyAdded ? "&" : "?");
+
         public static string GetSpecificReplayUrl(string id)
         {
             return $"{BallchasingApiUrl}/{id}";

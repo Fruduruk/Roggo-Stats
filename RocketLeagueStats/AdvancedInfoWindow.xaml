@@ -37,8 +37,8 @@
             <TextBlock x:Name="tbInfo"
                        Style="{DynamicResource textBlockStyle}"
                        Grid.Row="0"/>
-            <components:LoadingGrid x:Name="loadingGrid"
-                         Grid.Row="1"/>
+            <components:LoadingGrid x:Name="MainLoadingGrid"
+                                    Grid.Row="1"/>
         </Grid>
     </Grid>
 </Window>

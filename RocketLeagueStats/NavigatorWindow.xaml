@@ -34,8 +34,16 @@
                         <components:ReplayPickerControl x:Name="RpcReplayToComparePicker"/>
                     </TabItem>
                 </TabControl>
-
-                <components:LoadingGrid Grid.Column="1" x:Name="loadingGrid"/>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <components:LoadingGrid Grid.Row="0"
+                                            x:Name="MainLoadingGrid"/>
+                    <components:LoadingGrid Grid.Row="1"
+                                            x:Name="SecondLoadingGrid"/>
+                </Grid>
             </Grid>
         </Border>
         <Border Grid.Row="1" 

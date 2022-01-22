@@ -14,9 +14,12 @@ namespace RLStats_Classes.MainClasses
     public class BallchasingApi
     {
         public static BallchasingApi Instance { get; private set; }
+        public CancellationToken StoppingToken { get; set; } = CancellationToken.None;
+        public double MaximumCallsPerSecond { get; set; } = 1000;
         public IAuthTokenInfo TokenInfo { get; }
         private readonly Stopwatch _stopWatch = new();
         private readonly HttpClient _client;
+        private List<string> _calls = new();
         private BallchasingApi(IAuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo ?? throw new ArgumentNullException(nameof(tokenInfo));
@@ -45,6 +48,8 @@ namespace RLStats_Classes.MainClasses
             return await Task.Run(async () =>
             {
                 WaitForYourTurn();
+                lock (_calls)
+                    _calls.Add(url);
                 return await _client.GetAsync(url);
             });
         }
@@ -56,13 +61,16 @@ namespace RLStats_Classes.MainClasses
                 if (_stopWatch.IsRunning)
                 {
                     double speed = TokenInfo.GetSpeed();
-                    var timeToWait = (1000 / speed) * 1.1;
+                    if (speed > MaximumCallsPerSecond)
+                        speed = MaximumCallsPerSecond;
+                    var timeToWait = (1000d / speed) * 1.1; // I use 1.1. That 0.1 extra is a safety buffer.
                     var hasToWait = _stopWatch.ElapsedMilliseconds < timeToWait;
                     if (hasToWait)
                     {
                         var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) -
                                                _stopWatch.ElapsedMilliseconds;
-                        Thread.Sleep((int)actualTimeToWait);
+                        var task = Task.Run(() => Task.Delay((int)actualTimeToWait, StoppingToken));
+                        task.Wait();
                     }
 
                     _stopWatch.Stop();
@@ -126,6 +134,32 @@ namespace RLStats_Classes.MainClasses
                 Next = jData.next,
                 Success = true,
             };
+        }
+
+        public string[] GetCalls()
+        {
+            lock (_calls)
+            {
+                return _calls.ToArray();
+            }
+        }
+
+        public string[] GetAndDeleteCalls()
+        {
+            lock (_calls)
+            {
+                var callArray = _calls.ToArray();
+                _calls.Clear();
+                return callArray;
+            }
+        }
+
+        public void DeleteCalls()
+        {
+            lock (_calls)
+            {
+                _calls.Clear();
+            }
         }
     }
 }

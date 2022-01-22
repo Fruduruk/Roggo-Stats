@@ -12,7 +12,10 @@ namespace Replay_Download_Service
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseWindowsService()
+                .UseWindowsService(config =>
+                {
+                    config.ServiceName = "Rocket League Stats Replay Downloader";
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();

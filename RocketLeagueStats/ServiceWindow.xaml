@@ -17,19 +17,27 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0"
+                        Orientation="Vertical">
+                <TextBlock Text="Hours to wait after cycle:"
+                           Style="{DynamicResource textBlockStyle}"/>
+                <TextBox x:Name="hoursToWaitAfterCycleTextBox"
+                         Style="{DynamicResource textBoxStyle}"/>
+            </StackPanel>
             <Button x:Name="btnAddFilter"
                     Content="Add Filter"
                     Style="{DynamicResource buttonStyle}"
                     Margin="5"
-                    Grid.Row="0"
+                    Grid.Row="1"
                     Click="BtnAddFilter_Click"/>
             <Button x:Name="btnDeleteFilter"
                     Content="Delete Filter"
                     Style="{DynamicResource buttonStyle}"
                     Margin="5"
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Click="BtnDeleteFilter_Click"/>
             <ListView x:Name="lvFilters"
                       Style="{DynamicResource listViewStyle}"
@@ -37,7 +45,7 @@
                       Margin="5"
                       MouseEnter="LvFilters_MouseEnter"
                       SelectionChanged="LvFilters_SelectionChanged"
-                      Grid.Row="2">
+                      Grid.Row="3">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Filter Name"

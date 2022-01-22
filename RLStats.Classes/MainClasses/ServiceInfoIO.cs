@@ -6,35 +6,30 @@ namespace RLStats_Classes.MainClasses
 {
     public class ServiceInfoIO
     {
-        private string ServiceDirectory { get; set; } = RLConstants.RLStatsFolder + @"\RocketLeagueStatsService";
         private string ServiceFilePath { get; set; }
         public ServiceInfoIO()
         {
-            ServiceFilePath = ServiceDirectory + @"\serviceInfo.json";
-            if (!Directory.Exists(ServiceDirectory))
-                Directory.CreateDirectory(ServiceDirectory);
+            ServiceFilePath = Path.Combine(RLConstants.RLStatsFolder, @"serviceInfo");
+            if (!Directory.Exists(RLConstants.RLStatsFolder))
+                Directory.CreateDirectory(RLConstants.RLStatsFolder);
             if (!File.Exists(ServiceFilePath))
                 File.Create(ServiceFilePath).Dispose();
         }
         public ServiceInfo GetServiceInfo()
         {
-            var info = new ServiceInfo();
-            var text = File.ReadAllText(ServiceFilePath);
-            if (text.Equals(string.Empty))
+            try
             {
-                info.Available = false;
+                var info = Compressor.ConvertObject<ServiceInfo>(File.ReadAllBytes(ServiceFilePath));
                 return info;
             }
-            else
+            catch
             {
-                info = JsonConvert.DeserializeObject<ServiceInfo>(text);
-                return info;
+                return new ServiceInfo { Available = false };
             }
         }
         public void SaveServiceInfo(ServiceInfo info)
         {
-            var jsonString = JsonConvert.SerializeObject(info);
-            File.WriteAllText(ServiceFilePath, jsonString);
+            File.WriteAllBytes(ServiceFilePath, Compressor.ConvertObject(info));
         }
     }
 }

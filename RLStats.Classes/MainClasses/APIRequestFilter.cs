@@ -8,7 +8,9 @@ namespace RLStats_Classes.MainClasses
     {
         public int ReplayCap { get; set; } = 0;
         public string FilterName { get; set; }
+
         #region Checks
+        public bool AlsoSaveReplayFiles { get; set; }
         public bool CheckName { get; set; }
         public bool CheckTitle { get; set; }
         public bool CheckPlaylist { get; set; }
@@ -18,6 +20,7 @@ namespace RLStats_Classes.MainClasses
         public bool CheckDate { get; set; }
         #endregion
         #region Properties
+        public string ReplayFilePath { get; set; } = string.Empty;
         public List<string> Names { get; set; }
         public string Title { get; set; }
         public Playlist Playlist { get; set; }
@@ -39,6 +42,7 @@ namespace RLStats_Classes.MainClasses
             ReplayCap = 0;
             FilterName = string.Empty;
 
+            AlsoSaveReplayFiles = false;
             CheckName = false;
             CheckTitle = false;
             CheckPlaylist = false;
@@ -47,6 +51,7 @@ namespace RLStats_Classes.MainClasses
             CheckSteamId = false;
             CheckDate = false;
 
+            ReplayFilePath = string.Empty;
             Names = new List<string>();
             Title = string.Empty;
             Playlist = 0;
@@ -80,30 +85,11 @@ namespace RLStats_Classes.MainClasses
                 builder.SetStartDate(DateRange.Item1);
                 builder.SetEndDate(DateRange.Item2.AddDays(1));
             }
+
+            //Always sort them by upload date
+            builder.SetSortByUploadDate();
+
             return builder.GetApiUrl();
-        }
-
-        public void Overwrite(APIRequestFilter f)
-        {
-            this.FilterName = f.FilterName;
-
-            this.CheckName = f.CheckName;
-            this.CheckTitle = f.CheckTitle;
-            this.CheckPlaylist = f.CheckPlaylist;
-            this.CheckSeason = f.CheckSeason;
-            this.CheckMatchResult = f.CheckMatchResult;
-            this.CheckSteamId = f.CheckSteamId;
-            this.CheckDate = f.CheckDate;
-
-            this.Names = f.Names;
-            this.Title = f.Title;
-            this.Playlist = f.Playlist;
-            this.FreeToPlaySeason = f.FreeToPlaySeason;
-            this.Season = f.Season;
-            this.MatchResult = f.MatchResult;
-            this.Pro = f.Pro;
-            this.SteamIDs = f.SteamIDs;
-            this.DateRange = f.DateRange;
         }
     }
 }

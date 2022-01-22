@@ -1,5 +1,10 @@
+<<<<<<<< HEAD:RLStats.Classes/MainClasses/FileDatabase.cs
 ﻿using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses.Interfaces;
+========
+﻿
+using RLStats_Classes.AdvancedModels;
+>>>>>>>> master:RLStats.Classes/MainClasses/CacheHandlers/Database.cs
 using RLStats_Classes.Models;
 
 using System;
@@ -7,15 +12,22 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.MainClasses.CacheHandlers
 {
+<<<<<<<< HEAD:RLStats.Classes/MainClasses/FileDatabase.cs
     public class FileDatabase : IRLStatsDatabase
     {
         private ObservableCollection<Guid> IdCollection { get; } = new ObservableCollection<Guid>();
 
         private DirectoryInfo SavingDirectory
+========
+    public class Database : WithIndexFile<Guid>
+    {
+        public DirectoryInfo SavingDirectory
+>>>>>>>> master:RLStats.Classes/MainClasses/CacheHandlers/Database.cs
         {
             get
             {
@@ -28,6 +40,7 @@ namespace RLStats_Classes.MainClasses
 
         private DirectoryInfo _savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
 
+<<<<<<<< HEAD:RLStats.Classes/MainClasses/FileDatabase.cs
         private FileInfo IndexFile
         {
             get
@@ -42,6 +55,9 @@ namespace RLStats_Classes.MainClasses
         private FileInfo _indexFile;
 
         public int CacheSize { get; set; }= 4096;
+========
+        public int CacheSize { get; set; } = 10000;
+>>>>>>>> master:RLStats.Classes/MainClasses/CacheHandlers/Database.cs
 
         public int CacheHits { get; set; } = 0;
 
@@ -49,14 +65,15 @@ namespace RLStats_Classes.MainClasses
 
         public ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
 
+<<<<<<<< HEAD:RLStats.Classes/MainClasses/FileDatabase.cs
         public FileDatabase()
+========
+        public Database() : base(compressed: true)
+>>>>>>>> master:RLStats.Classes/MainClasses/CacheHandlers/Database.cs
         {
-            IndexFile = new FileInfo(SavingDirectory + @"\index.dat");
-            IdCollection = LoadIdListFromFile();
-            IdCollection.CollectionChanged += IdList_CollectionChanged;
+            base.InitializeLate(Path.Combine(SavingDirectory.ToString(), @"index.dat"));
             ReplayCache.CollectionChanged += ReplayCache_CollectionChanged;
         }
-
         private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             while (ReplayCache.Count > CacheSize)
@@ -65,11 +82,9 @@ namespace RLStats_Classes.MainClasses
             }
         }
 
-        private void IdList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SaveIdsInIndexFile(IdCollection);
-
         public bool IsReplayInDatabase(Replay replay)
         {
-            return IdCollection.Contains(Guid.Parse(replay.Id));
+            return IndexCollection.Contains(Guid.Parse(replay.Id));
         }
 
         public void SaveReplayList(List<AdvancedReplay> replays)
@@ -84,21 +99,21 @@ namespace RLStats_Classes.MainClasses
         {
             await Task.Run(() =>
             {
-                lock (IdCollection)
+                lock (IndexCollection)
                 {
-                    if (IdCollection.Contains(Guid.Parse(replay.Id)))
+                    if (IndexCollection.Contains(Guid.Parse(replay.Id)))
                         return;
                     var path = CreateReplayPath(replay);
                     var replayBatch = GetReplayBatch(path).GetAwaiter().GetResult();
                     if (replayBatch.Any(savedReplay => savedReplay.Id.Equals(replay.Id)))
                     {
-                        IdCollection.Add(Guid.Parse(replay.Id));
+                        IndexCollection.Add(Guid.Parse(replay.Id));
                         return;
                     }
                     replayBatch.Add(replay);
                     var bytes = Compressor.ConvertObject(replayBatch);
                     File.WriteAllBytesAsync(path, bytes).Wait();
-                    IdCollection.Add(Guid.Parse(replay.Id));
+                    IndexCollection.Add(Guid.Parse(replay.Id));
                 }
             });
         }
@@ -123,50 +138,60 @@ namespace RLStats_Classes.MainClasses
 
         private string CreateReplayPath(AdvancedReplay replay)
         {
-            var path = $@"{SavingDirectory}\{replay.Id.Substring(0, 1)}";
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            path += $@"\{replay.Id.Substring(1, 1)}.rply";
+            var path = Path.Combine(SavingDirectory.ToString(), replay.Id.Substring(0, 1));
+            Directory.CreateDirectory(path);
+            path = Path.Combine(path, replay.Id.Substring(1, 1));
             return path;
         }
 
-        public async Task<AdvancedReplay> LoadReplayAsync(Replay r)
+        public async Task<AdvancedReplay> LoadReplayAsync(Replay r, CancellationToken cancellationToken)
         {
             AdvancedReplay advancedReplay = null;
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             lock (ReplayCache)
-                foreach (var aReplay in ReplayCache)
+                foreach (var cacheEntry in ReplayCache)
                 {
-                    if (aReplay.Id.Equals(r.Id))
+                    if (cacheEntry.Id.Equals(r.Id))
                     {
                         CacheHits++;
-                        return aReplay;
+                        _ = ReplayCache.Remove(cacheEntry);
+                        return cacheEntry;
                     }
                 }
+            if (cancellationToken.IsCancellationRequested)
+                return null;
+
             CacheMisses++;
             var replayPath = await GetReplayPath(r);
             if (replayPath is null)
             {
-                lock (IdCollection)
-                    IdCollection.Remove(new Guid(r.Id));
+                lock (IndexCollection)
+                    _ = IndexCollection.Remove(new Guid(r.Id));
                 return advancedReplay;
             }
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             var replayBatch = await GetReplayBatch(replayPath);
+            if (cancellationToken.IsCancellationRequested)
+                return null;
             foreach (var replay in replayBatch)
             {
                 if (replay.Id.Equals(r.Id))
                     advancedReplay = replay;
             }
             if (advancedReplay is null)
-                lock (IdCollection)
-                    IdCollection.Remove(new Guid(r.Id));
+                lock (IndexCollection)
+                    IndexCollection.Remove(new Guid(r.Id));
             else
-                foreach (var replay in replayBatch)
+                lock (ReplayCache)
                 {
-                    lock (ReplayCache)
+                    foreach (var replay in replayBatch)
                     {
-                        var alreadyIn = ReplayCache.Any(cacheEntry => replay.Id.Equals(cacheEntry.Id));
-                        if (!alreadyIn)
+                        if (!replay.Id.Equals(r.Id))
+                        {
                             ReplayCache.Add(replay);
+                        }
                     }
                 }
             return advancedReplay;
@@ -190,27 +215,5 @@ namespace RLStats_Classes.MainClasses
             }
             return null;
         }
-
-        private void SaveIdsInIndexFile(IEnumerable<Guid> ids)
-        {
-            var bytes = Compressor.ConvertObject(ids.ToList());
-            File.WriteAllBytes(IndexFile.FullName, bytes);
-        }
-
-        private ObservableCollection<Guid> LoadIdListFromFile()
-        {
-            var bytes = File.ReadAllBytes(IndexFile.FullName);
-            try
-            {
-                var idList = Compressor.ConvertObject<List<Guid>>(bytes);
-                return new ObservableCollection<Guid>(idList);
-            }
-            catch
-            {
-                return new ObservableCollection<Guid>();
-            }
-
-        }
-
     }
 }

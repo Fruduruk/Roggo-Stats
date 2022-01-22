@@ -1,24 +1,20 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RLStats_Classes.Models
 {
     public class ProgressState
     {
-        public event EventHandler SomethingChanged;
-        private bool _initial;
+        public event PropertyChangedEventHandler SomethingChanged;
         private string _currentMessage;
         private int _totalCount;
         private int _partCount;
+        private int _falsePartCount;
 
-        public bool Initial
-        {
-            get => _initial;
-            set
-            {
-                _initial = value;
-                OnSomethingChanged();
-            }
-        }
+        public bool Initial { get; set; }
+
+        public bool LastCall { get; set; }
 
         public string CurrentMessage
         {
@@ -50,9 +46,19 @@ namespace RLStats_Classes.Models
             }
         }
 
-        private void OnSomethingChanged()
+        public int FalsePartCount
         {
-            SomethingChanged?.Invoke(this, EventArgs.Empty);
+            get => _falsePartCount;
+            set
+            {
+                _falsePartCount = value;
+                OnSomethingChanged();
+            }
+        }
+
+        private void OnSomethingChanged([CallerMemberName] string callerName = "")
+        {
+            SomethingChanged?.Invoke(this, new PropertyChangedEventArgs(callerName));
         }
     }
 }

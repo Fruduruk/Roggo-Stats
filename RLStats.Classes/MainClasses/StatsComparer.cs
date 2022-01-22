@@ -2,11 +2,13 @@
 using RLStats_Classes.AverageModels;
 using RLStats_Classes.ChartModels;
 using RLStats_Classes.MainClasses.Interfaces;
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
+using static RLStats_Classes.MainClasses.TaskDisposer;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -132,6 +134,7 @@ namespace RLStats_Classes.MainClasses
                     if (!task.IsCompleted)
                         task.Wait();
             });
+            DisposeTasks(taskList);
             return allAveragePlayerStats;
         }
         

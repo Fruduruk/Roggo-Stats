@@ -1,5 +1,6 @@
 ﻿using RLStats_Classes.Enums;
 using RLStats_Classes.MainClasses;
+
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -38,6 +39,8 @@ namespace RocketLeagueStats.Components
             if (cbSteamID.IsChecked == true)
                 return false;
             if (cbDate.IsChecked == true)
+                return false;
+            if (cbAlsoDownloadReplayFiles.IsChecked == true)
                 return false;
             return true;
         }
@@ -177,6 +180,21 @@ namespace RocketLeagueStats.Components
             dpTimeStart.SelectedDate = startDate;
             dpTimeEnd.SelectedDate = endDate;
         }
+
+        private string GetReplayFilePath()
+        {
+            if (cbAlsoDownloadReplayFiles.IsChecked == false)
+                return string.Empty;
+            else
+                return tbxAlsoDownloadReplayFiles.Text.Trim();
+        }
+        private void SetReplayFilePath(string path)
+        {
+            if (path is null)
+                return;
+            else
+                tbxAlsoDownloadReplayFiles.Text = path;
+        }
         #endregion
         public ReplayPickerControl()
         {
@@ -192,6 +210,7 @@ namespace RocketLeagueStats.Components
             cbMatchResult.IsChecked = false;
             cbSteamID.IsChecked = false;
             cbDate.IsChecked = false;
+            cbAlsoDownloadReplayFiles.IsChecked = false;
 
             cbSeasonType.IsChecked = true;
             cbPro.IsChecked = false;
@@ -203,6 +222,7 @@ namespace RocketLeagueStats.Components
             InitializePlaylistCoboxBox();
             InitializeMatchResultCombobox();
             InitializeProCombobox();
+            tbxAlsoDownloadReplayFiles.Text = string.Empty;
             RefreshVisibilities();
         }
         private void RefreshVisibilities()
@@ -216,6 +236,7 @@ namespace RocketLeagueStats.Components
             CbPro_Click(null, null);
             CbSteamID_Click(null, null);
             CbDate_Click(null, null);
+            CbAlsoDownloadReplayFiles_Click(null, null);
         }
         #region Initializer
         private void InitializeDatePickers()
@@ -277,6 +298,7 @@ namespace RocketLeagueStats.Components
         private void CbSeason_Click(object sender, RoutedEventArgs e) => spSeason.Visibility = GetVisibility(cbSeason.IsChecked);
         private void CbMatchResult_Click(object sender, RoutedEventArgs e) => cbxMatchResult.Visibility = GetVisibility(cbMatchResult.IsChecked);
         private void CbPro_Click(object sender, RoutedEventArgs e) => cbxPro.Visibility = GetVisibility(cbPro.IsChecked);
+        private void CbAlsoDownloadReplayFiles_Click(object sender, RoutedEventArgs e) => tbxAlsoDownloadReplayFiles.Visibility = GetVisibility(cbAlsoDownloadReplayFiles.IsChecked);
         private Visibility GetVisibility(bool? isChecked)
         {
             return isChecked switch
@@ -324,8 +346,13 @@ namespace RocketLeagueStats.Components
             if (filter.CheckDate)
                 filter.DateRange = GetDateRange();
 
+            filter.AlsoSaveReplayFiles = cbAlsoDownloadReplayFiles.IsChecked ?? false;
+            if (filter.AlsoSaveReplayFiles)
+                filter.ReplayFilePath = GetReplayFilePath();
+
             return filter;
         }
+
         private void SetRequestFilter(APIRequestFilter rule)
         {
             SetEverythingDefault();
@@ -364,6 +391,11 @@ namespace RocketLeagueStats.Components
             cbDate.IsChecked = rule.CheckDate;
             if (rule.CheckDate)
                 SetDateRange(rule.DateRange.Item1, rule.DateRange.Item2);
+
+            cbAlsoDownloadReplayFiles.IsChecked = rule.AlsoSaveReplayFiles;
+            if (rule.AlsoSaveReplayFiles)
+                SetReplayFilePath(rule.ReplayFilePath);
+
             RefreshVisibilities();
         }
     }
