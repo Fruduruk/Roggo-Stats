@@ -23,6 +23,7 @@ namespace Discord_Bot.Modules.RLStats
         }
 
         [Command("subscribe")]
+        [Alias("sub")]
         [Summary("This command lets you subscribe a specific action")]
         public async Task Subscribe(string time, string together, params string[] names)
         {
@@ -55,6 +56,7 @@ namespace Discord_Bot.Modules.RLStats
         }
 
         [Command("unsubscribe")]
+        [Alias("unsub")]
         [Summary("This command lets you unsubscribe a specific action")]
         public async Task Unsubscribe(string time, string together, params string[] names)
         {
@@ -81,6 +83,7 @@ namespace Discord_Bot.Modules.RLStats
         }
 
         [Command("show subscriptions")]
+        [Alias("show subs")]
         [Summary("Returns all subscriptions for this channel")]
         public async Task ShowSubscriptions()
         {
