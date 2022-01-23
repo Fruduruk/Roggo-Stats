@@ -10,7 +10,7 @@ namespace Discord_Bot.ExtensionMethods
         {
             return time switch
             {
-                "d" => TimeSpan.FromDays(1),
+                "d" => TimeSpan.FromSeconds(60),//TimeSpan.FromDays(1),
                 "w" => TimeSpan.FromDays(7),
                 "m" => TimeSpan.FromDays(28),
                 "y" => TimeSpan.FromDays(365),
@@ -30,47 +30,76 @@ namespace Discord_Bot.ExtensionMethods
             };
         }
         /// <summary>
-        /// Converts d,w,m or y to time ranges.
+        /// Converts d,w,m or y to timeRange.
         /// </summary>
         /// <param name="time">d,w,m or y</param>
-        /// <returns>The first one is the start time range the second the end time range.</returns>
+        /// <returns>Returns this {day, week, month ...} so Now - one day or one month. The range of that </returns>
         /// <exception cref="ArgumentOutOfRangeException">Throws if time is not d,w,m or y</exception>
-        public static (TimeRange, TimeRange) ConvertToTimeRanges(this string time)
+        public static TimeRange ConvertToThisTimeRange(this string time)
         {
             TimeRange startTimeRange;
-            TimeRange endTimeRange;
             switch (time)
             {
                 case "d":
                 case "day":
                     startTimeRange = TimeRange.Today;
-                    endTimeRange = TimeRange.Yesterday;
                     break;
                 case "w":
                 case "week":
                     startTimeRange = TimeRange.ThisWeek;
-                    endTimeRange = TimeRange.LastWeek;
                     break;
                 case "m":
                 case "month":
                     startTimeRange = TimeRange.ThisMonth;
-                    endTimeRange = TimeRange.LastMonth;
                     break;
                 case "y":
                 case "year":
                     startTimeRange = TimeRange.ThisYear;
-                    endTimeRange = TimeRange.LastYear;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"{time} is not a valid time parameter. Use d,w,m or y.");
             }
-            return (startTimeRange, endTimeRange);
+            return startTimeRange;
         }
+
+        /// <summary>
+        /// Converts d,w,m or y to timeRange.
+        /// </summary>
+        /// <param name="time">d,w,m or y</param>
+        /// <returns>Returns last {day, week, month ...} so Now - one day or one month... - one day or one month... The range of that </returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throws if time is not d,w,m or y</exception>
+        public static TimeRange ConvertToLastTimeRange(this string time)
+        {
+            TimeRange startTimeRange;
+            switch (time)
+            {
+                case "d":
+                case "day":
+                    startTimeRange = TimeRange.Yesterday;
+                    break;
+                case "w":
+                case "week":
+                    startTimeRange = TimeRange.LastWeek;
+                    break;
+                case "m":
+                case "month":
+                    startTimeRange = TimeRange.LastMonth;
+                    break;
+                case "y":
+                case "year":
+                    startTimeRange = TimeRange.LastYear;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"{time} is not a valid time parameter. Use d,w,m or y.");
+            }
+            return startTimeRange;
+        }
+
         public static bool CanConvertTime(this string time)
         {
             try
             {
-                _ = ConvertToTimeRanges(time);
+                _ = ConvertToThisTimeRange(time);
                 return true;
             }
             catch (ArgumentOutOfRangeException)

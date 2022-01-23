@@ -61,6 +61,7 @@ namespace Discord_Bot.Modules.RLStats
                 await Context.Channel.SendFileAsync(filePath);
                 if (File.Exists(filePath))
                     File.Delete(filePath);
+                await Task.Delay(1337);
             }
         }
 
@@ -169,7 +170,7 @@ namespace Discord_Bot.Modules.RLStats
             {
                 try
                 {
-                    _ = time.ConvertToTimeRanges();
+                    _ = time.ConvertToThisTimeRange();
                 }
                 catch (ArgumentOutOfRangeException e)
                 {

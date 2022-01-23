@@ -32,7 +32,7 @@ namespace Discord_Bot.RLStats
             StatsComparer = new StatsComparer();
             Logger = logger;
         }
-        public void AddNameOrSteamIds(string[] namesOrIds, APIRequestFilter filter)
+        private void AddNameOrSteamIds(string[] namesOrIds, APIRequestFilter filter)
         {
             foreach (var nameOrId in namesOrIds)
             {
@@ -71,7 +71,7 @@ namespace Discord_Bot.RLStats
         /// <param name="replayCap">This marks the cap at which no more replays are downloaded.</param>
         /// <param name="playedTogether">This is true if you want the average stats for the games the players played together. If you don't care if they played together then make this false. Caution: False will take longer to load.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<AveragePlayerStats>> AverageStatsForTime(
+        public async Task<IEnumerable<AveragePlayerStats>> GetAverageRocketLeagueStats(
             string[] nameOrSteamIds,
             Tuple<DateTime, DateTime> dateRange = null,
             int replayCap = 0,
@@ -120,7 +120,8 @@ namespace Discord_Bot.RLStats
 
         public async Task<(IEnumerable<AveragePlayerStats>, IEnumerable<AveragePlayerStats>)> Compare<T>(string time, string[] names, bool playedTogether = true)
         {
-            var (startTimeRange, endTimeRange) = time.ConvertToTimeRanges();
+            var startTimeRange = time.ConvertToThisTimeRange();
+            var endTimeRange = time.ConvertToLastTimeRange();
 
             var stats = await GetAverageStatsForTimeRange(names, startTimeRange, playedTogether);
 
@@ -129,16 +130,16 @@ namespace Discord_Bot.RLStats
             return (stats, statsToCompare);
         }
 
-        protected async Task<IEnumerable<AveragePlayerStats>> GetAverageStatsForTimeRange(IEnumerable<string> names, TimeRange timeRange, bool playedTogether)
+        private async Task<IEnumerable<AveragePlayerStats>> GetAverageStatsForTimeRange(IEnumerable<string> names, TimeRange timeRange, bool playedTogether)
         {
             var averages = new List<AveragePlayerStats>();
             var dateRange = timeRange.ConvertToDateTimeRange();
-            averages.AddRange(await AverageStatsForTime(names.ToArray(), dateRange, playedTogether: playedTogether));
+            averages.AddRange(await GetAverageRocketLeagueStats(names.ToArray(), dateRange, playedTogether: playedTogether));
 
             return averages;
         }
 
-        public static void ConvertForDanschl(string[] nameOrSteamIds)
+        private static void ConvertForDanschl(string[] nameOrSteamIds)
         {
             for (var i = 0; i < nameOrSteamIds.Length; i++)
             {
@@ -174,6 +175,7 @@ namespace Discord_Bot.RLStats
 
             return filePath;
         }
+
         private static string GetRlStatsTempFolder()
         {
             var tempPath = Path.GetTempPath();
@@ -207,8 +209,7 @@ namespace Discord_Bot.RLStats
             return pathList;
         }
 
-        public IEnumerable<string> CreateAndGetStatsFiles<T>(IEnumerable<AveragePlayerStats> averages,
-            IEnumerable<AveragePlayerStats> averagesToCompare)
+        public IEnumerable<string> CreateAndGetStatsFiles<T>(IEnumerable<AveragePlayerStats> averages, IEnumerable<AveragePlayerStats> averagesToCompare)
         {
             var provider = new ChartProvider(averages, averagesToCompare);
             var chartCreators = provider.GetChartCreators<T>(350, 600);

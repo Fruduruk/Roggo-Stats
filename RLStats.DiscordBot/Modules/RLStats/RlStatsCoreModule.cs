@@ -25,7 +25,7 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets the average core stats for one or more players for today.")]
         public async Task StatsToday(string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerCore>(averages);
         }
 
@@ -33,7 +33,7 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets the average core stats for one or more players.")]
         public async Task StatsAllTime(string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerCore>(averages);
         }
 
@@ -41,7 +41,7 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets the average core stats for one or more players for the last [count] games.")]
         public async Task StatsLast(int count, string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerCore>(averages);
         }
     }

@@ -9,6 +9,8 @@ using Discord_Bot.ExtensionMethods;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,15 +20,54 @@ namespace Discord_Bot.Services
     {
 
         private RecentlyAddedEntries _addedEntries;
-        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries) : base(client, logger)
+        private readonly RecurringReportServiceModule _module;
+        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken) : base(client, logger)
         {
             _addedEntries = recentlyAddedEntries;
+            _module = new RecurringReportServiceModule(logger, ballchasingToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Delay(5000, stoppingToken);
             await StartBackgroundThreads(ConfigHandler.Config, stoppingToken);
             CheckForNewEntries(stoppingToken);
+        }
+
+        /// <summary>
+        /// This Method executes the subscription commmands when they are ready.
+        /// </summary>
+        /// <param name="entry">The data the command is built of</param>
+        /// <param name="channel">The channel in which the stats are sent to</param>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
+        private async Task ExecuteCommand(ConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
+        {
+            await channel.TriggerTypingAsync();
+            var filePaths = await _module.GetAverageStats(entry.Names, entry.Together, entry.Time);
+            await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
+
+            try
+            {
+                await SendFilesAsync(filePaths, channel);
+            }
+            catch (Exception ex)
+            {
+                await channel.SendMessageAsync(ex.Message);
+            }
+            
+        }
+
+
+        private async Task SendFilesAsync(IEnumerable<string> pathList, IMessageChannel channel)
+        {
+            foreach (var filePath in pathList)
+            {
+                await channel.SendFileAsync(filePath);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                await Task.Delay(1337);
+            }
         }
 
         private async void CheckForNewEntries(CancellationToken stoppingToken)
@@ -84,15 +125,6 @@ namespace Discord_Bot.Services
                     break;
                 }
 
-            }
-        }
-
-        private async Task ExecuteCommand(ConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
-        {
-            //lock (Lock) ONLY ONE AT A TIME
-            {
-                await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
-                
             }
         }
 

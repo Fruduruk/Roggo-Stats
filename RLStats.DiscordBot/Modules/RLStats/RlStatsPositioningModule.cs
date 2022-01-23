@@ -24,21 +24,21 @@ namespace Discord_Bot.Modules.RLStats
         [Command("pos today")]
         public async Task PositioningToday(string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerPositioning>(averages);
         }
 
         [Command("pos all")]
         public async Task PositioningAllTime(string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerPositioning>(averages);
         }
 
         [Command("pos last")]
         public async Task PositioningLast(int count, string together, params string[] names)
         {
-            var averages = await CommonMethods.AverageStatsForTime(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerPositioning>(averages);
         }
     }
