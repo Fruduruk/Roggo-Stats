@@ -16,7 +16,7 @@ namespace Discord_Bot.Services
 {
     public class RecurringReportsService : DiscordClientService
     {
-        private readonly object Lock = new object();
+
         private RecentlyAddedEntries _addedEntries;
         public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries) : base(client, logger)
         {
@@ -92,7 +92,7 @@ namespace Discord_Bot.Services
             //lock (Lock) ONLY ONE AT A TIME
             {
                 await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
-
+                
             }
         }
 

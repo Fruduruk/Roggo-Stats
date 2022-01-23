@@ -17,7 +17,7 @@ namespace Discord_Bot
 {
     public class RLStatsHostBuilder
     {
-        private IHostBuilder _builder;
+        private readonly IHostBuilder _builder;
 
         public RLStatsHostBuilder()
         {
