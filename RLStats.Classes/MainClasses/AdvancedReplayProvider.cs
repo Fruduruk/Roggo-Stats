@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
 using static RLStats_Classes.MainClasses.TaskDisposer;
 
 namespace RLStats_Classes.MainClasses
@@ -90,8 +91,8 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r)
         {
-            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r,Api.StoppingToken);
-            
+            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r, Api.StoppingToken);
+
             if (advancedReplay is null)
             {
                 ProgressState.FalsePartCount++;
@@ -167,6 +168,8 @@ namespace RLStats_Classes.MainClasses
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await Api.GetAsync(url);
+            if(response.StatusCode == System.Net.HttpStatusCode.Locked)
+                throw new OperationCanceledException();
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());

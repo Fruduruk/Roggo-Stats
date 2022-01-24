@@ -128,7 +128,7 @@ namespace RocketLeagueStats
             {
                 tbMessages.Text = e.CurrentMessage;
             };
-            var response = await provider.CollectReplaysAsync(filter);
+            var response = await provider.CollectReplaysAsync(filter, cached: true);
             ShownReplays = new List<Replay>(response.Replays);
 
             tbMessages.Text = (response.ElapsedMilliseconds / 1000).ToString("0.##") +

@@ -192,14 +192,13 @@ namespace RocketLeagueStats
         private void LoadFile(string fileName)
         {
             var compressedBytes = File.ReadAllBytes(fileName);
-            var jsonString = Compressor.DecompressBytesToString(compressedBytes);
-            Replays = JsonConvert.DeserializeObject<List<Replay>>(jsonString);
+            Replays = Compressor.ConvertObject<List<Replay>>(compressedBytes);
         }
 
         private void SaveDialog_FileOk(object sender, CancelEventArgs e)
         {
             var dialog = (SaveFileDialog)sender;
-            var compressedBytes = Compressor.CompressString(JsonConvert.SerializeObject(Replays));
+            var compressedBytes = Compressor.ConvertObject(Replays);
             File.WriteAllBytes(dialog.FileName, compressedBytes);
         }
 
