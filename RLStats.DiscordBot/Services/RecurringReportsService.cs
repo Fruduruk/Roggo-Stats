@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,17 +47,24 @@ namespace Discord_Bot.Services
         {
             await channel.TriggerTypingAsync();
             var filePaths = await _module.GetAverageStats(entry.Names, entry.Together, entry.Time);
-            await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
+            if (filePaths.Any())
+            {
+                await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
 
-            try
-            {
-                await SendFilesAsync(filePaths, channel);
+                try
+                {
+                    await SendFilesAsync(filePaths, channel);
+                }
+                catch (Exception ex)
+                {
+                    await channel.SendMessageAsync(ex.Message);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                await channel.SendMessageAsync(ex.Message);
+                //if (Debugger.IsAttached)
+                await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report. Well all averages are empty.");
             }
-            
         }
 
 

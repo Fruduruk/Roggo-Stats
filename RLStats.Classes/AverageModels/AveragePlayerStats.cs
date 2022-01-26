@@ -12,6 +12,31 @@ namespace RLStats_Classes.AverageModels
         public AveragePlayerMovement AverageMovement { get; set; }
         public AveragePlayerPositioning AveragePositioning { get; set; }
         public AveragePlayerDemo AverageDemo { get; set; }
+        public bool IsEmpty => IsEverythingEmpty();
+
+        private bool IsEverythingEmpty()
+        {
+            return IsPartEmpty(AverageCore)
+                && IsPartEmpty(AverageBoost)
+                && IsPartEmpty(AverageMovement)
+                && IsPartEmpty(AveragePositioning)
+                && IsPartEmpty(AverageDemo);
+        }
+
+        private static bool IsPartEmpty<T>(T avg) where T : new()
+        {
+            var properties = typeof(T).GetProperties();
+            foreach(var prop in properties)
+            {
+                var value = prop.GetValue(avg) as double?;
+                if (value is not null)
+                    if (value.HasValue)
+                        if (value.Value != 0)
+                            return false;
+            }
+            return true;
+        }
+
 
         public static TAvgt GetAverage<TAvgt,T>(List<PlayerStats> allStatsForOnePlayer) where TAvgt : new() where T : new()
         {
@@ -97,6 +122,5 @@ namespace RLStats_Classes.AverageModels
                 average += value / list.Count;
             return average;
         }
-
     }
 }

@@ -10,7 +10,7 @@ namespace Discord_Bot.ExtensionMethods
         {
             return time switch
             {
-                "d" => TimeSpan.FromSeconds(60),//TimeSpan.FromDays(1),
+                "d" => TimeSpan.FromDays(1),
                 "w" => TimeSpan.FromDays(7),
                 "m" => TimeSpan.FromDays(28),
                 "y" => TimeSpan.FromDays(365),
