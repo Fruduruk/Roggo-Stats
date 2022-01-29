@@ -1,7 +1,11 @@
-﻿using Discord_Bot.ExtensionMethods;
+﻿using Discord;
+
+using Discord_Bot.ExtensionMethods;
 using Discord_Bot.Modules.RLStats;
 
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using RLStats_Classes.AverageModels;
 using RLStats_Classes.MainClasses;
@@ -181,6 +185,23 @@ namespace Discord_Bot.RLStats
             var tempPath = Path.GetTempPath();
             var info = Directory.CreateDirectory(tempPath + @"rlCharts\");
             return info.FullName;
+        }
+
+        public static string GetAllAvailableStatPropertiesFilePath()
+        {
+            var dic = GetPropertyNameDictionary();
+            var tempFileName = Path.Combine(GetRlStatsTempFolder(), "AllProperties.json");
+            File.WriteAllText(tempFileName, JsonConvert.SerializeObject(dic, Formatting.Indented));
+            return tempFileName;
+        }
+
+        private static Dictionary<int, string> GetPropertyNameDictionary()
+        {
+            var properties = AveragePlayerStats.GetAllPropertyNames();
+            var dic = new Dictionary<int, string>();
+            for (int i = 0; i < properties.Length; i++)
+                dic.Add(i, properties[i].Replace('_', ' '));
+            return dic;
         }
 
         private IEnumerable<string> GetPathList(IEnumerable<ChartCreator> chartCreators, int groupSize, int maxColumns)

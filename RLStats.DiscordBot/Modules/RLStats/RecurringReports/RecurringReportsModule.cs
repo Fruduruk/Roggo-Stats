@@ -187,6 +187,12 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             await ShowAllAvailableStatPropertiesAsync();
         }
 
+        private async Task ShowAllAvailableStatPropertiesAsync()
+        {
+            var tempFileName = RLStatsCommonMethods.GetAllAvailableStatPropertiesFilePath();
+            await Context.Channel.SendFileAsync(new FileAttachment(tempFileName, "allProperties.json"), "All properties");
+            File.Delete(tempFileName);
+        }
 
         [Remarks(ProceedingMethod)]
         [Command(ExecuteSubStepFour)]
@@ -216,24 +222,6 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             RemoveSavedConfigEntry();
         }
 
-        private async Task ShowAllAvailableStatPropertiesAsync()
-        {
-            var dic = GetPropertyNameDictionary();
-            var tempFileName = Path.Combine(RLStatsCommonMethods.GetRlStatsTempFolder(), "AllProperties.json");
-            File.WriteAllText(tempFileName, JsonConvert.SerializeObject(dic, Formatting.Indented));
-
-            await Context.Channel.SendFileAsync(new FileAttachment(tempFileName, "allProperties.json"), "All properties");
-            File.Delete(tempFileName);
-        }
-
-        private static Dictionary<int, string> GetPropertyNameDictionary()
-        {
-            var properties = AveragePlayerStats.GetAllPropertyNames();
-            var dic = new Dictionary<int, string>();
-            for (int i = 0; i < properties.Length; i++)
-                dic.Add(i, properties[i].Replace('_', ' '));
-            return dic;
-        }
 
         private async Task<bool> IsProcessCanceledOrCorrupted(string input)
         {
@@ -256,6 +244,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
             return false;
         }
+
         [Command("unsubscribe all")]
         [Alias("unsub all")]
         [Summary("This command lets you unsubscribe all subscriptions")]
