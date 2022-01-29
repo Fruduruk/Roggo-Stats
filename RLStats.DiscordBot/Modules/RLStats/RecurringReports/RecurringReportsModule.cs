@@ -43,11 +43,25 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         {
             if (!Context.IsPrivate)
                 return;
+
             await ProceedToNextStepAsync(SubStepOneMessage, ExecuteSubStepOne, new ConfigEntry()
             {
+                Id = GetUnusedId(),
                 ChannelId = Context.Channel.Id,
                 LastPost = DateTime.MinValue
             });
+        }
+
+        private int GetUnusedId()
+        {
+            int id = 1;
+            foreach (var entry in ConfigHandler.Config.ConfigEntries)
+            {
+                if (!entry.Id.Equals(id))
+                    return id;
+                id++;
+            }
+            return id;
         }
 
         private async Task ProceedToNextStepAsync(string message, string stepCommand, ConfigEntry configEntry)
@@ -63,7 +77,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 }
             }
 
-            CommandInProgress commandInProgress = new CommandInProgress(Context.Channel.Id, Context.User.Id, stepCommand)
+            var commandInProgress = new CommandInProgress(Context.Channel.Id, Context.User.Id, stepCommand)
             {
                 ConfigEntry = configEntry
             };
@@ -129,9 +143,18 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             var configEntry = GetSavedConfigEntry();
 
             var nameAndIdArr = namesAndIds.Split(',');
+            if (!nameAndIdArr.Any())
+                return;
+
             configEntry.Names = new List<string>(nameAndIdArr);
 
-            await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
+            if (configEntry.Names.Count > 1)
+                await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
+            else
+            {
+                await ProceedToNextStepAsync(SubStepSkipThreeMessage(nameAndIdArr), ExecuteSubStepFour, configEntry);
+                await ShowAllAvailableStatPropertiesAsync();
+            }
         }
 
         [Remarks(ProceedingMethod)]
@@ -180,8 +203,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             var reader = new NumberListReader();
             configEntry.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
 
-            await SendMessageToCurrentChannelAsync($"You have chosen these stats: {string.Join(',', configEntry.StatNames)}\n" +
-                $"You have successfully configured your subscription.");
+            await SendMessageToCurrentChannelAsync("You have successfully configured your subscription.");
 
             if (ConfigHandler.Config.HasConfigEntryInIt(configEntry))
             {
@@ -191,6 +213,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
             ConfigHandler.AddConfigEntry(configEntry);
             _addedEntries.ConfigEntries.Add(configEntry);
+            RemoveSavedConfigEntry();
         }
 
         private async Task ShowAllAvailableStatPropertiesAsync()
@@ -233,32 +256,47 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
             return false;
         }
-        //[Command("unsubscribe")]
-        //[Alias("unsub")]
-        //[Summary("This command lets you unsubscribe a specific action")]
-        //public async Task Unsubscribe(string time, string together, params string[] names)
-        //{
-        //    if (!Context.IsPrivate)
-        //        return;
-        //    if (!await CheckParameters(together, time, names))
-        //        return;
-        //    var configEntry = new ConfigEntry
-        //    {
-        //        Time = time,
-        //        Together = ConvertTogetherToBool(together),
-        //        Names = new List<string>(names),
-        //        ChannelId = Context.Channel.Id,
-        //        LastPost = DateTime.MinValue
-        //    };
+        [Command("unsubscribe all")]
+        [Alias("unsub all")]
+        [Summary("This command lets you unsubscribe all subscriptions")]
+        public async Task UnsubscribeAll()
+        {
+            if (!Context.IsPrivate)
+                return;
+            var config = ConfigHandler.Config;
+            var entriesNotFromThisChannel = new List<ConfigEntry>();
+            foreach (var entry in config.ConfigEntries)
+            {
+                if (Context.Channel.Id.Equals(entry.ChannelId))
+                    continue;
+                entriesNotFromThisChannel.Add(entry);
+            }
+            config.ConfigEntries = entriesNotFromThisChannel;
+            ConfigHandler.Config = config;
 
-        //    if (ConfigHandler.Config.HasConfigEntryInIt(configEntry))
-        //    {
-        //        ConfigHandler.RemoveConfigEntry(configEntry);
-        //        await Context.Channel.SendMessageAsync("Subscription removed.");
-        //        return;
-        //    }
-        //    await Context.Channel.SendMessageAsync("This subscription was not found.");
-        //}
+            await Context.Channel.SendMessageAsync("Removed all subscriptions from this channel.");
+        }
+
+        [Command("unsubscribe")]
+        [Alias("unsub")]
+        [Summary("This command lets you unsubscribe a subscription")]
+        public async Task Unsubscribe(int id)
+        {
+            ConfigEntry entryToRemove = null;
+            foreach (var entry in ConfigHandler.Config.ConfigEntries)
+            {
+                if (entry.ChannelId.Equals(Context.Channel.Id) && entry.Id.Equals(id))
+                    entryToRemove = entry;
+            }
+            if (entryToRemove is null)
+            {
+                await SendMessageToCurrentChannelAsync($"There is no subscription with id {id}");
+                return;
+            }
+            ConfigHandler.RemoveConfigEntry(entryToRemove);
+            await SendMessageToCurrentChannelAsync($"Successfully removed subscription with id {id}");
+        }
+
 
         [Command("show subscriptions")]
         [Alias("show subs")]
@@ -288,7 +326,8 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                     builder.AddField("Stats count:", entry.StatNames.Count, inline: true);
 
                 builder.AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
-                .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)));
+                .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)))
+                .WithFooter($"Id: {entry.Id}");
                 await Context.Channel.SendMessageAsync(embed: builder.Build());
             }
         }

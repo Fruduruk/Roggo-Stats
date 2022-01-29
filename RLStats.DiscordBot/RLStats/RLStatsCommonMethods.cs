@@ -220,7 +220,7 @@ namespace Discord_Bot.RLStats
         {
             var provider = new ChartProvider(averages);
             var chartCreators = provider.GetSpecificCreators(propertyNames, 350, 600);
-            var pathList = GetPathList(chartCreators, 9, 3);
+            var pathList = GetPathList(chartCreators, 4, 2);
             return pathList;
         }
 
@@ -228,7 +228,7 @@ namespace Discord_Bot.RLStats
         {
             var provider = new ChartProvider(averages, averagesToCompare);
             var chartCreators = provider.GetSpecificCreators(propertyNames, 350, 600);
-            var pathList = GetPathList(chartCreators, 9, 3);
+            var pathList = GetPathList(chartCreators, 4, 2);
             return pathList;
         }
     }

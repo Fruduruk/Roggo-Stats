@@ -5,6 +5,7 @@ namespace Discord_Bot.Configuration
 {
     public class ConfigEntry
     {
+        public int Id { get; set; }
         public string Time { get; set; }
         public bool Together { get; set; }
         public List<string> Names { get; set; } = new List<string>();

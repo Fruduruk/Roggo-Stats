@@ -18,6 +18,9 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         public static string SubStepThreeMessage(string[] namesAndIds) => $"You have chosen these names and steam ids: {string.Join(' ', namesAndIds)}" +
             $"\n\nOnly show stats where these players played together?\nPossible answers: y/n";
 
+        public static string SubStepSkipThreeMessage(string[] namesAndIds) => $"You have chosen these names and steam ids: {string.Join(' ', namesAndIds)}" +
+            $"\n\nNow you need to choose the stats you want to see.\nJust type in all the numbers separated by comma. No whitespaces.\nIf you want all of them just type in all.";
+
         public static string SubStepFourMessage(bool together) => $"You have chosen: {together}" +
             $"\n\nNow you need to choose the stats you want to see.\nJust type in all the numbers separated by comma. No whitespaces.\nIf you want all of them just type in all.";
         #endregion
