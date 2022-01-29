@@ -7,33 +7,26 @@ using System.IO;
 
 namespace Discord_Bot.Configuration
 {
-    public static class ConfigHandler
+    public class ConfigHandler<ConfigType, EntryType> where ConfigType : IConfigList<EntryType>, new() where EntryType : IEquatable<EntryType>, new()
     {
-        public static DirectoryInfo RLStatsDiscordFolder => GetRLStatsDiscordFolder();
-        private static string ConfigFilePath => Path.Combine(RLStatsDiscordFolder.ToString(), "DiscordConfig.json.7z");
+        public string ConfigFilePath { get; private set; } 
 
-        private static DirectoryInfo GetRLStatsDiscordFolder()
+        public ConfigHandler(string filePath)
         {
-            var folderPath = Path.Combine(RLConstants.RLStatsFolder, "Discord");
-            return Directory.CreateDirectory(folderPath);
+            ConfigFilePath = filePath;
         }
 
-        public static Config Config
-        {
-            get => ReadConfigFile();
-            set => SaveConfigFile(value);
-        }
+        public ConfigType Config => ReadConfigFile();
 
-        public static bool HasConfigEntryInIt(this Config config, ConfigEntry entry)
+        public bool HasConfigEntryInIt(EntryType entry)
         {
-
-            if (config is null)
+            if (Config is null)
                 return false;
             if (entry is null)
                 return false;
             lock (Config)
             {
-                foreach (var configEntry in config.ConfigEntries)
+                foreach (var configEntry in Config.ConfigEntries)
                 {
                     if (configEntry.Equals(entry))
                         return true;
@@ -42,21 +35,21 @@ namespace Discord_Bot.Configuration
             return false;
         }
 
-        public static void RemoveConfigEntry(ConfigEntry entry)
+        public void RemoveConfigEntry(EntryType entry)
         {
-            var newConfig = Config;
-            newConfig.ConfigEntries.Remove(entry);
-            Config = newConfig;
+            var config = ReadConfigFile();
+            config.ConfigEntries.Remove(entry);
+            SaveConfigFile(config);
         }
 
-        public static void AddConfigEntry(ConfigEntry configEntry)
+        public void AddConfigEntry(EntryType entry)
         {
-            var config = Config;
-            config.ConfigEntries.Add(configEntry);
-            Config = config;
+            var config = ReadConfigFile();
+            config.ConfigEntries.Add(entry);
+            SaveConfigFile(config);
         }
 
-        private static void SaveConfigFile(Config value)
+        public void SaveConfigFile(ConfigType value)
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
@@ -64,34 +57,16 @@ namespace Discord_Bot.Configuration
             File.WriteAllBytes(ConfigFilePath, Compressor.ConvertObject(value, false));
         }
 
-        public static ConfigEntry UpdateLastPost(ConfigEntry entry, DateTime newLastPost)
-        {
-            ConfigEntry newEntry = null;
-            var config = Config;
-            foreach (var configEntry in config.ConfigEntries)
-            {
-                if (configEntry.Equals(entry))
-                {
-                    configEntry.LastPost = newLastPost;
-                    newEntry = configEntry;
-                }
-            }
-            Config = config;
-            if (newEntry is null)
-                throw new EntryNotFoundException();
-            return newEntry;
-        }
-
-        private static Config ReadConfigFile()
+        private ConfigType ReadConfigFile()
         {
             try
             {
-                var config = Compressor.ConvertObject<Config>(File.ReadAllBytes(ConfigFilePath), false);
+                var config = Compressor.ConvertObject<ConfigType>(File.ReadAllBytes(ConfigFilePath), false);
                 return config;
             }
             catch
             {
-                return new Config();
+                return new ConfigType();
             }
         }
     }

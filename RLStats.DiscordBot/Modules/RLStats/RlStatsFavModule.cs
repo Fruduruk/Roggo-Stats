@@ -56,7 +56,7 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Sets and saves your favorite stats.")]
         public async Task SetFavoriteStats(params int[] statIds)
         {
-            ConfigHandler.Config
+            //ConfigHandler.Config
         }
 
 

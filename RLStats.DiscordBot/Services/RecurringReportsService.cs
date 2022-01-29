@@ -24,16 +24,19 @@ namespace Discord_Bot.Services
 
         private RecentlyAddedEntries _addedEntries;
         private readonly RecurringReportServiceModule _module;
-        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken) : base(client, logger)
+        private readonly ConfigHandler<SubscriptionConfig, SubscriptionConfigEntry> _configHandler;
+
+        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken, ConfigHandler<SubscriptionConfig,SubscriptionConfigEntry> configHandler) : base(client, logger)
         {
             _addedEntries = recentlyAddedEntries;
             _module = new RecurringReportServiceModule(logger, ballchasingToken);
+            _configHandler = configHandler;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Delay(5000, stoppingToken);
-            await StartBackgroundThreads(ConfigHandler.Config, stoppingToken);
+            await StartBackgroundThreads(_configHandler.Config, stoppingToken);
             CheckForNewEntries(stoppingToken);
         }
 
@@ -44,7 +47,7 @@ namespace Discord_Bot.Services
         /// <param name="channel">The channel in which the stats are sent to</param>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
-        private async Task ExecuteCommand(ConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
+        private async Task ExecuteCommand(SubscriptionConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
         {
             await channel.TriggerTypingAsync();
             var filePaths = await _module.GetAverageStats(entry);
@@ -99,7 +102,7 @@ namespace Discord_Bot.Services
             }
         }
 
-        private async Task StartBackgroundThreads(Config config, CancellationToken stoppingToken)
+        private async Task StartBackgroundThreads(SubscriptionConfig config, CancellationToken stoppingToken)
         {
             foreach (var entry in config.ConfigEntries)
             {
@@ -111,7 +114,7 @@ namespace Discord_Bot.Services
             }
         }
 
-        private async void StartBackgroundThread(ConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
+        private async void StartBackgroundThread(SubscriptionConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
         {
             while (true)
             {
@@ -120,9 +123,9 @@ namespace Discord_Bot.Services
                     await Task.Delay(GetTimeToWait(entry.Time, entry.LastPost), stoppingToken);
                     if (stoppingToken.IsCancellationRequested)
                         break;
-                    if (!ConfigHandler.Config.HasConfigEntryInIt(entry))
+                    if (!_configHandler.HasConfigEntryInIt(entry))
                         break;
-                    entry = await Task.Run(() => ConfigHandler.UpdateLastPost(entry, DateTime.Now));
+                    entry = UpdateLastPost(entry, DateTime.Now);
 
                     await ExecuteCommand(entry, channel, stoppingToken);
                 }
@@ -136,6 +139,24 @@ namespace Discord_Bot.Services
                 }
 
             }
+        }
+
+        public SubscriptionConfigEntry UpdateLastPost(SubscriptionConfigEntry entry, DateTime newLastPost)
+        {
+            SubscriptionConfigEntry newEntry = null;
+            var config = _configHandler.Config;
+            foreach (var configEntry in config.ConfigEntries)
+            {
+                if (configEntry.Equals(entry))
+                {
+                    configEntry.LastPost = newLastPost;
+                    newEntry = configEntry;
+                }
+            }
+            _configHandler.SaveConfigFile(config);
+            if (newEntry is null)
+                throw new EntryNotFoundException();
+            return newEntry;
         }
 
         private static TimeSpan GetTimeToWait(string time, DateTime lastPost)

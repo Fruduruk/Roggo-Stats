@@ -2,7 +2,7 @@
 
 namespace Discord_Bot.Singletons
 {
-    public class RecentlyAddedEntries : Config
+    public class RecentlyAddedEntries : SubscriptionConfig
     {
     }
 }

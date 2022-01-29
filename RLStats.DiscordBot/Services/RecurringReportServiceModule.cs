@@ -18,7 +18,7 @@ namespace Discord_Bot.Services
             CommonMethods = new RLStatsCommonMethods(logger, ballchasingToken);
         }
 
-        public async Task<IEnumerable<string>> GetAverageStats(ConfigEntry entry)
+        public async Task<IEnumerable<string>> GetAverageStats(SubscriptionConfigEntry entry)
         {
             var averages = await CommonMethods.GetAverageRocketLeagueStats(entry.Names.ToArray(), dateRange: entry.Time.ConvertToThisTimeRange().ConvertToDateTimeRange() ,playedTogether: entry.Together);
             var pathList = new List<string>();

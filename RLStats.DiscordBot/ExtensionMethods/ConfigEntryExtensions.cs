@@ -8,7 +8,7 @@ namespace Discord_Bot.ExtensionMethods
 {
     public static class ConfigEntryExtensions
     {
-        public static void AddPropertyNamesToConfigEntry(this ConfigEntry configEntry, IEnumerable<int> indexNumberList, bool collectAll = false)
+        public static void AddPropertyNamesToConfigEntry(this SubscriptionConfigEntry configEntry, IEnumerable<int> indexNumberList, bool collectAll = false)
         {
             var dic = GetPropertyNameDictionary();
             if (collectAll)
