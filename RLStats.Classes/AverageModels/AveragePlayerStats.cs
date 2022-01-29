@@ -122,5 +122,27 @@ namespace RLStats_Classes.AverageModels
                 average += value / list.Count;
             return average;
         }
+
+        public static string[] GetAllPropertyNames()
+        {
+            var names = new List<string>();
+            names.AddRange(GetPropertyNames<AveragePlayerCore>());
+            names.AddRange(GetPropertyNames<AveragePlayerBoost>());
+            names.AddRange(GetPropertyNames<AveragePlayerMovement>());
+            names.AddRange(GetPropertyNames<AveragePlayerPositioning>());
+            names.AddRange(GetPropertyNames<AveragePlayerDemo>());
+            return names.ToArray();
+        }
+
+        private static IEnumerable<string> GetPropertyNames<T>()
+        {
+            var names = new List<string>();
+            var properties = typeof(T).GetProperties();
+            foreach(var property in properties)
+            {
+                names.Add(property.Name);
+            }
+            return names;
+        }
     }
 }

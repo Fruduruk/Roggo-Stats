@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Rest;
 
 using Discord_Bot.ExtensionMethods;
 using Discord_Bot.RLStats;
@@ -52,6 +53,11 @@ namespace Discord_Bot.Modules.RLStats
         {
             var pathList = CommonMethods.CreateAndGetStatsFiles<T>(averages);
             await SendFilesAsync(pathList);
+        }
+
+        protected async Task<RestUserMessage> SendMessageToCurrentChannelAsync(string message)
+        {
+            return await Context.Channel.SendMessageAsync(message);
         }
 
         private async Task SendFilesAsync(IEnumerable<string> pathList)

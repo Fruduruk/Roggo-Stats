@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Discord_Bot.Configuration;
 using Discord_Bot.Exceptions;
 using Discord_Bot.ExtensionMethods;
+using Discord_Bot.Singletons;
 
 using Microsoft.Extensions.Logging;
 

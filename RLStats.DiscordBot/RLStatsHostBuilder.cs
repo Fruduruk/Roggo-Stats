@@ -5,6 +5,7 @@ using Discord.WebSocket;
 
 using Discord_Bot.Configuration;
 using Discord_Bot.Services;
+using Discord_Bot.Singletons;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,8 @@ namespace Discord_Bot
                 {
                     services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
                     services.AddSingleton(new RecentlyAddedEntries());
+                    services.AddSingleton(new CommandsToProceed());
+
                     services.AddHostedService<CommandHandler>();
                     services.AddHostedService<RecurringReportsService>();
                 })

@@ -33,13 +33,22 @@ namespace Discord_Bot.Services
             _client.MessageReceived += OnMessageReceived;
 
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+
+            await Client.SetStatusAsync(UserStatus.Invisible);
         }
 
         private async Task OnMessageReceived(SocketMessage arg)
         {
+            //Check if message comes from a user
             if (!(arg is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
+            //if (message.Reference != null)
+            //{
+            // Maybe someday replying is the way to go
+            //}
+
+            //Check if this user wants to call a command and execute it
             var argPos = 0;
             if (!message.HasStringPrefix(_config["prefix"], ref argPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argPos)) return;
 
