@@ -49,6 +49,13 @@ namespace Discord_Bot.Configuration
             Config = newConfig;
         }
 
+        public static void AddConfigEntry(ConfigEntry configEntry)
+        {
+            var config = Config;
+            config.ConfigEntries.Add(configEntry);
+            Config = config;
+        }
+
         private static void SaveConfigFile(Config value)
         {
             if (value is null)

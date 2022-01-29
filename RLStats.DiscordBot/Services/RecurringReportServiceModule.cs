@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord_Bot.ExtensionMethods;
 using System;
 using System.Linq;
+using Discord_Bot.Configuration;
 
 namespace Discord_Bot.Services
 {
@@ -17,18 +18,15 @@ namespace Discord_Bot.Services
             CommonMethods = new RLStatsCommonMethods(logger, ballchasingToken);
         }
 
-        public async Task<IEnumerable<string>> GetAverageStats(List<string> names, bool together, string time)
+        public async Task<IEnumerable<string>> GetAverageStats(ConfigEntry entry)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names.ToArray(), dateRange: time.ConvertToThisTimeRange().ConvertToDateTimeRange() ,playedTogether: together);
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(entry.Names.ToArray(), dateRange: entry.Time.ConvertToThisTimeRange().ConvertToDateTimeRange() ,playedTogether: entry.Together);
             var pathList = new List<string>();
             averages = RemoveEmptyAverages(averages);
             if (averages.Any())
             {
-                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles<AveragePlayerCore>(averages));
-                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles<AveragePlayerBoost>(averages));
-                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles<AveragePlayerMovement>(averages));
-                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles<AveragePlayerPositioning>(averages));
-                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles<AveragePlayerDemo>(averages));
+                pathList.AddRange(CommonMethods.CreateAndGetStatsFiles(averages, propertyNames: entry.StatNames));
+                
                 return pathList;
             }
             return Array.Empty<string>();

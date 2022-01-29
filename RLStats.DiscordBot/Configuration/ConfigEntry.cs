@@ -9,6 +9,7 @@ namespace Discord_Bot.Configuration
         public bool Together { get; set; }
         public List<string> Names { get; set; } = new List<string>();
         public ulong ChannelId { get; set; }
+        public List<string> StatNames { get; set; } = new List<string>();
         public DateTime LastPost { get; set; }
 
         public override bool Equals(object obj)
@@ -37,7 +38,7 @@ namespace Discord_Bot.Configuration
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Time, Together, Names, ChannelId, LastPost);
+            return HashCode.Combine(Time, Together, Names, ChannelId, LastPost, StatNames);
         }
     }
 }

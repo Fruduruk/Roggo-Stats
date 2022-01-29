@@ -126,7 +126,7 @@ namespace Discord_Bot.RLStats
             var stats = await GetAverageStatsForTimeRange(names, startTimeRange, playedTogether);
 
             var statsToCompare = await GetAverageStatsForTimeRange(names, endTimeRange, playedTogether);
-            
+
             return (stats, statsToCompare);
         }
 
@@ -176,7 +176,7 @@ namespace Discord_Bot.RLStats
             return filePath;
         }
 
-        private static string GetRlStatsTempFolder()
+        public static string GetRlStatsTempFolder()
         {
             var tempPath = Path.GetTempPath();
             var info = Directory.CreateDirectory(tempPath + @"rlCharts\");
@@ -213,6 +213,21 @@ namespace Discord_Bot.RLStats
         {
             var provider = new ChartProvider(averages, averagesToCompare);
             var chartCreators = provider.GetChartCreators<T>(350, 600);
+            var pathList = GetPathList(chartCreators, 9, 3);
+            return pathList;
+        }
+        public IEnumerable<string> CreateAndGetStatsFiles(IEnumerable<AveragePlayerStats> averages, IEnumerable<string> propertyNames)
+        {
+            var provider = new ChartProvider(averages);
+            var chartCreators = provider.GetSpecificCreators(propertyNames, 350, 600);
+            var pathList = GetPathList(chartCreators, 9, 3);
+            return pathList;
+        }
+
+        public IEnumerable<string> CreateAndGetStatsFiles(IEnumerable<AveragePlayerStats> averages, IEnumerable<AveragePlayerStats> averagesToCompare, IEnumerable<string> propertyNames)
+        {
+            var provider = new ChartProvider(averages, averagesToCompare);
+            var chartCreators = provider.GetSpecificCreators(propertyNames, 350, 600);
             var pathList = GetPathList(chartCreators, 9, 3);
             return pathList;
         }

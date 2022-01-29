@@ -47,7 +47,7 @@ namespace Discord_Bot.Services
         private async Task ExecuteCommand(ConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
         {
             await channel.TriggerTypingAsync();
-            var filePaths = await _module.GetAverageStats(entry.Names, entry.Together, entry.Time);
+            var filePaths = await _module.GetAverageStats(entry);
             if (filePaths.Any())
             {
                 await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");

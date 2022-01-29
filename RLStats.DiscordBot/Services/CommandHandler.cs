@@ -10,6 +10,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConstants;
 
 namespace Discord_Bot.Services
 {
@@ -80,6 +81,8 @@ namespace Discord_Bot.Services
                 .WithTitle(module.Name);
                 foreach (var command in module.Commands)
                 {
+                    if (ProceedingMethod.Equals(command.Remarks))
+                        continue;
                     var value = command.Summary ?? "This command has no summary" + Environment.NewLine;
                     value += $"\n{_config["prefix"]}{command.Name}";
                     foreach (var param in command.Parameters)

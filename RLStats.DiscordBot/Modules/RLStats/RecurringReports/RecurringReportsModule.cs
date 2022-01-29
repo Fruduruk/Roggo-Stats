@@ -3,14 +3,20 @@ using Discord.Commands;
 
 using Discord_Bot.Configuration;
 using Discord_Bot.ExtensionMethods;
+using Discord_Bot.RLStats;
 using Discord_Bot.Singletons;
 
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using RLStats_Classes.AverageModels;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConstants;
@@ -37,13 +43,14 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         {
             if (!Context.IsPrivate)
                 return;
-            await ProceedToNextStep(SubStepOneMessage, ExecuteSubStepOne, new ConfigEntry()
+            await ProceedToNextStepAsync(SubStepOneMessage, ExecuteSubStepOne, new ConfigEntry()
             {
-                ChannelId = Context.Channel.Id
+                ChannelId = Context.Channel.Id,
+                LastPost = DateTime.MinValue
             });
         }
 
-        private async Task ProceedToNextStep(string message, string stepCommand, ConfigEntry configEntry)
+        private async Task ProceedToNextStepAsync(string message, string stepCommand, ConfigEntry configEntry)
         {
             await SendMessageToCurrentChannelAsync(message);
             foreach (var command in _commandsToProceed.CommandsInProgress)
@@ -76,18 +83,29 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             return null;
         }
 
+        private void RemoveSavedConfigEntry()
+        {
+            CommandInProgress commandToRemove = null;
+            foreach (var command in _commandsToProceed.CommandsInProgress)
+            {
+                if (command.UserId == Context.User.Id && command.ChannelId == Context.Channel.Id)
+                {
+                    commandToRemove = command;
+                }
+            }
+            if (commandToRemove != null)
+                _commandsToProceed.CommandsInProgress.Remove(commandToRemove);
+        }
+
+        [Remarks(ProceedingMethod)]
         [Command(ExecuteSubStepOne)]
         public async Task ExecuteSubStepOneAsync(string time)
         {
-            var configEntry = GetSavedConfigEntry();
-            if (configEntry is null)
-            {
-                await SendMessageToCurrentChannelAsync(CorruptedConfigMessage);
+            var stopHere = await IsProcessCanceledOrCorrupted(time);
+            if (stopHere)
                 return;
-            }
 
-            if (string.IsNullOrEmpty(time))
-                return;
+            var configEntry = GetSavedConfigEntry();
 
             if (!time.CanConvertTime())
             {
@@ -97,40 +115,35 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
             configEntry.Time = time;
 
-            await ProceedToNextStep(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
+            await ProceedToNextStepAsync(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
         }
 
+        [Remarks(ProceedingMethod)]
         [Command(ExecuteSubStepTwo)]
         public async Task ExecuteSubStepTwoAsync(string namesAndIds)
         {
-            var configEntry = GetSavedConfigEntry();
-            if (configEntry is null)
-            {
-                await SendMessageToCurrentChannelAsync(CorruptedConfigMessage);
+            var stopHere = await IsProcessCanceledOrCorrupted(namesAndIds);
+            if (stopHere)
                 return;
-            }
 
-            if (string.IsNullOrEmpty(namesAndIds))
-                return;
+            var configEntry = GetSavedConfigEntry();
 
             var nameAndIdArr = namesAndIds.Split(',');
             configEntry.Names = new List<string>(nameAndIdArr);
 
-            await ProceedToNextStep(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
+            await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
         }
 
+        [Remarks(ProceedingMethod)]
         [Command(ExecuteSubStepThree)]
         public async Task ExecuteSubStepThreeAsync(string together)
         {
-            var configEntry = GetSavedConfigEntry();
-            if (configEntry is null)
-            {
-                await SendMessageToCurrentChannelAsync(CorruptedConfigMessage);
+            var stopHere = await IsProcessCanceledOrCorrupted(together);
+            if (stopHere)
                 return;
-            }
 
-            if (string.IsNullOrEmpty(together))
-                return;
+            var configEntry = GetSavedConfigEntry();
+
 
             bool playedTogether;
             try
@@ -145,44 +158,81 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             }
 
             configEntry.Together = playedTogether;
-            
-            await ProceedToNextStep(SubStepFourMessage(playedTogether), ExecuteSubStepFour, configEntry);
+
+            await ProceedToNextStepAsync(SubStepFourMessage(playedTogether), ExecuteSubStepFour, configEntry);
+
+            await ShowAllAvailableStatPropertiesAsync();
         }
 
+
+        [Remarks(ProceedingMethod)]
+        [Command(ExecuteSubStepFour)]
         public async Task ExecuteSubStepFourAsync(string indexes)
         {
-            
+            var stopHere = await IsProcessCanceledOrCorrupted(indexes);
+            if (stopHere)
+                return;
+
+            var configEntry = GetSavedConfigEntry();
+            var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
+            if (!indexList.Any())
+                return;
+            var reader = new NumberListReader();
+            configEntry.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
+
+            await SendMessageToCurrentChannelAsync($"You have chosen these stats: {string.Join(',', configEntry.StatNames)}\n" +
+                $"You have successfully configured your subscription.");
+
+            if (ConfigHandler.Config.HasConfigEntryInIt(configEntry))
+            {
+                await Context.Channel.SendMessageAsync("You have already subscribed to this.");
+                return;
+            }
+
+            ConfigHandler.AddConfigEntry(configEntry);
+            _addedEntries.ConfigEntries.Add(configEntry);
         }
 
-        //var config = ConfigHandler.Config;
+        private async Task ShowAllAvailableStatPropertiesAsync()
+        {
+            var dic = GetPropertyNameDictionary();
+            var tempFileName = Path.Combine(RLStatsCommonMethods.GetRlStatsTempFolder(), "AllProperties.json");
+            File.WriteAllText(tempFileName, JsonConvert.SerializeObject(dic, Formatting.Indented));
 
-        //var configEntry = new ConfigEntry
-        //{
-        //    Time = time,
-        //    Together = ConvertTogetherToBool(together),
-        //    Names = new List<string>(names),
-        //    ChannelId = Context.Channel.Id,
-        //    LastPost = DateTime.MinValue
-        //};
+            await Context.Channel.SendFileAsync(new FileAttachment(tempFileName, "allProperties.json"), "All properties");
+            File.Delete(tempFileName);
+        }
 
-        //if (config.HasConfigEntryInIt(configEntry))
-        //{
-        //    await Context.Channel.SendMessageAsync("You have already subscribed to this.");
-        //    return;
-        //}
+        private static Dictionary<int, string> GetPropertyNameDictionary()
+        {
+            var properties = AveragePlayerStats.GetAllPropertyNames();
+            var dic = new Dictionary<int, string>();
+            for (int i = 0; i < properties.Length; i++)
+                dic.Add(i, properties[i].Replace('_', ' '));
+            return dic;
+        }
 
-        //config.ConfigEntries.Add(configEntry);
-        //_addedEntries.ConfigEntries.Add(configEntry);
-        //ConfigHandler.Config = config;
-        //await Context.Channel.SendMessageAsync("Subscription saved.");
+        private async Task<bool> IsProcessCanceledOrCorrupted(string input)
+        {
+            var configEntry = GetSavedConfigEntry();
+            if (configEntry is null)
+            {
+                await SendMessageToCurrentChannelAsync(CorruptedConfigMessage);
+                return true;
+            }
 
+            if (string.IsNullOrEmpty(input))
+                return true;
 
+            if ("cancel".Equals(input))
+            {
+                await SendMessageToCurrentChannelAsync(ProcessCanceledMessage);
+                RemoveSavedConfigEntry();
+                return true;
+            }
 
-
-
-
-
-
+            return false;
+        }
         //[Command("unsubscribe")]
         //[Alias("unsub")]
         //[Summary("This command lets you unsubscribe a specific action")]
@@ -223,11 +273,22 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 var random = new Random(entry.GetHashCode());
 
                 var builder = new EmbedBuilder()
-                    .AddField("Names:", string.Join(',', entry.Names), inline: true)
-                    .AddField("Together:", entry.Together, inline: true)
                     .AddField("Time:", entry.Time.Adverbify(), inline: true)
-                    .AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
-                    .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)));
+                    .AddField("Names:", string.Join(',', entry.Names), inline: true)
+                    .AddField("Together:", entry.Together, inline: true);
+
+                if (entry.StatNames.Count < 21)
+                {
+                    var fancyStatNames = new List<string>();
+                    foreach (var statName in entry.StatNames)
+                        fancyStatNames.Add(statName.Replace('_', ' '));
+                    builder.AddField("Stats:", string.Join('\n', fancyStatNames), inline: true);
+                }
+                else
+                    builder.AddField("Stats count:", entry.StatNames.Count, inline: true);
+
+                builder.AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
+                .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)));
                 await Context.Channel.SendMessageAsync(embed: builder.Build());
             }
         }
