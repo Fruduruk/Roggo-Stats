@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
     <PackageReference Include="RLStats.Classes" Version="2.1.3" />
-    <PackageReference Include="RLStats.WPF" Version="1.4.0" />
+    <PackageReference Include="RLStats.WPF" Version="1.4.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -41,6 +41,7 @@ namespace Discord_Bot.Modules.RLStats
             await OutputEpicAsync(averages, favorite.FavoriteStats);
         }
 
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command("fav compare")]
         [Summary("Compares your favorite stats of different times.")]
         public async Task Compare(string time, string together, params string[] names)
@@ -54,6 +55,7 @@ namespace Discord_Bot.Modules.RLStats
             await CompareAndSend(time, names, favorite.FavoriteStats, ConvertTogetherToBool(together));
         }
 
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command("fav today")]
         [Summary("Gets your favorite stats for one or more players for today.")]
         public async Task StatsToday(string together, params string[] names)
@@ -62,6 +64,7 @@ namespace Discord_Bot.Modules.RLStats
             await ShowFavoriteStats(averages);
         }
 
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command("fav all")]
         [Summary("Gets your favorite stats for one or more players.")]
         public async Task StatsAllTime(string together, params string[] names)
@@ -70,6 +73,7 @@ namespace Discord_Bot.Modules.RLStats
             await ShowFavoriteStats(averages);
         }
 
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command("fav last")]
         [Summary("Gets your favorite stats for one or more players for the last [count] games.")]
         public async Task StatsLast(int count, string together, params string[] names)

@@ -81,7 +81,7 @@ namespace Discord_Bot.Services
                 .WithTitle(module.Name);
                 foreach (var command in module.Commands)
                 {
-                    if (ProceedingMethod.Equals(command.Remarks))
+                    if (Constants.IgnoreEndpoint.Equals(command.Remarks))
                         continue;
                     var value = command.Summary ?? "This command has no summary" + Environment.NewLine;
                     value += $"\n{_config["prefix"]}{command.Name}";

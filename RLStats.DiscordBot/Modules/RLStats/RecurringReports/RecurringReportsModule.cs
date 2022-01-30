@@ -108,7 +108,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 _commandsToProceed.CommandsInProgress.Remove(commandToRemove);
         }
 
-        [Remarks(ProceedingMethod)]
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepOne)]
         public async Task ExecuteSubStepOneAsync(string time)
         {
@@ -129,7 +129,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             await ProceedToNextStepAsync(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
         }
 
-        [Remarks(ProceedingMethod)]
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepTwo)]
         public async Task ExecuteSubStepTwoAsync(string namesAndIds)
         {
@@ -154,7 +154,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             }
         }
 
-        [Remarks(ProceedingMethod)]
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepThree)]
         public async Task ExecuteSubStepThreeAsync(string together)
         {
@@ -191,7 +191,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             File.Delete(tempFileName);
         }
 
-        [Remarks(ProceedingMethod)]
+        [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepFour)]
         public async Task ExecuteSubStepFourAsync(string indexes)
         {

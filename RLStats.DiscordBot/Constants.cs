@@ -6,6 +6,10 @@ namespace Discord_Bot
 {
     public class Constants
     {
+        /// <summary>
+        /// Proceeding method remark
+        /// </summary>
+        public const string IgnoreEndpoint = "093wmasoiwej,,na9w3..pnfc_iosdnpvaiouebg";
         public static DirectoryInfo RLStatsDiscordFolder => GetRLStatsDiscordFolder();
         public static string SubscribtionConfigFilePath => GetSubscrptionConfigFilePath();
         public static string UserFavoritesConfigFilePath => GetUserFavoritesConfigFilePath();

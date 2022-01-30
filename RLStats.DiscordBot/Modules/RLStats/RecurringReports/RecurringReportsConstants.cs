@@ -25,10 +25,6 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             $"\n\nNow you need to choose the stats you want to see.\nJust type in all the numbers separated by comma. No whitespaces.\nIf you want all of them just type in all.";
         #endregion
 
-        /// <summary>
-        /// Proceeding method remark
-        /// </summary>
-        public const string ProceedingMethod = "093wmasoiwej,,na9w3..pnfc_iosdnpvaiouebg";
         public const string ExecuteSubStepOne = "proceed to subscription step one";
         public const string ExecuteSubStepTwo = "proceed to subscription step two";
         public const string ExecuteSubStepThree = "proceed to subscription step three";
