@@ -2,12 +2,19 @@
 using Discord.Commands;
 
 using Discord_Bot.Configuration;
+using Discord_Bot.ExtensionMethods;
+using Discord_Bot.Modules.RLStats.RecurringReports;
 using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
+
 using RLStats_Classes.AverageModels;
+
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Discord_Bot.Modules.RLStats
@@ -16,17 +23,35 @@ namespace Discord_Bot.Modules.RLStats
     [Name("Favorite Commands")]
     public class RlStatsFavModule : RlStatsModuleBase
     {
+        private const string NoneConfiguredMessage = "You don't have any favorites configured.";
         private ConfigHandler<UserFavorite> _userFavoritesConfigHandler;
         public RlStatsFavModule(ILogger<RlStatsFavModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
         {
             _userFavoritesConfigHandler = new ConfigHandler<UserFavorite>(Constants.UserFavoritesConfigFilePath);
         }
 
+        private async Task ShowFavoriteStats(IEnumerable<AveragePlayerStats> averages)
+        {
+            var favorite = GetUserFavoriteByUserId(Context.User.Id);
+            if (favorite is null)
+            {
+                await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
+                return;
+            }
+            await OutputEpicAsync(averages, favorite.FavoriteStats);
+        }
+
         [Command("fav compare")]
         [Summary("Compares your favorite stats of different times.")]
         public async Task Compare(string time, string together, params string[] names)
         {
-            await CompareAndSend<AveragePlayerCore>(time, names, ConvertTogetherToBool(together));
+            var favorite = GetUserFavoriteByUserId(Context.User.Id);
+            if (favorite is null)
+            {
+                await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
+                return;
+            }
+            await CompareAndSend(time, names, favorite.FavoriteStats, ConvertTogetherToBool(together));
         }
 
         [Command("fav today")]
@@ -34,7 +59,7 @@ namespace Discord_Bot.Modules.RLStats
         public async Task StatsToday(string together, params string[] names)
         {
             var averages = await CommonMethods.GetAverageRocketLeagueStats(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerCore>(averages);
+            await ShowFavoriteStats(averages);
         }
 
         [Command("fav all")]
@@ -42,7 +67,7 @@ namespace Discord_Bot.Modules.RLStats
         public async Task StatsAllTime(string together, params string[] names)
         {
             var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerCore>(averages);
+            await ShowFavoriteStats(averages);
         }
 
         [Command("fav last")]
@@ -50,20 +75,62 @@ namespace Discord_Bot.Modules.RLStats
         public async Task StatsLast(int count, string together, params string[] names)
         {
             var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerCore>(averages);
+            await ShowFavoriteStats(averages);
         }
 
         [Command("set favorites")]
         [Alias("set fav")]
         [Summary("Sets and saves your favorite stats.")]
-        public async Task SetFavoriteStats(params int[] statIds)
+        public async Task SetFavoriteStats(string indexes)
         {
-            //ConfigHandler.Config
+            var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
+            if (!indexList.Any())
+                return;
+            var reader = new NumberListReader();
+
+            var favorite = GetUserFavoriteByUserId(Context.User.Id);
+            if (favorite is null)
+                favorite = new UserFavorite() { UserId = Context.User.Id };
+            else
+                _userFavoritesConfigHandler.RemoveConfigEntry(favorite);
+
+            favorite.FavoriteStats.Clear();
+            favorite.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
+
+            _userFavoritesConfigHandler.AddConfigEntry(favorite);
+
+            await SendMessageToCurrentChannelAsync("Successfully configured your favorite stats");
         }
 
+        [Command("show favorites")]
+        [Alias("show fav")]
+        [Summary("shows your favorites stats")]
+        public async Task ShowFavoriteStats()
+        {
+            var favorite = GetUserFavoriteByUserId(Context.User.Id);
+            if(favorite is null)
+            {
+                await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
+                return;
+            }
+            var builder = new StringBuilder($"{Context.User.Username}'s favorite stats:");
+            foreach(var stat in favorite.FavoriteStats)
+                builder.Append('\n').Append(stat.Replace('_', ' '));
+            await SendMessageToCurrentChannelAsync(builder.ToString());
+        }
+
+        private UserFavorite GetUserFavoriteByUserId(ulong userId)
+        {
+            foreach (var favorite in _userFavoritesConfigHandler.Config)
+            {
+                if (favorite.UserId.Equals(userId))
+                    return favorite;
+            }
+            return null;
+        }
 
         [Command("show stats list")]
-        [Alias("show statlist")]
+        [Alias("show sl")]
         [Summary("Shows a list of possible stats with their ids.")]
         public async Task ShowAllAvailableStatPropertiesAsync()
         {

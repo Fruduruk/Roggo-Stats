@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Discord_Bot.Modules.RLStats.RecurringReports
+namespace Discord_Bot.RLStats
 {
     public class NumberListReader
     {
         public bool CollectAll { get; private set; }
-        
+
         public IEnumerable<int> ReadIndexNuberList(List<string> indexList)
         {
             var numberList = new List<int>();
@@ -21,7 +21,8 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                         break;
                     }
                     int indexNumber = Convert.ToInt32(index);
-                    numberList.Add(indexNumber);
+                    if (!numberList.Contains(indexNumber))
+                        numberList.Add(indexNumber);
                 }
                 catch
                 {

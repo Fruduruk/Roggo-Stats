@@ -55,6 +55,12 @@ namespace Discord_Bot.Modules.RLStats
             await SendFilesAsync(pathList);
         }
 
+        protected async Task OutputEpicAsync(IEnumerable<AveragePlayerStats> averages, IEnumerable<string> propertyNames)
+        {
+            var pathList = CommonMethods.CreateAndGetStatsFiles(averages, propertyNames);
+            await SendFilesAsync(pathList);
+        }
+
         protected async Task<RestUserMessage> SendMessageToCurrentChannelAsync(string message)
         {
             return await Context.Channel.SendMessageAsync(message);
@@ -75,6 +81,13 @@ namespace Discord_Bot.Modules.RLStats
             IEnumerable<AveragePlayerStats> averagesToCompare)
         {
             var pathList = CommonMethods.CreateAndGetStatsFiles<T>(averages, averagesToCompare);
+            await SendFilesAsync(pathList);
+        }
+
+        protected async Task OutputEpicAsync(IEnumerable<AveragePlayerStats> averages,
+            IEnumerable<AveragePlayerStats> averagesToCompare, IEnumerable<string> propertyNames)
+        {
+            var pathList = CommonMethods.CreateAndGetStatsFiles(averages, averagesToCompare, propertyNames);
             await SendFilesAsync(pathList);
         }
 
@@ -136,8 +149,21 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                var (stats, statsToCompare) = await CommonMethods.Compare<T>(time, names, playedTogether);
+                var (stats, statsToCompare) = await CommonMethods.Compare(time, names, playedTogether);
                 await OutputEpicAsync<T>(statsToCompare, stats);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                await Context.Channel.SendMessageAsync(e.Message);
+            }
+        }
+
+        protected async Task CompareAndSend(string time, string[] names, IEnumerable<string> propertyNames, bool playedTogether = true)
+        {
+            try
+            {
+                var (stats, statsToCompare) = await CommonMethods.Compare(time, names, playedTogether);
+                await OutputEpicAsync(statsToCompare, stats, propertyNames);
             }
             catch (ArgumentOutOfRangeException e)
             {

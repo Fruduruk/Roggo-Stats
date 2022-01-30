@@ -113,7 +113,7 @@ namespace Discord_Bot.RLStats
 
                 //var dMessage = await Context.Channel.SendMessageAsync($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
 
-                var response = await ReplayProvider.CollectReplaysAsync(filter, false);
+                var response = await ReplayProvider.CollectReplaysAsync(filter, true);
 
                 var advancedReplays = await AdvancedReplayProvider.GetAdvancedReplayInfosAsync(response.Replays.ToList());
 
@@ -122,7 +122,7 @@ namespace Discord_Bot.RLStats
             }
         }
 
-        public async Task<(IEnumerable<AveragePlayerStats>, IEnumerable<AveragePlayerStats>)> Compare<T>(string time, string[] names, bool playedTogether = true)
+        public async Task<(IEnumerable<AveragePlayerStats>, IEnumerable<AveragePlayerStats>)> Compare(string time, string[] names, bool playedTogether = true)
         {
             var startTimeRange = time.ConvertToThisTimeRange();
             var endTimeRange = time.ConvertToLastTimeRange();

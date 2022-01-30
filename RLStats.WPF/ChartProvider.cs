@@ -118,10 +118,20 @@ namespace RLStats_WPF
                 {
                     var barValues = GetChartBarValuesForStatProperty(AvgPlayerStatList, property);
                     var title = property.Name.Replace('_', ' ');
-                    var chart = new ChartCreator(title, barValues, height, width);
-                    chartList.Add(chart);
+                    if (AvgPlayerStatListToCompare is null)
+                    {
+                        var chart = new ChartCreator(title, barValues, height, width);
+                        chartList.Add(chart);
+                    }
+                    else
+                    {
+                        var secondBarValues = GetChartBarValuesForStatProperty(AvgPlayerStatListToCompare, property);
+                        var chart = new ChartCreator(title, barValues, secondBarValues, height, width);
+                        chartList.Add(chart);
+                    }
                 }
             }
+
             return chartList;
         }
     }

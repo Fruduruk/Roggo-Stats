@@ -19,15 +19,7 @@ namespace Discord_Bot.Configuration
                 return false;
             if (other.UserId != UserId)
                 return false;
-            if (FavoriteStats != other.FavoriteStats)
-                return false;
-            foreach (var item in FavoriteStats)
-                if (!other.FavoriteStats.Contains(item))
-                    return false;
-            foreach (var item in other.FavoriteStats)
-                if (!FavoriteStats.Contains(item))
-                    return false;
-
+            
             return true;
         }
 
