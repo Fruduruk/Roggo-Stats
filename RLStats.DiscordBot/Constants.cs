@@ -8,10 +8,16 @@ namespace Discord_Bot
     {
         public static DirectoryInfo RLStatsDiscordFolder => GetRLStatsDiscordFolder();
         public static string SubscribtionConfigFilePath => GetSubscrptionConfigFilePath();
+        public static string UserFavoritesConfigFilePath => GetUserFavoritesConfigFilePath();
 
         private static string GetSubscrptionConfigFilePath()
         {
-            return Path.Combine(RLStatsDiscordFolder.ToString(), "DiscordConfig.json.7z");
+            return Path.Combine(RLStatsDiscordFolder.ToString(), "SubscriptionConfig.json.7z");
+        }
+
+        private static string GetUserFavoritesConfigFilePath()
+        {
+            return Path.Combine(RLStatsDiscordFolder.ToString(), "UserFavoritesConfig.json.7z");
         }
 
         private static DirectoryInfo GetRLStatsDiscordFolder()
@@ -19,7 +25,5 @@ namespace Discord_Bot
             var folderPath = Path.Combine(RLConstants.RLStatsFolder, "Discord");
             return Directory.CreateDirectory(folderPath);
         }
-
-
     }
 }

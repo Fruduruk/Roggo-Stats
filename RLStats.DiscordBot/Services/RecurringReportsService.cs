@@ -24,9 +24,9 @@ namespace Discord_Bot.Services
 
         private RecentlyAddedEntries _addedEntries;
         private readonly RecurringReportServiceModule _module;
-        private readonly ConfigHandler<SubscriptionConfig, SubscriptionConfigEntry> _configHandler;
+        private readonly ConfigHandler<Subscription> _configHandler;
 
-        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken, ConfigHandler<SubscriptionConfig,SubscriptionConfigEntry> configHandler) : base(client, logger)
+        public RecurringReportsService(DiscordSocketClient client, ILogger<DiscordClientService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken, ConfigHandler<Subscription> configHandler) : base(client, logger)
         {
             _addedEntries = recentlyAddedEntries;
             _module = new RecurringReportServiceModule(logger, ballchasingToken);
@@ -47,7 +47,7 @@ namespace Discord_Bot.Services
         /// <param name="channel">The channel in which the stats are sent to</param>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
-        private async Task ExecuteCommand(SubscriptionConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
+        private async Task ExecuteCommand(Subscription entry, IMessageChannel channel, CancellationToken stoppingToken)
         {
             await channel.TriggerTypingAsync();
             var filePaths = await _module.GetAverageStats(entry);
@@ -98,13 +98,13 @@ namespace Discord_Bot.Services
                     break;
                 }
                 await StartBackgroundThreads(_addedEntries, stoppingToken);
-                _addedEntries.ConfigEntries.Clear();
+                _addedEntries.Clear();
             }
         }
 
-        private async Task StartBackgroundThreads(SubscriptionConfig config, CancellationToken stoppingToken)
+        private async Task StartBackgroundThreads(IEnumerable<Subscription> subscriptions, CancellationToken stoppingToken)
         {
-            foreach (var entry in config.ConfigEntries)
+            foreach (var entry in subscriptions)
             {
                 var channel = await Client.GetChannelAsync(entry.ChannelId) as IMessageChannel;
                 if (channel != null)
@@ -114,7 +114,7 @@ namespace Discord_Bot.Services
             }
         }
 
-        private async void StartBackgroundThread(SubscriptionConfigEntry entry, IMessageChannel channel, CancellationToken stoppingToken)
+        private async void StartBackgroundThread(Subscription entry, IMessageChannel channel, CancellationToken stoppingToken)
         {
             while (true)
             {
@@ -141,11 +141,11 @@ namespace Discord_Bot.Services
             }
         }
 
-        public SubscriptionConfigEntry UpdateLastPost(SubscriptionConfigEntry entry, DateTime newLastPost)
+        public Subscription UpdateLastPost(Subscription entry, DateTime newLastPost)
         {
-            SubscriptionConfigEntry newEntry = null;
+            Subscription newEntry = null;
             var config = _configHandler.Config;
-            foreach (var configEntry in config.ConfigEntries)
+            foreach (var configEntry in config)
             {
                 if (configEntry.Equals(entry))
                 {

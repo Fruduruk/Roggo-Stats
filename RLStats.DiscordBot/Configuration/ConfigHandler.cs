@@ -1,13 +1,12 @@
-﻿using Discord_Bot.Exceptions;
-
-using RLStats_Classes.MainClasses;
+﻿using RLStats_Classes.MainClasses;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Discord_Bot.Configuration
 {
-    public class ConfigHandler<ConfigType, EntryType> where ConfigType : IConfigList<EntryType>, new() where EntryType : IEquatable<EntryType>, new()
+    public class ConfigHandler<T> where T : IEquatable<T>, new()
     {
         public string ConfigFilePath { get; private set; } 
 
@@ -16,9 +15,9 @@ namespace Discord_Bot.Configuration
             ConfigFilePath = filePath;
         }
 
-        public ConfigType Config => ReadConfigFile();
+        public List<T> Config => ReadConfigFile();
 
-        public bool HasConfigEntryInIt(EntryType entry)
+        public bool HasConfigEntryInIt(T entry)
         {
             if (Config is null)
                 return false;
@@ -26,7 +25,7 @@ namespace Discord_Bot.Configuration
                 return false;
             lock (Config)
             {
-                foreach (var configEntry in Config.ConfigEntries)
+                foreach (var configEntry in Config)
                 {
                     if (configEntry.Equals(entry))
                         return true;
@@ -35,38 +34,38 @@ namespace Discord_Bot.Configuration
             return false;
         }
 
-        public void RemoveConfigEntry(EntryType entry)
+        public void RemoveConfigEntry(T entry)
         {
             var config = ReadConfigFile();
-            config.ConfigEntries.Remove(entry);
+            config.Remove(entry);
             SaveConfigFile(config);
         }
 
-        public void AddConfigEntry(EntryType entry)
+        public void AddConfigEntry(T entry)
         {
             var config = ReadConfigFile();
-            config.ConfigEntries.Add(entry);
+            config.Add(entry);
             SaveConfigFile(config);
         }
 
-        public void SaveConfigFile(ConfigType value)
+        public void SaveConfigFile(IEnumerable<T> value)
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
-            File.WriteAllBytes(ConfigFilePath, Compressor.ConvertObject(value, false));
+            File.WriteAllBytes(ConfigFilePath, Compressor.ConvertObject(new List<T>(value), false));
         }
 
-        private ConfigType ReadConfigFile()
+        private List<T> ReadConfigFile()
         {
             try
             {
-                var config = Compressor.ConvertObject<ConfigType>(File.ReadAllBytes(ConfigFilePath), false);
+                var config = Compressor.ConvertObject<List<T>>(File.ReadAllBytes(ConfigFilePath), false);
                 return config;
             }
             catch
             {
-                return new ConfigType();
+                return new List<T>();
             }
         }
     }

@@ -16,8 +16,10 @@ namespace Discord_Bot.Modules.RLStats
     [Name("Favorite Commands")]
     public class RlStatsFavModule : RlStatsModuleBase
     {
+        private ConfigHandler<UserFavorite> _userFavoritesConfigHandler;
         public RlStatsFavModule(ILogger<RlStatsFavModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
         {
+            _userFavoritesConfigHandler = new ConfigHandler<UserFavorite>(Constants.UserFavoritesConfigFilePath);
         }
 
         [Command("fav compare")]

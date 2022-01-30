@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace Discord_Bot.ExtensionMethods
 {
-    public static class ConfigEntryExtensions
+    public static class SubscriptionConfigEntryExtensions
     {
-        public static void AddPropertyNamesToConfigEntry(this SubscriptionConfigEntry configEntry, IEnumerable<int> indexNumberList, bool collectAll = false)
+        public static void AddPropertyNamesToConfigEntry(this Subscription configEntry, IEnumerable<int> indexNumberList, bool collectAll = false)
         {
             var dic = GetPropertyNameDictionary();
             if (collectAll)
@@ -32,6 +32,7 @@ namespace Discord_Bot.ExtensionMethods
                 }
             }
         }
+
         private static Dictionary<int, string> GetPropertyNameDictionary()
         {
             var properties = AveragePlayerStats.GetAllPropertyNames();

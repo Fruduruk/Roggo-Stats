@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Discord_Bot.Configuration
 {
-    public class SubscriptionConfigEntry : IEquatable<SubscriptionConfigEntry>
+    public class Subscription : IEquatable<Subscription>
     {
         public int Id { get; set; }
         public string Time { get; set; }
@@ -15,10 +15,10 @@ namespace Discord_Bot.Configuration
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as SubscriptionConfigEntry);
+            return Equals(obj as Subscription);
         }
 
-        public bool Equals(SubscriptionConfigEntry other)
+        public bool Equals(Subscription other)
         {
             if (other is null)
                 return false;

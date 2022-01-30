@@ -59,7 +59,7 @@ namespace Discord_Bot
                     services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
                     services.AddSingleton(new RecentlyAddedEntries());
                     services.AddSingleton(new CommandsToProceed());
-                    services.AddSingleton(new ConfigHandler<SubscriptionConfig, SubscriptionConfigEntry>(Constants.SubscribtionConfigFilePath));
+                    services.AddSingleton(new ConfigHandler<Subscription>(Constants.SubscribtionConfigFilePath));
 
                     services.AddHostedService<CommandHandler>();
                     services.AddHostedService<RecurringReportsService>();

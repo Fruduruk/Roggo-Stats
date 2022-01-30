@@ -9,7 +9,7 @@ namespace Discord_Bot.Singletons
         public ulong ChannelId { get; set; }
         public ulong UserId { get; set; }
         public string CommandToProceed { get; set; }
-        public SubscriptionConfigEntry ConfigEntry { get; set; } = new SubscriptionConfigEntry();
+        public Subscription ConfigEntry { get; set; } = new Subscription();
 
         public CommandInProgress(ulong channelId, ulong userId, string commandToProceed)
         {
