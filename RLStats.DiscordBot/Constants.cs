@@ -13,6 +13,19 @@ namespace Discord_Bot
         public static DirectoryInfo RLStatsDiscordFolder => GetRLStatsDiscordFolder();
         public static string SubscribtionConfigFilePath => GetSubscrptionConfigFilePath();
         public static string UserFavoritesConfigFilePath => GetUserFavoritesConfigFilePath();
+        public static string DiscordLogsZipPath => GetDiscordLogsZipPath();
+
+        public static string LogPath => GetLogPath();
+
+        private static string GetLogPath()
+        {
+            return Path.Combine(RLStatsDiscordFolder.ToString(), "DiscordLog.txt");
+        }
+
+        private static string GetDiscordLogsZipPath()
+        {
+            return Path.Combine(RLStatsDiscordFolder.ToString(), "Logs.zip");
+        }
 
         private static string GetSubscrptionConfigFilePath()
         {

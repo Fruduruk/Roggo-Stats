@@ -111,13 +111,13 @@ namespace Discord_Bot.RLStats
                 };
                 AddNameOrSteamIds(namesToUse.ToArray(), filter);
 
-                //var dMessage = await Context.Channel.SendMessageAsync($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
+                DiscordBotLog.Log($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
 
                 var response = await ReplayProvider.CollectReplaysAsync(filter, true);
 
                 var advancedReplays = await AdvancedReplayProvider.GetAdvancedReplayInfosAsync(response.Replays.ToList());
-
-                //await dMessage.ModifyAsync(props => props.Content = $"Downloaded { response.Replays.Count()} replays for {string.Join(',', namesToUse)}!");
+                DiscordBotLog.LogCalls(AdvancedReplayProvider.GetAndDeleteApiCalls());
+                DiscordBotLog.Log($"Downloaded { response.Replays.Count()} replays for {string.Join(',', namesToUse)}!");
                 return await StatsComparer.GetAveragesAsync(advancedReplays, new List<string>(namesToUse));
             }
         }

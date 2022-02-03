@@ -55,6 +55,8 @@ namespace Discord_Bot.Services
 
             var context = new SocketCommandContext(_client, message);
 
+            DiscordBotLog.Log($"Command Received: {message} from {context.User.Username}");
+
             if (message.ToString().StartsWith($"{_config["prefix"]}help"))
             {
                 await Help(context);
