@@ -21,32 +21,10 @@ namespace RLStats_Classes.MainClasses
             return replaysInTimeZone;
         }
 
-        public static int DeleteObsoleteReplays(this List<Replay> replays)
+        public static int DeleteReplaysThatDoNotHaveTheActualNamesInIt(this HashSet<Replay> replays, IEnumerable<string> names)
         {
-            var newReplayList = new HashSet<Replay>();
-
-            foreach (var replay in replays)
-            {
-                if (!newReplayList.Contains(replay))
-                    newReplayList.Add(replay);
-            }
-            
-            var obsoleteCount = replays.Count - newReplayList.Count;
-            replays.Clear();
-            replays.AddRange(newReplayList);
-            return obsoleteCount;
-        }
-
-        public static bool ContainsReplay(this IEnumerable<Replay> replays, Replay r)
-        {
-            foreach (var replay in replays)
-                if (r.Equals(replay))
-                    return true;
-            return false;
-        }
-
-        public static int DeleteReplaysThatDoNotHaveTheActualNamesInIt(this List<Replay> replays, IEnumerable<string> names)
-        {
+            if (!names.Any())
+                return 0;
             var newReplayList = new List<Replay>();
             foreach(var name in names)
             {
@@ -58,18 +36,18 @@ namespace RLStats_Classes.MainClasses
             }
             var obsoleteCount = replays.Count - newReplayList.Count;
             replays.Clear();
-            replays.AddRange(newReplayList);
+            replays.UnionWith(newReplayList);
             return obsoleteCount;
         }
 
-        public static void DeleteReplaysThatAreNotInTimeRange(this List<Replay> replays, DateTime start, DateTime end)
+        public static void DeleteReplaysThatAreNotInTimeRange(this HashSet<Replay> replays, DateTime start, DateTime end)
         {
             var replaysInTimeZone = replays.GetReplaysInTimeZone(start, end);
             replays.Clear();
-            replays.AddRange(replaysInTimeZone);
+            replays.UnionWith(replaysInTimeZone);
         }
 
-        public static void TrimReplaysToCap(this List<Replay> replays, int filterReplayCap)
+        public static void TrimReplaysToCap(this HashSet<Replay> replays, int filterReplayCap)
         {
             if (replays.Count <= filterReplayCap)
                 return;

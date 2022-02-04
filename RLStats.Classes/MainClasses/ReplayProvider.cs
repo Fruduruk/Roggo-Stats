@@ -5,6 +5,7 @@ using RLStats_Classes.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ namespace RLStats_Classes.MainClasses
             var url = filter.GetApiUrl();
             var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
             var done = false;
-            var allReplays = new List<Replay>();
+            var allReplays = new HashSet<Replay>();
             ProgressState.TotalCount = totalReplayCount;
 
             //check if there are replays to download
@@ -79,18 +80,21 @@ namespace RLStats_Classes.MainClasses
 
                 var replayCountBefore = dataPack.Replays.Count;
 
+                //Delete all obsolete replays in this chunk
+                var hashedReplayChunk = new HashSet<Replay>(dataPack.Replays);
+                doubleReplays += replayCountBefore - dataPack.Replays.Count;
+
                 //delete false replays
                 if (filter.CheckDate)
-                    dataPack.Replays.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
+                    hashedReplayChunk.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
 
-                if (dataPack.Replays.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
+                if (hashedReplayChunk.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
                     done = true;
 
-                doubleReplays += dataPack.Replays.DeleteObsoleteReplays();
-                doubleReplays += dataPack.Replays.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
+                doubleReplays += hashedReplayChunk.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
 
-                ProgressState.FalsePartCount += replayCountBefore - dataPack.Replays.Count;
-                ProgressState.PartCount += dataPack.Replays.Count;
+                ProgressState.FalsePartCount += replayCountBefore - hashedReplayChunk.Count;
+                ProgressState.PartCount += hashedReplayChunk.Count;
 
                 //Now check if there is a cache file with the rest of the replays.But only if the checkCache flag is set
                 bool gotOtherReplaysFromCache = false;
@@ -98,19 +102,19 @@ namespace RLStats_Classes.MainClasses
                 {
                     if (ReplayCache.HasCacheFile(filter))
                     {
-                        if (ReplayCache.HasOneReplayInFile(dataPack.Replays, filter))
+                        if (ReplayCache.HasOneReplayInFile(hashedReplayChunk, filter))
                         {
-                            ReplayCache.AddTheOtherReplaysToTheDataPack(dataPack, filter);
+                            ReplayCache.AddTheOtherReplaysToTheDataPack(hashedReplayChunk, filter);
                             gotOtherReplaysFromCache = true;
                         }
                     }
                 }
 
                 //add the rest to the replay batch
-                allReplays.AddRange(dataPack.Replays);
+                allReplays.UnionWith(hashedReplayChunk);
 
                 //Check double replays one more time, there can be doubles between the chunks.
-                doubleReplays += allReplays.DeleteObsoleteReplays();
+                //doubleReplays += allReplays.DeleteObsoleteReplays();
 
 
                 //check if replay count exceeds replay cap
