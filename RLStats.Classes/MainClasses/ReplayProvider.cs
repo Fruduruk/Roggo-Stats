@@ -1,5 +1,4 @@
-﻿
-using RLStats_Classes.MainClasses.CacheHandlers;
+﻿using RLStats_Classes.MainClasses.CacheHandlers;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 
@@ -31,11 +30,6 @@ namespace RLStats_Classes.MainClasses
             sw.Start();
 
             var (replays, doubleReplays) = await GetDataPack(filter, checkCache);
-
-            //Check double replays one more time, there can be doubles between the chunks.
-            var replayList = new List<Replay>(replays);
-            doubleReplays += replayList.DeleteObsoleteReplays();
-            replays = replayList.ToArray();
 
             sw.Stop();
             LastUpdateCall("Downlad finished.", replays.Length, doubleReplays);
@@ -89,7 +83,11 @@ namespace RLStats_Classes.MainClasses
                 if (filter.CheckDate)
                     dataPack.Replays.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
 
+                if (dataPack.Replays.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
+                    done = true;
+
                 doubleReplays += dataPack.Replays.DeleteObsoleteReplays();
+                doubleReplays += dataPack.Replays.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
 
                 ProgressState.FalsePartCount += replayCountBefore - dataPack.Replays.Count;
                 ProgressState.PartCount += dataPack.Replays.Count;
@@ -110,6 +108,10 @@ namespace RLStats_Classes.MainClasses
 
                 //add the rest to the replay batch
                 allReplays.AddRange(dataPack.Replays);
+
+                //Check double replays one more time, there can be doubles between the chunks.
+                doubleReplays += allReplays.DeleteObsoleteReplays();
+
 
                 //check if replay count exceeds replay cap
                 if (!filter.ReplayCap.Equals(0))

@@ -37,6 +37,23 @@ namespace RLStats_Classes.MainClasses
             return obsoleteCount;
         }
 
+        public static int DeleteReplaysThatDoNotHaveTheActualNamesInIt(this List<Replay> replays, IEnumerable<string> names)
+        {
+            var newReplayList = new List<Replay>();
+            foreach(var name in names)
+            {
+                foreach(var replay in replays)
+                {
+                    if(replay.HasNameInIt(name))
+                        newReplayList.Add(replay);
+                }
+            }
+            var obsoleteCount = replays.Count - newReplayList.Count;
+            replays.Clear();
+            replays.AddRange(newReplayList);
+            return obsoleteCount;
+        }
+
         public static void DeleteReplaysThatAreNotInTimeRange(this List<Replay> replays, DateTime start, DateTime end)
         {
             var replaysInTimeZone = replays.GetReplaysInTimeZone(start, end);
