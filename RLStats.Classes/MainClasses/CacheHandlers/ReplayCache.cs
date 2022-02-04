@@ -59,7 +59,7 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
                 var cacheReplays = GetReplaysOutOfCacheFile(filter);
                 foreach (var replay in replays)
                 {
-                    if (cacheReplays.DoesListContainReplay(replay))
+                    if (cacheReplays.ContainsReplay(replay))
                     {
                         return true;
                     }

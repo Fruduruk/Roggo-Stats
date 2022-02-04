@@ -8,6 +8,7 @@ namespace RLStats_Classes.Models
 
         public int Goals { get; set; }
         public List<Player> Players { get; set; } = new List<Player>();
+        public int InitialTeamSize { get; set; }
 
         // override object.Equals
         public override bool Equals(object obj)
@@ -17,7 +18,8 @@ namespace RLStats_Classes.Models
             var that = obj as Team;
             if (Goals.Equals(that.Goals))
             {
-                foreach (var p in Players)
+                var playerList = GetBasicPlayersSorted();
+                foreach (var p in playerList)
                 {
                     if (!that.HasName(p.Name))
                         return false;
@@ -30,7 +32,27 @@ namespace RLStats_Classes.Models
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Goals, Players);
+            var hashCode = new HashCode();
+            hashCode.Add(Goals);
+            var playerList = GetBasicPlayersSorted();
+
+            foreach (var p in playerList)
+                hashCode.Add(p);
+            var hash = hashCode.ToHashCode();
+            return hash;
+        }
+
+        private IEnumerable<Player> GetBasicPlayersSorted()
+        {
+            var playerList = new List<Player>();
+            for (int i = 0; i < Players.Count; i++)
+            {
+                if (playerList.Count < InitialTeamSize)
+                    playerList.Add(Players[i]);
+            }
+
+            playerList.Sort();
+            return playerList;
         }
 
         public bool HasName(string name)

@@ -1,7 +1,11 @@
-﻿using RLStats_Classes.Models;
+﻿using Newtonsoft.Json;
+
+using RLStats_Classes.Models;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace RLStats_Classes.MainClasses
 {
@@ -17,24 +21,28 @@ namespace RLStats_Classes.MainClasses
             return replaysInTimeZone;
         }
 
-        public static bool DoesListContainReplay(this IEnumerable<Replay> replays, Replay r)
+        public static int DeleteObsoleteReplays(this List<Replay> replays)
+        {
+            var newReplayList = new HashSet<Replay>();
+
+            foreach (var replay in replays)
+            {
+                if (!newReplayList.Contains(replay))
+                    newReplayList.Add(replay);
+            }
+            
+            var obsoleteCount = replays.Count - newReplayList.Count;
+            replays.Clear();
+            replays.AddRange(newReplayList);
+            return obsoleteCount;
+        }
+
+        public static bool ContainsReplay(this IEnumerable<Replay> replays, Replay r)
         {
             foreach (var replay in replays)
                 if (r.Equals(replay))
                     return true;
             return false;
-        }
-
-        public static int DeleteObsoleteReplays(this List<Replay> replays)
-        {
-            var newReplayList = new List<Replay>();
-            foreach (var replay in replays)
-                if (!newReplayList.DoesListContainReplay(replay))
-                    newReplayList.Add(replay);
-            var obsoleteCount = replays.Count - newReplayList.Count;
-            replays.Clear();
-            replays.AddRange(newReplayList);
-            return obsoleteCount;
         }
 
         public static int DeleteReplaysThatDoNotHaveTheActualNamesInIt(this List<Replay> replays, IEnumerable<string> names)

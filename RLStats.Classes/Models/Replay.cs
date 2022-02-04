@@ -2,7 +2,7 @@
 
 namespace RLStats_Classes.Models
 {
-    public class Replay : IComparable
+    public class Replay
     {
         public string Id { get; set; }
         public string RocketLeagueId { get; set; }
@@ -37,29 +37,13 @@ namespace RLStats_Classes.Models
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
-            hashCode.Add(Id);
-            hashCode.Add(RocketLeagueId);
             hashCode.Add(SeasonType);
-            hashCode.Add(Visibility);
-            hashCode.Add(Link);
-            hashCode.Add(Title);
             hashCode.Add(Playlist);
             hashCode.Add(Season);
-            hashCode.Add(Date);
-            hashCode.Add(Uploader);
             hashCode.Add(Blue);
             hashCode.Add(Orange);
-            return hashCode.ToHashCode();
-        }
-        public int CompareTo(object? obj)
-        {
-            if (obj is null)
-                return 1;
-            if (obj is Replay replay)
-            {
-                return String.Compare(Id, replay.Id, StringComparison.OrdinalIgnoreCase);
-            }
-            else throw new ArgumentException("Object was not a replay");
+            var hash = hashCode.ToHashCode();
+            return hash;
         }
 
         private static bool CheckEquality(object ob1, object ob2)
