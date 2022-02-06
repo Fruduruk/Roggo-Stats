@@ -1,4 +1,6 @@
-﻿using RLStats_Classes.AdvancedModels;
+﻿using Microsoft.Extensions.Logging;
+
+using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses.CacheHandlers;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
@@ -17,7 +19,7 @@ namespace RLStats_Classes.MainClasses
     {
         private Database ReplayDatabase { get; } = new Database();
 
-        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
+        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
 
         public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false)
         {

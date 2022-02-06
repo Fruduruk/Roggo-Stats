@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 
 using Newtonsoft.Json;
 
@@ -10,6 +11,7 @@ using RocketLeagueStats.Components;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,7 +22,7 @@ namespace RocketLeagueStats
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, ILogger
     {
         private List<Replay> _replays = new();
         private int _index;
@@ -58,7 +60,7 @@ namespace RocketLeagueStats
             InitializeComponent();
             Service = new ServiceWindow(tokenInfo);
             Navigator = new NavigatorWindow(tokenInfo);
-            DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo));
+            DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo, this));
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
             if (!string.IsNullOrEmpty(filePath))
@@ -213,5 +215,21 @@ namespace RocketLeagueStats
             DetailWindow.LoadReplaysAsync(Replays, ReplaysToCompare);
         }
         private void BtnService_Click(object sender, RoutedEventArgs e) => Service.Show();
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (logLevel.Equals(LogLevel.Information))
+                Debug.WriteLine("INFO: "+state.ToString());
+        }
+
+        bool ILogger.IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

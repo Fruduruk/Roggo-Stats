@@ -13,9 +13,9 @@ namespace Discord_Bot.Services
     public class RecurringReportServiceModule
     {
         private RLStatsCommonMethods CommonMethods { get; set; }
-        public RecurringReportServiceModule(ILogger logger, string ballchasingToken)
+        public RecurringReportServiceModule(ILogger commonMethodsLogger, string ballchasingToken)
         {
-            CommonMethods = new RLStatsCommonMethods(logger, ballchasingToken);
+            CommonMethods = new RLStatsCommonMethods(commonMethodsLogger, ballchasingToken);
         }
 
         public async Task<IEnumerable<string>> GetAverageStats(Subscription entry)

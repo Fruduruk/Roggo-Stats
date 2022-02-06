@@ -10,6 +10,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConstants;
 
 namespace Discord_Bot.Services
@@ -20,13 +21,15 @@ namespace Discord_Bot.Services
         private readonly DiscordSocketClient _client;
         private readonly CommandService _service;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
-        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, ILogger<DiscordClientService> logger, CommandService service, IConfiguration config) : base(client, logger)
+        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, ILogger<CommandHandler> logger, CommandService service, IConfiguration config) : base(client, logger)
         {
             _provider = provider;
             _client = client;
             _service = service;
             _config = config;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,16 +41,12 @@ namespace Discord_Bot.Services
             await Client.SetStatusAsync(UserStatus.Invisible);
         }
 
+
         private async Task OnMessageReceived(SocketMessage arg)
         {
             //Check if message comes from a user
             if (!(arg is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
-
-            //if (message.Reference != null)
-            //{
-            // Maybe someday replying is the way to go
-            //}
 
             //Check if this user wants to call a command and execute it
             var argPos = 0;
@@ -55,7 +54,7 @@ namespace Discord_Bot.Services
 
             var context = new SocketCommandContext(_client, message);
 
-            DiscordBotLog.Log($"Command Received: {message} from {context.User.Username}");
+            _logger.LogInformation($"Command Received: {message} from {context.User.Username}");
 
             if (message.ToString().StartsWith($"{_config["prefix"]}help"))
             {
@@ -129,6 +128,6 @@ namespace Discord_Bot.Services
             await context.Channel.SendMessageAsync(null, false, titleEmbedBuilder.Build());
         }
 
-        
+
     }
 }

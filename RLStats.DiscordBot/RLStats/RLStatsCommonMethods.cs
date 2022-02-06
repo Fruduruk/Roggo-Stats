@@ -31,8 +31,8 @@ namespace Discord_Bot.RLStats
         public RLStatsCommonMethods(ILogger logger, string ballchasingToken)
         {
             var tokeninfo = TokenInfoProvider.GetTokenInfo(ballchasingToken);
-            ReplayProvider = new ReplayProvider(tokeninfo);
-            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo);
+            ReplayProvider = new ReplayProvider(tokeninfo, logger);
+            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo, logger);
             StatsComparer = new StatsComparer();
             Logger = logger;
         }
@@ -111,13 +111,17 @@ namespace Discord_Bot.RLStats
                 };
                 AddNameOrSteamIds(namesToUse.ToArray(), filter);
 
-                DiscordBotLog.Log($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
+                Logger.LogInformation($"Downloading replays for {string.Join(',', namesToUse)}. Please wait.");
 
                 var response = await ReplayProvider.CollectReplaysAsync(filter, true);
 
                 var advancedReplays = await AdvancedReplayProvider.GetAdvancedReplayInfosAsync(response.Replays.ToList());
-                DiscordBotLog.LogCalls(AdvancedReplayProvider.GetAndDeleteApiCalls());
-                DiscordBotLog.Log($"Downloaded { response.Replays.Count()} replays for {string.Join(',', namesToUse)}!");
+                Logger.LogDebug(JsonConvert.SerializeObject(new
+                {
+                    ApiCalls = AdvancedReplayProvider.GetAndDeleteApiCalls()
+                }, Formatting.Indented));
+                var message = $"Downloaded { response.Replays.Count()} replays for {string.Join(',', namesToUse)}!";
+                Logger.LogInformation(message);
                 return await StatsComparer.GetAveragesAsync(advancedReplays, new List<string>(namesToUse));
             }
         }

@@ -1,4 +1,8 @@
-﻿using RLStats_Classes.MainClasses.CacheHandlers;
+﻿using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
+
+using RLStats_Classes.MainClasses.CacheHandlers;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 
@@ -16,10 +20,11 @@ namespace RLStats_Classes.MainClasses
         private bool _cancelDownload;
         private ReplayCache ReplayCache { get; set; } = new ReplayCache();
 
-        public ReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
+        public ReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
 
         public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter, bool checkCache = false)
         {
+            Logger.LogInformation("Started collecting replays.");
             //Don't use cache on requests with cap
             if (filter.ReplayCap > 0)
                 checkCache = false;
@@ -34,10 +39,19 @@ namespace RLStats_Classes.MainClasses
 
             sw.Stop();
             LastUpdateCall("Downlad finished.", replays.Length, doubleReplays);
+            Logger.LogInformation("Finished collecting replays.");
+            
             response.DoubleReplays = doubleReplays;
             response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             GC.Collect();
+
+            LogDebugObject(new
+            {
+                ReplayCount = replays.Length,
+                FalsePartCount = doubleReplays,
+                sw.ElapsedMilliseconds
+            });
 
             //Don't use cache on requests with cap
             if (filter.ReplayCap == 0)
@@ -58,11 +72,16 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(Replay[], int doubleReplays)> GetDataPack(APIRequestFilter filter, bool checkCache)
         {
+            LogDebugObject(new
+            {
+                PackUrl = filter.GetApiUrl(),
+                filter.Names
+            });
             //init variables
-            int doubleReplays = 0;
             var url = filter.GetApiUrl();
             var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
             var done = false;
+            var doubleReplays = 0;
             var allReplays = new HashSet<Replay>();
             ProgressState.TotalCount = totalReplayCount;
 
@@ -82,7 +101,7 @@ namespace RLStats_Classes.MainClasses
 
                 //Delete all obsolete replays in this chunk
                 var hashedReplayChunk = new HashSet<Replay>(dataPack.Replays);
-                doubleReplays += replayCountBefore - dataPack.Replays.Count;
+                Logger.LogDebug($"Removed {dataPack.Replays.Count - hashedReplayChunk.Count} duplicates");
 
                 //delete false replays
                 if (filter.CheckDate)
@@ -91,8 +110,9 @@ namespace RLStats_Classes.MainClasses
                 if (hashedReplayChunk.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
                     done = true;
 
-                doubleReplays += hashedReplayChunk.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
+                hashedReplayChunk.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
 
+                doubleReplays += replayCountBefore - hashedReplayChunk.Count;
                 ProgressState.FalsePartCount += replayCountBefore - hashedReplayChunk.Count;
                 ProgressState.PartCount += hashedReplayChunk.Count;
 
@@ -112,10 +132,6 @@ namespace RLStats_Classes.MainClasses
 
                 //add the rest to the replay batch
                 allReplays.UnionWith(hashedReplayChunk);
-
-                //Check double replays one more time, there can be doubles between the chunks.
-                //doubleReplays += allReplays.DeleteObsoleteReplays();
-
 
                 //check if replay count exceeds replay cap
                 if (!filter.ReplayCap.Equals(0))
@@ -143,8 +159,15 @@ namespace RLStats_Classes.MainClasses
                     url = dataPack.Next;
                 else
                     done = true;
+
+                Logger.LogDebug($"Current replay count: {allReplays.Count}");
             }
             return (allReplays.ToArray(), doubleReplays);
+        }
+
+        private void LogDebugObject(object obj)
+        {
+            Logger.LogDebug(JsonConvert.SerializeObject(obj, Formatting.Indented));
         }
     }
 }

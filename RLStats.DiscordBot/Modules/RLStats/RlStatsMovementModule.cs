@@ -21,7 +21,8 @@ namespace Discord_Bot.Modules.RLStats
         [Command("mov today")]
         public async Task MovementToday(string together, params string[] names)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0)), playedTogether: ConvertTogetherToBool(together));
+            var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today);
+            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
             await OutputEpicAsync<AveragePlayerMovement>(averages);
         }
 
