@@ -12,8 +12,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConstants;
-
 namespace Discord_Bot.Services
 {
     public class CommandHandler : DiscordClientService
@@ -37,8 +35,10 @@ namespace Discord_Bot.Services
         {
             _client.MessageReceived += OnMessageReceived;
 
+            _logger.LogInformation("Adding Modules...");
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
-
+            
+            _logger.LogInformation("Setting Activity Status...");
             await Client.SetActivityAsync(new BotActivity());
 
             if (Debugger.IsAttached)
