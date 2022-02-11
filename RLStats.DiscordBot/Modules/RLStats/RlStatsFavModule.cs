@@ -46,13 +46,21 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Compares your favorite stats of different times.")]
         public async Task Compare(string time, string together, params string[] names)
         {
-            var favorite = GetUserFavoriteByUserId(Context.User.Id);
-            if (favorite is null)
+            try
             {
-                await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
-                return;
+                var favorite = GetUserFavoriteByUserId(Context.User.Id);
+                if (favorite is null)
+                {
+                    await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
+                    return;
+                }
+                await CompareAndSend(time, names, favorite.FavoriteStats, ConvertTogetherToBool(together));
             }
-            await CompareAndSend(time, names, favorite.FavoriteStats, ConvertTogetherToBool(together));
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
+            
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
@@ -60,9 +68,16 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets your favorite stats for one or more players for today.")]
         public async Task StatsToday(string together, params string[] names)
         {
-            var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today);
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
-            await ShowFavoriteStats(averages);
+            try
+            {
+                var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today);
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
+                await ShowFavoriteStats(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
@@ -70,8 +85,15 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets your favorite stats for one or more players.")]
         public async Task StatsAllTime(string together, params string[] names)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
-            await ShowFavoriteStats(averages);
+            try
+            {
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
+                await ShowFavoriteStats(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
@@ -79,8 +101,15 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Gets your favorite stats for one or more players for the last [count] games.")]
         public async Task StatsLast(int count, string together, params string[] names)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
-            await ShowFavoriteStats(averages);
+            try
+            {
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+                await ShowFavoriteStats(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("set favorites")]
@@ -88,23 +117,30 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Sets and saves your favorite stats.")]
         public async Task SetFavoriteStats(string indexes)
         {
-            var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
-            if (!indexList.Any())
-                return;
-            var reader = new NumberListReader();
+            try
+            {
+                var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                if (!indexList.Any())
+                    return;
+                var reader = new NumberListReader();
 
-            var favorite = GetUserFavoriteByUserId(Context.User.Id);
-            if (favorite is null)
-                favorite = new UserFavorite() { UserId = Context.User.Id };
-            else
-                _userFavoritesConfigHandler.RemoveConfigEntry(favorite);
+                var favorite = GetUserFavoriteByUserId(Context.User.Id);
+                if (favorite is null)
+                    favorite = new UserFavorite() { UserId = Context.User.Id };
+                else
+                    _userFavoritesConfigHandler.RemoveConfigEntry(favorite);
 
-            favorite.FavoriteStats.Clear();
-            favorite.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
+                favorite.FavoriteStats.Clear();
+                favorite.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
 
-            _userFavoritesConfigHandler.AddConfigEntry(favorite);
+                _userFavoritesConfigHandler.AddConfigEntry(favorite);
 
-            await SendMessageToCurrentChannelAsync("Successfully configured your favorite stats");
+                await SendMessageToCurrentChannelAsync("Successfully configured your favorite stats");
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("show favorites")]
@@ -112,16 +148,23 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("shows your favorites stats")]
         public async Task ShowFavoriteStats()
         {
-            var favorite = GetUserFavoriteByUserId(Context.User.Id);
-            if(favorite is null)
+            try
             {
-                await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
-                return;
+                var favorite = GetUserFavoriteByUserId(Context.User.Id);
+                if (favorite is null)
+                {
+                    await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
+                    return;
+                }
+                var builder = new StringBuilder($"{Context.User.Username}'s favorite stats:");
+                foreach (var stat in favorite.FavoriteStats)
+                    builder.Append('\n').Append(stat.Replace('_', ' '));
+                await SendMessageToCurrentChannelAsync(builder.ToString());
             }
-            var builder = new StringBuilder($"{Context.User.Username}'s favorite stats:");
-            foreach(var stat in favorite.FavoriteStats)
-                builder.Append('\n').Append(stat.Replace('_', ' '));
-            await SendMessageToCurrentChannelAsync(builder.ToString());
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         private UserFavorite GetUserFavoriteByUserId(ulong userId)
@@ -139,9 +182,16 @@ namespace Discord_Bot.Modules.RLStats
         [Summary("Shows a list of possible stats with their ids.")]
         public async Task ShowAllAvailableStatPropertiesAsync()
         {
-            var tempFileName = RLStatsCommonMethods.GetAllAvailableStatPropertiesFilePath();
-            await Context.Channel.SendFileAsync(new FileAttachment(tempFileName, "allProperties.json"), "All properties");
-            File.Delete(tempFileName);
+            try
+            {
+                var tempFileName = RLStatsCommonMethods.GetAllAvailableStatPropertiesFilePath();
+                await Context.Channel.SendFileAsync(new FileAttachment(tempFileName, "allProperties.json"), "All properties");
+                File.Delete(tempFileName);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
     }
 }

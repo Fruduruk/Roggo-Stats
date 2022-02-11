@@ -63,6 +63,7 @@ namespace Discord_Bot.Modules.RLStats
 
         protected async Task<RestUserMessage> SendMessageToCurrentChannelAsync(string message)
         {
+            Logger.LogInformation($"Sending message to channel {Context.Channel.Name}:\n{message}");
             return await Context.Channel.SendMessageAsync(message);
         }
 

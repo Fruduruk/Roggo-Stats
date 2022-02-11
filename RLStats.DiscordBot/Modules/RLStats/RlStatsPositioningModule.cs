@@ -18,29 +18,57 @@ namespace Discord_Bot.Modules.RLStats
         [Command("pos compare")]
         public async Task Compare(string time, string together, params string[] names)
         {
-            await CompareAndSend<AveragePlayerPositioning>(time, names, playedTogether: ConvertTogetherToBool(together));
+            try
+            {
+                await CompareAndSend<AveragePlayerPositioning>(time, names, playedTogether: ConvertTogetherToBool(together));
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("pos today")]
         public async Task PositioningToday(string together, params string[] names)
         {
-            var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today);
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            try
+            {
+                var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today);
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
+                await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("pos all")]
         public async Task PositioningAllTime(string together, params string[] names)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            try
+            {
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
+                await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("pos last")]
         public async Task PositioningLast(int count, string together, params string[] names)
         {
-            var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
-            await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            try
+            {
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+                await OutputEpicAsync<AveragePlayerPositioning>(averages);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
     }
 }

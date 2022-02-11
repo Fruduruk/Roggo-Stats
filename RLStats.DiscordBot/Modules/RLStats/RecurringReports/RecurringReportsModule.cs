@@ -112,76 +112,99 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Command(ExecuteSubStepOne)]
         public async Task ExecuteSubStepOneAsync(string time)
         {
-            var stopHere = await IsProcessCanceledOrCorrupted(time);
-            if (stopHere)
-                return;
-
-            var configEntry = GetSavedConfigEntry();
-
-            if (!time.CanConvertTime())
+            try
             {
-                await SendMessageToCurrentChannelAsync($"{time} is not a valid time value. Try d,w,m or y");
-                return;
+                var stopHere = await IsProcessCanceledOrCorrupted(time);
+                if (stopHere)
+                    return;
+
+                var configEntry = GetSavedConfigEntry();
+
+                if (!time.CanConvertTime())
+                {
+                    await SendMessageToCurrentChannelAsync($"{time} is not a valid time value. Try d,w,m or y");
+                    return;
+                }
+
+                configEntry.Time = time;
+
+                await ProceedToNextStepAsync(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
             }
-
-            configEntry.Time = time;
-
-            await ProceedToNextStepAsync(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
+            
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepTwo)]
         public async Task ExecuteSubStepTwoAsync(string namesAndIds)
         {
-            var stopHere = await IsProcessCanceledOrCorrupted(namesAndIds);
-            if (stopHere)
-                return;
-
-            var configEntry = GetSavedConfigEntry();
-
-            var nameAndIdArr = namesAndIds.Split(',');
-            if (!nameAndIdArr.Any())
-                return;
-
-            configEntry.Names = new List<string>(nameAndIdArr);
-
-            if (configEntry.Names.Count > 1)
-                await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
-            else
+            try
             {
-                await ProceedToNextStepAsync(SubStepSkipThreeMessage(nameAndIdArr), ExecuteSubStepFour, configEntry);
-                await ShowAllAvailableStatPropertiesAsync();
+                var stopHere = await IsProcessCanceledOrCorrupted(namesAndIds);
+                if (stopHere)
+                    return;
+
+                var configEntry = GetSavedConfigEntry();
+
+                var nameAndIdArr = namesAndIds.Split(',');
+                if (!nameAndIdArr.Any())
+                    return;
+
+                configEntry.Names = new List<string>(nameAndIdArr);
+
+                if (configEntry.Names.Count > 1)
+                    await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
+                else
+                {
+                    await ProceedToNextStepAsync(SubStepSkipThreeMessage(nameAndIdArr), ExecuteSubStepFour, configEntry);
+                    await ShowAllAvailableStatPropertiesAsync();
+                }
             }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
+            
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
         [Command(ExecuteSubStepThree)]
         public async Task ExecuteSubStepThreeAsync(string together)
         {
-            var stopHere = await IsProcessCanceledOrCorrupted(together);
-            if (stopHere)
-                return;
-
-            var configEntry = GetSavedConfigEntry();
-
-
-            bool playedTogether;
             try
             {
-                playedTogether = ConvertTogetherToBool(together);
+                var stopHere = await IsProcessCanceledOrCorrupted(together);
+                if (stopHere)
+                    return;
 
+                var configEntry = GetSavedConfigEntry();
+
+
+                bool playedTogether;
+                try
+                {
+                    playedTogether = ConvertTogetherToBool(together);
+
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    await SendMessageToCurrentChannelAsync(ex.Message);
+                    return;
+                }
+
+                configEntry.Together = playedTogether;
+
+                await ProceedToNextStepAsync(SubStepFourMessage(playedTogether), ExecuteSubStepFour, configEntry);
+
+                await ShowAllAvailableStatPropertiesAsync();
             }
-            catch (ArgumentOutOfRangeException ex)
+            catch (Exception ex)
             {
                 await SendMessageToCurrentChannelAsync(ex.Message);
-                return;
             }
-
-            configEntry.Together = playedTogether;
-
-            await ProceedToNextStepAsync(SubStepFourMessage(playedTogether), ExecuteSubStepFour, configEntry);
-
-            await ShowAllAvailableStatPropertiesAsync();
         }
 
         private async Task ShowAllAvailableStatPropertiesAsync()
@@ -195,28 +218,35 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Command(ExecuteSubStepFour)]
         public async Task ExecuteSubStepFourAsync(string indexes)
         {
-            var stopHere = await IsProcessCanceledOrCorrupted(indexes);
-            if (stopHere)
-                return;
-
-            var configEntry = GetSavedConfigEntry();
-            var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
-            if (!indexList.Any())
-                return;
-            var reader = new NumberListReader();
-            configEntry.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
-
-            await SendMessageToCurrentChannelAsync("You have successfully configured your subscription.");
-
-            if (_configHandler.HasConfigEntryInIt(configEntry))
+            try
             {
-                await Context.Channel.SendMessageAsync("You have already subscribed to this.");
-                return;
-            }
+                var stopHere = await IsProcessCanceledOrCorrupted(indexes);
+                if (stopHere)
+                    return;
 
-            _configHandler.AddConfigEntry(configEntry);
-            _addedEntries.Add(configEntry);
-            RemoveSavedConfigEntry();
+                var configEntry = GetSavedConfigEntry();
+                var indexList = new List<string>(indexes.Split(',', StringSplitOptions.RemoveEmptyEntries));
+                if (!indexList.Any())
+                    return;
+                var reader = new NumberListReader();
+                configEntry.AddPropertyNamesToConfigEntry(reader.ReadIndexNuberList(indexList), reader.CollectAll);
+
+                await SendMessageToCurrentChannelAsync("You have successfully configured your subscription.");
+
+                if (_configHandler.HasConfigEntryInIt(configEntry))
+                {
+                    await Context.Channel.SendMessageAsync("You have already subscribed to this.");
+                    return;
+                }
+
+                _configHandler.AddConfigEntry(configEntry);
+                _addedEntries.Add(configEntry);
+                RemoveSavedConfigEntry();
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         private async Task<bool> IsProcessCanceledOrCorrupted(string input)
@@ -246,18 +276,25 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Summary("This command lets you unsubscribe all subscriptions")]
         public async Task UnsubscribeAll()
         {
-            if (!Context.IsPrivate)
-                return;
-            var entriesNotFromThisChannel = new List<Subscription>();
-            foreach (var entry in _configHandler.Config)
+            try
             {
-                if (Context.Channel.Id.Equals(entry.ChannelId))
-                    continue;
-                entriesNotFromThisChannel.Add(entry);
-            }
-            _configHandler.SaveConfigFile(entriesNotFromThisChannel);
+                if (!Context.IsPrivate)
+                    return;
+                var entriesNotFromThisChannel = new List<Subscription>();
+                foreach (var entry in _configHandler.Config)
+                {
+                    if (Context.Channel.Id.Equals(entry.ChannelId))
+                        continue;
+                    entriesNotFromThisChannel.Add(entry);
+                }
+                _configHandler.SaveConfigFile(entriesNotFromThisChannel);
 
-            await Context.Channel.SendMessageAsync("Removed all subscriptions from this channel.");
+                await Context.Channel.SendMessageAsync("Removed all subscriptions from this channel.");
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
         }
 
         [Command("unsubscribe")]
@@ -265,19 +302,26 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Summary("This command lets you unsubscribe a subscription")]
         public async Task Unsubscribe(int id)
         {
-            Subscription entryToRemove = null;
-            foreach (var entry in _configHandler.Config)
+            try
             {
-                if (entry.ChannelId.Equals(Context.Channel.Id) && entry.Id.Equals(id))
-                    entryToRemove = entry;
+                Subscription entryToRemove = null;
+                foreach (var entry in _configHandler.Config)
+                {
+                    if (entry.ChannelId.Equals(Context.Channel.Id) && entry.Id.Equals(id))
+                        entryToRemove = entry;
+                }
+                if (entryToRemove is null)
+                {
+                    await SendMessageToCurrentChannelAsync($"There is no subscription with id {id}");
+                    return;
+                }
+                _configHandler.RemoveConfigEntry(entryToRemove);
+                await SendMessageToCurrentChannelAsync($"Successfully removed subscription with id {id}");
             }
-            if (entryToRemove is null)
+            catch (Exception ex)
             {
-                await SendMessageToCurrentChannelAsync($"There is no subscription with id {id}");
-                return;
+                await SendMessageToCurrentChannelAsync(ex.Message);
             }
-            _configHandler.RemoveConfigEntry(entryToRemove);
-            await SendMessageToCurrentChannelAsync($"Successfully removed subscription with id {id}");
         }
 
 
@@ -286,31 +330,38 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Summary("Returns all subscriptions for this channel")]
         public async Task ShowSubscriptions()
         {
-            foreach (var entry in _configHandler.Config)
+            try
             {
-                if (Context.Channel.Id != entry.ChannelId)
-                    continue;
-                var random = new Random(entry.GetHashCode());
-
-                var builder = new EmbedBuilder()
-                    .AddField("Time:", entry.Time.Adverbify(), inline: true)
-                    .AddField("Names:", string.Join(',', entry.Names), inline: true)
-                    .AddField("Together:", entry.Together, inline: true);
-
-                if (entry.StatNames.Count < 21)
+                foreach (var entry in _configHandler.Config)
                 {
-                    var fancyStatNames = new List<string>();
-                    foreach (var statName in entry.StatNames)
-                        fancyStatNames.Add(statName.Replace('_', ' '));
-                    builder.AddField("Stats:", string.Join('\n', fancyStatNames), inline: true);
-                }
-                else
-                    builder.AddField("Stats count:", entry.StatNames.Count, inline: true);
+                    if (Context.Channel.Id != entry.ChannelId)
+                        continue;
+                    var random = new Random(entry.GetHashCode());
 
-                builder.AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
-                .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)))
-                .WithFooter($"Id: {entry.Id}");
-                await Context.Channel.SendMessageAsync(embed: builder.Build());
+                    var builder = new EmbedBuilder()
+                        .AddField("Time:", entry.Time.Adverbify(), inline: true)
+                        .AddField("Names:", string.Join(',', entry.Names), inline: true)
+                        .AddField("Together:", entry.Together, inline: true);
+
+                    if (entry.StatNames.Count < 21)
+                    {
+                        var fancyStatNames = new List<string>();
+                        foreach (var statName in entry.StatNames)
+                            fancyStatNames.Add(statName.Replace('_', ' '));
+                        builder.AddField("Stats:", string.Join('\n', fancyStatNames), inline: true);
+                    }
+                    else
+                        builder.AddField("Stats count:", entry.StatNames.Count, inline: true);
+
+                    builder.AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
+                    .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)))
+                    .WithFooter($"Id: {entry.Id}");
+                    await Context.Channel.SendMessageAsync(embed: builder.Build());
+                }
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
             }
         }
     }
