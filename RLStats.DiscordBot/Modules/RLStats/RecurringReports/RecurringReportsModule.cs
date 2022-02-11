@@ -52,10 +52,9 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         private int GetUnusedId()
         {
             int id = 1;
-            foreach (var entry in _configHandler.Config)
+            var usedIds = _configHandler.Config.Select(entry => entry.Id).ToList();
+            while (usedIds.Contains(id))
             {
-                if (!entry.Id.Equals(id))
-                    return id;
                 id++;
             }
             return id;

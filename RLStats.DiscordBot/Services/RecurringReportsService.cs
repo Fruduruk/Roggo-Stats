@@ -138,7 +138,11 @@ namespace Discord_Bot.Services
                         break;
                     entry = UpdateLastPost(entry, DateTime.Now);
 
-                    await ExecuteCommand(entry, channel, stoppingToken);
+                    lock (_module)
+                    {
+                        var executionTask = ExecuteCommand(entry, channel, stoppingToken);
+                        executionTask.Wait();
+                    }
                 }
                 catch (TaskCanceledException)
                 {
@@ -150,7 +154,6 @@ namespace Discord_Bot.Services
                     _logger.LogError(ex, $"Task {entry.Id} was canceled due to an error.");
                     break;
                 }
-
             }
         }
 
