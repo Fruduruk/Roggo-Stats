@@ -2,7 +2,7 @@
 
 namespace RLStats_Classes.AdvancedModels
 {
-    public class AdvancedReplay
+    public class AdvancedReplay : IEquatable<AdvancedReplay>
     {
         public string Id { get; set; }
         public string Link { get; set; }
@@ -27,6 +27,26 @@ namespace RLStats_Classes.AdvancedModels
         public AdvancedTeam Orange { get; set; }
         public string Playlist_name { get; set; }
         public string Map_name { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AdvancedReplay);
+        }
+
+        public bool Equals(AdvancedReplay other)
+        {
+            if (other is null)
+                return false;
+            return other.Id == Id;
+        }
+
+        public override int GetHashCode()
+        {
+            if(Id != null)
+                return Id.GetHashCode();
+            return 0;
+        }
+
         public bool Contains(string nameOrSteamId)
         {
             if (Blue != null)
