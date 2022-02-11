@@ -80,6 +80,8 @@ namespace RLStats_Classes.MainClasses
             //init variables
             var url = filter.GetApiUrl();
             var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
+            if (totalReplayCount >= 10_000)
+                throw new Exception($"Total replays to download exceeds the download limit of 10000. Download canceled.");
             var done = false;
             var doubleReplays = 0;
             var allReplays = new HashSet<Replay>();

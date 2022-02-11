@@ -78,7 +78,14 @@ namespace RocketLeagueStats
 
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
-            await LoadReplaysIntoTemp();
+            try
+            {
+                await LoadReplaysIntoTemp();
+            }
+            catch (Exception ex)
+            {
+                tbMessages.Text = ex.Message;
+            }
         }
 
         private async Task LoadReplaysIntoTemp()
@@ -155,7 +162,7 @@ namespace RocketLeagueStats
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if(logLevel == LogLevel.Information)
+            if (logLevel == LogLevel.Information)
                 Debug.WriteLine(state.ToString());
         }
 
