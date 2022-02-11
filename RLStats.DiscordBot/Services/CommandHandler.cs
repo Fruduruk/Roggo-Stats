@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +39,10 @@ namespace Discord_Bot.Services
 
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
-            await Client.SetStatusAsync(UserStatus.Invisible);
+            await Client.SetActivityAsync(new BotActivity());
+
+            if (Debugger.IsAttached)
+                await Client.SetStatusAsync(UserStatus.Invisible);
         }
 
 
