@@ -2,9 +2,16 @@
 {
     public class Uploader
     {
-        public string Steam_id { get; set; }
+        [JsonProperty("steam_id")]
+        public string SteamId { get; set; }
+
+        [JsonProperty("name")]
         public string Name { get; set; }
-        public string Profile_url { get; set; }
+
+        [JsonProperty("profile_url")]
+        public string ProfileUrl { get; set; }
+
+        [JsonProperty("avatar")]
         public string Avatar { get; set; }
     }
 }

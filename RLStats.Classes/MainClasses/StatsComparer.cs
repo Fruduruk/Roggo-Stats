@@ -90,9 +90,9 @@ namespace RLStats_Classes.MainClasses
                             if (p.Name != null)
                                 if (p.Name.Equals(nameOrId))
                                     playersTeam = r.Blue.Color;
-                            if (p.Id.ID != null)
+                            if (p.Id.Id != null)
                                 if (p.Id.Platform.Equals("steam"))
-                                    if (p.Id.ID.Equals(nameOrId))
+                                    if (p.Id.Id.Equals(nameOrId))
                                         playersTeam = r.Blue.Color;
                         }
                 if (playersTeam != null)
@@ -103,9 +103,9 @@ namespace RLStats_Classes.MainClasses
                                 if (p.Name != null)
                                     if (p.Name.Equals(nameOrId))
                                         playersTeam = r.Orange.Color;
-                                if (p.Id.ID != null)
+                                if (p.Id.Id != null)
                                     if (p.Id.Platform.Equals("steam"))
-                                        if (p.Id.ID.Equals(nameOrId))
+                                        if (p.Id.Id.Equals(nameOrId))
                                             playersTeam = r.Orange.Color;
                             }
 

@@ -58,8 +58,8 @@ namespace RLStats_Classes.Models.Advanced
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
                                 return true;
                         if (p.Id != null)
-                            if (p.Id.ID != null)
-                                if (p.Id.ID.ToLower().Equals(nameOrSteamId.ToLower()))
+                            if (p.Id.Id != null)
+                                if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return true;
                     }
             if (Orange != null)
@@ -70,8 +70,8 @@ namespace RLStats_Classes.Models.Advanced
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
                                 return true;
                         if (p.Id != null)
-                            if (p.Id.ID != null)
-                                if (p.Id.ID.ToLower().Equals(nameOrSteamId.ToLower()))
+                            if (p.Id.Id != null)
+                                if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return true;
                     }
             return false;
@@ -87,8 +87,8 @@ namespace RLStats_Classes.Models.Advanced
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
                                 return p.Stats;
                         if (p.Id != null)
-                            if (p.Id.ID != null)
-                                if (p.Id.ID.ToLower().Equals(nameOrSteamId.ToLower()))
+                            if (p.Id.Id != null)
+                                if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return p.Stats;
                     }
             if (Orange != null)
@@ -99,8 +99,8 @@ namespace RLStats_Classes.Models.Advanced
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
                                 return p.Stats;
                         if (p.Id != null)
-                            if (p.Id.ID != null)
-                                if (p.Id.ID.ToLower().Equals(nameOrSteamId.ToLower()))
+                            if (p.Id.Id != null)
+                                if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return p.Stats;
                     }
             return null;

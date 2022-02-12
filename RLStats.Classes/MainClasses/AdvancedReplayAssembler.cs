@@ -23,9 +23,9 @@ namespace RLStats_Classes.MainClasses
             r.Created = Convert.ToDateTime(JData.created);
             r.Uploader = new Uploader()
             {
-                Steam_id = JData.uploader.steam_id,
+                SteamId = JData.uploader.steam_id,
                 Name = JData.uploader.name,
-                Profile_url = JData.uploader.profile_url,
+                ProfileUrl = JData.uploader.profile_url,
                 Avatar = JData.uploader.avatar
             };
             r.Status = JData.status;
@@ -235,7 +235,7 @@ namespace RLStats_Classes.MainClasses
             return new PlatformId()
             {
                 Platform = id.platform,
-                ID = id.id
+                Id = id.id
             };
         }
 
