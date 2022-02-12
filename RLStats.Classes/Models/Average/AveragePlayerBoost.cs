@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.AverageModels
+﻿namespace RLStats_Classes.Models.Average
 {
     public class AveragePlayerBoost
     {

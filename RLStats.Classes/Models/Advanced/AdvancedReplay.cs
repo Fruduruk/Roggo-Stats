@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace RLStats_Classes.AdvancedModels
+namespace RLStats_Classes.Models.Advanced
 {
     public class AdvancedReplay : IEquatable<AdvancedReplay>
     {
@@ -42,7 +43,7 @@ namespace RLStats_Classes.AdvancedModels
 
         public override int GetHashCode()
         {
-            if(Id != null)
+            if (Id != null)
                 return Id.GetHashCode();
             return 0;
         }

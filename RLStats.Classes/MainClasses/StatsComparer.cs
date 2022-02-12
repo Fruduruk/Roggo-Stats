@@ -1,7 +1,7 @@
-﻿using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.AverageModels;
-using RLStats_Classes.ChartModels;
-using RLStats_Classes.MainClasses.Interfaces;
+﻿using RLStats_Classes.MainClasses.Interfaces;
+using RLStats_Classes.Models.Advanced;
+using RLStats_Classes.Models.Average;
+using RLStats_Classes.Models.Chart;
 
 using System;
 using System.Collections.Generic;

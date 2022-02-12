@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses.CacheHandlers;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+using RLStats_Classes.Models.Advanced;
 
 using System;
 using System.Collections.Generic;
