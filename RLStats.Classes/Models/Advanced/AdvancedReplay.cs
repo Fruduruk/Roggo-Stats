@@ -5,29 +5,83 @@ namespace RLStats_Classes.Models.Advanced
 {
     public class AdvancedReplay : IEquatable<AdvancedReplay>
     {
+        [JsonProperty("id")]
         public string Id { get; set; }
+
+        [JsonProperty("link")]
         public string Link { get; set; }
+
+        [JsonProperty("created")]
         public DateTime Created { get; set; }
+
+        [JsonProperty("uploader")]
         public Uploader Uploader { get; set; }
+
+        [JsonProperty("status")]
         public string Status { get; set; }
-        public string Rocket_league_id { get; set; }
-        public string Match_guid { get; set; }
+
+        [JsonProperty("rocket_league_id")]
+        public string RocketLeagueId { get; set; }
+
+        [JsonProperty("match_guid")]
+        public string MatchGuid { get; set; }
+
+        [JsonProperty("title")]
         public string Title { get; set; }
-        public string Map_code { get; set; }
-        public string Match_type { get; set; }
-        public int? Team_size { get; set; }
-        public string Playlist_id { get; set; }
+
+        [JsonProperty("map_code")]
+        public string MapCode { get; set; }
+
+        [JsonProperty("match_type")]
+        public string MatchType { get; set; }
+
+        [JsonProperty("team_size")]
+        public int? TeamSize { get; set; }
+
+        [JsonProperty("playlist_id")]
+        public string PlaylistId { get; set; }
+
+        [JsonProperty("duration")]
         public int? Duration { get; set; }
+
+        [JsonProperty("overtime")]
         public bool? Overtime { get; set; }
-        public int? Overtime_seconds { get; set; }
+
+        [JsonProperty("overtime_seconds")]
+        public int? OvertimeSeconds { get; set; }
+
+        [JsonProperty("season")]
         public int? Season { get; set; }
-        public string Season_type { get; set; }
+
+        [JsonProperty("season_type")]
+        public string SeasonType { get; set; } = "before Free2Play";
+
+        [JsonProperty("date")]
         public DateTime Date { get; set; }
+
+        [JsonProperty("date_has_timezone")]
+        public bool? DateHasTimezone { get; set; }
+
+        [JsonProperty("visibility")]
         public string Visibility { get; set; }
-        public AdvancedTeam Blue { get; set; }
-        public AdvancedTeam Orange { get; set; }
-        public string Playlist_name { get; set; }
-        public string Map_name { get; set; }
+
+        [JsonProperty("min_rank")]
+        public Rank MinRank { get; set; }
+
+        [JsonProperty("max_rank")]
+        public Rank MaxRank { get; set; }
+
+        [JsonProperty("blue")]
+        public AdvancedTeam TeamBlue { get; set; }
+
+        [JsonProperty("orange")]
+        public AdvancedTeam TeamOrange { get; set; }
+
+        [JsonProperty("playlist_name")]
+        public string PlaylistName { get; set; }
+
+        [JsonProperty("map_name")]
+        public string MapName { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -50,9 +104,9 @@ namespace RLStats_Classes.Models.Advanced
 
         public bool Contains(string nameOrSteamId)
         {
-            if (Blue != null)
-                if (Blue.Players != null)
-                    foreach (var p in Blue.Players)
+            if (TeamBlue != null)
+                if (TeamBlue.Players != null)
+                    foreach (var p in TeamBlue.Players)
                     {
                         if (p.Name != null)
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
@@ -62,9 +116,9 @@ namespace RLStats_Classes.Models.Advanced
                                 if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return true;
                     }
-            if (Orange != null)
-                if (Orange.Players != null)
-                    foreach (var p in Orange.Players)
+            if (TeamOrange != null)
+                if (TeamOrange.Players != null)
+                    foreach (var p in TeamOrange.Players)
                     {
                         if (p.Name != null)
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
@@ -79,9 +133,9 @@ namespace RLStats_Classes.Models.Advanced
 
         public PlayerStats GetPlayerStats(string nameOrSteamId)
         {
-            if (Blue != null)
-                if (Blue.Players != null)
-                    foreach (var p in Blue.Players)
+            if (TeamBlue != null)
+                if (TeamBlue.Players != null)
+                    foreach (var p in TeamBlue.Players)
                     {
                         if (p.Name != null)
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))
@@ -91,9 +145,9 @@ namespace RLStats_Classes.Models.Advanced
                                 if (p.Id.Id.ToLower().Equals(nameOrSteamId.ToLower()))
                                     return p.Stats;
                     }
-            if (Orange != null)
-                if (Orange.Players != null)
-                    foreach (var p in Orange.Players)
+            if (TeamOrange != null)
+                if (TeamOrange.Players != null)
+                    foreach (var p in TeamOrange.Players)
                     {
                         if (p.Name != null)
                             if (p.Name.ToLower().Equals(nameOrSteamId.ToLower()))

@@ -170,13 +170,14 @@ namespace RLStats_Classes.MainClasses
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await Api.GetAsync(url);
-            if(response.StatusCode == System.Net.HttpStatusCode.Locked)
+            if (response.StatusCode == System.Net.HttpStatusCode.Locked)
                 throw new OperationCanceledException();
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
             var dataString = await reader.ReadToEndAsync();
-            return AdvancedReplayAssembler.GetAdvancedReplayFromString(dataString);
+            var advancedReplay = JsonConvert.DeserializeObject<AdvancedReplay>(dataString);
+            return advancedReplay;
         }
     }
 }

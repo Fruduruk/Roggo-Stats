@@ -29,27 +29,27 @@ namespace RLStats_Classes.MainClasses
                 Avatar = JData.uploader.avatar
             };
             r.Status = JData.status;
-            r.Rocket_league_id = JData.rocket_league_id;
-            r.Match_guid = JData.match_gui;
+            r.RocketLeagueId = JData.rocket_league_id;
+            r.MatchGuid = JData.match_gui;
             r.Title = JData.title;
-            r.Map_code = JData.map_code;
-            r.Match_type = JData.match_type;
-            r.Team_size = JData.team_size;
-            r.Playlist_id = JData.playlist_id;
+            r.MapCode = JData.map_code;
+            r.MatchType = JData.match_type;
+            r.TeamSize = JData.team_size;
+            r.PlaylistId = JData.playlist_id;
             r.Duration = JData.duration;
             r.Overtime = JData.overtime;
-            r.Overtime_seconds = JData.overtime_seconds;
+            r.OvertimeSeconds = JData.overtime_seconds;
             r.Season = JData.season;
             if (JData.season_type is null)
-                r.Season_type = "before Free2Play";
+                r.SeasonType = "before Free2Play";
             else
-                r.Season_type = JData.season_type;
+                r.SeasonType = JData.season_type;
             r.Date = Convert.ToDateTime(JData.date);
             r.Visibility = JData.visibility;
-            r.Blue = GetTeam(JData.blue);
-            r.Orange = GetTeam(JData.orange);
-            r.Playlist_name = JData.playlist_name;
-            r.Map_name = JData.map_name;
+            r.TeamBlue = GetTeam(JData.blue);
+            r.TeamOrange = GetTeam(JData.orange);
+            r.PlaylistName = JData.playlist_name;
+            r.MapName = JData.map_name;
             return r;
         }
 
@@ -79,14 +79,14 @@ namespace RLStats_Classes.MainClasses
             {
                 AdvancedPlayer player = new AdvancedPlayer()
                 {
-                    Start_time = p.start_time,
-                    End_time = p.end_time,
+                    StartTime = p.start_time,
+                    EndTime = p.end_time,
                     Name = p.name,
                     Id = GetPlayerID(p.id),
-                    Car_id = p.car_id,
+                    CarId = p.car_id,
                     Car_name = p.car_name,
                     Camera = GetPlayerCamera(p.camera),
-                    Steering_sensitivity = p.steering_sensitivity,
+                    SteeringSensitivity = p.steering_sensitivity,
                     Stats = GetPlayerStats(p.stats)
                 };
                 playerList.Add(player);

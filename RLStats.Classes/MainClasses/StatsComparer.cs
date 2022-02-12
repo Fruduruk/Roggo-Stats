@@ -42,7 +42,7 @@ namespace RLStats_Classes.MainClasses
             {
                 var commonMapReplays = new List<AdvancedReplay>();
                 foreach (var r in goodReplays)
-                    if (r.Map_name.Equals(s))
+                    if (r.MapName.Equals(s))
                         commonMapReplays.Add(r);
                 mapWinrates.Add(GetWinratePack(nameOrSteamId, s, commonMapReplays));
             }
@@ -61,12 +61,12 @@ namespace RLStats_Classes.MainClasses
                 {
                     played++;
                     var teamThatWon = string.Empty;
-                    if (r.Orange.Stats.Core.Goals != r.Blue.Stats.Core.Goals)
+                    if (r.TeamOrange.Stats.Core.Goals != r.TeamBlue.Stats.Core.Goals)
                     {
-                        if (r.Orange.Stats.Core.Goals > r.Blue.Stats.Core.Goals)
-                            teamThatWon = r.Orange.Color;
+                        if (r.TeamOrange.Stats.Core.Goals > r.TeamBlue.Stats.Core.Goals)
+                            teamThatWon = r.TeamOrange.Color;
                         else
-                            teamThatWon = r.Blue.Color;
+                            teamThatWon = r.TeamBlue.Color;
                         if (teamThatWon.Equals(playersTeam))
                             won = 1 + won;
                     }
@@ -83,30 +83,30 @@ namespace RLStats_Classes.MainClasses
             var playersTeam = string.Empty;
             try
             {
-                if (r.Blue != null)
-                    if (r.Blue.Players != null)
-                        foreach (var p in r.Blue.Players)
+                if (r.TeamBlue != null)
+                    if (r.TeamBlue.Players != null)
+                        foreach (var p in r.TeamBlue.Players)
                         {
                             if (p.Name != null)
                                 if (p.Name.Equals(nameOrId))
-                                    playersTeam = r.Blue.Color;
+                                    playersTeam = r.TeamBlue.Color;
                             if (p.Id.Id != null)
                                 if (p.Id.Platform.Equals("steam"))
                                     if (p.Id.Id.Equals(nameOrId))
-                                        playersTeam = r.Blue.Color;
+                                        playersTeam = r.TeamBlue.Color;
                         }
                 if (playersTeam != null)
-                    if (r.Orange != null)
-                        if (r.Orange.Players != null)
-                            foreach (var p in r.Orange.Players)
+                    if (r.TeamOrange != null)
+                        if (r.TeamOrange.Players != null)
+                            foreach (var p in r.TeamOrange.Players)
                             {
                                 if (p.Name != null)
                                     if (p.Name.Equals(nameOrId))
-                                        playersTeam = r.Orange.Color;
+                                        playersTeam = r.TeamOrange.Color;
                                 if (p.Id.Id != null)
                                     if (p.Id.Platform.Equals("steam"))
                                         if (p.Id.Id.Equals(nameOrId))
-                                            playersTeam = r.Orange.Color;
+                                            playersTeam = r.TeamOrange.Color;
                             }
 
             }
@@ -172,7 +172,7 @@ namespace RLStats_Classes.MainClasses
             var names = new List<string>();
             foreach (var r in legitReplays)
             {
-                var mapname = r.Map_name;
+                var mapname = r.MapName;
                 if (!names.Contains(mapname))
                         names.Add(mapname);
             }
@@ -183,7 +183,7 @@ namespace RLStats_Classes.MainClasses
         {
             var goodReplays = new List<AdvancedReplay>();
             foreach (var r in replays)
-                if (r.Map_name != null)
+                if (r.MapName != null)
                     goodReplays.Add(r);
             return goodReplays;
         }
