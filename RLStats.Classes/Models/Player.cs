@@ -1,13 +1,30 @@
-﻿using System;
+﻿using RLStats_Classes.Models.Advanced;
+
+using System;
 
 namespace RLStats_Classes.Models
 {
     public class Player : IEquatable<Player>, IComparable<Player>
     {
+        [JsonProperty("start_time")]
         public double StartTime { get; set; }
+
+        [JsonProperty("end_time")]
         public double EndTime { get; set; }
+
+        [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("id")]
+        public PlatformId Id { get; set; }
+
+        [JsonProperty("mvp")]
         public bool MVP { get; set; }
+
+        [JsonProperty("rank")]
+        public Rank Rank { get; set; }
+
+        [JsonProperty("score")]
         public int Score { get; set; }
 
         public int CompareTo(Player other)

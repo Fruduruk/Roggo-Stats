@@ -5,7 +5,7 @@
         public int? Start_time { get; set; }
         public float? End_time { get; set; }
         public string Name { get; set; }
-        public Id Id { get; set; }
+        public PlatformId Id { get; set; }
         public int? Car_id { get; set; }
         public string Car_name { get; set; }
         public Camera Camera { get; set; }

@@ -229,9 +229,9 @@ namespace RLStats_Classes.MainClasses
             };
         }
 
-        private Id GetPlayerID(dynamic id)
+        private PlatformId GetPlayerID(dynamic id)
         {
-            return new Id()
+            return new PlatformId()
             {
                 Platform = id.platform,
                 ID = id.id

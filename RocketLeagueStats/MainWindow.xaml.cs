@@ -128,17 +128,17 @@ namespace RocketLeagueStats
             tbPlaylist.Text = "Playlist: " + replay.Playlist;
             tbSeason.Text = "Season: " + replay.Season.ToString();
             tbReplayTitle.Text = "Title: " + replay.Title;
-            tbUploader.Text = "Uploader: " + replay.Uploader;
-            tbWinner.Text = "Winner: " + ((replay.Blue.Goals > replay.Orange.Goals) ? "Blue" : "Orange");
-            lblBlueGoals.Text = replay.Blue.Goals.ToString();
-            lblOrangeGoals.Text = replay.Orange.Goals.ToString();
+            tbUploader.Text = "Uploader: " + replay.Uploader.Name;
+            tbWinner.Text = "Winner: " + ((replay.TeamBlue.Goals > replay.TeamOrange.Goals) ? "Blue" : "Orange");
+            lblBlueGoals.Text = replay.TeamBlue.Goals.ToString();
+            lblOrangeGoals.Text = replay.TeamOrange.Goals.ToString();
             InitializePlayerBoxes(replay);
         }
 
         private void InitializePlayerBoxes(Replay replay)
         {
-            CreatePlayerBoxes(blueSideGrid, replay.Blue);
-            CreatePlayerBoxes(orangeSideGrid, replay.Orange);
+            CreatePlayerBoxes(blueSideGrid, replay.TeamBlue);
+            CreatePlayerBoxes(orangeSideGrid, replay.TeamOrange);
         }
 
         private static void CreatePlayerBoxes(Grid grid, Team team)
@@ -194,13 +194,13 @@ namespace RocketLeagueStats
         private void LoadFile(string fileName)
         {
             var compressedBytes = File.ReadAllBytes(fileName);
-            Replays = Compressor.ConvertObject<List<Replay>>(compressedBytes);
+            Replays = Compressor.ConvertObject<List<Replay>>(compressedBytes, false);
         }
 
         private void SaveDialog_FileOk(object sender, CancelEventArgs e)
         {
             var dialog = (SaveFileDialog)sender;
-            var compressedBytes = Compressor.ConvertObject(Replays);
+            var compressedBytes = Compressor.ConvertObject(Replays, false);
             File.WriteAllBytes(dialog.FileName, compressedBytes);
         }
 

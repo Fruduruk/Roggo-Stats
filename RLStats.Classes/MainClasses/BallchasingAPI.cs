@@ -48,7 +48,7 @@ namespace RLStats_Classes.MainClasses
             return await Task.Run(async () =>
             {
                 WaitForYourTurn();
-                if(StoppingToken.IsCancellationRequested)
+                if (StoppingToken.IsCancellationRequested)
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Locked);
                 lock (_calls)
                     _calls.Add(url);
@@ -108,34 +108,59 @@ namespace RLStats_Classes.MainClasses
 
         private static ApiDataPack GetApiDataFromString(string dataString)
         {
-            dynamic jData = JsonConvert.DeserializeObject(dataString);
-            var replays = new List<Replay>();
             try
             {
-                if (jData != null)
-                    foreach (var r in jData.list)
-                    {
-                        replays.Add(new ReplayAssembler(r).Assemble());
-                    }
-
-                if (replays.Count == 0)
-                    throw new Exception("No replay found");
+                var datapack = JsonConvert.DeserializeObject<ApiDataPack>(dataString);
+                FillInitialTeamSizes(datapack);
+                datapack.Success = true;
+                return datapack;
             }
-            catch
+            catch (Exception ex)
             {
-                return new ApiDataPack()
+                return new ApiDataPack
                 {
-                    Success = false,
-                    ReceivedString = dataString
+                    ReceivedString = ex.Message,
+                    Success = false
                 };
             }
-            return new ApiDataPack()
+            //var replays = new List<Replay>();
+            //try
+            //{
+            //    if (jData != null)
+            //        foreach (var r in jData.list)
+            //        {
+            //            replays.Add(new ReplayAssembler(r).Assemble());
+            //        }
+
+            //    if (replays.Count == 0)
+            //        throw new Exception("No replay found");
+            //}
+            //catch
+            //{
+            //    return new ApiDataPack()
+            //    {
+            //        Success = false,
+            //        ReceivedString = dataString
+            //    };
+            //}
+            //return new ApiDataPack()
+            //{
+            //    Replays = replays,
+            //    ReplayCount = jData.count,
+            //    Next = jData.next,
+            //    Success = true,
+            //};
+        }
+
+        private static void FillInitialTeamSizes(ApiDataPack datapack)
+        {
+            foreach (var replay in datapack.Replays)
             {
-                Replays = replays,
-                ReplayCount = jData.count,
-                Next = jData.next,
-                Success = true,
-            };
+                var teamSize = (replay.TeamBlue.Players.Count < replay.TeamOrange.Players.Count) ?
+                    replay.TeamBlue.Players.Count : replay.TeamOrange.Players.Count;
+                replay.TeamBlue.InitialTeamSize = teamSize;
+                replay.TeamOrange.InitialTeamSize = teamSize;
+            }
         }
 
         public string[] GetCalls()

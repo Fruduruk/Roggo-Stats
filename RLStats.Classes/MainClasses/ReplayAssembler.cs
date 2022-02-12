@@ -25,8 +25,8 @@ namespace RLStats_Classes.MainClasses
                 Season = JData.season,
                 Date = JData.date,
                 Uploader = JData.uploader.name,
-                Blue = GetTeam(JData.blue),
-                Orange = GetTeam(JData.orange)
+                TeamBlue = GetTeam(JData.blue),
+                TeamOrange = GetTeam(JData.orange)
             };
 
             SetInitialTeamSize(replay);
@@ -36,11 +36,11 @@ namespace RLStats_Classes.MainClasses
 
         private static void SetInitialTeamSize(Replay replay)
         {
-            var initialTeamSize = replay.Blue.Players.Count;
-            if (replay.Orange.Players.Count < initialTeamSize)
-                initialTeamSize = replay.Orange.Players.Count;
-            replay.Blue.InitialTeamSize = initialTeamSize;
-            replay.Orange.InitialTeamSize = initialTeamSize;
+            var initialTeamSize = replay.TeamBlue.Players.Count;
+            if (replay.TeamOrange.Players.Count < initialTeamSize)
+                initialTeamSize = replay.TeamOrange.Players.Count;
+            replay.TeamBlue.InitialTeamSize = initialTeamSize;
+            replay.TeamOrange.InitialTeamSize = initialTeamSize;
         }
 
         private Team GetTeam(dynamic r)
