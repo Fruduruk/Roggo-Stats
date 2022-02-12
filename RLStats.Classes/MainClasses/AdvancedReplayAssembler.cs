@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 
+using RLStats_Classes.Models;
 using RLStats_Classes.Models.Advanced;
 
 using System;

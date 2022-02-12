@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Models.Advanced
+﻿namespace RLStats_Classes.Models
 {
     public class Uploader
     {

@@ -1,5 +1,4 @@
-﻿using RLStats_Classes.Models.Advanced;
-
+﻿
 using System;
 
 namespace RLStats_Classes.Models
