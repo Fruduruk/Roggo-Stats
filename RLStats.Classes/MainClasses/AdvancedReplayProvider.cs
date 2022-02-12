@@ -93,7 +93,7 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r)
         {
-            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r, Api.StoppingToken);
+            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r.Id, Api.StoppingToken);
 
             if (advancedReplay is null)
             {
