@@ -56,10 +56,10 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
         {
             try
             {
-                var cacheReplays = GetReplaysOutOfCacheFile(filter);
+                var cacheReplays = new HashSet<Replay>(GetReplaysOutOfCacheFile(filter));
                 foreach (var replay in replays)
                 {
-                    if (cacheReplays.DoesListContainReplay(replay))
+                    if (cacheReplays.Contains(replay))
                     {
                         return true;
                     }
@@ -96,10 +96,9 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
             return Compressor.ConvertObject<List<Replay>>(File.ReadAllBytes(fileName), false);
         }
 
-        public void AddTheOtherReplaysToTheDataPack(ApiDataPack dataPack, APIRequestFilter filter)
+        public void AddTheOtherReplaysToTheDataPack(HashSet<Replay> hashSet, APIRequestFilter filter)
         {
-            dataPack.Replays.AddRange(GetReplaysOutOfCacheFile(filter));
-            _ = dataPack.Replays.DeleteObsoleteReplays();
+            hashSet.UnionWith(GetReplaysOutOfCacheFile(filter));
         }
     }
 }

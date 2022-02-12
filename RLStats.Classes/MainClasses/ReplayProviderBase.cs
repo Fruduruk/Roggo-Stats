@@ -1,4 +1,6 @@
-﻿using RLStats_Classes.MainClasses.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+
+using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
 
 using System;
@@ -10,14 +12,20 @@ namespace RLStats_Classes.MainClasses
     {
         protected ProgressState ProgressState { get; private set; }
         public event EventHandler<ProgressState> DownloadProgressUpdated;
+        protected ILogger Logger { get; private set; }
         protected BallchasingApi Api { get; }
 
-        public ReplayProviderBase(IAuthTokenInfo tokenInfo)
+        public ReplayProviderBase(IAuthTokenInfo tokenInfo, ILogger logger)
         {
+            Logger = logger;
             if (tokenInfo is null)
                 throw new ArgumentNullException(nameof(tokenInfo));
+
             if (BallchasingApi.Instance is null)
+            {
                 BallchasingApi.CreateInstance(tokenInfo);
+                Logger.LogInformation("Connected to the ballchasing.com api.");
+            }
             Api = BallchasingApi.Instance;
             InitializeNewProgress();
         }

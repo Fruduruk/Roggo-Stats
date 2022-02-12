@@ -1,4 +1,6 @@
-﻿using RLStats_Classes.MainClasses.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+
+using RLStats_Classes.MainClasses.Interfaces;
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace RLStats_Classes.MainClasses
 {
     public class ReplayFileProvider : ReplayProviderBase, IReplayFileProvider
     {
-        public ReplayFileProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo)
+        public ReplayFileProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger)
         {
         }
 

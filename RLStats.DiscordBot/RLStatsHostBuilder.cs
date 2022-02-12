@@ -3,7 +3,10 @@ using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 
+using Discord_Bot.Configuration;
+using Discord_Bot.CustomLogging;
 using Discord_Bot.Services;
+using Discord_Bot.Singletons;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +19,7 @@ namespace Discord_Bot
 {
     public class RLStatsHostBuilder
     {
-        private IHostBuilder _builder;
+        private readonly IHostBuilder _builder;
 
         public RLStatsHostBuilder()
         {
@@ -32,8 +35,9 @@ namespace Discord_Bot
                 })
                 .ConfigureLogging(x =>
                 {
-                    x.AddConsole();
+                    x.AddSimpleConsole();
                     x.SetMinimumLevel(LogLevel.Debug); // Defines what kind of information should be logged (e.g. Debug, Information, Warning, Critical) adjust this to your liking
+                    x.AddProvider(new FileLoggingProvider(new FileLoggerConfiguration(LogLevel.Debug)));
                 })
                 .ConfigureDiscordHost((context, config) =>
                 {
@@ -51,12 +55,17 @@ namespace Discord_Bot
                     config.CaseSensitiveCommands = false;
                     config.LogLevel = LogSeverity.Verbose;
                     config.DefaultRunMode = RunMode.Async;
-                    config.CaseSensitiveCommands = false;
+                    config.ThrowOnError = true;
                 })
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
+                    services.AddSingleton(new RecentlyAddedEntries());
+                    services.AddSingleton(new CommandsToProceed());
+                    services.AddSingleton(new ConfigHandler<Subscription>(Constants.SubscribtionConfigFilePath));
+
                     services.AddHostedService<CommandHandler>();
+                    services.AddHostedService<RecurringReportsService>();
                 })
                 .UseConsoleLifetime();
             _builder = builder;

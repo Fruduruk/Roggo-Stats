@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using RLStats_Classes.MainClasses;
 using RLStats_Classes.MainClasses.Interfaces;
@@ -16,7 +18,7 @@ namespace RocketLeagueStats
     /// <summary>
     /// Interaktionslogik für NavigatorWindow.xaml
     /// </summary>
-    public partial class NavigatorWindow : Window, INotifyPropertyChanged
+    public partial class NavigatorWindow : Window, INotifyPropertyChanged, ILogger
     {
         private bool _dontClose;
         private List<Replay> _shownReplays;
@@ -76,20 +78,27 @@ namespace RocketLeagueStats
 
         private async void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
-            await LoadReplaysIntoTemp();
+            try
+            {
+                await LoadReplaysIntoTemp();
+            }
+            catch (Exception ex)
+            {
+                tbMessages.Text = ex.Message;
+            }
         }
 
         private async Task LoadReplaysIntoTemp()
         {
             TempReplays = null;
             TempReplaysToCompare = null;
-            var mainProvider = new ReplayProvider(_tokenInfo);
+            var mainProvider = new ReplayProvider(_tokenInfo, this);
             mainProvider.DownloadProgressUpdated += MainProvider_DownloadProgressUpdated;
             _providers.Add(mainProvider);
             var task = DownloadReplays(mainProvider, rpcReplayPicker.RequestFilter);
             if (!RpcReplayToComparePicker.IsEmpty)
             {
-                var secondProvider = new ReplayProvider(_tokenInfo);
+                var secondProvider = new ReplayProvider(_tokenInfo, this);
                 secondProvider.DownloadProgressUpdated += SecondProvider_DownloadProgressUpdated;
                 _providers.Add(secondProvider);
                 TempReplaysToCompare = await DownloadReplays(secondProvider, RpcReplayToComparePicker.RequestFilter);
@@ -128,7 +137,7 @@ namespace RocketLeagueStats
             {
                 tbMessages.Text = e.CurrentMessage;
             };
-            var response = await provider.CollectReplaysAsync(filter);
+            var response = await provider.CollectReplaysAsync(filter, cached: true);
             ShownReplays = new List<Replay>(response.Replays);
 
             tbMessages.Text = (response.ElapsedMilliseconds / 1000).ToString("0.##") +
@@ -149,6 +158,22 @@ namespace RocketLeagueStats
             {
                 provider.CancelDownload();
             }
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (logLevel == LogLevel.Information)
+                Debug.WriteLine(state.ToString());
+        }
+
+        bool ILogger.IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            throw new NotImplementedException();
         }
     }
 }

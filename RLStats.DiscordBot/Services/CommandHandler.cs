@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,31 +20,45 @@ namespace Discord_Bot.Services
         private readonly DiscordSocketClient _client;
         private readonly CommandService _service;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
-        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, ILogger<DiscordClientService> logger, CommandService service, IConfiguration config) : base(client, logger)
+        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, ILogger<CommandHandler> logger, CommandService service, IConfiguration config) : base(client, logger)
         {
             _provider = provider;
             _client = client;
             _service = service;
             _config = config;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _client.MessageReceived += OnMessageReceived;
 
+            _logger.LogInformation("Adding Modules...");
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+            
+            _logger.LogInformation("Setting Activity Status...");
+            await Client.SetActivityAsync(new BotActivity());
+
+            if (Debugger.IsAttached)
+                await Client.SetStatusAsync(UserStatus.Invisible);
         }
+
 
         private async Task OnMessageReceived(SocketMessage arg)
         {
+            //Check if message comes from a user
             if (!(arg is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
+            //Check if this user wants to call a command and execute it
             var argPos = 0;
             if (!message.HasStringPrefix(_config["prefix"], ref argPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argPos)) return;
 
             var context = new SocketCommandContext(_client, message);
+
+            _logger.LogInformation($"Command Received: {message} from {context.User.Username}");
 
             if (message.ToString().StartsWith($"{_config["prefix"]}help"))
             {
@@ -71,6 +86,8 @@ namespace Discord_Bot.Services
                 .WithTitle(module.Name);
                 foreach (var command in module.Commands)
                 {
+                    if (Constants.IgnoreEndpoint.Equals(command.Remarks))
+                        continue;
                     var value = command.Summary ?? "This command has no summary" + Environment.NewLine;
                     value += $"\n{_config["prefix"]}{command.Name}";
                     foreach (var param in command.Parameters)
@@ -115,6 +132,6 @@ namespace Discord_Bot.Services
             await context.Channel.SendMessageAsync(null, false, titleEmbedBuilder.Build());
         }
 
-        
+
     }
 }

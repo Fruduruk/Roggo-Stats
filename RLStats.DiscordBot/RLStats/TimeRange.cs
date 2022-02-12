@@ -1,4 +1,4 @@
-﻿namespace Discord_Bot.Modules.RLStats
+﻿namespace Discord_Bot.RLStats
 {
     public enum TimeRange
     {

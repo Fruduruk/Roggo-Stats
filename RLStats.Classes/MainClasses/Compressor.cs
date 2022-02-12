@@ -43,9 +43,19 @@ namespace RLStats_Classes.MainClasses
                 var buffer = new byte[dataLength];
 
                 memoryStream.Position = 0;
+
+                //OMG dotnet 6 changed the behaviour of GZipStream.Read(). It just stops the read sometimes now. WTF. I will loop it now.
                 using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
                 {
-                    gZipStream.Read(buffer, 0, buffer.Length);
+                    int totalRead = 0;
+                    while (totalRead < buffer.Length)
+                    {
+                        int bytesRead = gZipStream.Read(buffer, totalRead, buffer.Length - totalRead);
+                        if (bytesRead == 0) break;
+                        totalRead += bytesRead;
+                    }
+                    if (totalRead != buffer.Length)
+                        throw new Exception("GZipStream did not read all the bytes again...");
                 }
                 return buffer;
             }
@@ -59,7 +69,7 @@ namespace RLStats_Classes.MainClasses
         #region objects
         public static byte[] ConvertObject<T>(T obj, bool encrypt = true) where T : new()
         {
-            var jsonString = JsonConvert.SerializeObject(obj);
+            var jsonString = JsonConvert.SerializeObject(obj, Formatting.Indented);
             var compressedBytes = CompressString(jsonString, encrypt);
             return compressedBytes;
         }

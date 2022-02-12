@@ -48,6 +48,8 @@ namespace RLStats_Classes.MainClasses
             return await Task.Run(async () =>
             {
                 WaitForYourTurn();
+                if(StoppingToken.IsCancellationRequested)
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.Locked);
                 lock (_calls)
                     _calls.Add(url);
                 return await _client.GetAsync(url);

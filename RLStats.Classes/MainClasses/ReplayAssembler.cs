@@ -28,7 +28,19 @@ namespace RLStats_Classes.MainClasses
                 Blue = GetTeam(JData.blue),
                 Orange = GetTeam(JData.orange)
             };
+
+            SetInitialTeamSize(replay);
+
             return replay;
+        }
+
+        private static void SetInitialTeamSize(Replay replay)
+        {
+            var initialTeamSize = replay.Blue.Players.Count;
+            if (replay.Orange.Players.Count < initialTeamSize)
+                initialTeamSize = replay.Orange.Players.Count;
+            replay.Blue.InitialTeamSize = initialTeamSize;
+            replay.Orange.InitialTeamSize = initialTeamSize;
         }
 
         private Team GetTeam(dynamic r)

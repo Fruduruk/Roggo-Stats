@@ -10,7 +10,7 @@ namespace RLStats_Classes.MainClasses
     {
         public const int CurrentSeason = 5;
 
-        private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d");
+        private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d"); //Yea, I know this is not THAT safe.
 
         public static string BallchasingToken
         {

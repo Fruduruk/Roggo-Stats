@@ -1,4 +1,6 @@
 ﻿using RLStats_Classes.AverageModels;
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -48,8 +50,6 @@ namespace RLStats_WPF
             return chartList;
         }
 
-
-
         private Dictionary<string, double> GetChartBarValuesForStatProperty(
             IEnumerable<AveragePlayerStats> averagePlayerStats, PropertyInfo avgPlayerStatsProperty)
         {
@@ -76,6 +76,63 @@ namespace RLStats_WPF
             }
 
             return barValues;
+        }
+
+        /// <summary>
+        /// This returns a set of chart creators for specific charts.
+        /// </summary>
+        /// <param name="propertyNames"></param>
+        /// <param name="height"></param>
+        /// <param name="width"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public IEnumerable<ChartCreator> GetSpecificCreators(IEnumerable<string> propertyNames, double height = (375 + 100), double width = 700)
+        {
+            var allPropertyNames = new List<string>(AveragePlayerStats.GetAllPropertyNames());
+            foreach (var propertyName in propertyNames)
+            {
+                if (!allPropertyNames.Contains(propertyName))
+                    throw new ArgumentOutOfRangeException(propertyName);
+            }
+
+            var chartList = new List<ChartCreator>();
+
+            chartList.AddRange(GetSpecificCreators<AveragePlayerCore>(propertyNames, height, width));
+            chartList.AddRange(GetSpecificCreators<AveragePlayerBoost>(propertyNames, height, width));
+            chartList.AddRange(GetSpecificCreators<AveragePlayerMovement>(propertyNames, height, width));
+            chartList.AddRange(GetSpecificCreators<AveragePlayerPositioning>(propertyNames, height, width));
+            chartList.AddRange(GetSpecificCreators<AveragePlayerDemo>(propertyNames, height, width));
+
+            return chartList;
+        }
+
+        public IEnumerable<ChartCreator> GetSpecificCreators<T>(IEnumerable<string> propertyNames, double height = (375 + 100), double width = 700)
+        {
+            var chartList = new List<ChartCreator>();
+            var properties = typeof(T).GetProperties();
+            var propertyNameList = new List<string>(propertyNames);
+
+            foreach (var property in properties)
+            {
+                if (propertyNameList.Contains(property.Name))
+                {
+                    var barValues = GetChartBarValuesForStatProperty(AvgPlayerStatList, property);
+                    var title = property.Name.Replace('_', ' ');
+                    if (AvgPlayerStatListToCompare is null)
+                    {
+                        var chart = new ChartCreator(title, barValues, height, width);
+                        chartList.Add(chart);
+                    }
+                    else
+                    {
+                        var secondBarValues = GetChartBarValuesForStatProperty(AvgPlayerStatListToCompare, property);
+                        var chart = new ChartCreator(title, barValues, secondBarValues, height, width);
+                        chartList.Add(chart);
+                    }
+                }
+            }
+
+            return chartList;
         }
     }
 }

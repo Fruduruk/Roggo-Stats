@@ -1,4 +1,6 @@
-﻿using RLStats_Classes.AdvancedModels;
+﻿using Microsoft.Extensions.Logging;
+
+using RLStats_Classes.AdvancedModels;
 using RLStats_Classes.MainClasses.CacheHandlers;
 using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
@@ -8,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
 using static RLStats_Classes.MainClasses.TaskDisposer;
 
 namespace RLStats_Classes.MainClasses
@@ -16,7 +19,7 @@ namespace RLStats_Classes.MainClasses
     {
         private IRLStatsDatabase ReplayDatabase { get; } = new FileDatabase();
 
-        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo) : base(tokenInfo) { }
+        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
 
         public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false)
         {
@@ -90,8 +93,8 @@ namespace RLStats_Classes.MainClasses
 
         private async Task<(bool, Replay)> LoadAndAddToListAsync(List<AdvancedReplay> advancedReplays, Replay r)
         {
-            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r,Api.StoppingToken);
-            
+            var advancedReplay = await ReplayDatabase.LoadReplayAsync(r.Id, Api.StoppingToken);
+
             if (advancedReplay is null)
             {
                 ProgressState.FalsePartCount++;
@@ -167,6 +170,8 @@ namespace RLStats_Classes.MainClasses
         {
             var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await Api.GetAsync(url);
+            if(response.StatusCode == System.Net.HttpStatusCode.Locked)
+                throw new OperationCanceledException();
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"Couldn't load Advanced Replay: {response.ReasonPhrase}");
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());

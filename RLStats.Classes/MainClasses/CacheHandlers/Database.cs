@@ -144,7 +144,7 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
             return path;
         }
 
-        public async Task<AdvancedReplay> LoadReplayAsync(Replay r, CancellationToken cancellationToken)
+        public async Task<AdvancedReplay> LoadReplayAsync(string id, CancellationToken cancellationToken)
         {
             AdvancedReplay advancedReplay = null;
             if (cancellationToken.IsCancellationRequested)
@@ -152,7 +152,7 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
             lock (ReplayCache)
                 foreach (var cacheEntry in ReplayCache)
                 {
-                    if (cacheEntry.Id.Equals(r.Id))
+                    if (cacheEntry.Id.Equals(id))
                     {
                         CacheHits++;
                         _ = ReplayCache.Remove(cacheEntry);
@@ -163,11 +163,11 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
                 return null;
 
             CacheMisses++;
-            var replayPath = await GetReplayPath(r);
+            var replayPath = await GetReplayPath(id);
             if (replayPath is null)
             {
                 lock (IndexCollection)
-                    _ = IndexCollection.Remove(new Guid(r.Id));
+                    _ = IndexCollection.Remove(new Guid(id));
                 return advancedReplay;
             }
             if (cancellationToken.IsCancellationRequested)
@@ -177,18 +177,18 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
                 return null;
             foreach (var replay in replayBatch)
             {
-                if (replay.Id.Equals(r.Id))
+                if (replay.Id.Equals(id))
                     advancedReplay = replay;
             }
             if (advancedReplay is null)
                 lock (IndexCollection)
-                    IndexCollection.Remove(new Guid(r.Id));
+                    IndexCollection.Remove(new Guid(id));
             else
                 lock (ReplayCache)
                 {
                     foreach (var replay in replayBatch)
                     {
-                        if (!replay.Id.Equals(r.Id))
+                        if (!replay.Id.Equals(id))
                         {
                             ReplayCache.Add(replay);
                         }
@@ -196,18 +196,18 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
                 }
             return advancedReplay;
         }
-        private async Task<string> GetReplayPath(Replay replay)
+        private async Task<string> GetReplayPath(string id)
         {
             var directories = Directory.EnumerateDirectories(SavingDirectory.FullName);
             foreach (var d in directories)
             {
-                if (new DirectoryInfo(d).Name.Equals(replay.Id.Substring(0, 1)))
+                if (new DirectoryInfo(d).Name.Equals(id.Substring(0, 1)))
                 {
                     var filenames = Directory.EnumerateFiles(d);
                     return await Task.Run(() =>
                     {
                         foreach (var s in filenames)
-                            if (new FileInfo(s).Name.StartsWith(replay.Id.Substring(1, 1)))
+                            if (new FileInfo(s).Name.StartsWith(id.Substring(1, 1)))
                                 return s;
                         return null;
                     });

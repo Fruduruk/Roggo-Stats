@@ -67,11 +67,11 @@ namespace Replay_Download_Service
                 return;
             }
 
-            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo);
+            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, Logger);
             replayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
-            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo);
+            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, Logger);
             advancedReplayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
-            var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo);
+            var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo, Logger);
             replayFileProvider.DownloadProgressUpdated += DownloadProgressUpdated;
 
             foreach (var filter in serviceInfo.Filters)
@@ -134,9 +134,7 @@ namespace Replay_Download_Service
         private static void Log(string text, bool debug = false)
         {
             text = $"{DateTime.Now}: {text}";
-            if (debug)
-                Logger.LogDebug(text);
-            else
+            if (!debug)
                 Logger.LogInformation(text);
             File.AppendAllLines(LogPath, new string[] { text });
         }
