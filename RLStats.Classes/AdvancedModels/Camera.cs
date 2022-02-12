@@ -1,7 +1,10 @@
-﻿namespace RLStats_Classes.AdvancedModels
+﻿using System;
+
+namespace RLStats_Classes.AdvancedModels
 {
     public class Camera
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public int? Fov { get; set; }
         public int? Height { get; set; }
         public int? Pitch { get; set; }

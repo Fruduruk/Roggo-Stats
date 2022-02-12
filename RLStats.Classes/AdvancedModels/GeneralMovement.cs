@@ -1,7 +1,10 @@
-﻿namespace RLStats_Classes.AdvancedModels
+﻿using System;
+
+namespace RLStats_Classes.AdvancedModels
 {
     public class GeneralMovement
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public int? Total_distance { get; set; }
         public float? Time_supersonic_speed { get; set; }
         public float? Time_boost_speed { get; set; }

@@ -1,7 +1,10 @@
-﻿namespace RLStats_Classes.AdvancedModels
+﻿using System;
+
+namespace RLStats_Classes.AdvancedModels
 {
     public class Boost
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public int? Bpm { get; set; }
         public float? Bcpm { get; set; }
         public float? Avg_amount { get; set; }

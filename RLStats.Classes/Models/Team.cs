@@ -5,7 +5,7 @@ namespace RLStats_Classes.Models
 {
     public class Team
     {
-
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public int Goals { get; set; }
         public List<Player> Players { get; set; } = new List<Player>();
         public int InitialTeamSize { get; set; }

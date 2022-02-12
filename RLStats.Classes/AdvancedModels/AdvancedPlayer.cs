@@ -1,7 +1,10 @@
-﻿namespace RLStats_Classes.AdvancedModels
+﻿using System;
+
+namespace RLStats_Classes.AdvancedModels
 {
     public class AdvancedPlayer
     {
+        public string CustomId { get; set; } = Guid.NewGuid().ToString();
         public int? Start_time { get; set; }
         public float? End_time { get; set; }
         public string Name { get; set; }

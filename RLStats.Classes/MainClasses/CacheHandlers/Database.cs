@@ -1,10 +1,12 @@
 ﻿
 using RLStats_Classes.AdvancedModels;
+using RLStats_Classes.DB;
 using RLStats_Classes.Models;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,7 +41,34 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
         {
             base.InitializeLate(Path.Combine(SavingDirectory.ToString(), @"index.dat"));
             ReplayCache.CollectionChanged += ReplayCache_CollectionChanged;
+            //MigrateDataAsync();
         }
+
+        private async void MigrateDataAsync()
+        {
+            int j = 0;
+            using var db = new ReplayContext();
+            foreach (var id in IndexCollection)
+            {
+                var aReplay = await LoadReplayAsync(id.ToString(), CancellationToken.None);
+                if (!db.AdvancedReplays.Contains(aReplay))
+                {
+                    try
+                    {
+                        db.AdvancedReplays.Add(aReplay);
+                        j++;
+                        Debug.WriteLine(j);
+                    }
+                    catch (Exception ex)
+                    {
+                        var i = ex;
+                    }
+
+                }
+            }
+            await db.SaveChangesAsync();
+        }
+
         private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             while (ReplayCache.Count > CacheSize)
