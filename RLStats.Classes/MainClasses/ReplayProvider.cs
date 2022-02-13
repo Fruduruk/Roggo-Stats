@@ -107,7 +107,7 @@ namespace RLStats_Classes.MainClasses
 
                 //delete false replays
                 if (filter.CheckDate)
-                    hashedReplayChunk.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2.AddDays(1));
+                    hashedReplayChunk.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2);
 
                 if (hashedReplayChunk.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
                     done = true;
