@@ -1,4 +1,5 @@
-﻿using RLStats_Classes.AverageModels;
+﻿using RLStats_Classes.Models.Average;
+
 using System.Collections.Generic;
 
 namespace Discord_Bot.Modules.RLStats

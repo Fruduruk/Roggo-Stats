@@ -1,6 +1,9 @@
 ﻿using Discord.Commands;
+
 using Microsoft.Extensions.Logging;
-using RLStats_Classes.AverageModels;
+
+using RLStats_Classes.Models.Average;
+
 using System;
 using System.Threading.Tasks;
 

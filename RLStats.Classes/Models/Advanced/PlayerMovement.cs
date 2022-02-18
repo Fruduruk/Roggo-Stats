@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.AdvancedModels
+﻿namespace RLStats_Classes.Models.Advanced
 {
     public class PlayerMovement : GeneralMovement
     {

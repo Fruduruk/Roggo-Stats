@@ -1,8 +1,9 @@
-﻿using RLStats_Classes.AdvancedModels;
+﻿using RLStats_Classes.Models.Advanced;
+
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.AverageModels
+namespace RLStats_Classes.Models.Average
 {
     public class AveragePlayerStats
     {
@@ -26,7 +27,7 @@ namespace RLStats_Classes.AverageModels
         private static bool IsPartEmpty<T>(T avg) where T : new()
         {
             var properties = typeof(T).GetProperties();
-            foreach(var prop in properties)
+            foreach (var prop in properties)
             {
                 var value = prop.GetValue(avg) as double?;
                 if (value is not null)
@@ -38,7 +39,7 @@ namespace RLStats_Classes.AverageModels
         }
 
 
-        public static TAvgt GetAverage<TAvgt,T>(List<PlayerStats> allStatsForOnePlayer) where TAvgt : new() where T : new()
+        public static TAvgt GetAverage<TAvgt, T>(List<PlayerStats> allStatsForOnePlayer) where TAvgt : new() where T : new()
         {
             TAvgt avgt = new TAvgt();
             var properties = typeof(T).GetProperties();
@@ -48,7 +49,7 @@ namespace RLStats_Classes.AverageModels
                 foreach (var stats in allStatsForOnePlayer)
                 {
                     var playerStatsProperties = typeof(PlayerStats).GetProperties();
-                    foreach(var psp in playerStatsProperties)
+                    foreach (var psp in playerStatsProperties)
                     {
                         if (typeof(T).Name.Equals(psp.Name))
                         {
@@ -138,7 +139,7 @@ namespace RLStats_Classes.AverageModels
         {
             var names = new List<string>();
             var properties = typeof(T).GetProperties();
-            foreach(var property in properties)
+            foreach (var property in properties)
             {
                 names.Add(property.Name);
             }

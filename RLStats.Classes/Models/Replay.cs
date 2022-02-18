@@ -1,21 +1,66 @@
-﻿using System;
+﻿
+using System;
 
 namespace RLStats_Classes.Models
 {
     public class Replay
     {
+        [JsonProperty("id")]
         public string Id { get; set; }
-        public string RocketLeagueId { get; set; }
-        public string SeasonType { get; set; }
-        public string Visibility { get; set; }
+
+        [JsonProperty("link")]
         public string Link { get; set; }
+
+        [JsonProperty("rocket_league_id")]
+        public string RocketLeagueId { get; set; }
+
+        [JsonProperty("replay_title")]
         public string Title { get; set; }
+
+        [JsonProperty("visibility")]
+        public string Visibility { get; set; }
+
+        [JsonProperty("map_code")]
+        public string MapCode { get; set; }
+
+        [JsonProperty("playlist_id")]
         public string Playlist { get; set; }
+
+        [JsonProperty("playlist_name")]
+        public string PlaylistName { get; set; }
+
+        [JsonProperty("duration")]
+        public int Duration { get; set; }
+
+        [JsonProperty("overtime")]
+        public bool Overtime { get; set; }
+        
+        [JsonProperty("season")]
         public int Season { get; set; }
+
+        [JsonProperty("season_type")]
+        public string SeasonType { get; set; } = "before Free2Play";
+
+        [JsonProperty("date")]
         public DateTime Date { get; set; }
-        public string Uploader { get; set; }
-        public Team Blue { get; set; }
-        public Team Orange { get; set; }
+
+        [JsonProperty("date_has_tz")]
+        public bool DateHasTimeZone { get; set; }
+
+        [JsonProperty("min_rank")]
+        public Rank MinRank { get; set; }
+
+        [JsonProperty("max_rank")]
+        public Rank MaxRank { get; set; }
+
+        [JsonProperty("uploader")]
+        public Uploader Uploader { get; set; }
+
+        [JsonProperty("blue")]
+        public Team TeamBlue { get; set; }
+
+        [JsonProperty("orange")]
+        public Team TeamOrange { get; set; }
 
         // override object.Equals
         public override bool Equals(object obj)
@@ -28,8 +73,8 @@ namespace RLStats_Classes.Models
             if (CheckEquality(SeasonType, that.SeasonType))
                 if (Season.Equals(that.Season))
                     if (CheckEquality(Playlist, that.Playlist))
-                        if (CheckEquality(Blue, that.Blue))
-                            if (CheckEquality(Orange, that.Orange))
+                        if (CheckEquality(TeamBlue, that.TeamBlue))
+                            if (CheckEquality(TeamOrange, that.TeamOrange))
                                 return true;
             return false;
         }
@@ -40,8 +85,8 @@ namespace RLStats_Classes.Models
             hashCode.Add(SeasonType);
             hashCode.Add(Playlist);
             hashCode.Add(Season);
-            hashCode.Add(Blue);
-            hashCode.Add(Orange);
+            hashCode.Add(TeamBlue);
+            hashCode.Add(TeamOrange);
             var hash = hashCode.ToHashCode();
             return hash;
         }
@@ -61,9 +106,9 @@ namespace RLStats_Classes.Models
 
         public bool HasNameInIt(string name)
         {
-            if (Blue.HasName(name))
+            if (TeamBlue.HasName(name))
                 return true;
-            if (Orange.HasName(name))
+            if (TeamOrange.HasName(name))
                 return true;
             return false;
         }

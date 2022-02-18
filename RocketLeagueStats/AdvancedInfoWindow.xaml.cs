@@ -1,6 +1,6 @@
-﻿using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.MainClasses.Interfaces;
+﻿using RLStats_Classes.MainClasses.Interfaces;
 using RLStats_Classes.Models;
+using RLStats_Classes.Models.Advanced;
 
 using RocketLeagueStats.Components;
 

@@ -1,5 +1,4 @@
-﻿using Discord;
-
+﻿
 using Discord_Bot.ExtensionMethods;
 using Discord_Bot.Modules.RLStats;
 
@@ -7,9 +6,9 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using RLStats_Classes.AverageModels;
 using RLStats_Classes.MainClasses;
 using RLStats_Classes.MainClasses.Interfaces;
+using RLStats_Classes.Models.Average;
 
 using RLStats_WPF;
 

@@ -11,7 +11,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>RLStats.WPF</PackageId>
     <AssemblyName>RLStats WPF</AssemblyName>
-    <Version>1.4.1</Version>
+    <Version>1.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
