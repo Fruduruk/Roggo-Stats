@@ -123,33 +123,6 @@ namespace RLStats_Classes.MainClasses
                     Success = false
                 };
             }
-            //var replays = new List<Replay>();
-            //try
-            //{
-            //    if (jData != null)
-            //        foreach (var r in jData.list)
-            //        {
-            //            replays.Add(new ReplayAssembler(r).Assemble());
-            //        }
-
-            //    if (replays.Count == 0)
-            //        throw new Exception("No replay found");
-            //}
-            //catch
-            //{
-            //    return new ApiDataPack()
-            //    {
-            //        Success = false,
-            //        ReceivedString = dataString
-            //    };
-            //}
-            //return new ApiDataPack()
-            //{
-            //    Replays = replays,
-            //    ReplayCount = jData.count,
-            //    Next = jData.next,
-            //    Success = true,
-            //};
         }
 
         private static void FillInitialTeamSizes(ApiDataPack datapack)
