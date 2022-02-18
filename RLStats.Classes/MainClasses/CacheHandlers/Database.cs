@@ -1,6 +1,5 @@
-﻿
-using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.Models;
+﻿using RLStats_Classes.Models;
+using RLStats_Classes.Models.Advanced;
 
 using System;
 using System.Collections.Generic;

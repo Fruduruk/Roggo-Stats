@@ -3,12 +3,11 @@ using Discord.Commands;
 
 using Discord_Bot.Configuration;
 using Discord_Bot.ExtensionMethods;
-using Discord_Bot.Modules.RLStats.RecurringReports;
 using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.AverageModels;
+using RLStats_Classes.Models.Average;
 
 using System;
 using System.Collections.Generic;

@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.AverageModels;
-using RLStats_Classes.ChartModels;
+
+using RLStats_Classes.Models.Advanced;
+using RLStats_Classes.Models.Average;
+using RLStats_Classes.Models.Chart;
 
 namespace RLStats_Classes.MainClasses.Interfaces
 {

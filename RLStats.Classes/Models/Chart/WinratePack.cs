@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace RLStats_Classes.ChartModels
+namespace RLStats_Classes.Models.Chart
 {
     public class WinratePack : IComparable
     {
@@ -12,7 +13,7 @@ namespace RLStats_Classes.ChartModels
 
         public int CompareTo(object obj)
         {
-            if(obj is WinratePack mw)
+            if (obj is WinratePack mw)
             {
                 if (Winrate == mw.Winrate)
                     return 0;
@@ -21,9 +22,10 @@ namespace RLStats_Classes.ChartModels
                 else
                     return -1;
             }
-            else 
+            else
             {
-                throw new Exception("cant compare");            }
+                throw new Exception("cant compare");
+            }
         }
     }
 }

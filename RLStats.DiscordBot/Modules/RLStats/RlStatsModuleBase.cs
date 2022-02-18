@@ -7,8 +7,8 @@ using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.AdvancedModels;
-using RLStats_Classes.AverageModels;
+using RLStats_Classes.Models.Advanced;
+using RLStats_Classes.Models.Average;
 
 using System;
 using System.Collections.Generic;

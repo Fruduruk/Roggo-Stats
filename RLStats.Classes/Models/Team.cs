@@ -5,12 +5,14 @@ namespace RLStats_Classes.Models
 {
     public class Team
     {
-
+        [JsonProperty("goals")]
         public int Goals { get; set; }
+
+        [JsonProperty("players")]
         public List<Player> Players { get; set; } = new List<Player>();
+
         public int InitialTeamSize { get; set; }
 
-        // override object.Equals
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())

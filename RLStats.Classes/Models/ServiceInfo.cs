@@ -12,7 +12,7 @@ namespace RLStats_Classes.Models
 
         public double CycleIntervalInHours { get; set; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public bool Available { get; set; } = true;
     }
 }
