@@ -1,12 +1,15 @@
-﻿using Discord_Bot.RLStats;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using RLStats_Classes.AverageModels;
-using System.Threading.Tasks;
+﻿using Discord_Bot.Configuration;
 using Discord_Bot.ExtensionMethods;
+using Discord_Bot.RLStats;
+
+using Microsoft.Extensions.Logging;
+
+using RLStats_Classes.Models.Average;
+
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Discord_Bot.Configuration;
+using System.Threading.Tasks;
 
 namespace Discord_Bot.Services
 {
