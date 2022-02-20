@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace RLStats_Classes.Models
+namespace RLStats_Classes.Models.ReplayModels
 {
     public class Replay
     {
@@ -34,7 +34,7 @@ namespace RLStats_Classes.Models
 
         [JsonProperty("overtime")]
         public bool Overtime { get; set; }
-        
+
         [JsonProperty("season")]
         public int Season { get; set; }
 

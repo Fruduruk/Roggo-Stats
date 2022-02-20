@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public static class DateTimeHelper
     {

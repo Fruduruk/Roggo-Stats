@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses.Interfaces
+namespace RLStats_Classes.Interfaces
 {
     public interface IReplayFileProvider
     {

@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 
-using RLStats_Classes.Models;
+using RLStats_Classes.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.Extensions
 {
     public static class ReplayListExtensionMethods
     {
@@ -26,11 +26,11 @@ namespace RLStats_Classes.MainClasses
             if (!names.Any())
                 return 0;
             var newReplayList = new List<Replay>();
-            foreach(var name in names)
+            foreach (var name in names)
             {
-                foreach(var replay in replays)
+                foreach (var replay in replays)
                 {
-                    if(replay.HasNameInIt(name))
+                    if (replay.HasNameInIt(name))
                         newReplayList.Add(replay);
                 }
             }

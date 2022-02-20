@@ -2,7 +2,7 @@
 using RLStats_Classes.Models;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses.Interfaces
+namespace RLStats_Classes.Interfaces
 {
     public interface IReplayProvider : IReplayProviderBase
     {

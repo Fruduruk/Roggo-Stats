@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models.Advanced;
+using RLStats_Classes.Models.ReplayModels.Advanced;
+using RLStats_Classes.Interfaces;
 
 namespace RocketLeagueStats.Components
 {

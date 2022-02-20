@@ -4,7 +4,7 @@ using System.Text;
 
 using RLStats_Classes.Encryption;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class RLConstants
     {

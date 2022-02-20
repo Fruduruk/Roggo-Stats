@@ -1,5 +1,5 @@
-﻿using RLStats_Classes.Models;
-using RLStats_Classes.Models.Advanced;
+﻿using RLStats_Classes.Models.ReplayModels;
+using RLStats_Classes.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses.CacheHandlers
+namespace RLStats_Classes.CacheHandlers
 {
     public class Database : WithIndexFile<Guid>
     {
@@ -36,7 +36,7 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
 
         public Database() : base(compressed: true)
         {
-            base.InitializeLate(Path.Combine(SavingDirectory.ToString(), @"index.dat"));
+            InitializeLate(Path.Combine(SavingDirectory.ToString(), @"index.dat"));
             ReplayCache.CollectionChanged += ReplayCache_CollectionChanged;
         }
         private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Controls;
 using RLStats_WPF;
-using RLStats_Classes.Models.Average;
+using RLStats_Classes.Models.ReplayModels.Average;
 
 namespace RocketLeagueStats.Components
 {

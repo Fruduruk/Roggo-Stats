@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Models
+﻿namespace RLStats_Classes.Models.ReplayModels
 {
     public class Uploader
     {

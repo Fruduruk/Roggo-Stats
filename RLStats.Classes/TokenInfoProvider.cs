@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
+
+using RLStats_Classes.Models;
+
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class TokenInfoProvider
     {

@@ -1,8 +1,9 @@
 ﻿using RLStats_Classes.Enums;
+
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class APIRequestFilter
     {
@@ -78,7 +79,7 @@ namespace RLStats_Classes.MainClasses
                 builder.SetMatchResult(MatchResult);
             if (CheckSteamId)
                 builder.SetSteamIds(SteamIDs);
-            if(Pro)
+            if (Pro)
                 builder.SetPro(Pro);
             if (CheckDate)
             {

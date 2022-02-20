@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using RLStats_Classes.Models.Advanced;
-using RLStats_Classes.Models.Average;
 using RLStats_Classes.Models.Chart;
+using RLStats_Classes.Models.ReplayModels.Advanced;
+using RLStats_Classes.Models.ReplayModels.Average;
 
-namespace RLStats_Classes.MainClasses.Interfaces
+namespace RLStats_Classes.Interfaces
 {
     public interface IStatsComparer
     {

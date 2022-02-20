@@ -1,5 +1,4 @@
-﻿using RLStats_Classes.MainClasses.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,8 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RLStats_Classes.Models;
+using RLStats_Classes.Interfaces;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class BallchasingApi
     {
@@ -65,7 +65,7 @@ namespace RLStats_Classes.MainClasses
                     double speed = TokenInfo.GetSpeed();
                     if (speed > MaximumCallsPerSecond)
                         speed = MaximumCallsPerSecond;
-                    var timeToWait = (1000d / speed) * 1.1; // I use 1.1. That 0.1 extra is a safety buffer.
+                    var timeToWait = 1000d / speed * 1.1; // I use 1.1. That 0.1 extra is a safety buffer.
                     var hasToWait = _stopWatch.ElapsedMilliseconds < timeToWait;
                     if (hasToWait)
                     {
@@ -129,7 +129,7 @@ namespace RLStats_Classes.MainClasses
         {
             foreach (var replay in datapack.Replays)
             {
-                var teamSize = (replay.TeamBlue.Players.Count < replay.TeamOrange.Players.Count) ?
+                var teamSize = replay.TeamBlue.Players.Count < replay.TeamOrange.Players.Count ?
                     replay.TeamBlue.Players.Count : replay.TeamOrange.Players.Count;
                 replay.TeamBlue.InitialTeamSize = teamSize;
                 replay.TeamOrange.InitialTeamSize = teamSize;

@@ -1,9 +1,9 @@
-﻿using RLStats_Classes.Models.Advanced;
+﻿using RLStats_Classes.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.Models.Average
+namespace RLStats_Classes.Models.ReplayModels.Average
 {
     public class AveragePlayerStats
     {
