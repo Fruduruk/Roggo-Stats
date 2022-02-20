@@ -1,6 +1,6 @@
 ﻿using RLStatsClasses.Models.ReplayModels.Average;
 
-using RLStats_WPF;
+using RLStatsWPF;
 
 using System.Collections.Generic;
 using System.Windows.Controls;
