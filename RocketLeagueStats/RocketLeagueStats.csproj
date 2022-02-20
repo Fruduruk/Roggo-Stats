@@ -13,6 +13,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     
     <ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
+    
+    <ProjectReference Include="..\RLStats.MongoDBSupport\RLStats.MongoDBSupport.csproj" />
     <ProjectReference Include="..\RLStats.WPF\RLStats WPF.csproj" />
   </ItemGroup>
 
