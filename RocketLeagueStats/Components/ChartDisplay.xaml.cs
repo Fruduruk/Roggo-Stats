@@ -1,4 +1,4 @@
-﻿using RLStats_Classes.Models.ReplayModels.Average;
+﻿using RLStatsClasses.Models.ReplayModels.Average;
 
 using RLStats_WPF;
 

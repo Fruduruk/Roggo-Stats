@@ -1,7 +1,7 @@
 ﻿
 using System.Collections.Generic;
 
-namespace RLStats_Classes.Models
+namespace RLStatsClasses.Models
 {
     public class ServiceInfo
     {

@@ -1,4 +1,4 @@
-﻿using RLStats_Classes.Models.ReplayModels.Advanced;
+﻿using RLStatsClasses.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;

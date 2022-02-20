@@ -1,5 +1,5 @@
-﻿using RLStats_Classes;
-using RLStats_Classes.Enums;
+﻿using RLStatsClasses;
+using RLStatsClasses.Enums;
 
 using System;
 using System.Collections.Generic;

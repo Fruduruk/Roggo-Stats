@@ -1,9 +1,9 @@
-﻿using RLStats_Classes.Interfaces;
+﻿using RLStatsClasses.Interfaces;
 
 using System;
 using System.Diagnostics;
 
-namespace RLStats_Classes.Models
+namespace RLStatsClasses.Models
 {
     public class ServiceTokenInfo : IAuthTokenInfo
     {

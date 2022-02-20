@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Interfaces;
+using RLStatsClasses.Interfaces;
 
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class ReplayFileProvider : ReplayProviderBase, IReplayFileProvider
     {

@@ -1,8 +1,8 @@
-﻿using RLStats_Classes.Models.ReplayModels;
+﻿using RLStatsClasses.Models.ReplayModels;
 
 using System.Collections.Generic;
 
-namespace RLStats_Classes.Interfaces
+namespace RLStatsClasses.Interfaces
 {
     public interface IReplayCache
     {

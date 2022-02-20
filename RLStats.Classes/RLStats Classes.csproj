@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>RLStats_Classes</RootNamespace>
+    <RootNamespace>RLStatsClasses</RootNamespace>
     <PackageId>RLStats.Classes</PackageId>
 	<Authors>Fruduruk</Authors>
     <Product>RLStats.Classes</Product>

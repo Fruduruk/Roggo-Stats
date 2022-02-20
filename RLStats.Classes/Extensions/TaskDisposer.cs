@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.Extensions
+namespace RLStatsClasses.Extensions
 {
     public static class TaskDisposer
     {

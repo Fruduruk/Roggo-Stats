@@ -1,11 +1,11 @@
-﻿using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models.ReplayModels;
+﻿using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class ReplayCache : WithIndexFile<CacheEntry>, IReplayCache
     {

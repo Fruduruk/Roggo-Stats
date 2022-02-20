@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
 
 using System;
 using System.ComponentModel;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class ReplayProviderBase : IReplayProviderBase
     {

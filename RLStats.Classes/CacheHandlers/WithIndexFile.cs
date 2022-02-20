@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class WithIndexFile<T>
     {

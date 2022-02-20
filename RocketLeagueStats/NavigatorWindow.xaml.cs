@@ -2,10 +2,10 @@
 
 using Newtonsoft.Json;
 
-using RLStats_Classes;
-using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
-using RLStats_Classes.Models.ReplayModels;
+using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;

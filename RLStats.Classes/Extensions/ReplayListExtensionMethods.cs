@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 
-using RLStats_Classes.Models.ReplayModels;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RLStats_Classes.Extensions
+namespace RLStatsClasses.Extensions
 {
     public static class ReplayListExtensionMethods
     {

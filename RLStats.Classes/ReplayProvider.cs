@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.CacheHandlers;
-using RLStats_Classes.Extensions;
-using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
-using RLStats_Classes.Models.ReplayModels;
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Extensions;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {

@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace RLStats_Classes.Models.Chart
+namespace RLStatsClasses.Models.Chart
 {
     public class WinratePack : IComparable
     {

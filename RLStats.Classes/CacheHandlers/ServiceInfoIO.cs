@@ -1,9 +1,9 @@
-﻿using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
+﻿using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
 
 using System.IO;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class ServiceInfoIO : IServiceInfoIO
     {

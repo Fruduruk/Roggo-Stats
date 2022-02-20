@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RLStats_Classes.Models;
-using RLStats_Classes.Interfaces;
+using RLStatsClasses.Models;
+using RLStatsClasses.Interfaces;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class BallchasingApi
     {

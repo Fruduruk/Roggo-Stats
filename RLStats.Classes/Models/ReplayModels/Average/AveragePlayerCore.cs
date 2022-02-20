@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Models.ReplayModels.Average
+﻿namespace RLStatsClasses.Models.ReplayModels.Average
 {
     public class AveragePlayerCore
     {

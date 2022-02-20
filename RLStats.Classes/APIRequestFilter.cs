@@ -1,9 +1,9 @@
-﻿using RLStats_Classes.Enums;
+﻿using RLStatsClasses.Enums;
 
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class APIRequestFilter
     {

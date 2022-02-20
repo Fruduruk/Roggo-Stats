@@ -1,11 +1,11 @@
-﻿using RLStats_Classes.Models.ReplayModels;
-using RLStats_Classes.Models.ReplayModels.Advanced;
+﻿using RLStatsClasses.Models.ReplayModels;
+using RLStatsClasses.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.Interfaces
+namespace RLStatsClasses.Interfaces
 {
     public interface IAdvancedReplayProvider : IReplayProviderBase
     {
