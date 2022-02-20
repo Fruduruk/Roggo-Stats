@@ -1,4 +1,5 @@
 ﻿using RLStats_Classes;
+using RLStats_Classes.Interfaces;
 
 using System;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ namespace RocketLeagueStats
     public partial class APILoginWindow : Window
     {
         private readonly string _filePath = string.Empty;
+        private readonly ISaveBallchasingToken tokenSaver = new RLConstants();
         private MainWindow MW { get; set; }
         public APILoginWindow()
         {
@@ -19,7 +21,7 @@ namespace RocketLeagueStats
             if (args.Length == 2)
                 _filePath = args[1];
             InitializeComponent();
-            var key = RLConstants.BallchasingToken;
+            var key = tokenSaver.GetBallchasingToken();
             if (string.IsNullOrEmpty(key))
             {
                 tbInfo.Text = "Paste your ballchasing key here";
@@ -50,7 +52,7 @@ namespace RocketLeagueStats
                     MW.Show();
                 });
                 tbInfo.Text = "Token approved! Welcome " + tokenInfo.Type + " chaser";
-                RLConstants.BallchasingToken = tokenInfo.Token;
+                tokenSaver.SetBallchasingToken(tokenInfo.Token);
             }
             else
             {

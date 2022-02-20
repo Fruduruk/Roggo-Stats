@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-using RLStats_Classes.Interfaces;
+﻿using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
 
 using System.IO;

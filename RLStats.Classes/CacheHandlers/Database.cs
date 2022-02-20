@@ -14,7 +14,7 @@ namespace RLStats_Classes.CacheHandlers
 {
     public class Database : WithIndexFile<Guid>, IDatabase
     {
-        public DirectoryInfo SavingDirectory
+        private DirectoryInfo SavingDirectory
         {
             get
             {
@@ -22,7 +22,7 @@ namespace RLStats_Classes.CacheHandlers
                     _savingDirectory.Create();
                 return _savingDirectory;
             }
-            private set => _savingDirectory = value;
+            set => _savingDirectory = value;
         }
 
         private DirectoryInfo _savingDirectory = new DirectoryInfo(RLConstants.RLStatsFolder + @"\Data");
@@ -33,13 +33,14 @@ namespace RLStats_Classes.CacheHandlers
 
         public int CacheMisses { get; set; } = 0;
 
-        public ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
+        private ObservableCollection<AdvancedReplay> ReplayCache { get; set; } = new();
 
         public Database() : base(compressed: true)
         {
             InitializeLate(Path.Combine(SavingDirectory.ToString(), @"index.dat"));
             ReplayCache.CollectionChanged += ReplayCache_CollectionChanged;
         }
+
         private void ReplayCache_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             while (ReplayCache.Count > CacheSize)

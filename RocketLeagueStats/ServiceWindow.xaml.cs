@@ -1,4 +1,6 @@
 ﻿using RLStats_Classes;
+using RLStats_Classes.CacheHandlers;
+using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
 
 using System;
@@ -16,6 +18,7 @@ namespace RocketLeagueStats
     {
         public AuthTokenInfo AuthTokenInfo { get; }
         private bool dontClose;
+        private IServiceInfoIO serviceInfoIO = new ServiceInfoIO();
 
         public bool DontClose
         {
@@ -83,7 +86,7 @@ namespace RocketLeagueStats
 
         private void LoadFilters()
         {
-            var info = new ServiceInfoIO().GetServiceInfo();
+            var info = serviceInfoIO.GetServiceInfo();
             if (info.Available)
             {
                 CycleIntervalInHours = info.CycleIntervalInHours;
@@ -164,7 +167,7 @@ namespace RocketLeagueStats
                     Type = AuthTokenInfo.Type
                 }
             };
-            new ServiceInfoIO().SaveServiceInfo(info);
+            serviceInfoIO.SaveServiceInfo(info);
         }
     }
 }

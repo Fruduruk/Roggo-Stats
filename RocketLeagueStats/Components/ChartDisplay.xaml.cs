@@ -1,9 +1,9 @@
-﻿using RLStats_Classes.MainClasses;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Windows.Controls;
+﻿using RLStats_Classes.Models.ReplayModels.Average;
+
 using RLStats_WPF;
-using RLStats_Classes.Models.ReplayModels.Average;
+
+using System.Collections.Generic;
+using System.Windows.Controls;
 
 namespace RocketLeagueStats.Components
 {

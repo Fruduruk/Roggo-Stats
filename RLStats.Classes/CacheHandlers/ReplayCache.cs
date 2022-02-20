@@ -1,5 +1,4 @@
 ﻿using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
 using RLStats_Classes.Models.ReplayModels;
 
 using System;
@@ -15,7 +14,7 @@ namespace RLStats_Classes.CacheHandlers
 
         }
 
-        public void StoreReplaysInCache(CollectReplaysResponse response, APIRequestFilter filter)
+        public void StoreReplaysInCache(IEnumerable<Replay> replays, APIRequestFilter filter)
         {
             var fileName = $"{Guid.NewGuid()}.7z";
             var hasCacheFile = HasCacheFile(filter);
@@ -23,7 +22,7 @@ namespace RLStats_Classes.CacheHandlers
                 fileName = GetFileName(filter);
             var filePath = Path.Combine(RLConstants.ReplayCacheFolder, fileName);
 
-            File.WriteAllBytes(filePath, Compressor.ConvertObject(new List<Replay>(response.Replays), false));
+            File.WriteAllBytes(filePath, Compressor.ConvertObject(new List<Replay>(replays), false));
             if (!hasCacheFile)
                 IndexCollection.Add(new CacheEntry { FileName = fileName, URL = filter.GetApiUrl() });
         }

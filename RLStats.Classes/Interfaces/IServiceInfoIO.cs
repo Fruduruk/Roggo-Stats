@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RLStats_Classes.Models;
 
 namespace RLStats_Classes.Interfaces
 {
     public interface IServiceInfoIO
     {
-
+        ServiceInfo GetServiceInfo();
+        void SaveServiceInfo(ServiceInfo info);
     }
 }
