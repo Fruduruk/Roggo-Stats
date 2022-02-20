@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Replay_Download_Service
+namespace ReplayDownloadService
 {
     public class Worker : BackgroundService
     {

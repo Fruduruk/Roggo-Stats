@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Replay_Download_Service
+namespace ReplayDownloadService
 {
     public class Program
     {
