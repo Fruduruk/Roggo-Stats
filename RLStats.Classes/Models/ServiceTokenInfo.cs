@@ -7,7 +7,7 @@ namespace RLStatsClasses.Models
 {
     public class ServiceTokenInfo : IAuthTokenInfo
     {
-        public string Token { get; }
+        public string Token { get; set; }
         public string Type { get; set; }
 
         public ServiceTokenInfo(string token)

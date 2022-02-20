@@ -1,5 +1,4 @@
 ﻿using RLStatsClasses;
-using RLStatsClasses.CacheHandlers;
 using RLStatsClasses.Interfaces;
 using RLStatsClasses.Models;
 
@@ -18,7 +17,7 @@ namespace RocketLeagueStats
     {
         public AuthTokenInfo AuthTokenInfo { get; }
         private bool dontClose;
-        private IServiceInfoIO serviceInfoIO = new ServiceInfoIO();
+        private IServiceInfoIO serviceInfoIO = DBProvider.Instance.GetServiceInfoDB();
 
         public bool DontClose
         {

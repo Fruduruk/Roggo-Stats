@@ -18,9 +18,12 @@ namespace RLStatsClasses
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
         private bool _cancelDownload;
-        private IReplayCache ReplayCache { get; set; } = new ReplayCache();
+        private IReplayCache ReplayCache { get; set; }
 
-        public ReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
+        public ReplayProvider(IAuthTokenInfo tokenInfo, IReplayCache replayCache, ILogger logger) : base(tokenInfo, logger)
+        {
+            ReplayCache = replayCache;
+        }
 
         public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter, bool checkCache = false)
         {
