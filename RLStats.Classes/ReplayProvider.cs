@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
-
 using RLStats_Classes.CacheHandlers;
 using RLStats_Classes.Extensions;
 using RLStats_Classes.Interfaces;
@@ -20,7 +18,7 @@ namespace RLStats_Classes
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
         private bool _cancelDownload;
-        private ReplayCache ReplayCache { get; set; } = new ReplayCache();
+        private IReplayCache ReplayCache { get; set; } = new ReplayCache();
 
         public ReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
 
@@ -58,7 +56,7 @@ namespace RLStats_Classes
             //Don't use cache on requests with cap
             if (filter.ReplayCap == 0)
                 if (!_cancelDownload)
-                    ReplayCache.StoreReplaysInCache(response, filter);
+                    ReplayCache.StoreReplaysInCache(response.Replays, filter);
 
             _cancelDownload = false;
             return response;

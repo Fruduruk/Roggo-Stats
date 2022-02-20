@@ -3,12 +3,13 @@ using System.IO;
 using System.Text;
 
 using RLStats_Classes.Encryption;
+using RLStats_Classes.Interfaces;
 
 namespace RLStats_Classes
 {
-    public class RLConstants
+    public class RLConstants : ISaveBallchasingToken
     {
-        public const int CurrentSeason = 5;
+        public static int CurrentSeason { get; private set; } = 5;
 
         private static readonly byte[] _key = Encoding.UTF8.GetBytes("+9.[#qr5S1;r{A2d"); //Yea, I know this is not THAT safe.
 
@@ -21,6 +22,8 @@ namespace RLStats_Classes
         public static string RLStatsFolder => GetRLStatsFolder();
 
         public static string ReplayCacheFolder => GetReplayCacheFolder();
+
+        public int GetCurrentSeason => CurrentSeason;
 
         private static string ReadKey(string filePath)
         {
@@ -64,6 +67,16 @@ namespace RLStats_Classes
         {
             var keyPath = Path.Combine(GetRLStatsFolder(), "ballchasingKey");
             return keyPath;
+        }
+
+        public string GetBallchasingToken()
+        {
+            return BallchasingToken;
+        }
+
+        public void SetBallchasingToken(string ballchasingToken)
+        {
+            BallchasingToken = ballchasingToken;
         }
     }
 }

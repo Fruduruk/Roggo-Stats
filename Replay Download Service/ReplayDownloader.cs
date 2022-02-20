@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using RLStats_Classes;
 using RLStats_Classes.CacheHandlers;
+using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
 using RLStats_Classes.Models.ReplayModels;
 
@@ -28,6 +29,7 @@ namespace Replay_Download_Service
         private static string UpdateLogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceUpdateLog.txt");
         private static Stopwatch UpdateWatch { get; set; } = new Stopwatch();
         private static ILogger<Worker> Logger { get; set; }
+        private static IServiceInfoIO serviceInfoIO { get; set; } = new ServiceInfoIO();
         private static CancellationToken StoppingToken { get; set; }
 
         public static Task ExecuteServiceAsync(ILogger<Worker> logger, CancellationToken stoppingToken)
@@ -39,7 +41,7 @@ namespace Replay_Download_Service
                 StoppingToken = stoppingToken;
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var sInfo = new ServiceInfoIO().GetServiceInfo();
+                    var sInfo = serviceInfoIO.GetServiceInfo();
                     if (File.Exists(LogPath))
                         ZipOldLog();
 
