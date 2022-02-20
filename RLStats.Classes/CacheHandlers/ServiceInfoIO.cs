@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
 
+using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
 
 using System.IO;
 
 namespace RLStats_Classes.CacheHandlers
 {
-    public class ServiceInfoIO
+    public class ServiceInfoIO : IServiceInfoIO
     {
         private string ServiceFilePath { get; set; }
         public ServiceInfoIO()
