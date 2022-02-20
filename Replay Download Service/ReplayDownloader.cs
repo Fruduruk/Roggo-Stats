@@ -17,7 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Replay_Download_Service
+namespace ReplayDownloadService
 {
     public static class ReplayDownloader
     {
