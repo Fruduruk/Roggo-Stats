@@ -46,7 +46,7 @@ namespace RLStats_Classes
             ProgressState.CurrentMessage = "Downloading advanced replays.";
             await DownloadReplays(advancedReplays, replaysToDownload);
             ProgressState.CurrentMessage = "Loading done.";
-            ReplayDatabase.ReplayCache.Clear();
+            ReplayDatabase.ClearCache();
             ProgressState.CurrentMessage = $"Cache Hits: {ReplayDatabase.CacheHits} Cache Misses: {ReplayDatabase.CacheMisses}";
             ProgressState.LastCall = true;
             return advancedReplays;

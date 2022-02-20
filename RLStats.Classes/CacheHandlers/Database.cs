@@ -1,4 +1,5 @@
-﻿using RLStats_Classes.Models.ReplayModels;
+﻿using RLStats_Classes.Interfaces;
+using RLStats_Classes.Models.ReplayModels;
 using RLStats_Classes.Models.ReplayModels.Advanced;
 
 using System;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RLStats_Classes.CacheHandlers
 {
-    public class Database : WithIndexFile<Guid>
+    public class Database : WithIndexFile<Guid>, IDatabase
     {
         public DirectoryInfo SavingDirectory
         {
@@ -81,6 +82,8 @@ namespace RLStats_Classes.CacheHandlers
                 }
             });
         }
+
+        public void ClearCache() => ReplayCache.Clear();
 
         private async Task<List<AdvancedReplay>> GetReplayBatch(string path)
         {

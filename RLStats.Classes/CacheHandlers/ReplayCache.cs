@@ -1,4 +1,5 @@
-﻿using RLStats_Classes.Models;
+﻿using RLStats_Classes.Interfaces;
+using RLStats_Classes.Models;
 using RLStats_Classes.Models.ReplayModels;
 
 using System;
@@ -7,7 +8,7 @@ using System.IO;
 
 namespace RLStats_Classes.CacheHandlers
 {
-    public class ReplayCache : WithIndexFile<CacheEntry>
+    public class ReplayCache : WithIndexFile<CacheEntry>, IReplayCache
     {
         public ReplayCache() : base(compressed: false, Path.Combine(RLConstants.ReplayCacheFolder, "ContentRegistry.txt"))
         {
