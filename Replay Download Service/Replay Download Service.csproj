@@ -14,5 +14,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
+		<ProjectReference Include="..\RLStats.MongoDBSupport\RLStats.MongoDBSupport.csproj" />
 	</ItemGroup>
 </Project>
