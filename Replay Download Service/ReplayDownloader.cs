@@ -68,9 +68,9 @@ namespace ReplayDownloadService
                 return;
             }
 
-            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, Logger);
+            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, new ReplayCache(), Logger);
             replayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
-            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, Logger);
+            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, null, Logger);
             advancedReplayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
             var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo, Logger);
             replayFileProvider.DownloadProgressUpdated += DownloadProgressUpdated;

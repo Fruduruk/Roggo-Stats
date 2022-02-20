@@ -1,6 +1,10 @@
 {
   "profiles": {
-    "RocketLeagueStats": {
+    "RocketLeagueStats with MongoDB": {
+      "commandName": "Project",
+      "commandLineArgs": "-mongo"
+    },
+    "RocketLeagueStats with Legacy Files": {
       "commandName": "Project"
     }
   }

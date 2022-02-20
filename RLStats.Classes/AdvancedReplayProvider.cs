@@ -18,9 +18,12 @@ namespace RLStatsClasses
 {
     public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
     {
-        private IDatabase ReplayDatabase { get; } = new Database();
+        private IDatabase ReplayDatabase { get; }
 
-        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger) { }
+        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo, IDatabase database, ILogger logger) : base(tokenInfo, logger)
+        {
+            ReplayDatabase = database;
+        }
 
         public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false)
         {

@@ -1,8 +1,11 @@
-﻿using RLStatsClasses;
+﻿using RLStats.MongoDBSupport;
+
+using RLStatsClasses;
 using RLStatsClasses.Interfaces;
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 
 namespace RocketLeagueStats
@@ -12,14 +15,29 @@ namespace RocketLeagueStats
     /// </summary>
     public partial class APILoginWindow : Window
     {
-        private readonly string _filePath = string.Empty;
-        private readonly ISaveBallchasingToken tokenSaver = new RLConstants();
+        private readonly string filePath = string.Empty;
+        private readonly ISaveBallchasingToken tokenSaver;
         private MainWindow MW { get; set; }
         public APILoginWindow()
         {
             var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-                _filePath = args[1];
+            if (args.Length == 3)
+                filePath = args[2];
+
+            if (args.Contains("-mongo"))
+            {
+                DBProvider.CreateInstance(DBType.MongoDB, new DatabaseSettings
+                {
+                    ConnectionString = "mongodb://localhost:27017",
+                    DatabaseName = "RLStatsData"
+                });
+            }
+            else
+            {
+                DBProvider.CreateInstance(DBType.Legacy);
+            }
+            tokenSaver = DBProvider.Instance.GetBallchasingTokenDB();
+
             InitializeComponent();
             var key = tokenSaver.GetBallchasingToken();
             if (string.IsNullOrEmpty(key))
@@ -47,7 +65,7 @@ namespace RocketLeagueStats
                 Dispatcher.Invoke(() =>
                 {
                     Hide();
-                    MW = new MainWindow(tokenInfo, _filePath);
+                    MW = new MainWindow(tokenInfo, filePath);
                     MW.Closed += MW_Closed;
                     MW.Show();
                 });

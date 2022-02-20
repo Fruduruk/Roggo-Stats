@@ -53,13 +53,6 @@ namespace RLStatsClasses.CacheHandlers
         {
             return IndexCollection.Contains(Guid.Parse(replay.Id));
         }
-        public void SaveReplayList(List<AdvancedReplay> replays)
-        {
-            foreach (var replay in replays)
-            {
-                SaveReplayAsync(replay);
-            }
-        }
 
         public async void SaveReplayAsync(AdvancedReplay replay)
         {
