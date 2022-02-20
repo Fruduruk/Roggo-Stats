@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.Extensions
 {
     public static class TaskDisposer
     {

@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace RLStats_Classes.Models
+namespace RLStats_Classes.Models.ReplayModels
 {
     public class Player : IEquatable<Player>, IComparable<Player>
     {

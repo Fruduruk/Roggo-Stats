@@ -1,7 +1,8 @@
-﻿using RLStats_Classes.MainClasses.Interfaces;
+﻿using RLStats_Classes.Interfaces;
+
 using System;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.Models
 {
     public class AuthTokenInfo : IAuthTokenInfo
     {

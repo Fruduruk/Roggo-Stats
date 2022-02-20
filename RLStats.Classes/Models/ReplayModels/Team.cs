@@ -1,7 +1,8 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.Models
+namespace RLStats_Classes.Models.ReplayModels
 {
     public class Team
     {
@@ -62,7 +63,7 @@ namespace RLStats_Classes.Models
             foreach (var player in Players)
             {
                 if (player.Name != null)
-                    if (CheckEquality(player.Name,name))
+                    if (CheckEquality(player.Name, name))
                         return true;
             }
             return false;

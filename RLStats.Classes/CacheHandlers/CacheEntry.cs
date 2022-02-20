@@ -1,6 +1,7 @@
-﻿using System;
+﻿
+using System;
 
-namespace RLStats_Classes.MainClasses.CacheHandlers
+namespace RLStats_Classes.CacheHandlers
 {
     public class CacheEntry : IEquatable<CacheEntry>
     {
@@ -12,7 +13,7 @@ namespace RLStats_Classes.MainClasses.CacheHandlers
             if (other is null)
                 return false;
             if (other.URL == URL)
-                if(other.FileName == FileName)
+                if (other.FileName == FileName)
                     return true;
             return false;
         }

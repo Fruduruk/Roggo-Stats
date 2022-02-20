@@ -1,5 +1,4 @@
-﻿using RLStats_Classes.MainClasses;
-
+﻿
 using System.Collections.Generic;
 
 namespace RLStats_Classes.Models

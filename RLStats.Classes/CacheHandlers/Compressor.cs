@@ -7,7 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.CacheHandlers
 {
     public class Compressor
     {

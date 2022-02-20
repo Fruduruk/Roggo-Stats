@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Models.Average
+﻿namespace RLStats_Classes.Models.ReplayModels.Average
 {
     public class AveragePlayerMovement
     {

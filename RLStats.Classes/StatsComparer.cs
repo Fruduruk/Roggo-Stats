@@ -1,16 +1,16 @@
-﻿using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models.Advanced;
-using RLStats_Classes.Models.Average;
+﻿using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models.Chart;
+using RLStats_Classes.Models.ReplayModels.Advanced;
+using RLStats_Classes.Models.ReplayModels.Average;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using static RLStats_Classes.MainClasses.TaskDisposer;
+using static RLStats_Classes.Extensions.TaskDisposer;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class StatsComparer : IStatsComparer
     {
@@ -130,14 +130,14 @@ namespace RLStats_Classes.MainClasses
             }
             await Task.Run(() =>
             {
-                foreach(var task in taskList)
+                foreach (var task in taskList)
                     if (!task.IsCompleted)
                         task.Wait();
             });
             DisposeTasks(taskList);
             return allAveragePlayerStats;
         }
-        
+
         private async Task CalculateAveragesAndAddToListAsync(IList<AdvancedReplay> advancedReplays, IList<AveragePlayerStats> allAveragePlayerStats, string name)
         {
             var averageStatsForOnePlayer = await GetAverageStatsForOnePlayer(advancedReplays, name);
@@ -174,7 +174,7 @@ namespace RLStats_Classes.MainClasses
             {
                 var mapname = r.MapName;
                 if (!names.Contains(mapname))
-                        names.Add(mapname);
+                    names.Add(mapname);
             }
 
             return names;

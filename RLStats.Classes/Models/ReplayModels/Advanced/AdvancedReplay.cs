@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace RLStats_Classes.Models.Advanced
+namespace RLStats_Classes.Models.ReplayModels.Advanced
 {
     public class AdvancedReplay : IEquatable<AdvancedReplay>
     {

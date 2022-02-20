@@ -2,9 +2,11 @@
 
 using Newtonsoft.Json;
 
-using RLStats_Classes.MainClasses.CacheHandlers;
-using RLStats_Classes.MainClasses.Interfaces;
+using RLStats_Classes.CacheHandlers;
+using RLStats_Classes.Extensions;
+using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
+using RLStats_Classes.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class ReplayProvider : ReplayProviderBase, IReplayProvider
     {
@@ -40,7 +42,7 @@ namespace RLStats_Classes.MainClasses
             sw.Stop();
             LastUpdateCall("Downlad finished.", replays.Length, doubleReplays);
             Logger.LogInformation("Finished collecting replays.");
-            
+
             response.DoubleReplays = doubleReplays;
             response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;

@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.MainClasses.CacheHandlers;
-using RLStats_Classes.MainClasses.Interfaces;
+using RLStats_Classes.CacheHandlers;
+using RLStats_Classes.Interfaces;
 using RLStats_Classes.Models;
-using RLStats_Classes.Models.Advanced;
+using RLStats_Classes.Models.ReplayModels;
+using RLStats_Classes.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using static RLStats_Classes.MainClasses.TaskDisposer;
+using static RLStats_Classes.Extensions.TaskDisposer;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
     {

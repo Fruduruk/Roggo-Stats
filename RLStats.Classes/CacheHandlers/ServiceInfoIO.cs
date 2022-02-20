@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+
 using RLStats_Classes.Models;
+
 using System.IO;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes.CacheHandlers
 {
     public class ServiceInfoIO
     {

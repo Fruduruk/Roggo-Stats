@@ -1,4 +1,4 @@
-﻿using RLStats_Classes.MainClasses;
+﻿using RLStats_Classes;
 using RLStats_Classes.Models;
 
 using System;
