@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.MainClasses.Interfaces
+﻿namespace RLStats_Classes.Interfaces
 {
     public interface IAuthTokenInfo
     {
