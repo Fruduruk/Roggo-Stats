@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
-using RLStats_Classes;
-using RLStats_Classes.CacheHandlers;
-using RLStats_Classes.Models;
-using RLStats_Classes.Models.ReplayModels;
+using RLStatsClasses;
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using RocketLeagueStats.Components;
 

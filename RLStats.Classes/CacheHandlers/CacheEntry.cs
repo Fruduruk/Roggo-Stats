@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class CacheEntry : IEquatable<CacheEntry>
     {

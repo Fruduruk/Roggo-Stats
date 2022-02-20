@@ -2,10 +2,10 @@
 using System.IO;
 using System.Text;
 
-using RLStats_Classes.Encryption;
-using RLStats_Classes.Interfaces;
+using RLStatsClasses.Encryption;
+using RLStatsClasses.Interfaces;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class RLConstants : ISaveBallchasingToken
     {

@@ -1,7 +1,7 @@
-﻿using RLStats_Classes;
-using RLStats_Classes.CacheHandlers;
-using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models;
+﻿using RLStatsClasses;
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
 
 using System;
 using System.Collections.ObjectModel;

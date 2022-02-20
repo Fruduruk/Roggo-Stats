@@ -1,6 +1,6 @@
-﻿using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models.ReplayModels;
-using RLStats_Classes.Models.ReplayModels.Advanced;
+﻿using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels;
+using RLStatsClasses.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class Database : WithIndexFile<Guid>, IDatabase
     {

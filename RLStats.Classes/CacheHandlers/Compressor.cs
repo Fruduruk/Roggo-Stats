@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 
-using RLStats_Classes.Encryption;
+using RLStatsClasses.Encryption;
 
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace RLStats_Classes.CacheHandlers
+namespace RLStatsClasses.CacheHandlers
 {
     public class Compressor
     {

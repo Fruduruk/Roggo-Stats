@@ -1,5 +1,5 @@
-﻿using RLStats_Classes;
-using RLStats_Classes.Interfaces;
+﻿using RLStatsClasses;
+using RLStatsClasses.Interfaces;
 
 using System;
 using System.Diagnostics;

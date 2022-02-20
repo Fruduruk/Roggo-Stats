@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-using RLStats_Classes.Models;
+using RLStatsClasses.Models;
 
 using System.Windows.Controls;
 

@@ -1,16 +1,16 @@
-﻿using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models.Chart;
-using RLStats_Classes.Models.ReplayModels.Advanced;
-using RLStats_Classes.Models.ReplayModels.Average;
+﻿using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.Chart;
+using RLStatsClasses.Models.ReplayModels.Advanced;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using static RLStats_Classes.Extensions.TaskDisposer;
+using static RLStatsClasses.Extensions.TaskDisposer;
 
-namespace RLStats_Classes
+namespace RLStatsClasses
 {
     public class StatsComparer : IStatsComparer
     {

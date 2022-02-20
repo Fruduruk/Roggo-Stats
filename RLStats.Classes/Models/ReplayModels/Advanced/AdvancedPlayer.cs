@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Models.ReplayModels.Advanced
+﻿namespace RLStatsClasses.Models.ReplayModels.Advanced
 {
     public class AdvancedPlayer
     {

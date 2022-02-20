@@ -1,10 +1,10 @@
-﻿using RLStats_Classes.Models.ReplayModels;
-using RLStats_Classes.Models.ReplayModels.Advanced;
+﻿using RLStatsClasses.Models.ReplayModels;
+using RLStatsClasses.Models.ReplayModels.Advanced;
 
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.Interfaces
+namespace RLStatsClasses.Interfaces
 {
     public interface IDatabase
     {

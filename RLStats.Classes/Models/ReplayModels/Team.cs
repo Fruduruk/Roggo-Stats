@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.Models.ReplayModels
+namespace RLStatsClasses.Models.ReplayModels
 {
     public class Team
     {

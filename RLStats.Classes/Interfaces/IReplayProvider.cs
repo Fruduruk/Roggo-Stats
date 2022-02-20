@@ -1,8 +1,8 @@
 ﻿using System;
-using RLStats_Classes.Models;
+using RLStatsClasses.Models;
 using System.Threading.Tasks;
 
-namespace RLStats_Classes.Interfaces
+namespace RLStatsClasses.Interfaces
 {
     public interface IReplayProvider : IReplayProviderBase
     {

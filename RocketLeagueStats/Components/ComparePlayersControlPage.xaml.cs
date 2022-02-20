@@ -1,6 +1,6 @@
-﻿using RLStats_Classes;
-using RLStats_Classes.Interfaces;
-using RLStats_Classes.Models.ReplayModels.Advanced;
+﻿using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Advanced;
 
 using System;
 using System.Collections.Generic;

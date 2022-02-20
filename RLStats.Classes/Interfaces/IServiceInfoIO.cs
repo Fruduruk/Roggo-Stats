@@ -1,6 +1,6 @@
-﻿using RLStats_Classes.Models;
+﻿using RLStatsClasses.Models;
 
-namespace RLStats_Classes.Interfaces
+namespace RLStatsClasses.Interfaces
 {
     public interface IServiceInfoIO
     {

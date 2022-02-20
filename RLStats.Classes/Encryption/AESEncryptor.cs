@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 
-namespace RLStats_Classes.Encryption
+namespace RLStatsClasses.Encryption
 {
     public class AESEncryptor
     {
