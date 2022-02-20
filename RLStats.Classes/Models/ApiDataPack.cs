@@ -1,5 +1,7 @@
 ﻿global using Newtonsoft.Json;
 
+using RLStats_Classes.Models.ReplayModels;
+
 using System.Collections.Generic;
 
 namespace RLStats_Classes.Models

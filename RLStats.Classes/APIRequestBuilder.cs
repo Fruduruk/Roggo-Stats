@@ -1,8 +1,9 @@
 ﻿using RLStats_Classes.Enums;
+
 using System;
 using System.Collections.Generic;
 
-namespace RLStats_Classes.MainClasses
+namespace RLStats_Classes
 {
     // ReSharper disable once InconsistentNaming
     public class APIRequestBuilder
@@ -82,13 +83,13 @@ namespace RLStats_Classes.MainClasses
         public void SetStartDate(DateTime startDate)
         {
             AddBinding();
-            Base += "replay-date-after=" + DateTimeHelper.ToRfc3339String(startDate);
+            Base += "replay-date-after=" + startDate.ToRfc3339String();
             _anyAdded = true;
         }
         public void SetEndDate(DateTime endDate)
         {
             AddBinding();
-            Base += "replay-date-before=" + DateTimeHelper.ToRfc3339String(endDate);
+            Base += "replay-date-before=" + endDate.ToRfc3339String();
             _anyAdded = true;
         }
         public void SetSortByUploadDate()
@@ -107,7 +108,7 @@ namespace RLStats_Classes.MainClasses
             _anyAdded = false;
         }
 
-        private void AddBinding() => Base += (_anyAdded ? "&" : "?");
+        private void AddBinding() => Base += _anyAdded ? "&" : "?";
 
         public static string GetSpecificReplayUrl(string id)
         {

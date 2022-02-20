@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 
-namespace RLStats_Classes.Models.Advanced
+namespace RLStats_Classes.Models.ReplayModels.Advanced
 {
     public class AdvancedTeam
     {
