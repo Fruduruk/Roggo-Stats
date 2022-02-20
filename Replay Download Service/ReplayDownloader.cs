@@ -21,19 +21,30 @@ namespace ReplayDownloadService
 {
     public static class ReplayDownloader
     {
+        private static ILogger<Worker> Logger { get; set; }
+        private static IServiceInfoIO ServiceInfoIO { get; set; }
+        private static IDatabase Database { get; set; }
+        private static IReplayCache Cache { get; set; }
+        private static CancellationToken StoppingToken { get; set; }
+
+
         private const int ProgressBarLength = 90;
         private const string BlockValueString = "■";
 
         private static string ServiceLogsZipPath { get; set; } = Path.Combine(RLConstants.RLStatsFolder, "ServiceLogs.zip");
         private static string LogPath => Path.Combine(RLConstants.RLStatsFolder, "ServiceLog.txt");
-        private static string UpdateLogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceUpdateLog.txt");
         private static Stopwatch UpdateWatch { get; set; } = new Stopwatch();
-        private static ILogger<Worker> Logger { get; set; }
-        private static IServiceInfoIO serviceInfoIO { get; set; } = new ServiceInfoIO();
-        private static CancellationToken StoppingToken { get; set; }
 
-        public static Task ExecuteServiceAsync(ILogger<Worker> logger, CancellationToken stoppingToken)
+        public static Task ExecuteServiceAsync(DBProvider dbProvider, ILogger<Worker> logger, CancellationToken stoppingToken)
         {
+            if (dbProvider is null)
+                throw new ArgumentNullException(nameof(dbProvider));
+
+            ServiceInfoIO = dbProvider.GetServiceInfoDB();
+            Database = dbProvider.GetAdvancedReplayDB();
+            Cache = dbProvider.GetReplayCacheDB();
+
+
             UpdateWatch.Start();
             return Task.Run(async () =>
             {
@@ -41,7 +52,7 @@ namespace ReplayDownloadService
                 StoppingToken = stoppingToken;
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var sInfo = serviceInfoIO.GetServiceInfo();
+                    var sInfo = ServiceInfoIO.GetServiceInfo();
                     if (File.Exists(LogPath))
                         ZipOldLog();
 
@@ -53,8 +64,6 @@ namespace ReplayDownloadService
 
                     GC.Collect(3);
                     await Task.Delay(TimeSpan.FromHours(sInfo.CycleIntervalInHours), stoppingToken);
-
-                    //await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                 }
             }, stoppingToken);
         }
@@ -68,9 +77,9 @@ namespace ReplayDownloadService
                 return;
             }
 
-            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, new ReplayCache(), Logger);
+            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, Cache, Logger);
             replayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
-            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, null, Logger);
+            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, Database, Logger);
             advancedReplayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
             var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo, Logger);
             replayFileProvider.DownloadProgressUpdated += DownloadProgressUpdated;
