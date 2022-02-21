@@ -4,6 +4,7 @@ using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
+using RLStatsClasses.Interfaces;
 using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
@@ -16,9 +17,9 @@ namespace Discord_Bot.Services
     public class RecurringReportServiceModule
     {
         private RLStatsCommonMethods CommonMethods { get; set; }
-        public RecurringReportServiceModule(ILogger commonMethodsLogger, string ballchasingToken)
+        public RecurringReportServiceModule(ILogger commonMethodsLogger, IDatabase database, IReplayCache replayCache, string ballchasingToken)
         {
-            CommonMethods = new RLStatsCommonMethods(commonMethodsLogger, ballchasingToken);
+            CommonMethods = new RLStatsCommonMethods(commonMethodsLogger, database, replayCache, ballchasingToken);
         }
 
         public async Task<IEnumerable<string>> GetAverageStats(Subscription entry)

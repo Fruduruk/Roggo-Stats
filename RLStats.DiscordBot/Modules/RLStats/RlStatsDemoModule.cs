@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using RLStatsClasses.Interfaces;
 using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
@@ -11,7 +12,7 @@ namespace Discord_Bot.Modules.RLStats
 {
     public class RlStatsDemoModule : RlStatsModuleBase
     {
-        public RlStatsDemoModule(ILogger<RlStatsDemoModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsDemoModule(ILogger<RlStatsDemoModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
         }
 

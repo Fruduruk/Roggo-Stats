@@ -8,6 +8,8 @@ using Discord_Bot.Singletons;
 
 using Microsoft.Extensions.Logging;
 
+using RLStatsClasses.Interfaces;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +28,13 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         private readonly CommandsToProceed _commandsToProceed;
         private readonly ConfigHandler<Subscription> _configHandler;
 
-        public RecurringReportsModule(ILogger<RecurringReportsModule> logger, string ballchasingToken, RecentlyAddedEntries entries, CommandsToProceed commandsToProceed, ConfigHandler<Subscription> configHandler) : base(logger, ballchasingToken)
+        public RecurringReportsModule(ILogger<RecurringReportsModule> logger,
+            IDatabase database,
+            IReplayCache replayCache,
+            string ballchasingToken,
+            RecentlyAddedEntries entries,
+            CommandsToProceed commandsToProceed,
+            ConfigHandler<Subscription> configHandler) : base(logger, database, replayCache, ballchasingToken)
         {
             _addedEntries = entries;
             _commandsToProceed = commandsToProceed;

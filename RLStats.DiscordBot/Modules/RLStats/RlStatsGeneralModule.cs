@@ -2,13 +2,15 @@
 
 using Microsoft.Extensions.Logging;
 
+using RLStatsClasses.Interfaces;
+
 namespace Discord_Bot.Modules.RLStats
 {
     //[Remarks("HelperModule")]
     [Name("General Commands")]
     public class RlStatsGeneralModule : RlStatsModuleBase
     {
-        public RlStatsGeneralModule(ILogger<RlStatsGeneralModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsGeneralModule(ILogger<RlStatsGeneralModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
         }
 
