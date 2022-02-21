@@ -1,13 +1,6 @@
-﻿using Discord;
-using Discord.Commands;
-
-using Discord_Bot.RLStats;
+﻿using Discord.Commands;
 
 using Microsoft.Extensions.Logging;
-using RLStats_Classes.MainClasses;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Discord_Bot.Modules.RLStats
 {

@@ -37,7 +37,7 @@ namespace Discord_Bot.Services
 
             _logger.LogInformation("Adding Modules...");
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
-            
+
             _logger.LogInformation("Setting Activity Status...");
             await Client.SetActivityAsync(new BotActivity());
 

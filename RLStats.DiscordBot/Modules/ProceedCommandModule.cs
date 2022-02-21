@@ -15,7 +15,7 @@ namespace Discord_Bot.Modules
         private readonly IServiceProvider _provider;
         private readonly CommandService _service;
         private readonly CommandsToProceed _commandsToProceed;
-        public ProceedCommandModule(ILogger<ProceedCommandModule> logger,IServiceProvider provider, CommandService service, CommandsToProceed commandsToProceed)
+        public ProceedCommandModule(ILogger<ProceedCommandModule> logger, IServiceProvider provider, CommandService service, CommandsToProceed commandsToProceed)
         {
             _logger = logger;
             _provider = provider;

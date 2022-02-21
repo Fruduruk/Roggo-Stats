@@ -1,16 +1,15 @@
-﻿
-using Discord_Bot.ExtensionMethods;
+﻿using Discord_Bot.ExtensionMethods;
 using Discord_Bot.Modules.RLStats;
 
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using RLStats_Classes.MainClasses;
-using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models.Average;
+using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Average;
 
-using RLStats_WPF;
+using RLStatsWPF;
 
 using System;
 using System.Collections.Generic;

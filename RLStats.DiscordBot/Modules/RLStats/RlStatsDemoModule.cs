@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Threading.Tasks;
@@ -58,7 +58,7 @@ namespace Discord_Bot.Modules.RLStats
         }
 
         [Command("demo last")]
-        public async Task DemoLast(int count,  string together, params string[] names)
+        public async Task DemoLast(int count, string together, params string[] names)
         {
             try
             {

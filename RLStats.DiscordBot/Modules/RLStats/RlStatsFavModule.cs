@@ -7,7 +7,7 @@ using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Collections.Generic;
@@ -59,7 +59,7 @@ namespace Discord_Bot.Modules.RLStats
             {
                 await SendMessageToCurrentChannelAsync(ex.Message);
             }
-            
+
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
