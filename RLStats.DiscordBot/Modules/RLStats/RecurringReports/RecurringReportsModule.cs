@@ -133,7 +133,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             {
                 await SendMessageToCurrentChannelAsync(ex.Message);
             }
-            
+
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
@@ -166,7 +166,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             {
                 await SendMessageToCurrentChannelAsync(ex.Message);
             }
-            
+
         }
 
         [Remarks(Constants.IgnoreEndpoint)]

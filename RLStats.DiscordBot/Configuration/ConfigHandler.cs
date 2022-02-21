@@ -1,4 +1,4 @@
-﻿using RLStats_Classes.MainClasses;
+﻿using RLStatsClasses.CacheHandlers;
 
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace Discord_Bot.Configuration
 {
     public class ConfigHandler<T> where T : IEquatable<T>, new()
     {
-        public string ConfigFilePath { get; private set; } 
+        public string ConfigFilePath { get; private set; }
 
         public ConfigHandler(string filePath)
         {

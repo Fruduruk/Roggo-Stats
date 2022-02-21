@@ -4,7 +4,7 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>RocketLeagueStats with Legacy Files</ActiveDebugProfile>
+    <ActiveDebugProfile>RocketLeagueStats with MongoDB</ActiveDebugProfile>
   </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Update="App.xaml">
