@@ -47,26 +47,13 @@ namespace RLStats.MongoDBSupport
         public int CacheMisses { get; set; } = 0;
         public void ClearCache() { }
 
-        public bool IsReplayInDatabase(Replay replay)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
         {
             var coll = db.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
-            if (IsEmpty(coll))
-                return false;
-            var wrapper = coll.Find(aReplay => aReplay.Value.Id.Equals(replay.Id)).FirstOrDefault();
-            if (wrapper is null)
-                return false;
-            return true;
-        }
-
-        public async Task<AdvancedReplay> LoadReplayAsync(string id, CancellationToken cancellationToken)
-        {
-            var coll = db.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
-            if (IsEmpty(coll))
-                return null;
-            var wrapper = (await coll.FindAsync(aReplay => aReplay.Value.Id.Equals(id), cancellationToken: cancellationToken)).FirstOrDefault();
-            if (wrapper is null)
-                return null;
-            return wrapper.Value;
+            var wrappers = (await coll.FindAsync(wrapper => ids.Contains(wrapper.Value.Id), cancellationToken: cancellationToken)).ToList(cancellationToken: cancellationToken);
+            if (wrappers is null)
+                return Enumerable.Empty<AdvancedReplay>();
+            return wrappers.Select(w => w.Value);
         }
 
         public async void SaveReplayAsync(AdvancedReplay replay)

@@ -49,9 +49,21 @@ namespace RLStatsClasses.CacheHandlers
             }
         }
 
-        public bool IsReplayInDatabase(Replay replay)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
         {
-            return IndexCollection.Contains(Guid.Parse(replay.Id));
+            var dbReplays = new List<AdvancedReplay>();
+            foreach (string id in ids)
+            {
+                if (IsReplayInDatabase(id))
+                {
+                    var replay = await LoadReplayAsync(id, cancellationToken);
+                    if(replay is not null)
+                        dbReplays.Add(replay);
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+            }
+            return dbReplays;
         }
 
         public async void SaveReplayAsync(AdvancedReplay replay)
@@ -78,6 +90,11 @@ namespace RLStatsClasses.CacheHandlers
         }
 
         public void ClearCache() => ReplayCache.Clear();
+
+        public bool IsReplayInDatabase(string id)
+        {
+            return IndexCollection.Contains(Guid.Parse(id));
+        }
 
         private async Task<List<AdvancedReplay>> GetReplayBatch(string path)
         {
