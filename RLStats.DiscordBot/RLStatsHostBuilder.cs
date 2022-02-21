@@ -13,6 +13,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using RLStats.MongoDBSupport;
+
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Interfaces;
+
 using System.IO;
 
 namespace Discord_Bot
@@ -59,7 +64,23 @@ namespace Discord_Bot
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
+                    if (context.Configuration["DB"].Equals("MongoDB"))
+                    {
+                        var db = new RLStatsMongoDatabase(new DatabaseSettings
+                        {
+                            ConnectionString = context.Configuration["ConnectionString"],
+                            DatabaseName = context.Configuration["DatabaseName"]
+                        });
+                        services.AddSingleton<IDatabase>(db);
+                        services.AddSingleton<IReplayCache>(db);
+                    }
+                    else
+                    {
+                        services.AddSingleton<IDatabase>(new Database());
+                        services.AddSingleton<IReplayCache>(new ReplayCache());
+                    }
+
+                    services.AddSingleton(context.Configuration["ballchasing-token"]);
                     services.AddSingleton(new RecentlyAddedEntries());
                     services.AddSingleton(new CommandsToProceed());
                     services.AddSingleton(new ConfigHandler<Subscription>(Constants.SubscribtionConfigFilePath));

@@ -7,6 +7,7 @@ using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
+using RLStatsClasses.Interfaces;
 using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
@@ -24,7 +25,7 @@ namespace Discord_Bot.Modules.RLStats
     {
         private const string NoneConfiguredMessage = "You don't have any favorites configured.";
         private ConfigHandler<UserFavorite> _userFavoritesConfigHandler;
-        public RlStatsFavModule(ILogger<RlStatsFavModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsFavModule(ILogger<RlStatsFavModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
             _userFavoritesConfigHandler = new ConfigHandler<UserFavorite>(Constants.UserFavoritesConfigFilePath);
         }

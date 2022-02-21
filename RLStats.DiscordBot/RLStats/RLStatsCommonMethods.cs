@@ -26,11 +26,11 @@ namespace Discord_Bot.RLStats
         private IReplayProvider ReplayProvider { get; }
         private IAdvancedReplayProvider AdvancedReplayProvider { get; }
         private IStatsComparer StatsComparer { get; }
-        public RLStatsCommonMethods(ILogger logger, string ballchasingToken)
+        public RLStatsCommonMethods(ILogger logger, IDatabase database, IReplayCache replayCache, string ballchasingToken)
         {
             var tokeninfo = TokenInfoProvider.GetTokenInfo(ballchasingToken);
-            ReplayProvider = new ReplayProvider(tokeninfo, logger);
-            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo, logger);
+            ReplayProvider = new ReplayProvider(tokeninfo, replayCache, logger);
+            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo, database, logger);
             StatsComparer = new StatsComparer();
             Logger = logger;
         }

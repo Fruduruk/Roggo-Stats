@@ -4,9 +4,7 @@ using Microsoft.Extensions.Hosting;
 
 using RLStats.MongoDBSupport;
 
-using System;
 using System.IO;
-using System.Linq;
 
 namespace ReplayDownloadService
 {
@@ -29,10 +27,9 @@ namespace ReplayDownloadService
                         DatabaseName = "RLStatsData"
                     });
                     break;
-                case "Legacy":
+                default:
                     DBProvider.CreateInstance(DBType.Legacy);
                     break;
-                default: throw new Exception("Database not specified. Options are Legacy and MongoDB");
             }
             CreateHostBuilder(args).Build().Run();
         }

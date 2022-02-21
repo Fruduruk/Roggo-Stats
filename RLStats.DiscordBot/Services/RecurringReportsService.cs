@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
+using RLStatsClasses.Interfaces;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,10 +30,16 @@ namespace Discord_Bot.Services
         private readonly ILogger<RecurringReportsService> _logger;
         private readonly ConfigHandler<Subscription> _configHandler;
 
-        public RecurringReportsService(DiscordSocketClient client, ILogger<RecurringReportsService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken, ConfigHandler<Subscription> configHandler) : base(client, logger)
+        public RecurringReportsService(DiscordSocketClient client,
+            ILogger<RecurringReportsService> logger,
+            IDatabase database,
+            IReplayCache replayCache,
+            RecentlyAddedEntries recentlyAddedEntries,
+            string ballchasingToken,
+            ConfigHandler<Subscription> configHandler) : base(client, logger)
         {
             _addedEntries = recentlyAddedEntries;
-            _module = new RecurringReportServiceModule(logger, ballchasingToken);
+            _module = new RecurringReportServiceModule(logger, database, replayCache, ballchasingToken);
             _logger = logger;
             _configHandler = configHandler;
         }
