@@ -42,14 +42,10 @@ namespace RLStats.MongoDBSupport
         }
         #endregion
         #region IDatabase
-        public int CacheSize { get; set; } = 0;
-        public int CacheHits { get; set; } = 0;
-        public int CacheMisses { get; set; } = 0;
-        public void ClearCache() { }
-
-        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken, ProgressState progressState)
         {
             var coll = db.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
+            progressState.CurrentMessage = "Waiting for MongoDB response...";
             var wrappers = (await coll.FindAsync(wrapper => ids.Contains(wrapper.Value.Id), cancellationToken: cancellationToken)).ToList(cancellationToken: cancellationToken);
             if (wrappers is null)
                 return Enumerable.Empty<AdvancedReplay>();

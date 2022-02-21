@@ -28,7 +28,7 @@ namespace RLStatsClasses
 
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Loading advanced replays from database.";
-            var dbReplays = await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), Api.StoppingToken);
+            var dbReplays = await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), Api.StoppingToken, ProgressState);
             advancedReplays.AddRange(dbReplays);
             if (Api.StoppingToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
@@ -41,9 +41,7 @@ namespace RLStatsClasses
             ProgressState.CurrentMessage = "Downloading advanced replays.";
             advancedReplays.AddRange(await DownloadReplays(replaysToDownload.ToList()));
 
-            ProgressState.CurrentMessage = "Loading done.";
-            ReplayDatabase.ClearCache();
-            LastUpdateCall($"Cache Hits: {ReplayDatabase.CacheHits} Cache Misses: {ReplayDatabase.CacheMisses}", advancedReplays.Count);
+            LastUpdateCall("Loading done.", advancedReplays.Count);
             if (Api.StoppingToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
             return advancedReplays;

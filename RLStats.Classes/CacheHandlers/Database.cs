@@ -1,4 +1,5 @@
 ﻿using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
 using RLStatsClasses.Models.ReplayModels;
 using RLStatsClasses.Models.ReplayModels.Advanced;
 
@@ -49,20 +50,36 @@ namespace RLStatsClasses.CacheHandlers
             }
         }
 
-        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken, ProgressState progressState)
         {
+            CacheHits = 0;
+            CacheMisses = 0;
             var dbReplays = new List<AdvancedReplay>();
+            progressState.CurrentMessage = "Loading replays from FileDatabase";
+            progressState.TotalCount = ids.Count();
             foreach (string id in ids)
             {
                 if (IsReplayInDatabase(id))
                 {
                     var replay = await LoadReplayAsync(id, cancellationToken);
-                    if(replay is not null)
+                    if (replay is not null)
+                    {
                         dbReplays.Add(replay);
+                        progressState.PartCount++;
+                    }
+                    else
+                        progressState.FalsePartCount++;
                 }
+                else
+                    progressState.FalsePartCount++;
                 if (cancellationToken.IsCancellationRequested)
+                {
+                    progressState.CurrentMessage = "Loading cancelled";
                     break;
+                }
+                progressState.CurrentMessage = $"Cache Hits: {CacheHits} Cache Misses: {CacheMisses}";
             }
+            ClearCache();
             return dbReplays;
         }
 
