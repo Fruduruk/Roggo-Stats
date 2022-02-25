@@ -15,7 +15,7 @@ namespace RLStatsClasses.Encryption
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                using (AesManaged cryptor = new AesManaged())
+                using (Aes cryptor = Aes.Create())
                 {
                     cryptor.Mode = CipherMode.CBC;
                     cryptor.Padding = PaddingMode.PKCS7;
@@ -60,7 +60,7 @@ namespace RLStatsClasses.Encryption
 
             using (MemoryStream ms = new MemoryStream())
             {
-                using (AesManaged cryptor = new AesManaged())
+                using (Aes cryptor = Aes.Create())
                 {
                     cryptor.Mode = CipherMode.CBC;
                     cryptor.Padding = PaddingMode.PKCS7;
