@@ -13,11 +13,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using MongoDB.Driver;
+
 using RLStats.MongoDBSupport;
 
 using RLStatsClasses.CacheHandlers;
 using RLStatsClasses.Interfaces;
 
+using System;
 using System.IO;
 
 namespace Discord_Bot
@@ -66,9 +69,17 @@ namespace Discord_Bot
                 {
                     if (context.Configuration["DB"].Equals("MongoDB"))
                     {
+                        var settings = new MongoClientSettings
+                        {
+                            Server = new MongoServerAddress(context.Configuration["Host"], Convert.ToInt32(context.Configuration["Port"]))
+                        };
+                        var username = context.Configuration["Username"];
+                        var password = context.Configuration["Password"];
+                        if (username != null && password != null)
+                            settings.Credential = MongoCredential.CreateCredential(context.Configuration["DatabaseName"], username, password);
                         var db = new RLStatsMongoDatabase(new DatabaseSettings
                         {
-                            ConnectionString = context.Configuration["ConnectionString"],
+                            MongoSettings = settings,
                             DatabaseName = context.Configuration["DatabaseName"]
                         });
                         services.AddSingleton<IDatabase>(db);
