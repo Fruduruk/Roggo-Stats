@@ -19,7 +19,7 @@ namespace RLStats.MongoDBSupport
 
         public RLStatsMongoDatabase(DatabaseSettings settings)
         {
-            client = new MongoClient(settings.ConnectionString);
+            client = new MongoClient(settings.MongoSettings);
             db = client.GetDatabase(settings.DatabaseName);
         }
         #region ISaveBallchasingToken

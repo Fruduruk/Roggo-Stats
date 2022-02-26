@@ -4,12 +4,15 @@ using Microsoft.Extensions.Hosting;
 
 using RLStats.MongoDBSupport;
 
+using System;
 using System.IO;
 
 namespace ReplayDownloadService
 {
     public class Program
     {
+        private const string DatabaseName = "RLStatsData";
+
         public static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -21,17 +24,36 @@ namespace ReplayDownloadService
             switch (dbType)
             {
                 case "MongoDB":
-                    DBProvider.CreateInstance(DBType.MongoDB, new DatabaseSettings
-                    {
-                        ConnectionString = "mongodb://localhost:27017",
-                        DatabaseName = "RLStatsData"
-                    });
+                    SetupMongoDB(configuration);
                     break;
                 default:
                     DBProvider.CreateInstance(DBType.Legacy);
                     break;
             }
             CreateHostBuilder(args).Build().Run();
+        }
+
+        private static void SetupMongoDB(IConfigurationRoot configuration)
+        {
+            var mongoSection = configuration.GetSection("Mongo");
+            var host = mongoSection.GetSection("Host").Value;
+            var port = Convert.ToInt32(mongoSection.GetSection("Port").Value);
+            if (host == null)
+                throw new ArgumentNullException("Host was null");
+            var settings = new DatabaseSettings
+            {
+                MongoSettings = new MongoDB.Driver.MongoClientSettings
+                {
+                    Server = new MongoDB.Driver.MongoServerAddress(host, port),
+                    Compressors = new[] { new MongoDB.Driver.Core.Configuration.CompressorConfiguration(MongoDB.Driver.Core.Compression.CompressorType.Snappy) }
+                },
+                DatabaseName = DatabaseName
+            };
+            var username = mongoSection.GetSection("Username").Value;
+            var password = mongoSection.GetSection("Password").Value;
+            if (username != null && password != null)
+                settings.MongoSettings.Credential = MongoDB.Driver.MongoCredential.CreateCredential(DatabaseName, username, password);
+            DBProvider.CreateInstance(DBType.MongoDB, settings);
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

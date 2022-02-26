@@ -11,14 +11,21 @@ namespace RocketLeagueStats
         public static DBProvider Instance { get; private set; }
         public DBType DatabaseType { get; }
 
-        public static void CreateInstance(DBType dbType, DatabaseSettings settings = null)
+        public static void CreateInstance(DatabaseSettings settings)
         {
             if (Instance is null)
-                Instance = new DBProvider(dbType, settings);
+                Instance = new DBProvider(DBType.MongoDB, settings);
+        }
+
+        public static void CreateInstance()
+        {
+            if (Instance is null)
+                Instance = new DBProvider(DBType.Legacy);
         }
 
         private RLStatsMongoDatabase MongoDB { get; set; }
-        public DBProvider(DBType dbType, DatabaseSettings settings = null)
+
+        private DBProvider(DBType dbType, DatabaseSettings settings = null)
         {
             DatabaseType = dbType;
             if (dbType.Equals(DBType.MongoDB))

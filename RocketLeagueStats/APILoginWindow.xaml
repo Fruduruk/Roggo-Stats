@@ -6,40 +6,81 @@
         xmlns:local="clr-namespace:RocketLeagueStats"
         mc:Ignorable="d"
         Style="{DynamicResource windowStyle}"
-        Title="Login" Height="200" Width="600">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <!--<Label HorizontalAlignment="Right"
-               FontSize="13"
-               Foreground="AliceBlue"
-               Width="Auto">
-            <Hyperlink NavigateUri="https://ballchasing.com/upload"
-                       
-                       RequestNavigate="Hyperlink_RequestNavigate">
-                Get API Token
-            </Hyperlink>
-        </Label>-->
-
+        Title="Configuration"
+        MinHeight="300"
+        MinWidth="600"
+        MaxHeight="400"
+        MaxWidth="800">
+    <StackPanel>
         <TextBox x:Name="tbxToken"
-                 Style="{DynamicResource textBoxStyle}"
-                 Grid.Row="0"
-                 Margin="10"
-                 HorizontalAlignment="Stretch"/>
+                 Style="{DynamicResource textBoxStyle}"/>
+        <CheckBox x:Name="UseMongoDBCheckbox"
+                  Style="{DynamicResource checkBoxStyle}"
+                  Content="Use MongoDB"
+                  Checked="UseMongoDBCheckboxChecked"
+                  Unchecked="UseMongoDBCheckboxUnchecked"/>
+        <Grid x:Name="DBConfigGrid"
+              Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Database Name:"
+                       Style="{DynamicResource textBlockStyle}"
+                       Grid.ColumnSpan="2"/>
+            <TextBox x:Name="DatabaseNameTextBox"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.ColumnSpan="2"
+                     Grid.Column="2"/>
+            <TextBlock Text="Host:"
+                       Grid.Column="0"
+                       Grid.Row="1"
+                       Style="{DynamicResource textBlockStyle}"/>
+            <TextBox x:Name="HostTextBox"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.Row="1"
+                     Grid.Column="1"/>
+            <TextBlock Text="Port:"
+                       Grid.Column="2"
+                       Grid.Row="1"
+                       Style="{DynamicResource textBlockStyle}"/>
+            <TextBox x:Name="PortTextBox"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.Row="1"
+                     Grid.Column="3"/>
+            
+            <TextBlock Text="Username:"
+                       Grid.Column="0"
+                       Grid.Row="2"
+                       Style="{DynamicResource textBlockStyle}"/>
+            <TextBox x:Name="UsernameTextBox"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.Row="2"
+                     Grid.Column="1"/>
+            <TextBlock Text="Password:"
+                       Grid.Column="2"
+                       Grid.Row="2"
+                       Style="{DynamicResource textBlockStyle}"/>
+            <TextBox x:Name="PasswordTextBox"
+                     Style="{DynamicResource textBoxStyle}"
+                     Grid.Row="2"
+                     Grid.Column="3"/>
+        </Grid>
         <Button x:Name="btnLogin"
                 Style="{DynamicResource buttonStyle}"
                 Margin="10"
-                Grid.Row="1"
                 Content="START"
                 Click="BtnLoginClick"
                 HorizontalAlignment="Stretch"/>
         <TextBlock x:Name="tbInfo"
                    Style="{DynamicResource textBlockStyle}"
-                   Grid.Row="3"
                    TextWrapping="Wrap"/>
-    </Grid>
+    </StackPanel>
 </Window>

@@ -1,8 +1,10 @@
-﻿namespace RLStats.MongoDBSupport
+﻿using MongoDB.Driver;
+
+namespace RLStats.MongoDBSupport
 {
     public class DatabaseSettings
     {
-        public string ConnectionString { get; set; } = null!;
+        public MongoClientSettings MongoSettings { get; set; } = null!;
         public string DatabaseName { get; set; } = null!;
     }
 }
