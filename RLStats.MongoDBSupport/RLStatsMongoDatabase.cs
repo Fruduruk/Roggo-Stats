@@ -14,18 +14,19 @@ namespace RLStats.MongoDBSupport
         private const string AdvancedReplayCollectionName = "AdvancedReplays";
         private const string ServiceInfoCollectionName = "ServiceInfo";
         private const string ReplayCacheCollectionName = "ReplayCache";
-        private readonly MongoClient client;
-        private readonly IMongoDatabase db;
+        protected MongoClient Client { get; set; }
+        protected IMongoDatabase Database { get; set; }
 
         public RLStatsMongoDatabase(DatabaseSettings settings)
         {
-            client = new MongoClient(settings.MongoSettings);
-            db = client.GetDatabase(settings.DatabaseName);
+            Client = new MongoClient(settings.MongoSettings);
+            Database = Client.GetDatabase(settings.DatabaseName);
         }
+
         #region ISaveBallchasingToken
         public string GetBallchasingToken()
         {
-            var tokenCollection = db.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
+            var tokenCollection = Database.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
             if (IsEmpty(tokenCollection))
                 return string.Empty;
             var tokenInfo = tokenCollection.Find(_ => true).FirstOrDefault();
@@ -36,15 +37,15 @@ namespace RLStats.MongoDBSupport
 
         public void SetBallchasingToken(string ballchasingToken)
         {
-            db.DropCollection(BallchasingTokenCollectionName);
-            var tokenCollection = db.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
+            Database.DropCollection(BallchasingTokenCollectionName);
+            var tokenCollection = Database.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
             tokenCollection.InsertOne(new Wrapper<string> { Value = ballchasingToken });
         }
         #endregion
         #region IDatabase
         public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken, ProgressState progressState)
         {
-            var coll = db.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
+            var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
             progressState.CurrentMessage = "Waiting for MongoDB response...";
             var wrappers = (await coll.FindAsync(wrapper => ids.Contains(wrapper.Value.Id), cancellationToken: cancellationToken)).ToList(cancellationToken: cancellationToken);
             if (wrappers is null)
@@ -54,14 +55,14 @@ namespace RLStats.MongoDBSupport
 
         public async void SaveReplayAsync(AdvancedReplay replay)
         {
-            var coll = db.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
+            var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
             await coll.InsertOneAsync(new Wrapper<AdvancedReplay> { Value = replay });
         }
         #endregion
         #region IReplayCache
         public void AddTheOtherReplaysToTheDataPack(HashSet<Replay> hashSet, APIRequestFilter filter)
         {
-            var coll = db.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
             var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.GetApiUrl())).FirstOrDefault();
             if (wrapper is null || wrapper.Value is null)
                 return;
@@ -71,14 +72,14 @@ namespace RLStats.MongoDBSupport
 
         public bool HasCacheFile(APIRequestFilter filter)
         {
-            var coll = db.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
             var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.GetApiUrl())).FirstOrDefault();
             return wrapper is not null;
         }
 
         public bool HasOneReplayInFile(IEnumerable<Replay> replays, APIRequestFilter filter)
         {
-            var coll = db.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
             var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.GetApiUrl())).FirstOrDefault();
             if (wrapper is null || wrapper.Value is null)
                 return false;
@@ -92,7 +93,7 @@ namespace RLStats.MongoDBSupport
 
         public void StoreReplaysInCache(IEnumerable<Replay> replays, APIRequestFilter filter)
         {
-            var coll = db.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
             var document = new ReplayCacheDocument
             {
                 Replays = replays,
@@ -106,7 +107,7 @@ namespace RLStats.MongoDBSupport
         #region IServiceInfoIO
         public ServiceInfo GetServiceInfo()
         {
-            var coll = db.GetCollection<Wrapper<ServiceInfo>>(ServiceInfoCollectionName);
+            var coll = Database.GetCollection<Wrapper<ServiceInfo>>(ServiceInfoCollectionName);
             if (IsEmpty(coll))
                 return new ServiceInfo() { Available = false };
             var wrapper = coll.Find(_ => true).FirstOrDefault();
@@ -117,8 +118,8 @@ namespace RLStats.MongoDBSupport
 
         public void SaveServiceInfo(ServiceInfo info)
         {
-            db.DropCollection(ServiceInfoCollectionName);
-            var coll = db.GetCollection<Wrapper<ServiceInfo>>(ServiceInfoCollectionName);
+            Database.DropCollection(ServiceInfoCollectionName);
+            var coll = Database.GetCollection<Wrapper<ServiceInfo>>(ServiceInfoCollectionName);
             coll.InsertOne(new Wrapper<ServiceInfo> { Value = info });
         }
         #endregion

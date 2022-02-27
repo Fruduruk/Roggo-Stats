@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Discord_Bot.Configuration
 {
-    public class ConfigHandler<T> where T : IEquatable<T>, new()
+    public class ConfigHandler<T> : IConfigHandler<T> where T : IEquatable<T>, new()
     {
         public string ConfigFilePath { get; private set; }
 
@@ -15,17 +15,25 @@ namespace Discord_Bot.Configuration
             ConfigFilePath = filePath;
         }
 
-        public List<T> Config => ReadConfigFile();
+        public List<T> GetConfig()
+        {
+            return ReadConfigFile();
+        }
+
+        public void SetConfig(List<T> value)
+        {
+            SaveConfigFile(value);
+        }
 
         public bool HasConfigEntryInIt(T entry)
         {
-            if (Config is null)
+            if (GetConfig() is null)
                 return false;
             if (entry is null)
                 return false;
-            lock (Config)
+            lock (GetConfig())
             {
-                foreach (var configEntry in Config)
+                foreach (var configEntry in GetConfig())
                 {
                     if (configEntry.Equals(entry))
                         return true;
@@ -48,7 +56,7 @@ namespace Discord_Bot.Configuration
             SaveConfigFile(config);
         }
 
-        public void SaveConfigFile(IEnumerable<T> value)
+        private void SaveConfigFile(IEnumerable<T> value)
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
