@@ -98,14 +98,6 @@ namespace RLStatsClasses
             };
         }
 
-        public async Task<int> GetTotalReplayCountOfUrlAsync(string url)
-        {
-            var pack = await GetApiDataPack(url);
-            if (pack.Success)
-                return pack.ReplayCount;
-            return 0;
-        }
-
         private static ApiDataPack GetApiDataFromString(string dataString)
         {
             try
