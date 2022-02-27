@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using RLStatsClasses.Models.ReplayModels;
 
-namespace RLStats_Classes.Models
+using System.Collections.Generic;
+
+namespace RLStatsClasses.Models
 {
     public class CollectReplaysResponse
     {

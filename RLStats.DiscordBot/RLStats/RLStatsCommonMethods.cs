@@ -1,16 +1,15 @@
-﻿
-using Discord_Bot.ExtensionMethods;
+﻿using Discord_Bot.ExtensionMethods;
 using Discord_Bot.Modules.RLStats;
 
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using RLStats_Classes.MainClasses;
-using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models.Average;
+using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Average;
 
-using RLStats_WPF;
+using RLStatsWPF;
 
 using System;
 using System.Collections.Generic;
@@ -27,11 +26,11 @@ namespace Discord_Bot.RLStats
         private IReplayProvider ReplayProvider { get; }
         private IAdvancedReplayProvider AdvancedReplayProvider { get; }
         private IStatsComparer StatsComparer { get; }
-        public RLStatsCommonMethods(ILogger logger, string ballchasingToken)
+        public RLStatsCommonMethods(ILogger logger, IDatabase database, IReplayCache replayCache, string ballchasingToken)
         {
             var tokeninfo = TokenInfoProvider.GetTokenInfo(ballchasingToken);
-            ReplayProvider = new ReplayProvider(tokeninfo, logger);
-            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo, logger);
+            ReplayProvider = new ReplayProvider(tokeninfo, replayCache, logger);
+            AdvancedReplayProvider = new AdvancedReplayProvider(tokeninfo, database, logger);
             StatsComparer = new StatsComparer();
             Logger = logger;
         }

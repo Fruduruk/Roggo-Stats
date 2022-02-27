@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>RLStats_Classes</RootNamespace>
+    <RootNamespace>RLStatsClasses</RootNamespace>
     <PackageId>RLStats.Classes</PackageId>
 	<Authors>Fruduruk</Authors>
     <Product>RLStats.Classes</Product>
     <Description>All the main classes for the ballchasing.com connection.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.0</Version>
+    <Version>2.3.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

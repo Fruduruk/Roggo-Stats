@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
+using RLStatsClasses.Interfaces;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,12 +28,18 @@ namespace Discord_Bot.Services
         private RecentlyAddedEntries _addedEntries;
         private readonly RecurringReportServiceModule _module;
         private readonly ILogger<RecurringReportsService> _logger;
-        private readonly ConfigHandler<Subscription> _configHandler;
+        private readonly IConfigHandler<Subscription> _configHandler;
 
-        public RecurringReportsService(DiscordSocketClient client, ILogger<RecurringReportsService> logger, RecentlyAddedEntries recentlyAddedEntries, string ballchasingToken, ConfigHandler<Subscription> configHandler) : base(client, logger)
+        public RecurringReportsService(DiscordSocketClient client,
+            ILogger<RecurringReportsService> logger,
+            IDatabase database,
+            IReplayCache replayCache,
+            RecentlyAddedEntries recentlyAddedEntries,
+            string ballchasingToken,
+            IConfigHandler<Subscription> configHandler) : base(client, logger)
         {
             _addedEntries = recentlyAddedEntries;
-            _module = new RecurringReportServiceModule(logger, ballchasingToken);
+            _module = new RecurringReportServiceModule(logger, database, replayCache, ballchasingToken);
             _logger = logger;
             _configHandler = configHandler;
         }
@@ -41,7 +49,7 @@ namespace Discord_Bot.Services
             _logger.LogInformation("Starting background threads in 5 seconds...");
             await Task.Delay(5000, stoppingToken);
             _logger.LogInformation("Starting background threads...");
-            await StartBackgroundThreads(_configHandler.Config, stoppingToken);
+            await StartBackgroundThreads(_configHandler.GetConfig(), stoppingToken);
             CheckForNewEntries(stoppingToken);
         }
 
@@ -160,7 +168,7 @@ namespace Discord_Bot.Services
         public Subscription UpdateLastPost(Subscription entry, DateTime newLastPost)
         {
             Subscription newEntry = null;
-            var config = _configHandler.Config;
+            var config = _configHandler.GetConfig();
             foreach (var configEntry in config)
             {
                 if (configEntry.Equals(entry))
@@ -169,7 +177,7 @@ namespace Discord_Bot.Services
                     newEntry = configEntry;
                 }
             }
-            _configHandler.SaveConfigFile(config);
+            _configHandler.SetConfig(config);
             if (newEntry is null)
                 throw new EntryNotFoundException();
             return newEntry;

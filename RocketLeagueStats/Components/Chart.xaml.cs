@@ -1,4 +1,4 @@
-﻿using RLStats_WPF;
+﻿using RLStatsWPF;
 using System.Windows;
 using System.Windows.Controls;
 

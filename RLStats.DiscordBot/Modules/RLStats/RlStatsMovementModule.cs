@@ -2,16 +2,17 @@
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Threading.Tasks;
 
 namespace Discord_Bot.Modules.RLStats
 {
-    public class RlStatsMovementModule :RlStatsModuleBase
+    public class RlStatsMovementModule : RlStatsModuleBase
     {
-        public RlStatsMovementModule(ILogger<RlStatsMovementModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsMovementModule(ILogger<RlStatsMovementModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
         }
 

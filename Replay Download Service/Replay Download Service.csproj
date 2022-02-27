@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<UserSecretsId>dotnet-Replay_Download_Service-BFD8C9E1-E9F5-42ED-A2CE-574E131BEA7C</UserSecretsId>
-		<RootNamespace>Replay_Download_Service</RootNamespace>
+		<RootNamespace>ReplayDownloadService</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -14,5 +14,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
+		<ProjectReference Include="..\RLStats.MongoDBSupport\RLStats.MongoDBSupport.csproj" />
 	</ItemGroup>
 </Project>

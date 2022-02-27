@@ -19,7 +19,7 @@ namespace Discord_Bot.Configuration
                 return false;
             if (other.UserId != UserId)
                 return false;
-            
+
             return true;
         }
 

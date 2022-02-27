@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace RLStats_WPF
+namespace RLStatsWPF
 {
     public static class WriteableBitmapExtentions
     {

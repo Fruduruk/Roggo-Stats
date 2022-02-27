@@ -1,10 +1,10 @@
-﻿using RLStats_Classes.Models.Average;
+﻿using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace RLStats_WPF
+namespace RLStatsWPF
 {
     public class ChartProvider
     {

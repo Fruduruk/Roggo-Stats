@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackageId>RLStats.MongoDBSupport</PackageId>
+		<Authors>Fruduruk</Authors>
+		<Product>RLStats.MongoDBSupport</Product>
+		<Description>IDatabase implementation for MongoDB</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>1.0.3</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MongoDB.Driver" Version="2.14.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\RLStats.Classes\RLStats Classes.csproj" />
+	</ItemGroup>
+
+</Project>

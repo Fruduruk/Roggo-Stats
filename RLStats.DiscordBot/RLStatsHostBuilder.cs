@@ -13,6 +13,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using MongoDB.Driver;
+
+using RLStats.MongoDBSupport;
+
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Interfaces;
+
+using System;
 using System.IO;
 
 namespace Discord_Bot
@@ -59,10 +67,37 @@ namespace Discord_Bot
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddSingleton(context.Configuration["ballchasing-token"].ToString());
+                    if (context.Configuration["DB"].Equals("MongoDB"))
+                    {
+                        var settings = new MongoClientSettings
+                        {
+                            Server = new MongoServerAddress(context.Configuration["Host"], Convert.ToInt32(context.Configuration["Port"]))
+                        };
+                        var username = context.Configuration["Username"];
+                        var password = context.Configuration["Password"];
+                        if (username != null && password != null)
+                            settings.Credential = MongoCredential.CreateCredential(context.Configuration["DatabaseName"], username, password);
+                        var db = new RLStatsDiscordBotMongoDatabase(new DatabaseSettings
+                        {
+                            MongoSettings = settings,
+                            DatabaseName = context.Configuration["DatabaseName"]
+                        });
+                        services.AddSingleton<IDatabase>(db);
+                        services.AddSingleton<IReplayCache>(db);
+                        services.AddSingleton<IConfigHandler<Subscription>>(db);
+                        services.AddSingleton<IConfigHandler<UserFavorite>>(db);
+                    }
+                    else
+                    {
+                        services.AddSingleton<IDatabase>(new Database());
+                        services.AddSingleton<IReplayCache>(new ReplayCache());
+                        services.AddSingleton<IConfigHandler<Subscription>>(new ConfigHandler<Subscription>(Constants.SubscribtionConfigFilePath));
+                        services.AddSingleton<IConfigHandler<UserFavorite>>(new ConfigHandler<UserFavorite>(Constants.UserFavoritesConfigFilePath));
+                    }
+
+                    services.AddSingleton(context.Configuration["ballchasing-token"]);
                     services.AddSingleton(new RecentlyAddedEntries());
                     services.AddSingleton(new CommandsToProceed());
-                    services.AddSingleton(new ConfigHandler<Subscription>(Constants.SubscribtionConfigFilePath));
 
                     services.AddHostedService<CommandHandler>();
                     services.AddHostedService<RecurringReportsService>();

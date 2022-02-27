@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 
-namespace RLStats_Classes.Encryption
+namespace RLStatsClasses.Encryption
 {
     public class AESEncryptor
     {
@@ -15,7 +15,7 @@ namespace RLStats_Classes.Encryption
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                using (AesManaged cryptor = new AesManaged())
+                using (Aes cryptor = Aes.Create())
                 {
                     cryptor.Mode = CipherMode.CBC;
                     cryptor.Padding = PaddingMode.PKCS7;
@@ -60,7 +60,7 @@ namespace RLStats_Classes.Encryption
 
             using (MemoryStream ms = new MemoryStream())
             {
-                using (AesManaged cryptor = new AesManaged())
+                using (Aes cryptor = Aes.Create())
                 {
                     cryptor.Mode = CipherMode.CBC;
                     cryptor.Padding = PaddingMode.PKCS7;

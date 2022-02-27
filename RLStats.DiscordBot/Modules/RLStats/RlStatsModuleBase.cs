@@ -7,8 +7,9 @@ using Discord_Bot.RLStats;
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Models.Advanced;
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Advanced;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Collections.Generic;
@@ -31,10 +32,10 @@ namespace Discord_Bot.Modules.RLStats
             return _commonMethods;
         }
 
-        public RlStatsModuleBase(ILogger<RlStatsModuleBase> logger, string ballchasingToken)
+        public RlStatsModuleBase(ILogger<RlStatsModuleBase> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken)
         {
             Logger = logger;
-            _commonMethods = new RLStatsCommonMethods(logger, ballchasingToken);
+            _commonMethods = new RLStatsCommonMethods(logger, database, replayCache, ballchasingToken);
         }
 
         protected bool ConvertTogetherToBool(string together)
