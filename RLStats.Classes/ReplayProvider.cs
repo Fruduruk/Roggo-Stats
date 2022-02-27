@@ -82,7 +82,12 @@ namespace RLStatsClasses
             });
             //init variables
             var url = filter.GetApiUrl();
-            var totalReplayCount = await Api.GetTotalReplayCountOfUrlAsync(url);
+            var firstPack = await Api.GetApiDataPack(url);
+            var firstIteration = true;
+            if (!firstPack.Success)
+                return (Array.Empty<Replay>(), 0);
+
+            var totalReplayCount = firstPack.ReplayCount;
             if (totalReplayCount >= 10_000)
                 throw new Exception($"Total replays to download exceeds the download limit of 10000. Download canceled.");
             var done = false;
@@ -98,7 +103,8 @@ namespace RLStatsClasses
             while (!done)
             {
                 //download new pack
-                var dataPack = await Api.GetApiDataPack(url);
+                var dataPack = firstIteration ? firstPack : await Api.GetApiDataPack(url);
+                firstIteration = false;
                 if (!dataPack.Success)
                     return (Array.Empty<Replay>(), 0);
 

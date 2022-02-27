@@ -4,8 +4,11 @@ using Microsoft.Extensions.Hosting;
 
 using RLStats.MongoDBSupport;
 
+using RLStatsClasses;
+
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace ReplayDownloadService
 {
@@ -15,22 +18,31 @@ namespace ReplayDownloadService
 
         public static void Main(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", false, true)
-                        .Build();
-            var dbType = configuration.GetSection("DB").Value;
-
-            switch (dbType)
+            try
             {
-                case "MongoDB":
-                    SetupMongoDB(configuration);
-                    break;
-                default:
-                    DBProvider.CreateInstance(DBType.Legacy);
-                    break;
+                var installationPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var configuration = new ConfigurationBuilder()
+                            .SetBasePath(Directory.GetCurrentDirectory())
+                            .AddJsonFile(Path.Combine(installationPath, "appsettings.json"), false, true)
+                            .Build();
+                var dbType = configuration.GetSection("DB").Value;
+
+                switch (dbType)
+                {
+                    case "MongoDB":
+                        SetupMongoDB(configuration);
+                        break;
+                    default:
+                        DBProvider.CreateInstance(DBType.Legacy);
+                        break;
+                }
+                CreateHostBuilder(args).Build().Run();
             }
-            CreateHostBuilder(args).Build().Run();
+            catch (Exception ex)
+            {
+                var path = Path.Combine(RLConstants.RLStatsFolder, "ServiceLog.txt");
+                File.AppendAllLines(path, new string[] { ex.ToString() });
+            }
         }
 
         private static void SetupMongoDB(IConfigurationRoot configuration)
