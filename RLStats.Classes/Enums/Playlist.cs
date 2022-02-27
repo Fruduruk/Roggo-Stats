@@ -1,4 +1,4 @@
-﻿namespace RLStats_Classes.Enums
+﻿namespace RLStatsClasses.Enums
 {
     public enum Playlist
     {

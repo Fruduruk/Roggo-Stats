@@ -2,7 +2,8 @@
 
 using Microsoft.Extensions.Logging;
 
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Discord_Bot.Modules.RLStats
 {
     public class RlStatsDemoModule : RlStatsModuleBase
     {
-        public RlStatsDemoModule(ILogger<RlStatsDemoModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsDemoModule(ILogger<RlStatsDemoModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
         }
 
@@ -58,7 +59,7 @@ namespace Discord_Bot.Modules.RLStats
         }
 
         [Command("demo last")]
-        public async Task DemoLast(int count,  string together, params string[] names)
+        public async Task DemoLast(int count, string together, params string[] names)
         {
             try
             {

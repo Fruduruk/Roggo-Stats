@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <RootNamespace>RLStats_WPF</RootNamespace>
+    <RootNamespace>RLStatsWPF</RootNamespace>
     <UseWPF>true</UseWPF>
     <Authors>Fruduruk</Authors>
     <Company />
@@ -11,7 +11,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>RLStats.WPF</PackageId>
     <AssemblyName>RLStats WPF</AssemblyName>
-    <Version>1.5.0</Version>
+    <Version>1.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

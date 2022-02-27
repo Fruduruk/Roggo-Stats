@@ -1,12 +1,12 @@
-﻿using RLStats_Classes.MainClasses;
+﻿using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models.ReplayModels.Advanced;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models.Advanced;
 
 namespace RocketLeagueStats.Components
 {

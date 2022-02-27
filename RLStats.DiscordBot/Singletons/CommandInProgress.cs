@@ -1,5 +1,4 @@
-﻿using Discord.Commands;
-
+﻿
 using Discord_Bot.Configuration;
 
 namespace Discord_Bot.Singletons

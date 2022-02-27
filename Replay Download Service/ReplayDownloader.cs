@@ -1,12 +1,12 @@
-﻿
-using Ionic.Zip;
+﻿using Ionic.Zip;
 
 using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
-
-using RLStats_Classes.MainClasses;
-using RLStats_Classes.Models;
+using RLStatsClasses;
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
@@ -17,22 +17,34 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Replay_Download_Service
+namespace ReplayDownloadService
 {
     public static class ReplayDownloader
     {
+        private static ILogger<Worker> Logger { get; set; }
+        private static IServiceInfoIO ServiceInfoIO { get; set; }
+        private static IDatabase Database { get; set; }
+        private static IReplayCache Cache { get; set; }
+        private static CancellationToken StoppingToken { get; set; }
+
+
         private const int ProgressBarLength = 90;
         private const string BlockValueString = "■";
 
         private static string ServiceLogsZipPath { get; set; } = Path.Combine(RLConstants.RLStatsFolder, "ServiceLogs.zip");
         private static string LogPath => Path.Combine(RLConstants.RLStatsFolder, "ServiceLog.txt");
-        private static string UpdateLogPath => Path.Combine(RLConstants.RLStatsFolder, "serviceUpdateLog.txt");
         private static Stopwatch UpdateWatch { get; set; } = new Stopwatch();
-        private static ILogger<Worker> Logger { get; set; }
-        private static CancellationToken StoppingToken { get; set; }
 
-        public static Task ExecuteServiceAsync(ILogger<Worker> logger, CancellationToken stoppingToken)
+        public static Task ExecuteServiceAsync(DBProvider dbProvider, ILogger<Worker> logger, CancellationToken stoppingToken)
         {
+            if (dbProvider is null)
+                throw new ArgumentNullException(nameof(dbProvider));
+
+            ServiceInfoIO = dbProvider.GetServiceInfoDB();
+            Database = dbProvider.GetAdvancedReplayDB();
+            Cache = dbProvider.GetReplayCacheDB();
+
+
             UpdateWatch.Start();
             return Task.Run(async () =>
             {
@@ -40,7 +52,7 @@ namespace Replay_Download_Service
                 StoppingToken = stoppingToken;
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var sInfo = new ServiceInfoIO().GetServiceInfo();
+                    var sInfo = ServiceInfoIO.GetServiceInfo();
                     if (File.Exists(LogPath))
                         ZipOldLog();
 
@@ -52,8 +64,6 @@ namespace Replay_Download_Service
 
                     GC.Collect(3);
                     await Task.Delay(TimeSpan.FromHours(sInfo.CycleIntervalInHours), stoppingToken);
-
-                    //await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
                 }
             }, stoppingToken);
         }
@@ -67,9 +77,9 @@ namespace Replay_Download_Service
                 return;
             }
 
-            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, Logger);
+            var replayProvider = new ReplayProvider(serviceInfo.TokenInfo, Cache, Logger);
             replayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
-            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, Logger);
+            var advancedReplayProvider = new AdvancedReplayProvider(serviceInfo.TokenInfo, Database, Logger);
             advancedReplayProvider.DownloadProgressUpdated += DownloadProgressUpdated;
             var replayFileProvider = new ReplayFileProvider(serviceInfo.TokenInfo, Logger);
             replayFileProvider.DownloadProgressUpdated += DownloadProgressUpdated;

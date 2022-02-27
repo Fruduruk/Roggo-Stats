@@ -16,7 +16,7 @@ namespace Discord_Bot.CustomLogging
 
         public void Dispose()
         {
-            
+
         }
     }
 }

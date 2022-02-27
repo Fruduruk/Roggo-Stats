@@ -1,6 +1,6 @@
 ﻿using Discord_Bot.Configuration;
 
-using RLStats_Classes.Models.Average;
+using RLStatsClasses.Models.ReplayModels.Average;
 
 using System.Collections.Generic;
 

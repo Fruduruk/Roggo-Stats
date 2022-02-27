@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
-using Newtonsoft.Json;
+using RLStats.MongoDBSupport;
 
-using RLStats_Classes.MainClasses;
-using RLStats_Classes.Models;
+using RLStatsClasses;
+using RLStatsClasses.CacheHandlers;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using RocketLeagueStats.Components;
 
@@ -60,7 +62,8 @@ namespace RocketLeagueStats
             InitializeComponent();
             Service = new ServiceWindow(tokenInfo);
             Navigator = new NavigatorWindow(tokenInfo);
-            DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo, this));
+            var database = DBProvider.Instance.GetAdvancedReplayDB();
+            DetailWindow = new AdvancedInfoWindow(new AdvancedReplayProvider(tokenInfo, database, this));
             Closing += MainWindow_Closing;
             Navigator.GetReplaysClicked += Navigator_GetReplaysClicked;
             if (!string.IsNullOrEmpty(filePath))

@@ -1,13 +1,8 @@
-﻿using Discord;
-using Discord.Commands;
-
-using Discord_Bot.RLStats;
+﻿using Discord.Commands;
 
 using Microsoft.Extensions.Logging;
-using RLStats_Classes.MainClasses;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+
+using RLStatsClasses.Interfaces;
 
 namespace Discord_Bot.Modules.RLStats
 {
@@ -15,7 +10,7 @@ namespace Discord_Bot.Modules.RLStats
     [Name("General Commands")]
     public class RlStatsGeneralModule : RlStatsModuleBase
     {
-        public RlStatsGeneralModule(ILogger<RlStatsGeneralModule> logger, string ballchasingToken) : base(logger, ballchasingToken)
+        public RlStatsGeneralModule(ILogger<RlStatsGeneralModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
         }
 

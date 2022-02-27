@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace RLStats_Classes.Models
+namespace RLStatsClasses.Models
 {
     public class ProgressState
     {

@@ -2,9 +2,10 @@
 
 using Newtonsoft.Json;
 
-using RLStats_Classes.MainClasses;
-using RLStats_Classes.MainClasses.Interfaces;
-using RLStats_Classes.Models;
+using RLStatsClasses;
+using RLStatsClasses.Interfaces;
+using RLStatsClasses.Models;
+using RLStatsClasses.Models.ReplayModels;
 
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace RocketLeagueStats
 
         private readonly IAuthTokenInfo _tokenInfo;
         private readonly List<IReplayProvider> _providers = new();
+        private readonly IReplayCache _replayCache = DBProvider.Instance.GetReplayCacheDB();
 
         public List<Replay> ShownReplays
         {
@@ -92,13 +94,13 @@ namespace RocketLeagueStats
         {
             TempReplays = null;
             TempReplaysToCompare = null;
-            var mainProvider = new ReplayProvider(_tokenInfo, this);
+            var mainProvider = new ReplayProvider(_tokenInfo, _replayCache, this);
             mainProvider.DownloadProgressUpdated += MainProvider_DownloadProgressUpdated;
             _providers.Add(mainProvider);
             var task = DownloadReplays(mainProvider, rpcReplayPicker.RequestFilter);
             if (!RpcReplayToComparePicker.IsEmpty)
             {
-                var secondProvider = new ReplayProvider(_tokenInfo, this);
+                var secondProvider = new ReplayProvider(_tokenInfo, _replayCache, this);
                 secondProvider.DownloadProgressUpdated += SecondProvider_DownloadProgressUpdated;
                 _providers.Add(secondProvider);
                 TempReplaysToCompare = await DownloadReplays(secondProvider, RpcReplayToComparePicker.RequestFilter);

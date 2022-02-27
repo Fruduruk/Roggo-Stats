@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Controls;
 
-namespace RLStats_WPF
+namespace RLStatsWPF
 {
     public class ChartMerger
     {
