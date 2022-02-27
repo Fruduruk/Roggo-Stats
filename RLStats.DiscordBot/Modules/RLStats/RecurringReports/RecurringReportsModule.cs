@@ -26,7 +26,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
     {
         private RecentlyAddedEntries _addedEntries;
         private readonly CommandsToProceed _commandsToProceed;
-        private readonly ConfigHandler<Subscription> _configHandler;
+        private readonly IConfigHandler<Subscription> _configHandler;
 
         public RecurringReportsModule(ILogger<RecurringReportsModule> logger,
             IDatabase database,
@@ -34,7 +34,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             string ballchasingToken,
             RecentlyAddedEntries entries,
             CommandsToProceed commandsToProceed,
-            ConfigHandler<Subscription> configHandler) : base(logger, database, replayCache, ballchasingToken)
+            IConfigHandler<Subscription> configHandler) : base(logger, database, replayCache, ballchasingToken)
         {
             _addedEntries = entries;
             _commandsToProceed = commandsToProceed;
@@ -60,7 +60,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         private int GetUnusedId()
         {
             int id = 1;
-            var usedIds = _configHandler.Config.Select(entry => entry.Id).ToList();
+            var usedIds = _configHandler.GetConfig().Select(entry => entry.Id).ToList();
             while (usedIds.Contains(id))
             {
                 id++;
@@ -288,13 +288,13 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 if (!Context.IsPrivate)
                     return;
                 var entriesNotFromThisChannel = new List<Subscription>();
-                foreach (var entry in _configHandler.Config)
+                foreach (var entry in _configHandler.GetConfig())
                 {
                     if (Context.Channel.Id.Equals(entry.ChannelId))
                         continue;
                     entriesNotFromThisChannel.Add(entry);
                 }
-                _configHandler.SaveConfigFile(entriesNotFromThisChannel);
+                _configHandler.SetConfig(entriesNotFromThisChannel);
 
                 await Context.Channel.SendMessageAsync("Removed all subscriptions from this channel.");
             }
@@ -312,7 +312,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             try
             {
                 Subscription entryToRemove = null;
-                foreach (var entry in _configHandler.Config)
+                foreach (var entry in _configHandler.GetConfig())
                 {
                     if (entry.ChannelId.Equals(Context.Channel.Id) && entry.Id.Equals(id))
                         entryToRemove = entry;
@@ -339,7 +339,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         {
             try
             {
-                foreach (var entry in _configHandler.Config)
+                foreach (var entry in _configHandler.GetConfig())
                 {
                     if (Context.Channel.Id != entry.ChannelId)
                         continue;

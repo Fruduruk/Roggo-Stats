@@ -24,10 +24,10 @@ namespace Discord_Bot.Modules.RLStats
     public class RlStatsFavModule : RlStatsModuleBase
     {
         private const string NoneConfiguredMessage = "You don't have any favorites configured.";
-        private ConfigHandler<UserFavorite> _userFavoritesConfigHandler;
-        public RlStatsFavModule(ILogger<RlStatsFavModule> logger, IDatabase database, IReplayCache replayCache, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
+        private IConfigHandler<UserFavorite> _userFavoritesConfigHandler;
+        public RlStatsFavModule(ILogger<RlStatsFavModule> logger, IDatabase database, IReplayCache replayCache, IConfigHandler<UserFavorite> userFavoritesConfigHandler, string ballchasingToken) : base(logger, database, replayCache, ballchasingToken)
         {
-            _userFavoritesConfigHandler = new ConfigHandler<UserFavorite>(Constants.UserFavoritesConfigFilePath);
+            _userFavoritesConfigHandler = userFavoritesConfigHandler;
         }
 
         private async Task ShowFavoriteStats(IEnumerable<AveragePlayerStats> averages)
@@ -169,7 +169,7 @@ namespace Discord_Bot.Modules.RLStats
 
         private UserFavorite GetUserFavoriteByUserId(ulong userId)
         {
-            foreach (var favorite in _userFavoritesConfigHandler.Config)
+            foreach (var favorite in _userFavoritesConfigHandler.GetConfig())
             {
                 if (favorite.UserId.Equals(userId))
                     return favorite;

@@ -13,7 +13,7 @@ namespace RocketLeagueStats.Configuration
         {
             fileName = Path.Combine(RLConstants.RLStatsFolder, "config");
         }
-        public Config? LoadConfig()
+        public Config LoadConfig()
         {
             if (!File.Exists(fileName))
                 return null;
