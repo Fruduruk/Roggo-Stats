@@ -21,7 +21,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                await CompareAndSend<AveragePlayerBoost>(time, names, playedTogether: ConvertTogetherToBool(together));
+                await CompareAndSend<AveragePlayerBoost>(time, names, playedTogether: ConvertBoolenStringToBool(together));
             }
             catch (Exception ex)
             {
@@ -35,7 +35,7 @@ namespace Discord_Bot.Modules.RLStats
             try
             {
                 var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0));
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertBoolenStringToBool(together));
                 await OutputEpicAsync<AveragePlayerBoost>(averages);
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertBoolenStringToBool(together));
                 await OutputEpicAsync<AveragePlayerBoost>(averages);
             }
             catch (Exception ex)
@@ -63,7 +63,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertBoolenStringToBool(together));
                 await OutputEpicAsync<AveragePlayerBoost>(averages);
             }
             catch (Exception ex)

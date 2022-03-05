@@ -54,7 +54,7 @@ namespace Discord_Bot.Modules.RLStats
                     await SendMessageToCurrentChannelAsync(NoneConfiguredMessage);
                     return;
                 }
-                await CompareAndSend(time, names, favorite.FavoriteStats, ConvertTogetherToBool(together));
+                await CompareAndSend(time, names, favorite.FavoriteStats, ConvertBoolenStringToBool(together));
             }
             catch (Exception ex)
             {
@@ -71,7 +71,7 @@ namespace Discord_Bot.Modules.RLStats
             try
             {
                 var time = new Tuple<DateTime, DateTime>(DateTime.Today, DateTime.Today + new TimeSpan(1, 0, 0, 0));
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, time, playedTogether: ConvertBoolenStringToBool(together));
                 await ShowFavoriteStats(averages);
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, playedTogether: ConvertBoolenStringToBool(together));
                 await ShowFavoriteStats(averages);
             }
             catch (Exception ex)
@@ -103,7 +103,7 @@ namespace Discord_Bot.Modules.RLStats
         {
             try
             {
-                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertTogetherToBool(together));
+                var averages = await CommonMethods.GetAverageRocketLeagueStats(names, replayCap: count, playedTogether: ConvertBoolenStringToBool(together));
                 await ShowFavoriteStats(averages);
             }
             catch (Exception ex)

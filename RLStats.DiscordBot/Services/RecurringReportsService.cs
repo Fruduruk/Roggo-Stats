@@ -68,7 +68,10 @@ namespace Discord_Bot.Services
             var filePaths = await _module.GetAverageStats(entry);
             if (filePaths.Any())
             {
-                await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report");
+                await channel.SendMessageAsync($"Hi, here is your {entry.Time.Adverbify()} report" +
+                    $"\nNames: {string.Join(' ', entry.Names)}" +
+                    $"\nPlayed together: {entry.Together}" +
+                    $"\nNext post: {(entry.LastPost + entry.Time.ConvertTimeToTimeSpan()):dd.MM.yyyy HH:mm:ss}");
 
                 try
                 {

@@ -38,15 +38,15 @@ namespace Discord_Bot.Modules.RLStats
             _commonMethods = new RLStatsCommonMethods(logger, database, replayCache, ballchasingToken);
         }
 
-        protected bool ConvertTogetherToBool(string together)
+        protected bool ConvertBoolenStringToBool(string booleanString)
         {
-            if (together.ToLower().Equals("y"))
+            if (booleanString.ToLower().Equals("y"))
                 return true;
-            else if (together.ToLower().Equals("n"))
+            else if (booleanString.ToLower().Equals("n"))
                 return false;
             else
             {
-                throw new ArgumentOutOfRangeException($"{together} is not a valid together parameter. Use y or n");
+                throw new ArgumentOutOfRangeException($"{booleanString} is not a valid bool parameter. Use y or n");
             }
         }
 
@@ -192,7 +192,7 @@ namespace Discord_Bot.Modules.RLStats
             }
             try
             {
-                _ = ConvertTogetherToBool(together);
+                _ = ConvertBoolenStringToBool(together);
             }
             catch (ArgumentOutOfRangeException e)
             {
