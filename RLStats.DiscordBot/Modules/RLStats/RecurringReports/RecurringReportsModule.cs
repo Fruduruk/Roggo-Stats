@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConstants;
@@ -21,7 +22,7 @@ using static Discord_Bot.Modules.RLStats.RecurringReports.RecurringReportsConsta
 namespace Discord_Bot.Modules.RLStats.RecurringReports
 {
     [Remarks("HelperModule")]
-    [Name("Subscription Commands - Private Only")]
+    [Name("Subscription Commands")]
     public class RecurringReportsModule : RlStatsModuleBase
     {
         private RecentlyAddedEntries _addedEntries;
@@ -46,10 +47,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         [Summary("This command lets you subscribe a specific action")]
         public async Task Subscribe()
         {
-            if (!Context.IsPrivate)
-                return;
-
-            await ProceedToNextStepAsync(SubStepOneMessage, ExecuteSubStepOne, new Subscription()
+            await ProceedToNextStepAsync(SubStepTimeMessage, ExecuteSubStepTime, new Subscription()
             {
                 Id = GetUnusedId(),
                 ChannelId = Context.Channel.Id,
@@ -68,9 +66,17 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
             return id;
         }
 
-        private async Task ProceedToNextStepAsync(string message, string stepCommand, Subscription configEntry)
+        private async Task ProceedToNextStepAsync(string newMessage, string stepCommand, Subscription configEntry, string chosenAnswer = null)
         {
-            await SendMessageToCurrentChannelAsync(message);
+            var builder = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(chosenAnswer))
+            {
+                builder.Append($"You have chosen: {chosenAnswer}");
+                builder.AppendLine().AppendLine();
+            }
+            builder.Append(newMessage);
+
+            await SendMessageToCurrentChannelAsync(builder.ToString());
             foreach (var command in _commandsToProceed.CommandsInProgress)
             {
                 if (command.UserId == Context.User.Id && command.ChannelId == Context.Channel.Id)
@@ -116,8 +122,8 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
-        [Command(ExecuteSubStepOne)]
-        public async Task ExecuteSubStepOneAsync(string time)
+        [Command(ExecuteSubStepTime)]
+        public async Task ExecuteSubStepTimeAsync(string time)
         {
             try
             {
@@ -135,7 +141,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
                 configEntry.Time = time;
 
-                await ProceedToNextStepAsync(SubStepTwoMessage(time), ExecuteSubStepTwo, configEntry);
+                await ProceedToNextStepAsync(SubStepCompareMessage, ExecuteSubStepCompare, configEntry, time.Adverbify());
             }
             catch (Exception ex)
             {
@@ -145,8 +151,40 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
-        [Command(ExecuteSubStepTwo)]
-        public async Task ExecuteSubStepTwoAsync(string namesAndIds)
+        [Command(ExecuteSubStepCompare)]
+        public async Task ExecuteSubStepCompareAsync(string compare)
+        {
+            try
+            {
+                var stopHere = await IsProcessCanceledOrCorrupted(compare);
+                if (stopHere)
+                    return;
+
+                var configEntry = GetSavedConfigEntry();
+
+                bool compareToLastTime;
+                try
+                {
+                    compareToLastTime = ConvertBoolenStringToBool(compare);
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    await SendMessageToCurrentChannelAsync(ex.Message);
+                    return;
+                }
+                configEntry.CompareToLastTime = compareToLastTime;
+
+                await ProceedToNextStepAsync(SubStepNamesMessage, ExecuteSubStepNames, configEntry, compare);
+            }
+            catch (Exception ex)
+            {
+                await SendMessageToCurrentChannelAsync(ex.Message);
+            }
+        }
+
+        [Remarks(Constants.IgnoreEndpoint)]
+        [Command(ExecuteSubStepNames)]
+        public async Task ExecuteSubStepNamesAsync(string namesAndIds)
         {
             try
             {
@@ -163,10 +201,10 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 configEntry.Names = new List<string>(nameAndIdArr);
 
                 if (configEntry.Names.Count > 1)
-                    await ProceedToNextStepAsync(SubStepThreeMessage(nameAndIdArr), ExecuteSubStepThree, configEntry);
+                    await ProceedToNextStepAsync(SubStepTogetherMessage, ExecuteSubStepTogether, configEntry, string.Join(namesAndIds,' '));
                 else
                 {
-                    await ProceedToNextStepAsync(SubStepSkipThreeMessage(nameAndIdArr), ExecuteSubStepFour, configEntry);
+                    await ProceedToNextStepAsync(SubStepSkipTogetherMessage, ExecuteSubStepIndexes, configEntry, string.Join(namesAndIds, ' '));
                     await ShowAllAvailableStatPropertiesAsync();
                 }
             }
@@ -178,7 +216,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
-        [Command(ExecuteSubStepThree)]
+        [Command(ExecuteSubStepTogether)]
         public async Task ExecuteSubStepThreeAsync(string together)
         {
             try
@@ -193,7 +231,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                 bool playedTogether;
                 try
                 {
-                    playedTogether = ConvertTogetherToBool(together);
+                    playedTogether = ConvertBoolenStringToBool(together);
 
                 }
                 catch (ArgumentOutOfRangeException ex)
@@ -204,7 +242,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
 
                 configEntry.Together = playedTogether;
 
-                await ProceedToNextStepAsync(SubStepFourMessage(playedTogether), ExecuteSubStepFour, configEntry);
+                await ProceedToNextStepAsync(SubStepIndexesMessage, ExecuteSubStepIndexes, configEntry, together);
 
                 await ShowAllAvailableStatPropertiesAsync();
             }
@@ -222,7 +260,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
         }
 
         [Remarks(Constants.IgnoreEndpoint)]
-        [Command(ExecuteSubStepFour)]
+        [Command(ExecuteSubStepIndexes)]
         public async Task ExecuteSubStepFourAsync(string indexes)
         {
             try
@@ -360,6 +398,7 @@ namespace Discord_Bot.Modules.RLStats.RecurringReports
                     else
                         builder.AddField("Stats count:", entry.StatNames.Count, inline: true);
 
+                    builder.AddField("Compare:", entry.CompareToLastTime, inline: true);
                     builder.AddField("Next Execution:", (entry.LastPost + entry.Time.ConvertTimeToTimeSpan()).ToString("dd.MM.yyyy HH:mm:ss"))
                     .WithColor(new Color(random.Next(255), random.Next(255), random.Next(255)))
                     .WithFooter($"Id: {entry.Id}");

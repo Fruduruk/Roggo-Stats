@@ -12,6 +12,7 @@ namespace Discord_Bot.Configuration
         public ulong ChannelId { get; set; }
         public List<string> StatNames { get; set; } = new List<string>();
         public DateTime LastPost { get; set; }
+        public bool CompareToLastTime { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -34,13 +35,15 @@ namespace Discord_Bot.Configuration
             foreach (string name in other.Names)
                 if (!Names.Contains(name))
                     return false;
+            if (other.CompareToLastTime != CompareToLastTime)
+                return false;
 
             return true;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Time, Together, Names, ChannelId, LastPost, StatNames);
+            return HashCode.Combine(Time, Together, Names, ChannelId, LastPost, StatNames, CompareToLastTime);
         }
     }
 }
