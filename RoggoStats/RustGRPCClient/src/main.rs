@@ -1,33 +1,28 @@
 mod client;
 
-use greet::greeter_client::GreeterClient;
-use crate::greet::{HelloReply, HelloRequest};
+use ballchasing_api::basic_api_client;
+use crate::ballchasing_api::basic_api_client::BasicApiClient;
+use crate::ballchasing_api::SimpleReplayRequest;
 
-pub mod greet {
-    tonic::include_proto!("greet");
+pub mod ballchasing_api{
+    tonic::include_proto!("ballchasing_api");
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("This is my Greetings gRPC test.");
 
-    let mut client = GreeterClient::connect("http://localhost:5007").await?;
+    let mut client = BasicApiClient::connect("http://localhost:5007").await?;
 
-    let request = tonic::Request::new(HelloRequest {
-        name: "Fruduruk".into(),
-        age: 22
+    let request = tonic::Request::new(SimpleReplayRequest {
+        id: "Fruduruk".into(),
     });
 
 
-    let response = client.say_hello(request).await?;
+    let response = client.get_simple_replay(request).await?;
 
 
-    let helloReply = HelloReply{
-        message: "nice".into(),
-        data: Some(Data{
 
-        })
-    }
     println!("{:?}",response);
 
     Ok(())

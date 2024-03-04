@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "BallchasingWrapper";
+
+package ballchasing_api;
+
+service BasicAPI {
+  rpc GetSimpleReplay (SimpleReplayRequest) returns (SimpleReplayReply);
+}
+
+message SimpleReplayRequest {
+  string id = 1;
+}
+
+message SimpleReplayReply {
+  string title = 1;
+}
