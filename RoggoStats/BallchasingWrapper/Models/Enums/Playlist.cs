@@ -1,0 +1,29 @@
+﻿namespace BallchasingWrapper.Models.Enums
+{
+    public enum Playlist
+    {
+        UnrankedDuels,
+        UnrankedDoubles,
+        UnrankedStandard,
+        UnrankedChaos,
+        PrivateGame,
+        Season,
+        Offline,
+        RankedDuels,
+        RankedDoubles,
+        RankedSoloStandard,
+        RankedStandard,
+        Snowday,
+        Rocketlabs,
+        Hoops,
+        Rumble,
+        Tournament,
+        Dropshot,
+        RankedHoops,
+        RankedRumble,
+        RankedDropshot,
+        RankedSnowday,
+        DropshotRumble,
+        Heatseeker
+    }
+}
