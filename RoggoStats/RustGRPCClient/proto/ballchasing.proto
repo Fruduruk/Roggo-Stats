@@ -13,37 +13,12 @@ message RequestFilter {
   optional string filterName = 2;
   repeated string names = 3;
   optional string title = 4;
-  Playlist playlist = 5;
-  MatchType matchType = 6; 
-  optional bool freeToPlay = 7;
-  optional int32 season = 8;
-  repeated string steamIds = 9;
-  optional int64 minDate = 10;
-  optional int64 maxDate = 11;
-}
-
-enum MatchType{
-  BOTH = 0;
-  RANKED = 1;
-  UNRANKED = 2;
-}
-
-enum Playlist {
-  ALL = 0;
-  DUELS = 1;
-  DOUBLES = 2;
-  STANDARD = 3;
-  CHAOS = 4;
-  PRIVATE_GAME = 5;
-  OFFLINE = 6;
-  SNOW_DAY = 7;
-  ROCKET_LABS = 8;
-  HOOPS = 9;
-  RUMBLE = 10;
-  TOURNAMENT = 11;
-  DROP_SHOT = 12;
-  DROP_SHOT_RUMBLE = 13;
-  HEAT_SEEKER = 14;
+  optional string playlist = 5;
+  optional bool freeToPlay = 6;
+  optional int32 season = 7;
+  repeated string steamIds = 8;
+  optional int64 minDate = 9;
+  optional int64 maxDate = 10;
 }
 
 message SimpleReplaysResponse {
