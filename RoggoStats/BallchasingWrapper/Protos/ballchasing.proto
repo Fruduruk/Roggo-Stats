@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "BallchasingWrapper";
+
+package ballchasing;
+
+service Ballchasing {
+  rpc GetSimpleReplays (RequestFilter) returns (SimpleReplaysResponse);
+}
+
+message RequestFilter {
+  optional int32 replayCap = 1;
+  optional string filterName = 2;
+  repeated string names = 3;
+  optional string title = 4;
+  optional string playlist = 5;
+  optional bool freeToPlay = 6;
+  optional int32 season = 7;
+  repeated string steamIds = 8;
+  optional int64 minDate = 9;
+  optional int64 maxDate = 10;
+}
+
+message SimpleReplaysResponse {
+  string title = 1;
+}
