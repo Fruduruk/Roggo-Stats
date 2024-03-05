@@ -46,10 +46,10 @@ namespace BallchasingWrapper.Models.ReplayModels
         public bool DateHasTimeZone { get; set; }
 
         [JsonProperty("min_rank")]
-        public Rank MinRank { get; set; }
+        public Rank? MinRank { get; set; }
 
         [JsonProperty("max_rank")]
-        public Rank MaxRank { get; set; }
+        public Rank? MaxRank { get; set; }
 
         [JsonProperty("uploader")]
         public Uploader Uploader { get; set; }

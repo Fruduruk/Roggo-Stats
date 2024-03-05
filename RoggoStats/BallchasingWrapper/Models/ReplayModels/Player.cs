@@ -10,16 +10,16 @@ namespace BallchasingWrapper.Models.ReplayModels
         public double EndTime { get; set; }
 
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("id")]
-        public PlatformId Id { get; set; }
+        public PlatformId? Id { get; set; }
 
         [JsonProperty("mvp")]
         public bool MVP { get; set; }
 
         [JsonProperty("rank")]
-        public Rank Rank { get; set; }
+        public Rank? Rank { get; set; }
 
         [JsonProperty("score")]
         public int Score { get; set; }
