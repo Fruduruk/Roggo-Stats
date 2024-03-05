@@ -8,7 +8,7 @@ namespace BallchasingWrapper.BusinessLogic
     {
         private IDatabase ReplayDatabase { get; }
 
-        public AdvancedReplayProvider(IAuthTokenInfo tokenInfo, IDatabase database, ILogger logger) : base(tokenInfo, logger)
+        public AdvancedReplayProvider(BallchasingApi api, IDatabase database, ILogger logger) : base(api, logger)
         {
             ReplayDatabase = database;
         }

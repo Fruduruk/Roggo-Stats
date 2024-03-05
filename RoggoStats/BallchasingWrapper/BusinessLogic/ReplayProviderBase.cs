@@ -11,18 +11,10 @@ namespace BallchasingWrapper.BusinessLogic
         protected ILogger Logger { get; private set; }
         protected BallchasingApi Api { get; }
 
-        public ReplayProviderBase(IAuthTokenInfo tokenInfo, ILogger logger)
+        public ReplayProviderBase(BallchasingApi api, ILogger logger)
         {
             Logger = logger;
-            if (tokenInfo is null)
-                throw new ArgumentNullException(nameof(tokenInfo));
-
-            if (BallchasingApi.Instance is null)
-            {
-                BallchasingApi.CreateInstance(tokenInfo);
-                Logger.LogInformation("Connected to the ballchasing.com api.");
-            }
-            Api = BallchasingApi.Instance;
+            Api = api;
             InitializeNewProgress();
         }
 

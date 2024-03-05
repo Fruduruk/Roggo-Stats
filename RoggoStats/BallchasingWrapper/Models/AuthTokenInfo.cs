@@ -10,7 +10,7 @@ namespace BallchasingWrapper.Models
         }
 
         public string Token { get; set; }
-        public Exception Except { get; set; }
+        public Exception? Except { get; set; }
         public bool Chaser { get; set; }
         public string SteamId { get; set; }
         public string Name { get; set; }
