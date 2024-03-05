@@ -11,7 +11,7 @@ namespace BallchasingWrapper.BusinessLogic
         private bool _cancelDownload;
         private IReplayCache ReplayCache { get; }
 
-        public ReplayProvider(IAuthTokenInfo tokenInfo, IReplayCache replayCache, ILogger logger) : base(tokenInfo, logger)
+        public ReplayProvider(BallchasingApi api, IReplayCache replayCache, ILogger logger) : base(api, logger)
         {
             ReplayCache = replayCache;
         }

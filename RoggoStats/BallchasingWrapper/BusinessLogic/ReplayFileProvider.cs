@@ -4,7 +4,7 @@ namespace BallchasingWrapper.BusinessLogic
 {
     public class ReplayFileProvider : ReplayProviderBase, IReplayFileProvider
     {
-        public ReplayFileProvider(IAuthTokenInfo tokenInfo, ILogger logger) : base(tokenInfo, logger)
+        public ReplayFileProvider(BallchasingApi api, ILogger logger) : base(api, logger)
         {
         }
 

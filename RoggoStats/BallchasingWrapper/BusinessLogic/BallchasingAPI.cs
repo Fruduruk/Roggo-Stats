@@ -6,22 +6,16 @@ namespace BallchasingWrapper.BusinessLogic
 {
     public class BallchasingApi
     {
-        public static BallchasingApi Instance { get; private set; }
         public CancellationToken StoppingToken { get; set; } = CancellationToken.None;
         public double MaximumCallsPerSecond { get; set; } = 1000;
         public IAuthTokenInfo TokenInfo { get; }
         private readonly Stopwatch _stopWatch = new();
         private readonly HttpClient _client;
         private List<string> _calls = new();
-        private BallchasingApi(IAuthTokenInfo tokenInfo)
+        public BallchasingApi(IAuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo ?? throw new ArgumentNullException(nameof(tokenInfo));
             _client = GetClientWithToken();
-        }
-
-        public static void CreateInstance(IAuthTokenInfo tokenInfo)
-        {
-            Instance = new BallchasingApi(tokenInfo);
         }
 
         ~BallchasingApi()

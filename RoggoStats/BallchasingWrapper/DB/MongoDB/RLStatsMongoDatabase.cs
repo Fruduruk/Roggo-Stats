@@ -1,5 +1,4 @@
-﻿using BallchasingWrapper.BusinessLogic;
-using BallchasingWrapper.Interfaces;
+﻿using BallchasingWrapper.Interfaces;
 using BallchasingWrapper.Models;
 using BallchasingWrapper.Models.ReplayModels;
 using BallchasingWrapper.Models.ReplayModels.Advanced;
@@ -7,16 +6,16 @@ using MongoDB.Driver;
 
 namespace BallchasingWrapper.DB.MongoDB
 {
-    public class RLStatsMongoDatabase : ISaveBallchasingToken, IDatabase, IReplayCache, IServiceInfoIO
+    public class RlStatsMongoDatabase : ISaveBallchasingToken, IDatabase, IReplayCache, IServiceInfoIO
     {
         private const string BallchasingTokenCollectionName = "BallchasingTokens";
         private const string AdvancedReplayCollectionName = "AdvancedReplays";
         private const string ServiceInfoCollectionName = "ServiceInfo";
         private const string ReplayCacheCollectionName = "ReplayCache";
-        protected MongoClient Client { get; set; }
-        protected IMongoDatabase Database { get; set; }
+        private MongoClient Client { get; }
+        private IMongoDatabase Database { get; }
 
-        public RLStatsMongoDatabase(DatabaseSettings settings)
+        public RlStatsMongoDatabase(DatabaseSettings settings)
         {
             Client = new MongoClient(settings.MongoSettings);
             Database = Client.GetDatabase(settings.DatabaseName);
