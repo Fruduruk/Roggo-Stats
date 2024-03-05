@@ -1,8 +1,6 @@
-mod client;
-
 use ballchasing::ballchasing_client;
 use crate::ballchasing::ballchasing_client::BallchasingClient;
-use crate::ballchasing::RequestFilter;
+use crate::ballchasing::{MatchType, Playlist, RequestFilter};
 
 pub mod ballchasing{
     tonic::include_proto!("ballchasing");
@@ -19,7 +17,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         filter_name : None,
         names: vec!["Fruduruk".into()],
         title: None,
-        playlist: None,
+        playlist: Playlist::All.into(),
+        match_type: MatchType::Both.into(),
         free_to_play: None,
         season: None,
         steam_ids: vec![],

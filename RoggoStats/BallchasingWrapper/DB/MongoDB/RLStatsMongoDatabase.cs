@@ -6,9 +6,8 @@ using MongoDB.Driver;
 
 namespace BallchasingWrapper.DB.MongoDB
 {
-    public class RlStatsMongoDatabase : ISaveBallchasingToken, IDatabase, IReplayCache, IServiceInfoIO
+    public class RlStatsMongoDatabase : IDatabase, IReplayCache, IServiceInfoIO
     {
-        private const string BallchasingTokenCollectionName = "BallchasingTokens";
         private const string AdvancedReplayCollectionName = "AdvancedReplays";
         private const string ServiceInfoCollectionName = "ServiceInfo";
         private const string ReplayCacheCollectionName = "ReplayCache";
@@ -21,25 +20,6 @@ namespace BallchasingWrapper.DB.MongoDB
             Database = Client.GetDatabase(settings.DatabaseName);
         }
 
-        #region ISaveBallchasingToken
-        public string GetBallchasingToken()
-        {
-            var tokenCollection = Database.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
-            if (IsEmpty(tokenCollection))
-                return string.Empty;
-            var tokenInfo = tokenCollection.Find(_ => true).FirstOrDefault();
-            if (tokenInfo is null)
-                return string.Empty;
-            return tokenInfo.Value ?? string.Empty;
-        }
-
-        public void SetBallchasingToken(string ballchasingToken)
-        {
-            Database.DropCollection(BallchasingTokenCollectionName);
-            var tokenCollection = Database.GetCollection<Wrapper<string>>(BallchasingTokenCollectionName);
-            tokenCollection.InsertOne(new Wrapper<string> { Value = ballchasingToken });
-        }
-        #endregion
         #region IDatabase
         public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken, ProgressState progressState)
         {

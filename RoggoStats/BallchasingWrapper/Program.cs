@@ -111,13 +111,13 @@ namespace BallchasingWrapper
                             .Compression.CompressorType.Snappy)
                     }
                 },
-                DatabaseName = DatabaseName
+                DatabaseName = Environment.GetEnvironmentVariable(DatabaseName)
             };
             var username = Environment.GetEnvironmentVariable(MongoUser);
             var password = Environment.GetEnvironmentVariable(MongoPassword);
             if (username != null && password != null)
                 settings.MongoSettings.Credential =
-                    MongoDB.Driver.MongoCredential.CreateCredential(DatabaseName, username, password);
+                    MongoDB.Driver.MongoCredential.CreateCredential("admin", username, password);
             return new RlStatsMongoDatabase(settings);
         }
     }
