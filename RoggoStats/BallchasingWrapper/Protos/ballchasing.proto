@@ -11,18 +11,32 @@ service Ballchasing {
 message RequestFilter {
   optional int32 replayCap = 1;
   optional string filterName = 2;
-  repeated string names = 3;
+  repeated Identity identities = 3;
   optional string title = 4;
   Playlist playlist = 5;
-  MatchType matchType = 6; 
-  optional bool freeToPlay = 7;
-  optional int32 season = 8;
-  repeated string steamIds = 9;
-  optional int64 minDate = 10;
-  optional int64 maxDate = 11;
+  MatchType matchType = 6;
+  optional Season season = 7;
+  optional string minDate = 8;
+  optional string maxDate = 9;
 }
 
-enum MatchType{
+message Identity {
+  IdentityType type = 1;
+  string nameOrId = 2;
+}
+
+enum IdentityType{
+  NAME = 0;
+  STEAM_ID = 1;
+  EPIC_ID = 2;
+}
+
+message Season {
+  int32 number = 1;
+  bool freeToPlay = 2;
+}
+
+enum MatchType {
   BOTH = 0;
   RANKED = 1;
   UNRANKED = 2;
@@ -66,7 +80,7 @@ message Replay {
 }
 
 message Rank {
-  optional string id = 1;
+  string id = 1;
   int32 tier = 2;
   int32 division = 3;
   string name = 4;
@@ -80,11 +94,11 @@ message Team {
 message Player {
   double startTime = 1;
   double endTime = 2;
-  optional string name = 3;
+  string name = 3;
   optional PlayerId id = 4;
   bool mvp = 5;
   optional Rank rank = 6;
-   int32 score = 7;
+  int32 score = 7;
 }
 
 message PlayerId {

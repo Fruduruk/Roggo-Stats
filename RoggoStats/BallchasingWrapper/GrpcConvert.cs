@@ -1,4 +1,5 @@
 ﻿using BallchasingWrapper.BusinessLogic;
+using BallchasingWrapper.Models;
 using Player = BallchasingWrapper.Models.ReplayModels.Player;
 using Rank = BallchasingWrapper.Models.ReplayModels.Rank;
 using Replay = BallchasingWrapper.Models.ReplayModels.Replay;
@@ -8,6 +9,16 @@ namespace BallchasingWrapper;
 
 public static class GrpcConvert
 {
+    public static APIRequestFilter ToApiRequestFilter(this Grpc.RequestFilter filter)
+    {
+        var requestFilter = new APIRequestFilter
+        {
+            ReplayCap = filter.HasReplayCap ? filter.ReplayCap : 0,
+            FilterName = filter.HasFilterName ? filter.FilterName : string.Empty,
+        };
+        return requestFilter;
+    }
+
     public static Grpc.Replay ToGrpcReplay(this Replay replay)
     {
         var grpcReplay = new Grpc.Replay
@@ -23,12 +34,12 @@ public static class GrpcConvert
             Blue = ConvertToGrpcTeam(replay.TeamBlue),
             Orange = ConvertToGrpcTeam(replay.TeamOrange),
         };
-        if(replay.MinRank is not null)
+        if (replay.MinRank is not null)
             grpcReplay.MinRank = ConvertToGrpcRank(replay.MinRank);
 
         if (replay.MaxRank is not null)
             grpcReplay.MaxRank = ConvertToGrpcRank(replay.MaxRank);
-        
+
         return grpcReplay;
     }
 
@@ -64,7 +75,7 @@ public static class GrpcConvert
             StartTime = player.StartTime,
             EndTime = player.EndTime,
         };
-        
+
         if (player.Id.Id is not null)
             grpcPlayer.Id = new Grpc.PlayerId
             {
@@ -73,8 +84,8 @@ public static class GrpcConvert
             };
         if (player.Rank is not null)
             grpcPlayer.Rank = ConvertToGrpcRank(player.Rank);
-        
-        
+
+
         return grpcPlayer;
     }
 
