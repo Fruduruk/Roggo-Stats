@@ -1,8 +1,8 @@
 use ballchasing::ballchasing_client;
 use crate::ballchasing::ballchasing_client::BallchasingClient;
-use crate::ballchasing::{MatchType, Playlist, RequestFilter};
+use crate::ballchasing::{Identity, IdentityType, MatchType, Playlist, RequestFilter};
 
-pub mod ballchasing{
+pub mod ballchasing {
     tonic::include_proto!("ballchasing");
 }
 
@@ -14,14 +14,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let request = tonic::Request::new(RequestFilter {
         replay_cap: None,
-        filter_name : None,
-        names: vec!["Fruduruk".into()],
+        filter_name: None,
+        identities: vec![
+            Identity {
+                r#type: IdentityType::Name.into(),
+                name_or_id: "Fruduruk".into()
+            }
+        ],
         title: None,
         playlist: Playlist::All.into(),
         match_type: MatchType::Both.into(),
-        free_to_play: None,
         season: None,
-        steam_ids: vec![],
         min_date: None,
         max_date: None,
     });
@@ -30,8 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.get_simple_replays(request).await?;
 
 
-
-    println!("{:?}",response);
+    println!("{:?}", response);
 
     Ok(())
 }
