@@ -21,10 +21,10 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
     public override async Task<Grpc.SimpleReplaysResponse> GetSimpleReplays(Grpc.RequestFilter request,
         ServerCallContext context)
     {
-        var filter = request.ToApiRequestFilter();
+        var filter = new ApiUrlCreator(request);
         
         var response =
-            await _replayProvider.CollectReplaysAsync(filter, true);
+            await _replayProvider.CollectReplaysAsync(filter, false);
         
 
         var replays = response.Replays.ToList();

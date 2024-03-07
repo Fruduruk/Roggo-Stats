@@ -1,0 +1,13 @@
+{
+  "details": {
+    "methodFqn": "ballchasing.Ballchasing.GetSimpleReplays"
+  },
+  "requests": [
+    {
+      "location": "GetSimpleReplays-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc",
+  "importStreamId": "ff6e57f7-65cb-4f2a-83a7-1f51761e8660"
+}

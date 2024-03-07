@@ -1,0 +1,15 @@
+{
+  "settings": [
+    {
+      "options": {
+        "grpc": {
+          "endpoint": "http://localhost:5007",
+          "disableServerCertificateValidation": true
+        },
+        "rest": {
+          "pathParams": []
+        }
+      }
+    }
+  ]
+}

@@ -11,7 +11,7 @@ namespace BallchasingWrapper.BusinessLogic
         public async Task DownloadAndSaveReplayFileAsync(string fileName, string replayId)
         {
             Api.MaximumCallsPerSecond = 2;
-            var fileUrl = APIRequestBuilder.GetReplayFileUrl(replayId);
+            var fileUrl = ApiRequestBuilder.GetReplayFileUrl(replayId);
             using var response = await Api.GetAsync(fileUrl);
             var bytes = await response.Content.ReadAsByteArrayAsync();
             await File.WriteAllBytesAsync(fileName, bytes);
