@@ -13,15 +13,17 @@ namespace BallchasingWrapper.BusinessLogic
             ReplayDatabase = database;
         }
 
-        public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = true)
+        public async Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays,
+            CancellationToken cancellationToken)
         {
             var advancedReplays = new List<AdvancedReplay>();
 
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Loading advanced replays from database.";
-            var dbReplays = await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), Api.StoppingToken, ProgressState);
+            var dbReplays =
+                await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), cancellationToken, ProgressState);
             advancedReplays.AddRange(dbReplays);
-            if (Api.StoppingToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
 
             InitializeNewProgress();
@@ -30,15 +32,16 @@ namespace BallchasingWrapper.BusinessLogic
 
             InitializeNewProgress();
             ProgressState.CurrentMessage = "Downloading advanced replays.";
-            advancedReplays.AddRange(await DownloadReplays(replaysToDownload.ToList()));
+            advancedReplays.AddRange(await DownloadReplays(replaysToDownload.ToList(), cancellationToken));
 
             LastUpdateCall("Loading done.", advancedReplays.Count);
-            if (Api.StoppingToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
             return advancedReplays;
         }
 
-        private static IEnumerable<Replay> CalculateReplaysToDownload(IEnumerable<Replay> replays, IEnumerable<AdvancedReplay> dbReplays)
+        private static IEnumerable<Replay> CalculateReplaysToDownload(IEnumerable<Replay> replays,
+            IEnumerable<AdvancedReplay> dbReplays)
         {
             var replaysToDownload = new List<Replay>();
             var idsInDatabase = dbReplays.Select(r => r.Id).ToList();
@@ -47,31 +50,35 @@ namespace BallchasingWrapper.BusinessLogic
                 if (!idsInDatabase.Contains(replay.Id))
                     replaysToDownload.Add(replay);
             }
+
             return replaysToDownload;
         }
 
-        private async Task<IEnumerable<AdvancedReplay>> DownloadReplays(List<Replay> replaysToDownload)
+        private async Task<IEnumerable<AdvancedReplay>> DownloadReplays(List<Replay> replaysToDownload,
+            CancellationToken cancellationToken)
         {
             var advancedReplays = new List<AdvancedReplay>();
             ProgressState.TotalCount = replaysToDownload.Count;
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 var r = replaysToDownload[i];
-                var replay = await GetAdvancedReplayInfosAsync(r);
+                var replay = await GetAdvancedReplayInfosAsync(r, cancellationToken);
                 advancedReplays.Add(replay);
                 ReplayDatabase.SaveReplayAsync(replay);
                 ProgressState.PartCount++;
-                if (Api.StoppingToken.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                     break;
             }
+
             LastUpdateCall("Downlaoded advanced Replays", replaysToDownload.Count);
             return advancedReplays;
         }
 
-        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)
+        private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay,
+            CancellationToken cancellationToken)
         {
             var url = ApiRequestBuilder.GetSpecificReplayUrl(replay.Id);
-            var response = await Api.GetAsync(url);
+            var response = await Api.GetAsync(url, cancellationToken);
             if (response.StatusCode == System.Net.HttpStatusCode.Locked)
                 throw new OperationCanceledException();
             if (!response.IsSuccessStatusCode)

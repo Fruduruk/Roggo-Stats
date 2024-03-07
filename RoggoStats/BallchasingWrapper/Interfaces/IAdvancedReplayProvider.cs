@@ -5,6 +5,6 @@ namespace BallchasingWrapper.Interfaces
 {
     public interface IAdvancedReplayProvider : IReplayProviderBase
     {
-        Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, bool singleThreaded = false);
+        Task<IList<AdvancedReplay>> GetAdvancedReplayInfosAsync(IList<Replay> replays, CancellationToken cancellationToken);
     }
 }

@@ -6,20 +6,20 @@ namespace BallchasingWrapper.Models
     {
         private readonly Grpc.RequestFilter _request;
         public IEnumerable<string> Urls { get; }
-
+        public List<Grpc.Identity> Identities { get; }
         public int Cap { get; } = 0;
-
         public Grpc.GroupType GroupType { get; }
 
         public ApiUrlCreator(Grpc.RequestFilter request)
         {
             if (request.HasReplayCap)
                 Cap = request.ReplayCap;
-
+            Identities = request.Identities.ToList();
             GroupType = request.GroupType;
             _request = request;
             Urls = CreateUrls().ToArray();
         }
+
 
         private IEnumerable<string> CreateUrls()
         {

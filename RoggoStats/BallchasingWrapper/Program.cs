@@ -1,6 +1,7 @@
 global using Newtonsoft.Json;
 using BallchasingWrapper.BusinessLogic;
 using BallchasingWrapper.DB.MongoDB;
+using BallchasingWrapper.Interfaces;
 using BallchasingWrapper.Models;
 using BallchasingWrapper.Services;
 
@@ -25,7 +26,7 @@ namespace BallchasingWrapper
 
             builder.Services.AddGrpc();
             builder.Services.AddSingleton(SetupMongoDb());
-            builder.Services.AddSingleton(new BallchasingApi(_tokenInfo));
+            builder.Services.AddSingleton<IBallchasingApi>(new BallchasingApi(_tokenInfo));
             var app = builder.Build();
             app.MapGrpcService<BallchasingService>();
             app.MapGet("/",
