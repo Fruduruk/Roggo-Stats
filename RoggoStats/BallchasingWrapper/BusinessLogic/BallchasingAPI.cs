@@ -4,14 +4,14 @@ using BallchasingWrapper.Models;
 
 namespace BallchasingWrapper.BusinessLogic
 {
-    public class BallchasingApi
+    public class BallchasingApi : IBallchasingApi
     {
-        public CancellationToken StoppingToken { get; set; } = CancellationToken.None;
         public double MaximumCallsPerSecond { get; set; } = 1000;
         public IAuthTokenInfo TokenInfo { get; }
         private readonly Stopwatch _stopWatch = new();
         private readonly HttpClient _client;
         private List<string> _calls = new();
+
         public BallchasingApi(IAuthTokenInfo tokenInfo)
         {
             TokenInfo = tokenInfo ?? throw new ArgumentNullException(nameof(tokenInfo));
@@ -30,26 +30,26 @@ namespace BallchasingWrapper.BusinessLogic
             return client;
         }
 
-        public async Task<HttpResponseMessage> GetAsync(string url)
+        public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
         {
             return await Task.Run(async () =>
             {
-                WaitForYourTurn();
-                if (StoppingToken.IsCancellationRequested)
+                WaitForYourTurn(cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Locked);
                 lock (_calls)
                     _calls.Add(url);
-                return await _client.GetAsync(url);
-            });
+                return await _client.GetAsync(url, cancellationToken);
+            }, cancellationToken);
         }
 
-        private void WaitForYourTurn()
+        private void WaitForYourTurn(CancellationToken cancellationToken)
         {
             lock (_stopWatch)
             {
                 if (_stopWatch.IsRunning)
                 {
-                    double speed = TokenInfo.GetSpeed();
+                    var speed = TokenInfo.GetSpeed();
                     if (speed > MaximumCallsPerSecond)
                         speed = MaximumCallsPerSecond;
                     var timeToWait = 1000d / speed * 1.1; // I use 1.1. That 0.1 extra is a safety buffer.
@@ -58,8 +58,8 @@ namespace BallchasingWrapper.BusinessLogic
                     {
                         var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) -
                                                _stopWatch.ElapsedMilliseconds;
-                        var task = Task.Run(() => Task.Delay((int)actualTimeToWait, StoppingToken));
-                        task.Wait();
+                        var task = Task.Run(() => Task.Delay((int)actualTimeToWait, cancellationToken), cancellationToken);
+                        task.Wait(cancellationToken);
                     }
 
                     _stopWatch.Stop();
@@ -69,30 +69,25 @@ namespace BallchasingWrapper.BusinessLogic
             }
         }
 
-        public async Task<ApiDataPack> GetApiDataPack(string url)
+        public async Task<ApiDataPack> GetApiDataPackAsync(string url, CancellationToken cancellationToken)
         {
-            var response = await GetAsync(url);
-            if (response.IsSuccessStatusCode)
-            {
-                using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
-                var dataString = await reader.ReadToEndAsync();
-                var pack = GetApiDataFromString(dataString);
-                return pack;
-            }
-            return new ApiDataPack
-            {
-                Success = false
-            };
+            var response = await GetAsync(url,cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return new ApiDataPack { Success = false };
+            using var reader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
+            var dataString = await reader.ReadToEndAsync(cancellationToken);
+            var pack = GetApiDataFromString(dataString);
+            return pack;
         }
 
         private static ApiDataPack GetApiDataFromString(string dataString)
         {
             try
             {
-                var datapack = JsonConvert.DeserializeObject<ApiDataPack>(dataString);
-                FillInitialTeamSizes(datapack);
-                datapack.Success = true;
-                return datapack;
+                var dataPack = JsonConvert.DeserializeObject<ApiDataPack>(dataString);
+                FillInitialTeamSizes(dataPack);
+                dataPack.Success = true;
+                return dataPack;
             }
             catch (Exception ex)
             {
@@ -104,12 +99,13 @@ namespace BallchasingWrapper.BusinessLogic
             }
         }
 
-        private static void FillInitialTeamSizes(ApiDataPack datapack)
+        private static void FillInitialTeamSizes(ApiDataPack dataPack)
         {
-            foreach (var replay in datapack.Replays)
+            foreach (var replay in dataPack.Replays)
             {
-                var teamSize = replay.TeamBlue.Players.Count < replay.TeamOrange.Players.Count ?
-                    replay.TeamBlue.Players.Count : replay.TeamOrange.Players.Count;
+                var teamSize = replay.TeamBlue.Players.Count < replay.TeamOrange.Players.Count
+                    ? replay.TeamBlue.Players.Count
+                    : replay.TeamOrange.Players.Count;
                 replay.TeamBlue.InitialTeamSize = teamSize;
                 replay.TeamOrange.InitialTeamSize = teamSize;
             }
