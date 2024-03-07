@@ -70,7 +70,7 @@ namespace BallchasingWrapper.BusinessLogic
 
         private async Task<AdvancedReplay> GetAdvancedReplayInfosAsync(Replay replay)
         {
-            var url = APIRequestBuilder.GetSpecificReplayUrl(replay.Id);
+            var url = ApiRequestBuilder.GetSpecificReplayUrl(replay.Id);
             var response = await Api.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.Locked)
                 throw new OperationCanceledException();

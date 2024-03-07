@@ -6,7 +6,7 @@ namespace BallchasingWrapper.Models
     {
         public ServiceTokenInfo TokenInfo { get; set; }
 
-        public IList<APIRequestFilter> Filters { get; set; } = new List<APIRequestFilter>();
+        public IList<ApiUrlCreator> Filters { get; set; } = new List<ApiUrlCreator>();
 
         public double CycleIntervalInHours { get; set; }
 

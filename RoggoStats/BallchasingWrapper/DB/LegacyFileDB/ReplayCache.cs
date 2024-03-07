@@ -12,7 +12,7 @@ namespace BallchasingWrapper.DB.LegacyFileDB
 
         }
 
-        public void StoreReplaysInCache(IEnumerable<Replay> replays, APIRequestFilter filter)
+        public void StoreReplaysInCache(IEnumerable<Replay> replays, ApiUrlCreator filter)
         {
             var fileName = $"{Guid.NewGuid()}.7z";
             var hasCacheFile = HasCacheFile(filter);
@@ -22,36 +22,36 @@ namespace BallchasingWrapper.DB.LegacyFileDB
 
             File.WriteAllBytes(filePath, Compressor.ConvertObject(new List<Replay>(replays), false));
             if (!hasCacheFile)
-                IndexCollection.Add(new CacheEntry { FileName = fileName, URL = filter.GetApiUrl() });
+                IndexCollection.Add(new CacheEntry { FileName = fileName, URL = filter.Urls.First() });
         }
 
-        private string GetFileName(APIRequestFilter filter)
+        private string GetFileName(ApiUrlCreator filter)
         {
             lock (IndexCollection)
             {
                 foreach (var entry in IndexCollection)
                 {
-                    if (filter.GetApiUrl().Equals(entry.URL))
+                    if (filter.Urls.First().Equals(entry.URL))
                         return Path.Combine(RLConstants.ReplayCacheFolder, entry.FileName);
                 }
             }
             return string.Empty;
         }
 
-        public bool HasCacheFile(APIRequestFilter filter)
+        public bool HasCacheFile(ApiUrlCreator filter)
         {
             lock (IndexCollection)
             {
                 foreach (var entry in IndexCollection)
                 {
-                    if (filter.GetApiUrl().Equals(entry.URL))
+                    if (filter.Urls.First().Equals(entry.URL))
                         return true;
                 }
             }
             return false;
         }
 
-        public bool HasOneReplayInFile(IEnumerable<Replay> replays, APIRequestFilter filter)
+        public bool HasOneReplayInFile(IEnumerable<Replay> replays, ApiUrlCreator filter)
         {
             try
             {
@@ -72,14 +72,14 @@ namespace BallchasingWrapper.DB.LegacyFileDB
             return false;
         }
 
-        private void RemoveFalseEntryFromIndexCollection(APIRequestFilter filter)
+        private void RemoveFalseEntryFromIndexCollection(ApiUrlCreator filter)
         {
             CacheEntry falseEntry = null;
             lock (IndexCollection)
             {
                 foreach (var entry in IndexCollection)
                 {
-                    if (filter.GetApiUrl().Equals(entry.URL))
+                    if (filter.Urls.First().Equals(entry.URL))
                     {
                         falseEntry = entry;
                     }
@@ -89,13 +89,13 @@ namespace BallchasingWrapper.DB.LegacyFileDB
             }
         }
 
-        private List<Replay> GetReplaysOutOfCacheFile(APIRequestFilter filter)
+        private List<Replay> GetReplaysOutOfCacheFile(ApiUrlCreator filter)
         {
             var fileName = GetFileName(filter);
             return Compressor.ConvertObject<List<Replay>>(File.ReadAllBytes(fileName), false);
         }
 
-        public void AddTheOtherReplaysToTheDataPack(HashSet<Replay> hashSet, APIRequestFilter filter)
+        public void AddTheOtherReplaysToTheDataPack(HashSet<Replay> hashSet, ApiUrlCreator filter)
         {
             hashSet.UnionWith(GetReplaysOutOfCacheFile(filter));
         }

@@ -16,12 +16,9 @@ namespace BallchasingWrapper.BusinessLogic
             ReplayCache = replayCache;
         }
 
-        public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter, bool checkCache = false)
+        public async Task<CollectReplaysResponse> CollectReplaysAsync(ApiUrlCreator filter, bool checkCache = false)
         {
             Logger.LogInformation("Started collecting replays.");
-            //Don't use cache on requests with cap
-            if (filter.ReplayCap > 0)
-                checkCache = false;
 
             var response = new CollectReplaysResponse();
             InitializeNewProgress();
@@ -29,13 +26,12 @@ namespace BallchasingWrapper.BusinessLogic
             var sw = new Stopwatch();
             sw.Start();
 
-            var (replays, doubleReplays) = await GetDataPack(filter, checkCache);
+            var replays = await GetReplays(filter, checkCache);
 
             sw.Stop();
-            LastUpdateCall("Download finished.", replays.Length, doubleReplays);
+            LastUpdateCall("Download finished.", replays.Length);
             Logger.LogInformation("Finished collecting replays.");
 
-            response.DoubleReplays = doubleReplays;
             response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
             GC.Collect();
@@ -43,20 +39,14 @@ namespace BallchasingWrapper.BusinessLogic
             LogDebugObject(new
             {
                 ReplayCount = replays.Length,
-                FalsePartCount = doubleReplays,
                 sw.ElapsedMilliseconds
             });
-
-            //Don't use cache on requests with cap
-            if (filter.ReplayCap == 0)
-                if (!_cancelDownload)
-                    ReplayCache.StoreReplaysInCache(response.Replays, filter);
 
             _cancelDownload = false;
             return response;
         }
 
-        public async Task<CollectReplaysResponse> CollectReplaysAsync(APIRequestFilter filter, CancellationToken cancellationToken, bool checkCache = false)
+        public async Task<CollectReplaysResponse> CollectReplaysAsync(ApiUrlCreator filter, CancellationToken cancellationToken, bool checkCache = false)
         {
             Api.StoppingToken = cancellationToken;
             return await CollectReplaysAsync(filter, checkCache);
@@ -64,19 +54,18 @@ namespace BallchasingWrapper.BusinessLogic
 
         public void CancelDownload() => _cancelDownload = true;
 
-        private async Task<(Replay[], int doubleReplays)> GetDataPack(APIRequestFilter filter, bool checkCache)
+        private async Task<Replay[]> GetReplays(ApiUrlCreator filter, bool checkCache)
         {
             LogDebugObject(new
             {
-                PackUrl = filter.GetApiUrl(),
-                filter.Names
+                PackUrl = filter.Urls,
             });
             //init variables
-            var url = filter.GetApiUrl();
+            var url = filter.Urls.First();
             var firstPack = await Api.GetApiDataPack(url);
             var firstIteration = true;
             if (!firstPack.Success)
-                return (Array.Empty<Replay>(), 0);
+                return Array.Empty<Replay>();
 
             var totalReplayCount = firstPack.ReplayCount;
             if (totalReplayCount >= 10_000)
@@ -88,7 +77,7 @@ namespace BallchasingWrapper.BusinessLogic
 
             //check if there are replays to download
             if (totalReplayCount.Equals(0))
-                return (Array.Empty<Replay>(), 0);
+                return Array.Empty<Replay>();
 
 
             while (!done)
@@ -97,7 +86,7 @@ namespace BallchasingWrapper.BusinessLogic
                 var dataPack = firstIteration ? firstPack : await Api.GetApiDataPack(url);
                 firstIteration = false;
                 if (!dataPack.Success)
-                    return (Array.Empty<Replay>(), 0);
+                    return Array.Empty<Replay>();
 
                 var replayCountBefore = dataPack.Replays.Count;
 
@@ -106,13 +95,13 @@ namespace BallchasingWrapper.BusinessLogic
                 Logger.LogDebug($"Removed {dataPack.Replays.Count - hashedReplayChunk.Count} duplicates");
 
                 //delete false replays
-                if (filter.CheckDate)
-                    hashedReplayChunk.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2);
+                //if (filter.)
+                //    hashedReplayChunk.DeleteReplaysThatAreNotInTimeRange(filter.DateRange.Item1, filter.DateRange.Item2);
 
                 if (hashedReplayChunk.Count.Equals(0)) //If the query got out of range there is no need to seek farther; maybe there is; dont know yet.
                     done = true;
 
-                hashedReplayChunk.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
+                //hashedReplayChunk.DeleteReplaysThatDoNotHaveTheActualNamesInIt(filter.Names);
 
                 doubleReplays += replayCountBefore - hashedReplayChunk.Count;
                 ProgressState.FalsePartCount += replayCountBefore - hashedReplayChunk.Count;
@@ -136,10 +125,10 @@ namespace BallchasingWrapper.BusinessLogic
                 allReplays.UnionWith(hashedReplayChunk);
 
                 //check if replay count exceeds replay cap
-                if (!filter.ReplayCap.Equals(0))
-                    if (allReplays.Count >= filter.ReplayCap)
+                if (!filter.Cap.Equals(0))
+                    if (allReplays.Count >= filter.Cap)
                     {
-                        allReplays.TrimReplaysToCap(filter.ReplayCap);
+                        allReplays.TrimReplaysToCap(filter.Cap);
                         done = true;
                     }
 
@@ -164,7 +153,7 @@ namespace BallchasingWrapper.BusinessLogic
 
                 Logger.LogDebug($"Current replay count: {allReplays.Count}");
             }
-            return (allReplays.ToArray(), doubleReplays);
+            return allReplays.ToArray();
         }
 
         private void LogDebugObject(object obj)

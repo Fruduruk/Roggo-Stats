@@ -1,6 +1,6 @@
 use ballchasing::ballchasing_client;
 use crate::ballchasing::ballchasing_client::BallchasingClient;
-use crate::ballchasing::{Identity, IdentityType, MatchType, Playlist, RequestFilter};
+use crate::ballchasing::{GroupType, Identity, IdentityType, MatchType, Playlist, RequestFilter};
 
 pub mod ballchasing {
     tonic::include_proto!("ballchasing");
@@ -14,10 +14,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let request = tonic::Request::new(RequestFilter {
         replay_cap: None,
-        filter_name: None,
         identities: vec![
             Identity {
-                r#type: IdentityType::Name.into(),
+                identity_type: IdentityType::Name.into(),
                 name_or_id: "Fruduruk".into()
             }
         ],
@@ -27,6 +26,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         season: None,
         min_date: None,
         max_date: None,
+        group_type: GroupType::Together.into(),
+        min_rank: None,
+        max_rank: None,
     });
 
 

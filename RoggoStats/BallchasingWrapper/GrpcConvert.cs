@@ -9,16 +9,6 @@ namespace BallchasingWrapper;
 
 public static class GrpcConvert
 {
-    public static APIRequestFilter ToApiRequestFilter(this Grpc.RequestFilter filter)
-    {
-        var requestFilter = new APIRequestFilter
-        {
-            ReplayCap = filter.HasReplayCap ? filter.ReplayCap : 0,
-            FilterName = filter.HasFilterName ? filter.FilterName : string.Empty,
-        };
-        return requestFilter;
-    }
-
     public static Grpc.Replay ToGrpcReplay(this Replay replay)
     {
         var grpcReplay = new Grpc.Replay
@@ -47,12 +37,47 @@ public static class GrpcConvert
     {
         var grpcRank = new Grpc.Rank
         {
-            Id = rank.Id ?? string.Empty,
+            Id = ConvertToGrpcRankType(rank.Id),
             Tier = rank.Tier,
             Division = rank.Division,
             Name = rank.Name
         };
         return grpcRank;
+    }
+
+    private static Grpc.RankType ConvertToGrpcRankType(string? rankId)
+    {
+        if (rankId is null)
+            return 0;
+        return rankId switch
+        {
+            "" => Grpc.RankType.Unknown,
+            "unranked" => Grpc.RankType.NoRank,
+            "bronze-1" => Grpc.RankType.Bronze1,
+            "bronze-2" => Grpc.RankType.Bronze2,
+            "bronze-3" => Grpc.RankType.Bronze3,
+            "silver-1" => Grpc.RankType.Silver1,
+            "silver-2" => Grpc.RankType.Silver2,
+            "silver-3" => Grpc.RankType.Silver3,
+            "gold-1" => Grpc.RankType.Gold1,
+            "gold-2" => Grpc.RankType.Gold2,
+            "gold-3" => Grpc.RankType.Gold3,
+            "platinum-1" => Grpc.RankType.Platinum1,
+            "platinum-2" => Grpc.RankType.Platinum2,
+            "platinum-3" => Grpc.RankType.Platinum3,
+            "diamond-1" => Grpc.RankType.Diamond1,
+            "diamond-2" => Grpc.RankType.Diamond2,
+            "diamond-3" => Grpc.RankType.Diamond3,
+            "champion-1" => Grpc.RankType.Champion1,
+            "champion-2" => Grpc.RankType.Champion2,
+            "champion-3" => Grpc.RankType.Champion3,
+            "grand-champion" => Grpc.RankType.OldGrandChampion,
+            "grand-champion-1" => Grpc.RankType.GrandChampion1,
+            "grand-champion-2" => Grpc.RankType.GrandChampion2,
+            "grand-champion-3" => Grpc.RankType.GrandChampion3,
+            "supersonic-legend" => Grpc.RankType.SupersonicLegend,
+            _ => throw new ArgumentOutOfRangeException(nameof(rankId), rankId, "Cannot parse rank to RankType")
+        };
     }
 
     private static Grpc.Team ConvertToGrpcTeam(Team team)

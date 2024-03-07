@@ -1,0 +1,19 @@
+{
+  "id": "05ec0f94-0572-4747-9a76-b3e8c1f5a981",
+  "importStreams": [
+    {
+      "id": "ff6e57f7-65cb-4f2a-83a7-1f51761e8660",
+      "name": "proto-file",
+      "importerName": "ProtoFile",
+      "createMissingOperations": true,
+      "options": {
+        "files": [
+          "../BallchasingWrapper/Protos"
+        ],
+        "importPaths": []
+      }
+    }
+  ],
+  "authConfigs": [],
+  "certificates": []
+}
