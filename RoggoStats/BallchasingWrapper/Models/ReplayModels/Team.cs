@@ -2,11 +2,9 @@
 {
     public class Team
     {
-        [JsonProperty("goals")]
-        public int Goals { get; set; }
+        [JsonProperty("goals")] public int Goals { get; set; }
 
-        [JsonProperty("players")]
-        public List<Player> Players { get; set; } = new List<Player>();
+        [JsonProperty("players")] public List<Player> Players { get; set; } = new List<Player>();
 
         public int InitialTeamSize { get; set; }
 
@@ -23,6 +21,7 @@
                     if (!that.HasName(p.Name))
                         return false;
                 }
+
                 return true;
             }
             else
@@ -62,6 +61,20 @@
                     if (CheckEquality(player.Name, name))
                         return true;
             }
+
+            return false;
+        }
+
+        public bool HasId(string id)
+        {
+            foreach (var player in Players)
+            {
+                if (player.Id?.Id == null)
+                    continue;
+                if (CheckEquality(player.Id.Id, id))
+                    return true;
+            }
+
             return false;
         }
 
@@ -72,9 +85,9 @@
                 if (ob2 is null)
                     return true;
             }
-            else
-                if (ob1.Equals(ob2))
+            else if (ob1.Equals(ob2))
                 return true;
+
             return false;
         }
     }

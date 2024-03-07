@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using BallchasingWrapper.Extensions;
 using BallchasingWrapper.Interfaces;
 using BallchasingWrapper.Models;
 using Replay = BallchasingWrapper.Models.ReplayModels.Replay;
@@ -13,7 +12,6 @@ namespace BallchasingWrapper.BusinessLogic
     /// </summary>
     public class ReplayCollector
     {
-        private bool _cancelDownload;
         private readonly IBallchasingApi _api;
         private IReplayCache _replayCache;
         private ILogger _logger;
@@ -48,59 +46,57 @@ namespace BallchasingWrapper.BusinessLogic
                 sw.ElapsedMilliseconds
             });
 
-            _cancelDownload = false;
+            LogDebugObject(new
+            {
+                _api
+            });
+            
             return response;
         }
-
-        public void CancelDownload() => _cancelDownload = true;
 
         private async Task<List<Replay>> GetReplays(ApiUrlCreator filter,
             CancellationToken cancellationToken)
         {
             return filter.GroupType switch
             {
-                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(filter, cancellationToken),
-                Grpc.GroupType.Individually => await CollectIndividualReplaysAsync(filter, cancellationToken),
+                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(filter, cancellationToken,
+                    replay => replay.PlayedTogether(filter.Identities)),
+                Grpc.GroupType.Individually =>
+                    await CollectIndividualReplaysAsync(filter, cancellationToken, _ => true),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
         private async Task<List<Replay>> CollectIndividualReplaysAsync(ApiUrlCreator filter,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, Func<Replay, bool> condition)
         {
             var allReplays = new HashSet<Replay>();
             var downloaders = filter.Urls.Select(url =>
                 new SimpleReplayDownloader(_api, url, cancellationToken)).ToList();
 
-            while (!downloaders.All(downloader => downloader.EndReached) && (filter.Cap == 0|| allReplays.Count < filter.Cap))
+            while (!downloaders.All(downloader => downloader.EndReached) &&
+                   (filter.Cap == 0 || allReplays.Count < filter.Cap))
             {
-                foreach (var downloader in downloaders)
+                foreach (var downloader in downloaders.Where(downloader => !downloader.EndReached))
                 {
-                    if (filter.Cap == 0|| allReplays.Count < filter.Cap)
-                    {
-                        var replay = await downloader.DownloadNextReplayAsync();
-                        if (replay is null)
-                        {
-                            continue;
-                        }
-                        allReplays.Add(replay);
-                    }
-                    else
+                    if (filter.Cap != 0 && allReplays.Count >= filter.Cap)
                     {
                         break;
                     }
+
+                    var replay = await downloader.DownloadNextReplayAsync();
+                    if (replay is null)
+                    {
+                        continue;
+                    }
+
+                    if (condition.Invoke(replay))
+                        allReplays.Add(replay);
                 }
             }
 
             return allReplays.ToList();
         }
-
-        private async Task<List<Replay>> CollectTeamReplaysAsync(ApiUrlCreator filter,
-            CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-        
 
         private void LogDebugObject(object obj)
         {
