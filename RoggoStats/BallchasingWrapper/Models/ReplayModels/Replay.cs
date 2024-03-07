@@ -1,31 +1,30 @@
-﻿
-namespace BallchasingWrapper.Models.ReplayModels
+﻿namespace BallchasingWrapper.Models.ReplayModels
 {
     public class Replay
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("link")]
-        public string Link { get; set; }
+        public string? Link { get; set; }
 
         [JsonProperty("rocket_league_id")]
-        public string RocketLeagueId { get; set; }
+        public string? RocketLeagueId { get; set; }
 
         [JsonProperty("replay_title")]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [JsonProperty("visibility")]
-        public string Visibility { get; set; }
+        public string? Visibility { get; set; }
 
         [JsonProperty("map_code")]
-        public string MapCode { get; set; }
+        public string? MapCode { get; set; }
 
         [JsonProperty("playlist_id")]
-        public string Playlist { get; set; }
+        public string? Playlist { get; set; }
 
         [JsonProperty("playlist_name")]
-        public string PlaylistName { get; set; }
+        public string? PlaylistName { get; set; }
 
         [JsonProperty("duration")]
         public int Duration { get; set; }
@@ -37,7 +36,7 @@ namespace BallchasingWrapper.Models.ReplayModels
         public int Season { get; set; }
 
         [JsonProperty("season_type")]
-        public string SeasonType { get; set; } = "before Free2Play";
+        public string? SeasonType { get; set; } = "before Free2Play";
 
         [JsonProperty("date")]
         public DateTime Date { get; set; }
@@ -52,29 +51,30 @@ namespace BallchasingWrapper.Models.ReplayModels
         public Rank? MaxRank { get; set; }
 
         [JsonProperty("uploader")]
-        public Uploader Uploader { get; set; }
+        public Uploader? Uploader { get; set; }
 
         [JsonProperty("blue")]
-        public Team TeamBlue { get; set; }
+        public Team? TeamBlue { get; set; }
 
         [JsonProperty("orange")]
-        public Team TeamOrange { get; set; }
+        public Team? TeamOrange { get; set; }
 
         // override object.Equals
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || GetType() != obj.GetType())
                 return false;
             var that = obj as Replay;
-            if (that.Id.Equals(Id))
+            if (that != null && that.Id.Equals(Id))
                 return true;
-            if (CheckEquality(SeasonType, that.SeasonType))
-                if (Season.Equals(that.Season))
-                    if (CheckEquality(Playlist, that.Playlist))
-                        if (CheckEquality(TeamBlue, that.TeamBlue))
-                            if (CheckEquality(TeamOrange, that.TeamOrange))
-                                return true;
-            return false;
+            if (!CheckEquality(SeasonType, that?.SeasonType))
+                return false;
+            if (!Season.Equals(that?.Season))
+                return false;
+            if (!CheckEquality(Playlist, that.Playlist))
+                return false;
+            return CheckEquality(TeamBlue, that.TeamBlue) &&
+                   CheckEquality(TeamOrange, that.TeamOrange);
         }
 
         public override int GetHashCode()
@@ -89,7 +89,7 @@ namespace BallchasingWrapper.Models.ReplayModels
             return hash;
         }
 
-        private static bool CheckEquality(object ob1, object ob2)
+        private static bool CheckEquality(object? ob1, object? ob2)
         {
             if (ob1 is null)
             {
@@ -104,11 +104,26 @@ namespace BallchasingWrapper.Models.ReplayModels
 
         public bool HasNameInIt(string name)
         {
-            if (TeamBlue.HasName(name))
-                return true;
-            if (TeamOrange.HasName(name))
-                return true;
-            return false;
+            return TeamOrange != null && TeamBlue != null &&
+                   (TeamBlue.HasName(name) || TeamOrange.HasName(name));
+        }
+
+        public bool PlayedTogether(IEnumerable<Grpc.Identity> identities)
+        {
+            return identities.All(identity => identity.IdentityType switch
+            {
+                Grpc.IdentityType.Name => HasNameInIt(identity.NameOrId),
+                Grpc.IdentityType.SteamId => HasIdInIt(identity.NameOrId),
+                Grpc.IdentityType.EpicId => HasIdInIt(identity.NameOrId),
+                Grpc.IdentityType.Ps4GamerTag => HasIdInIt(identity.NameOrId),
+                _ => throw new ArgumentOutOfRangeException()
+            } );
+        }
+
+        private bool HasIdInIt(string id)
+        {
+            return TeamOrange != null && TeamBlue != null &&
+                   (TeamBlue.HasId(id) || TeamOrange.HasId(id));
         }
     }
 }

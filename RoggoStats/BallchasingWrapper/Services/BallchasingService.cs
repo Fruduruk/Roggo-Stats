@@ -29,22 +29,19 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         
 
         var replays = response.Replays.ToList();
-        var grpcReplays = new List<Grpc.Replay>();
-        for (int i = 0; i< response.Replays.Count(); i++)
+        var grpcReplays = replays.Select(replay =>
         {
-            var replay = replays[i];
             try
             {
-                var grpcReplay = replay.ToGrpcReplay();
-                grpcReplays.Add(grpcReplay);
+                return replay.ToGrpcReplay();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            
-        }
-        //var grpcReplays = response.Replays.Select(r => r.ToGrpcReplay()).ToList();
+
+            return null;
+        });
 
         return await Task.FromResult(new Grpc.SimpleReplaysResponse
         {

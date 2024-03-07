@@ -93,7 +93,7 @@ namespace BallchasingWrapper.BusinessLogic
             {
                 return new ApiDataPack
                 {
-                    ReceivedString = ex.Message,
+                    ReceivedString = ex.ToString(),
                     Success = false
                 };
             }
