@@ -17,6 +17,7 @@ namespace BallchasingWrapper
         private const string MongoPassword = "MONGO_PASSWORD";
 
         private static AuthTokenInfo? _tokenInfo;
+
         public static void Main(string[] args)
         {
             if (IsAnyEnvironmentVariableMissing())
@@ -24,9 +25,13 @@ namespace BallchasingWrapper
 
             var builder = WebApplication.CreateBuilder(args);
 
+            var mongoDb = SetupMongoDb();
+            var ballchasingApi = new BallchasingApi(_tokenInfo);
+            var replayCollectorFactory = new ReplayCollectorFactory(ballchasingApi, replayCache: mongoDb);
+            
             builder.Services.AddGrpc();
-            builder.Services.AddSingleton(SetupMongoDb());
-            builder.Services.AddSingleton<IBallchasingApi>(new BallchasingApi(_tokenInfo));
+            builder.Services.AddSingleton(replayCollectorFactory);
+
             var app = builder.Build();
             app.MapGrpcService<BallchasingService>();
             app.MapGet("/",
@@ -34,6 +39,9 @@ namespace BallchasingWrapper
                     "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             app.Run();
+            Console.WriteLine("Shutdown replay collectors...");
+            replayCollectorFactory.Shutdown();
+            Console.WriteLine("Replay collector shutdown successful.");
         }
 
         private static bool IsAnyEnvironmentVariableMissing()
@@ -63,6 +71,7 @@ namespace BallchasingWrapper
                 Console.WriteLine($"{BallchasingApiKey} missing.");
                 return false;
             }
+
             var tokenInfo = TokenInfoProvider.GetTokenInfo(key);
             if (tokenInfo.Except is not null)
             {
@@ -75,7 +84,7 @@ namespace BallchasingWrapper
                 Console.WriteLine("You are not a chaser. I can't let you in.");
                 return false;
             }
-            
+
             _tokenInfo = tokenInfo;
             return true;
         }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using BallchasingWrapper.Extensions;
 using BallchasingWrapper.Interfaces;
 using BallchasingWrapper.Models;
 using Replay = BallchasingWrapper.Models.ReplayModels.Replay;
@@ -10,43 +11,63 @@ namespace BallchasingWrapper.BusinessLogic
     /// It not only collects various replays asynchronously, it compares them, sorts out double replays and
     /// makes use of the replay cache to safe resources.
     /// </summary>
-    public class ReplayCollector
+    public class ReplayCollector : IDisposable
     {
+        private readonly ApiUrlCreator _urlCreator;
         private readonly IBallchasingApi _api;
         private IReplayCache _replayCache;
-        private ILogger _logger;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private bool _disposed;
+        private readonly List<SimpleReplayDownloader> _downloaders;
+        private readonly Task backgroundDownloadTask;
 
-        public ReplayCollector(IBallchasingApi api, IReplayCache replayCache, ILogger logger)
+        public ReplayCollector(ApiUrlCreator urlCreator, IBallchasingApi api, IReplayCache replayCache)
         {
+            _urlCreator = urlCreator;
             _api = api;
             _replayCache = replayCache;
-            _logger = logger;
+            _cancellationTokenSource = new CancellationTokenSource();
+            _downloaders = urlCreator.Urls.Select(url =>
+                new SimpleReplayDownloader(_api, url, _replayCache)).ToList();
+            backgroundDownloadTask = Task.WhenAll(_downloaders.Select(downloader =>
+            {
+                return Task.Run(async () =>
+                {
+                    await downloader.StartBackgroundDownloadAsync(_cancellationTokenSource.Token);
+                });
+            }));
         }
 
-        public async Task<CollectReplaysResponse> CollectReplaysAsync(ApiUrlCreator filter,
+        public async Task<CollectReplaysResponse> CollectReplaysAsync(ILogger logger,
             CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Started collecting replays.");
+            logger.LogInformation("Started collecting replays.");
 
             var response = new CollectReplaysResponse();
             var sw = new Stopwatch();
             sw.Start();
 
-            var replays = await GetReplays(filter, cancellationToken);
+            var replays = (await GetReplays(logger, cancellationToken)).ToList();
 
             sw.Stop();
-            _logger.LogInformation("Finished collecting replays.");
 
-            response.Replays = replays;
             response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
 
-            LogDebugObject(new
+            if (cancellationToken.IsCancellationRequested)
+            {
+                logger.LogInformation("Cancelled collecting replays.");
+                return response;
+            }
+
+            response.Replays = replays;
+            
+            logger.LogInformation("Finished collecting replays.");
+            logger.LogDebugObject(new
             {
                 ReplayCount = replays.Count,
                 sw.ElapsedMilliseconds
             });
-
-            LogDebugObject(new
+            logger.LogDebugObject(new
             {
                 _api
             });
@@ -54,29 +75,29 @@ namespace BallchasingWrapper.BusinessLogic
             return response;
         }
 
-        private async Task<List<Replay>> GetReplays(ApiUrlCreator filter,
+        private async Task<IEnumerable<Replay>> GetReplays(ILogger logger,
             CancellationToken cancellationToken)
         {
-            return filter.GroupType switch
+            return _urlCreator.GroupType switch
             {
-                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(filter,
-                    replay => replay.PlayedTogether(filter.Identities), cancellationToken),
+                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(_urlCreator,
+                    replay => replay.PlayedTogether(_urlCreator.Identities), logger, cancellationToken),
                 Grpc.GroupType.Individually =>
-                    await CollectIndividualReplaysAsync(filter, _ => true, cancellationToken),
+                    await CollectIndividualReplaysAsync(_urlCreator, _ => true, logger, cancellationToken),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
-        private async Task<List<Replay>> CollectIndividualReplaysAsync(ApiUrlCreator filter,
-            Func<Replay, bool> condition, CancellationToken cancellationToken)
+        private async Task<IEnumerable<Replay>> CollectIndividualReplaysAsync(ApiUrlCreator filter,
+            Func<Replay, bool> condition, ILogger logger, CancellationToken cancellationToken)
         {
             var allReplays = new HashSet<Replay>();
-            var downloaders = filter.Urls.Select(url =>
-                new SimpleReplayDownloader(_api, url, cancellationToken)).ToList();
 
             while (filter.Cap == 0 || allReplays.Count < filter.Cap)
             {
-                var activeDownloaders = downloaders.Where(downloader => !downloader.EndReached).ToList();
+                var activeDownloaders = _downloaders
+                    .Where(downloader => !downloader.EndReached)
+                    .ToList();
                 if (!activeDownloaders.Any())
                 {
                     break;
@@ -89,7 +110,12 @@ namespace BallchasingWrapper.BusinessLogic
                         break;
                     }
 
-                    var replay = await downloader.DownloadNextReplayAsync();
+                    var replay = await downloader.GetNextReplayAsync(cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return allReplays;
+                    }
+
                     if (replay is null)
                     {
                         continue;
@@ -101,17 +127,21 @@ namespace BallchasingWrapper.BusinessLogic
                     }
 
                     if (!allReplays.Contains(replay))
-                        _logger.LogInformation($"Added replay {allReplays.Count+1}: {replay.Title}");
+                        logger.LogInformation($"Added replay {allReplays.Count + 1}: {replay.Title}");
                     allReplays.Add(replay);
                 }
             }
 
-            return allReplays.ToList();
+            return allReplays;
         }
 
-        private void LogDebugObject(object obj)
+        public void Dispose()
         {
-            _logger.LogDebug(JsonConvert.SerializeObject(obj, Formatting.Indented));
+            if (_disposed)
+                return;
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _disposed = true;
         }
     }
 }

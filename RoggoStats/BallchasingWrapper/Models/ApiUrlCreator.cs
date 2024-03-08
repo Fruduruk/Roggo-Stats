@@ -20,6 +20,16 @@ namespace BallchasingWrapper.Models
             Urls = CreateUrls().ToArray();
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            foreach (var url in Urls)
+            {
+                hashCode.Add(url.GetHashCode());
+            }
+
+            return hashCode.ToHashCode();
+        }
 
         private IEnumerable<string> CreateUrls()
         {
