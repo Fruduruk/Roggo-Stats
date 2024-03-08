@@ -50,7 +50,7 @@ namespace BallchasingWrapper.BusinessLogic
             {
                 _api
             });
-            
+
             return response;
         }
 
@@ -59,25 +59,30 @@ namespace BallchasingWrapper.BusinessLogic
         {
             return filter.GroupType switch
             {
-                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(filter, cancellationToken,
-                    replay => replay.PlayedTogether(filter.Identities)),
+                Grpc.GroupType.Together => await CollectIndividualReplaysAsync(filter,
+                    replay => replay.PlayedTogether(filter.Identities), cancellationToken),
                 Grpc.GroupType.Individually =>
-                    await CollectIndividualReplaysAsync(filter, cancellationToken, _ => true),
+                    await CollectIndividualReplaysAsync(filter, _ => true, cancellationToken),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
         private async Task<List<Replay>> CollectIndividualReplaysAsync(ApiUrlCreator filter,
-            CancellationToken cancellationToken, Func<Replay, bool> condition)
+            Func<Replay, bool> condition, CancellationToken cancellationToken)
         {
             var allReplays = new HashSet<Replay>();
             var downloaders = filter.Urls.Select(url =>
                 new SimpleReplayDownloader(_api, url, cancellationToken)).ToList();
 
-            while (!downloaders.All(downloader => downloader.EndReached) &&
-                   (filter.Cap == 0 || allReplays.Count < filter.Cap))
+            while (filter.Cap == 0 || allReplays.Count < filter.Cap)
             {
-                foreach (var downloader in downloaders.Where(downloader => !downloader.EndReached))
+                var activeDownloaders = downloaders.Where(downloader => !downloader.EndReached).ToList();
+                if (!activeDownloaders.Any())
+                {
+                    break;
+                }
+
+                foreach (var downloader in activeDownloaders)
                 {
                     if (filter.Cap != 0 && allReplays.Count >= filter.Cap)
                     {
@@ -90,8 +95,14 @@ namespace BallchasingWrapper.BusinessLogic
                         continue;
                     }
 
-                    if (condition.Invoke(replay))
-                        allReplays.Add(replay);
+                    if (!condition.Invoke(replay))
+                    {
+                        continue;
+                    }
+
+                    if (!allReplays.Contains(replay))
+                        _logger.LogInformation($"Added replay {allReplays.Count+1}: {replay.Title}");
+                    allReplays.Add(replay);
                 }
             }
 
