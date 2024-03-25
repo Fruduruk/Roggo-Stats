@@ -27,10 +27,10 @@ namespace BallchasingWrapper
 
             var mongoDb = SetupMongoDb();
             var ballchasingApi = new BallchasingApi(_tokenInfo);
-            var replayCollectorFactory = new ReplayCollectorFactory(ballchasingApi, replayCache: mongoDb);
             
             builder.Services.AddGrpc();
-            builder.Services.AddSingleton(replayCollectorFactory);
+            builder.Services.AddSingleton(mongoDb);
+            builder.Services.AddSingleton<IBallchasingApi>(ballchasingApi);
 
             var app = builder.Build();
             app.MapGrpcService<BallchasingService>();
@@ -39,8 +39,6 @@ namespace BallchasingWrapper
                     "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             app.Run();
-            Console.WriteLine("Shutdown replay collectors...");
-            replayCollectorFactory.Shutdown();
             Console.WriteLine("Replay collector shutdown successful.");
         }
 

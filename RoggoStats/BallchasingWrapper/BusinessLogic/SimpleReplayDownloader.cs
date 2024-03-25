@@ -29,7 +29,7 @@ public class SimpleReplayDownloader
         if (_count != -1)
             return _count;
         // just download 1 replay to save resources.
-        var dataPack = await _api.GetApiDataPackAsync(_url + "&count=1", cancellationToken);
+        var dataPack = await _api.GetApiDataPackAsync(_startUrl + "&count=1", cancellationToken);
         _count = !dataPack.Success ? 0 : dataPack.ReplayCount;
 
         return _count;
@@ -53,42 +53,21 @@ public class SimpleReplayDownloader
 
     private async Task<Replay?> DownloadReplayAtIndexAsync(int index, CancellationToken cancellationToken)
     {
-        while (!EndReached)
-        {
-            if (cancellationToken.IsCancellationRequested)
-                return null;
+        if (_downloadedReplays.Count > index)
+            return _downloadedReplays[index];
+        
+        if (_url is null || cancellationToken.IsCancellationRequested)
+            return null;
+        _logger.LogInformation($"{((double)_downloadedReplays.Count / _count)*100}% Calling {_url}");
 
-            if (_downloadedReplays.Count - 1 >= index)
-                return _downloadedReplays[index];
+        var dataPack = await _api.GetApiDataPackAsync(_url, cancellationToken);
+        _url = dataPack.Next;
+        if (_count == -1)
+            _count = dataPack.ReplayCount;
 
-            await Task.Delay(10, cancellationToken);
-        }
-
-        return null;
-    }
-
-    public async Task StartBackgroundDownloadAsync(CancellationToken cancellationToken)
-    {
-        while (true)
-        {
-            if (_url is null || cancellationToken.IsCancellationRequested)
-                break;
-            _logger.LogInformation($"{((double)_downloadedReplays.Count / _count)*100}% Calling {_url}");
-
-            var dataPack = await _api.GetApiDataPackAsync(_url, cancellationToken);
-            _url = dataPack.Next;
-            if (_count == -1)
-                _count = dataPack.ReplayCount;
-
-            if (!dataPack.Success || !dataPack.Replays.Any())
-                break;
-            _downloadedReplays.AddRange(dataPack.Replays);
-        }
-    }
-
-    public void Reset()
-    {
-        _index = 0;
-        EndReached = false;
+        if (!dataPack.Success || !dataPack.Replays.Any())
+            return null;
+        _downloadedReplays.AddRange(dataPack.Replays);
+        return _downloadedReplays[index];
     }
 }
