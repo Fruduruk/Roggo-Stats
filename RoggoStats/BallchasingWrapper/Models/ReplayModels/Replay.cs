@@ -125,5 +125,17 @@
             return TeamOrange != null && TeamBlue != null &&
                    (TeamBlue.HasId(id) || TeamOrange.HasId(id));
         }
+
+        public bool ContainsAtLeastOneIdentity(List<Grpc.Identity> identities)
+        {
+            return identities.Any(identity => identity.IdentityType switch
+            {
+                Grpc.IdentityType.Name => HasNameInIt(identity.NameOrId),
+                Grpc.IdentityType.SteamId => HasIdInIt(identity.NameOrId),
+                Grpc.IdentityType.EpicId => HasIdInIt(identity.NameOrId),
+                Grpc.IdentityType.Ps4GamerTag => HasIdInIt(identity.NameOrId),
+                _ => throw new ArgumentOutOfRangeException()
+            } );
+        }
     }
 }

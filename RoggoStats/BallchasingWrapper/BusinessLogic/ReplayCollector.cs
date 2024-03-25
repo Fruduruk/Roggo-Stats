@@ -21,14 +21,14 @@ namespace BallchasingWrapper.BusinessLogic
         private readonly List<SimpleReplayDownloader> _downloaders;
         private readonly Task backgroundDownloadTask;
 
-        public ReplayCollector(ApiUrlCreator urlCreator, IBallchasingApi api, IReplayCache replayCache)
+        public ReplayCollector(ApiUrlCreator urlCreator, IBallchasingApi api, IReplayCache replayCache, ILogger logger)
         {
             _urlCreator = urlCreator;
             _api = api;
             _replayCache = replayCache;
             _cancellationTokenSource = new CancellationTokenSource();
             _downloaders = urlCreator.Urls.Select(url =>
-                new SimpleReplayDownloader(_api, url, _replayCache)).ToList();
+                new SimpleReplayDownloader(_api, url, _replayCache,logger)).ToList();
             backgroundDownloadTask = Task.WhenAll(_downloaders.Select(downloader =>
             {
                 return Task.Run(async () =>
@@ -83,7 +83,8 @@ namespace BallchasingWrapper.BusinessLogic
                 Grpc.GroupType.Together => await CollectIndividualReplaysAsync(_urlCreator,
                     replay => replay.PlayedTogether(_urlCreator.Identities), logger, cancellationToken),
                 Grpc.GroupType.Individually =>
-                    await CollectIndividualReplaysAsync(_urlCreator, _ => true, logger, cancellationToken),
+                    await CollectIndividualReplaysAsync(_urlCreator, 
+                        replay => replay.ContainsAtLeastOneIdentity(_urlCreator.Identities), logger, cancellationToken),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -132,6 +133,10 @@ namespace BallchasingWrapper.BusinessLogic
                 }
             }
 
+            foreach (var downloader in _downloaders)
+            {
+                downloader.Reset();
+            }
             return allReplays;
         }
 
