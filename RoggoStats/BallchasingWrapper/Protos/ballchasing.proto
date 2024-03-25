@@ -70,7 +70,8 @@ enum Playlist {
 }
 
 message SimpleReplaysResponse {
-  repeated Replay replays = 1;
+  int32 count = 1;
+  repeated Replay replays = 2;
 }
 
 message Replay {

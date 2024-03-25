@@ -8,21 +8,22 @@ namespace BallchasingWrapper.Services;
 
 public class BallchasingService : Grpc.Ballchasing.BallchasingBase
 {
+    private readonly IBallchasingApi _api;
+    private readonly RlStatsMongoDatabase _db;
     private readonly ILogger<BallchasingService> _logger;
-    private readonly ReplayCollectorFactory _replayCollectorFactory;
 
-    public BallchasingService(ILogger<BallchasingService> logger, ReplayCollectorFactory replayCollectorFactory)
+    public BallchasingService(IBallchasingApi api,RlStatsMongoDatabase db,ILogger<BallchasingService> logger)
     {
+        _api = api;
+        _db = db;
         _logger = logger;
-        _replayCollectorFactory = replayCollectorFactory;
     }
 
     public override async Task<Grpc.SimpleReplaysResponse> GetSimpleReplays(Grpc.RequestFilter request,
         ServerCallContext context)
     {
-        _replayCollectorFactory.AddCurrentLogger(_logger);
         var urlCreator = new ApiUrlCreator(request);
-        var collector = _replayCollectorFactory.GetReplayCollector(urlCreator);
+        var collector = new ReplayCollector(urlCreator,_api,_db,_logger);
         
         var response =
             await collector.CollectReplaysAsync(_logger, context.CancellationToken);
@@ -39,10 +40,11 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
             }
 
             return null;
-        });
+        }).ToList();
 
         return await Task.FromResult(new Grpc.SimpleReplaysResponse
         {
+            Count = grpcReplays.Count,
             Replays = { grpcReplays }
         });
     }

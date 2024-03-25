@@ -11,31 +11,20 @@ namespace BallchasingWrapper.BusinessLogic
     /// It not only collects various replays asynchronously, it compares them, sorts out double replays and
     /// makes use of the replay cache to safe resources.
     /// </summary>
-    public class ReplayCollector : IDisposable
+    public class ReplayCollector
     {
         private readonly ApiUrlCreator _urlCreator;
         private readonly IBallchasingApi _api;
         private IReplayCache _replayCache;
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private bool _disposed;
         private readonly List<SimpleReplayDownloader> _downloaders;
-        private readonly Task backgroundDownloadTask;
 
         public ReplayCollector(ApiUrlCreator urlCreator, IBallchasingApi api, IReplayCache replayCache, ILogger logger)
         {
             _urlCreator = urlCreator;
             _api = api;
             _replayCache = replayCache;
-            _cancellationTokenSource = new CancellationTokenSource();
             _downloaders = urlCreator.Urls.Select(url =>
                 new SimpleReplayDownloader(_api, url, _replayCache,logger)).ToList();
-            backgroundDownloadTask = Task.WhenAll(_downloaders.Select(downloader =>
-            {
-                return Task.Run(async () =>
-                {
-                    await downloader.StartBackgroundDownloadAsync(_cancellationTokenSource.Token);
-                });
-            }));
         }
 
         public async Task<CollectReplaysResponse> CollectReplaysAsync(ILogger logger,
@@ -47,7 +36,7 @@ namespace BallchasingWrapper.BusinessLogic
             var sw = new Stopwatch();
             sw.Start();
 
-            var replays = (await GetReplays(logger, cancellationToken)).ToList();
+            var replays = await GetReplays(logger, cancellationToken);
 
             sw.Stop();
 
@@ -59,18 +48,15 @@ namespace BallchasingWrapper.BusinessLogic
                 return response;
             }
 
-            response.Replays = replays;
+            response.Replays = replays.ToList();
             
             logger.LogInformation("Finished collecting replays.");
             logger.LogDebugObject(new
             {
-                ReplayCount = replays.Count,
+                ReplayCount = response.Replays.Count(),
                 sw.ElapsedMilliseconds
             });
-            logger.LogDebugObject(new
-            {
-                _api
-            });
+            logger.LogDebugObject(_api);
 
             return response;
         }
@@ -133,20 +119,7 @@ namespace BallchasingWrapper.BusinessLogic
                 }
             }
 
-            foreach (var downloader in _downloaders)
-            {
-                downloader.Reset();
-            }
             return allReplays;
-        }
-
-        public void Dispose()
-        {
-            if (_disposed)
-                return;
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _disposed = true;
         }
     }
 }
