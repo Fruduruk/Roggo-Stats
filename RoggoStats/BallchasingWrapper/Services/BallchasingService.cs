@@ -28,19 +28,7 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         var response =
             await collector.CollectReplaysAsync(_logger, context.CancellationToken);
 
-        var grpcReplays = response.Replays.Select(replay =>
-        {
-            try
-            {
-                return replay.ToGrpcReplay();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return null;
-        }).ToList();
+        var grpcReplays = response.Replays.Select(replay =>replay.ToGrpcReplay()).ToList();
 
         return await Task.FromResult(new Grpc.SimpleReplaysResponse
         {

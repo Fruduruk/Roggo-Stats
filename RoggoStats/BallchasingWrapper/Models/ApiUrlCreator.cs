@@ -21,6 +21,10 @@ namespace BallchasingWrapper.Models
             Urls = CreateUrls().ToArray();
         }
 
+        /// <summary>
+        /// NOT CONSISTENT
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
@@ -30,6 +34,7 @@ namespace BallchasingWrapper.Models
             {
                 hashCode.Add(url.GetHashCode());
             }
+
             hashCode.Add(Cap);
             hashCode.Add((int)GroupType);
 
@@ -45,6 +50,7 @@ namespace BallchasingWrapper.Models
             {
                 builder.Append(url);
             }
+
             builder.Append($" Cap: {Cap}");
             builder.Append($" GroupType: {GroupType.ToString()}");
 
@@ -137,13 +143,24 @@ namespace BallchasingWrapper.Models
 
         private static IEnumerable<string> ComputeMatchTypePlaylists(Grpc.RequestFilter request)
         {
+            var playlists = GetAllPlaylists();
             if (request.MatchType is Grpc.MatchType.Ranked)
             {
-                return GetAllPlaylists()
+                playlists = playlists
                     .Where(playlist => playlist.Contains("ranked") && !playlist.Contains("unranked"));
             }
+            else
+            {
+                playlists = playlists
+                    .Where(playlist => playlist.Contains("unranked") || !playlist.Contains("ranked"));
+            }
 
-            return GetAllPlaylists().Where(playlist => playlist.Contains("unranked") || !playlist.Contains("ranked"));
+            if (request.GroupType is Grpc.GroupType.Together && request.Identities.Count > 1)
+            {
+                playlists = playlists.Where(playlist => !playlist.Contains("solo"));
+            }
+
+            return playlists;
         }
 
         private static string CompleteBuilder(ApiRequestBuilder builder, Grpc.RequestFilter request)
@@ -225,6 +242,7 @@ namespace BallchasingWrapper.Models
         {
             return new List<string>
             {
+                "unranked-duels",
                 "unranked-doubles",
                 "unranked-standard",
                 "unranked-chaos",

@@ -95,6 +95,7 @@ namespace BallchasingWrapper.BusinessLogic
                     break;
                 }
 
+                // Download replays as usual.
                 foreach (var downloader in activeDownloaders)
                 {
                     if (filter.Cap != 0 && allReplays.Count >= filter.Cap)
@@ -119,7 +120,11 @@ namespace BallchasingWrapper.BusinessLogic
                     }
 
                     if (!allReplays.Contains(replay))
+                    {
                         logger.LogInformation($"Added replay {allReplays.Count + 1}: {replay.Title}");
+                        downloader.IncrementReplaysProvided();
+                    }
+
                     allReplays.Add(replay);
                 }
 
@@ -127,12 +132,26 @@ namespace BallchasingWrapper.BusinessLogic
                 // We have to check every downloader unfortunately.
                 // If true then the cache can be safely loaded.
                 // If false then the cache should be overwritten.
-                if (!firstReplaysDone && cachedReplays is not null && allReplays.Count > 0)
+                if (cachedReplays is not null && allReplays.Count > 0)
                 {
-                    if (allReplays.All(replay => cachedReplays.Contains(replay)))
+                    // If no new Replay was uploaded there is no need to proceed downloading
+                    // and the cache can be loaded in its entirety.
+                    if (!firstReplaysDone && allReplays.All(replay => cachedReplays.Contains(replay)))
                     {
                         logger.LogInformation($"Found {cachedReplays.Count} in cache.");
                         return cachedReplays;
+                    }
+
+                    // If there is at least one replay from every downloader in cache
+                    // the rest of the cache can be loaded and updated.
+                    // Only check active downloaders because the others won't have any new replays
+                    // and we are checking if the download should continue.
+                    if (activeDownloaders.Where(downloader => downloader.ReplaysProvided.Any()).All(
+                            downloader => downloader.ReplaysProvided.Any(replay => cachedReplays.Contains(replay))))
+                    {
+                        FillUpWithCachedReplays(allReplays, cachedReplays, filter.Cap);
+                        await _replayCache.WriteReplayCache(filter, allReplays);
+                        return allReplays;
                     }
                 }
 
@@ -141,6 +160,19 @@ namespace BallchasingWrapper.BusinessLogic
 
             await _replayCache.WriteReplayCache(filter, allReplays);
             return allReplays;
+        }
+
+
+        private static void FillUpWithCachedReplays(HashSet<Replay> allReplays, IEnumerable<Replay> cachedReplays,
+            int filterCap)
+        {
+            foreach (var replay in cachedReplays)
+            {
+                if (filterCap == 0 || allReplays.Count < filterCap)
+                {
+                    allReplays.Add(replay);
+                }
+            }
         }
     }
 }
