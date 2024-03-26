@@ -1,4 +1,5 @@
-﻿using BallchasingWrapper.BusinessLogic;
+﻿using System.Text;
+using BallchasingWrapper.BusinessLogic;
 
 namespace BallchasingWrapper.Models
 {
@@ -23,12 +24,31 @@ namespace BallchasingWrapper.Models
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
-            foreach (var url in Urls)
+            var sortedUrls = Urls.ToList();
+            sortedUrls.Sort();
+            foreach (var url in sortedUrls)
             {
                 hashCode.Add(url.GetHashCode());
             }
+            hashCode.Add(Cap);
+            hashCode.Add((int)GroupType);
 
             return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            var sortedUrls = Urls.ToList();
+            sortedUrls.Sort();
+            foreach (var url in sortedUrls)
+            {
+                builder.Append(url);
+            }
+            builder.Append($" Cap: {Cap}");
+            builder.Append($" GroupType: {GroupType.ToString()}");
+
+            return builder.ToString();
         }
 
         private IEnumerable<string> CreateUrls()

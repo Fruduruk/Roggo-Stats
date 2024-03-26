@@ -38,48 +38,25 @@ namespace BallchasingWrapper.DB.MongoDB
         }
         #endregion
         #region IReplayCache
-        public void AddTheOtherReplaysToTheDataPack(HashSet<Replay> hashSet, ApiUrlCreator filter)
+        public async Task<HashSet<Replay>?> LoadCachedReplays(ApiUrlCreator filter)
         {
             var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
-            var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.Urls.First())).FirstOrDefault();
-            if (wrapper is null || wrapper.Value is null)
-                return;
-            foreach(var replay in wrapper.Value.Replays)
-                hashSet.Add(replay);
+            var filterString = filter.ToString();
+            var wrapper = await (await coll.FindAsync(doc => doc.Value.FilterString == filterString)).FirstOrDefaultAsync();
+            return wrapper?.Value.Replays.ToHashSet();
         }
 
-        public bool HasCacheFile(ApiUrlCreator filter)
+        public async Task WriteReplayCache(ApiUrlCreator filter, IEnumerable<Replay> allReplays)
         {
             var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
-            var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.Urls.First())).FirstOrDefault();
-            return wrapper is not null;
-        }
-
-        public bool HasOneReplayInFile(IEnumerable<Replay> replays, ApiUrlCreator filter)
-        {
-            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
-            var wrapper = coll.Find(doc => doc.Value.Url.Equals(filter.Urls.First())).FirstOrDefault();
-            if (wrapper is null || wrapper.Value is null)
-                return false;
-            foreach(var replay in replays)
-            {
-                if (wrapper.Value.Replays.Contains(replay))
-                    return true;
-            }
-            return false;
-        }
-
-        public void StoreReplaysInCache(IEnumerable<Replay> replays, ApiUrlCreator filter)
-        {
-            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var filterString = filter.ToString();
             var document = new ReplayCacheDocument
             {
-                Replays = replays,
-                Url = filter.Urls.First()
+                Replays = allReplays,
+                FilterString = filterString
             };
-            
-            coll.FindOneAndDelete(doc => doc.Value.Url.Equals(filter.Urls.First()));
-            coll.InsertOne(new Wrapper<ReplayCacheDocument> { Value = document });
+            await coll.FindOneAndDeleteAsync(doc => doc.Value.FilterString == filterString);
+            await coll.InsertOneAsync(new Wrapper<ReplayCacheDocument> { Value = document });
         }
         #endregion
         #region IServiceInfoIO

@@ -99,5 +99,15 @@ namespace BallchasingWrapper.DB.LegacyFileDB
         {
             hashSet.UnionWith(GetReplaysOutOfCacheFile(filter));
         }
+
+        public Task<HashSet<Replay>?> LoadCachedReplays(ApiUrlCreator filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task WriteReplayCache(ApiUrlCreator filter, IEnumerable<Replay> allReplays)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

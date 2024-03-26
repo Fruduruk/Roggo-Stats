@@ -4,7 +4,7 @@ namespace BallchasingWrapper.DB.MongoDB
 {
     public class ReplayCacheDocument
     {
-        public string Url { get; set; } = null!;
-        public IEnumerable<Replay> Replays { get; set; } = null!;
+        public string? FilterString { get; set; } = null!;
+        public IEnumerable<Replay>? Replays { get; set; }
     }
 }

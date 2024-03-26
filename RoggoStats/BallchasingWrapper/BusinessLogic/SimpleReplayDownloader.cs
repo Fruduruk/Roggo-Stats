@@ -8,19 +8,17 @@ public class SimpleReplayDownloader
     private readonly IBallchasingApi _api;
     private readonly string _startUrl;
     private string? _url;
-    private readonly IReplayCache _replayCache;
     private readonly ILogger _logger;
     private int _index;
     private readonly List<Replay> _downloadedReplays = new();
     public bool EndReached { get; private set; }
     private int _count = -1;
 
-    public SimpleReplayDownloader(IBallchasingApi api, string url, IReplayCache replayCache, ILogger logger)
+    public SimpleReplayDownloader(IBallchasingApi api, string url, ILogger logger)
     {
         _api = api;
         _startUrl = url;
         _url = url;
-        _replayCache = replayCache;
         _logger = logger;
     }
 
