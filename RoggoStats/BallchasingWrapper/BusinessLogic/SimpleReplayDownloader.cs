@@ -6,46 +6,39 @@ namespace BallchasingWrapper.BusinessLogic;
 public class SimpleReplayDownloader
 {
     private readonly IBallchasingApi _api;
-    private readonly string _startUrl;
+    public string StartUrl { get; }
     private string? _url;
     private readonly ILogger _logger;
     private int _index;
     private readonly List<Replay> _downloadedReplays = new();
+    private readonly Stack<Replay> _triedReplays = new();
+    public List<Replay> ReplaysProvided { get; } = new();
     public bool EndReached { get; private set; }
     private int _count = -1;
 
     public SimpleReplayDownloader(IBallchasingApi api, string url, ILogger logger)
     {
         _api = api;
-        _startUrl = url;
+        StartUrl = url;
         _url = url;
         _logger = logger;
-    }
-
-    public async Task<int> GetCountAsync(CancellationToken cancellationToken)
-    {
-        if (_count != -1)
-            return _count;
-        // just download 1 replay to save resources.
-        var dataPack = await _api.GetApiDataPackAsync(_startUrl + "&count=1", cancellationToken);
-        _count = !dataPack.Success ? 0 : dataPack.ReplayCount;
-
-        return _count;
     }
 
     public async Task<Replay?> GetNextReplayAsync(CancellationToken cancellationToken)
     {
         if (EndReached)
             return null;
+
         var replay = await DownloadReplayAtIndexAsync(_index, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
-        {
             return null;
-        }
 
         if (replay is null)
             EndReached = true;
+        else
+            _triedReplays.Push(replay);
         _index++;
+        
         return replay;
     }
 
@@ -53,10 +46,11 @@ public class SimpleReplayDownloader
     {
         if (_downloadedReplays.Count > index)
             return _downloadedReplays[index];
-        
+
         if (_url is null || cancellationToken.IsCancellationRequested)
             return null;
-        _logger.LogInformation($"{((double)_downloadedReplays.Count / _count)*100}% Calling {_url}");
+        if (_count != 0)
+            _logger.LogInformation($"{((double)_downloadedReplays.Count / _count) * 100}% Calling {_url}");
 
         var dataPack = await _api.GetApiDataPackAsync(_url, cancellationToken);
         _url = dataPack.Next;
@@ -67,5 +61,13 @@ public class SimpleReplayDownloader
             return null;
         _downloadedReplays.AddRange(dataPack.Replays);
         return _downloadedReplays[index];
+    }
+
+    public void IncrementReplaysProvided()
+    {
+        if (!_triedReplays.Any())
+            throw new Exception($"You cannot use {nameof(IncrementReplaysProvided)} if there were no new replays provided.");
+        
+        ReplaysProvided.Add(_triedReplays.Pop());
     }
 }

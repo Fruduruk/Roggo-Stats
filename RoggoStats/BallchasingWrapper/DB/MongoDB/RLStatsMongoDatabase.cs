@@ -46,14 +46,14 @@ namespace BallchasingWrapper.DB.MongoDB
             return wrapper?.Value.Replays.ToHashSet();
         }
 
-        public async Task WriteReplayCache(ApiUrlCreator filter, IEnumerable<Replay> allReplays)
+        public async Task WriteReplayCache(ApiUrlCreator filter, IEnumerable<Replay> replays)
         {
             var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
             var filterString = filter.ToString();
             var document = new ReplayCacheDocument
             {
-                Replays = allReplays,
-                FilterString = filterString
+                Replays = replays,
+                FilterString = filterString,
             };
             await coll.FindOneAndDeleteAsync(doc => doc.Value.FilterString == filterString);
             await coll.InsertOneAsync(new Wrapper<ReplayCacheDocument> { Value = document });
