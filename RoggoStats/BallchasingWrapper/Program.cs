@@ -24,8 +24,10 @@ namespace BallchasingWrapper
                 return;
 
             var builder = WebApplication.CreateBuilder(args);
-
+            
+            Console.WriteLine("Connecting to MongoDb...");
             var mongoDb = SetupMongoDb();
+            Console.WriteLine("MongoDb connected!");
             var ballchasingApi = new BallchasingApi(_tokenInfo);
             
             builder.Services.AddGrpc();
@@ -117,7 +119,8 @@ namespace BallchasingWrapper
                     {
                         new MongoDB.Driver.Core.Configuration.CompressorConfiguration(MongoDB.Driver.Core
                             .Compression.CompressorType.Snappy)
-                    }
+                    },
+                    ServerSelectionTimeout = TimeSpan.FromSeconds(3)
                 },
                 DatabaseName = Environment.GetEnvironmentVariable(DatabaseName)
             };

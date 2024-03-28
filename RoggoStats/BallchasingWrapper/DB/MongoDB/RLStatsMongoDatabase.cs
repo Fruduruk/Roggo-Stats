@@ -2,6 +2,7 @@
 using BallchasingWrapper.Models;
 using BallchasingWrapper.Models.ReplayModels;
 using BallchasingWrapper.Models.ReplayModels.Advanced;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BallchasingWrapper.DB.MongoDB
@@ -18,13 +19,31 @@ namespace BallchasingWrapper.DB.MongoDB
         {
             Client = new MongoClient(settings.MongoSettings);
             Database = Client.GetDatabase(settings.DatabaseName);
+            if (!IsMongoDbAvailable().Result)
+            {
+                throw new Exception("No MongoDb available.");
+            }
+        }
+        
+        private async Task<bool> IsMongoDbAvailable(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var pingCommand = new BsonDocument("ping", 1);
+                await Database.RunCommandAsync<BsonDocument>(pingCommand,cancellationToken: cancellationToken);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
+
         #region IDatabase
-        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken, ProgressState progressState)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
         {
             var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
-            progressState.CurrentMessage = "Waiting for MongoDB response...";
             var wrappers = (await coll.FindAsync(wrapper => ids.Contains(wrapper.Value.Id), cancellationToken: cancellationToken)).ToList(cancellationToken: cancellationToken);
             if (wrappers is null)
                 return Enumerable.Empty<AdvancedReplay>();

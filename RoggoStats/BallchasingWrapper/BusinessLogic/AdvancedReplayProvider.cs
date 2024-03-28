@@ -4,12 +4,16 @@ using BallchasingWrapper.Models.ReplayModels.Advanced;
 
 namespace BallchasingWrapper.BusinessLogic
 {
-    public class AdvancedReplayProvider : ReplayProviderBase, IAdvancedReplayProvider
+    public class AdvancedReplayProvider
     {
+        private readonly BallchasingApi _api;
+        private readonly ILogger _logger;
         private IDatabase ReplayDatabase { get; }
 
-        public AdvancedReplayProvider(BallchasingApi api, IDatabase database, ILogger logger) : base(api, logger)
+        public AdvancedReplayProvider(BallchasingApi api, IDatabase database, ILogger logger)
         {
+            _api = api;
+            _logger = logger;
             ReplayDatabase = database;
         }
 
@@ -18,23 +22,20 @@ namespace BallchasingWrapper.BusinessLogic
         {
             var advancedReplays = new List<AdvancedReplay>();
 
-            InitializeNewProgress();
-            ProgressState.CurrentMessage = "Loading advanced replays from database.";
+            _logger.LogInformation("Loading advanced replays from database.");
             var dbReplays =
-                await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), cancellationToken, ProgressState);
+                await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), cancellationToken);
             advancedReplays.AddRange(dbReplays);
             if (cancellationToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
 
-            InitializeNewProgress();
-            ProgressState.CurrentMessage = "Calculating replays to download.";
+            _logger.LogInformation("Calculating replays to download.");
             var replaysToDownload = CalculateReplaysToDownload(replays, dbReplays);
 
-            InitializeNewProgress();
-            ProgressState.CurrentMessage = "Downloading advanced replays.";
+            _logger.LogInformation("Downloading advanced replays.");
             advancedReplays.AddRange(await DownloadReplays(replaysToDownload.ToList(), cancellationToken));
 
-            LastUpdateCall("Loading done.", advancedReplays.Count);
+            _logger.LogInformation("Loading advanced replays done.");
             if (cancellationToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();
             return advancedReplays;
@@ -58,19 +59,17 @@ namespace BallchasingWrapper.BusinessLogic
             CancellationToken cancellationToken)
         {
             var advancedReplays = new List<AdvancedReplay>();
-            ProgressState.TotalCount = replaysToDownload.Count;
             for (int i = 0; i < replaysToDownload.Count; i++)
             {
                 var r = replaysToDownload[i];
                 var replay = await GetAdvancedReplayInfosAsync(r, cancellationToken);
                 advancedReplays.Add(replay);
                 ReplayDatabase.SaveReplayAsync(replay);
-                ProgressState.PartCount++;
                 if (cancellationToken.IsCancellationRequested)
                     break;
             }
 
-            LastUpdateCall("Downlaoded advanced Replays", replaysToDownload.Count);
+            _logger.LogInformation("Downlaoded advanced Replays");
             return advancedReplays;
         }
 
@@ -78,7 +77,7 @@ namespace BallchasingWrapper.BusinessLogic
             CancellationToken cancellationToken)
         {
             var url = ApiRequestBuilder.GetSpecificReplayUrl(replay.Id);
-            var response = await Api.GetAsync(url, cancellationToken);
+            var response = await _api.GetAsync(url, cancellationToken);
             if (response.StatusCode == System.Net.HttpStatusCode.Locked)
                 throw new OperationCanceledException();
             if (!response.IsSuccessStatusCode)
