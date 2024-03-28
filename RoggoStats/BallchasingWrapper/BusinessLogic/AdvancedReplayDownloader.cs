@@ -30,9 +30,7 @@ public class AdvancedReplayDownloader
         if (cancellationToken.IsCancellationRequested)
             return null;
         var dataString = await reader.ReadToEndAsync(cancellationToken);
-        File.WriteAllText("new advanced replay.json",dataString);
-        var advancedReplay =  cancellationToken.IsCancellationRequested ? 
+        return cancellationToken.IsCancellationRequested ? 
             null : JsonConvert.DeserializeObject<AdvancedReplay>(dataString);
-        return advancedReplay;
     }
 }

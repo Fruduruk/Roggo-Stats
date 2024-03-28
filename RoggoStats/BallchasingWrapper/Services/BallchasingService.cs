@@ -47,9 +47,6 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         if (context.CancellationToken.IsCancellationRequested || replay is null)
             return new Grpc.AdvancedReplay();
 
-        return new Grpc.AdvancedReplay()
-        {
-            Id = replay.Id
-        };
+        return replay.ToGrpcAdvancedReplay();
     }
 }

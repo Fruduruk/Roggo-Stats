@@ -11,6 +11,207 @@ service Ballchasing {
 
 message AdvancedReplay {
   string id = 1;
+  string link = 2;
+  string created = 3;
+  string status = 4;
+  string rocketLeagueId = 5;
+  string matchGuid = 6;
+  string title = 7;
+  string mapCode = 8;
+  string serverType = 9;
+  int32 teamSize = 10;
+  MatchType matchType = 11;
+  Playlist playlist = 12;
+  int32 duration = 13;
+  bool overtime = 14;
+  int32 overtimeSeconds = 15;
+  //Season season = 16;
+  string date = 17;
+  Visibility visibility = 18;
+  Rank minRank = 19;
+  Rank maxRank = 20;
+  AdvancedTeam blue = 21;
+  AdvancedTeam orange = 22;
+  string mapName = 23;
+  optional Server server = 24;
+}
+
+message AdvancedTeam {
+  string color = 1;
+  TeamStats stats = 2;
+  repeated AdvancedPlayer players = 3;
+}
+
+message AdvancedPlayer{
+  float startTime = 1;
+  float endTime = 2;
+  string name = 3;
+  PlayerId id = 4;
+  Rank rank = 5;
+  int32 carId = 6;
+  string carName = 7;
+  Camera camera = 8;
+  double steeringSensitivity = 9;
+  PlayerStats stats = 10;
+}
+
+message PlayerStats {
+  PlayerCore core = 1;
+  PlayerBoost boost = 2;
+  PlayerMovement movement = 3;
+  PlayerPositioning positioning = 4;
+  Demo demo = 5;
+}
+
+message PlayerCore{
+  GeneralCore generalCore = 1;
+  bool mvp = 2;
+}
+
+message PlayerBoost {
+  GeneralBoost generalBoost = 1;
+  float percentZeroBoost = 2;
+  float percentFullBoost = 3;
+  float percentBoost0To25 = 4;
+  float percentBoost25To50 = 5;
+  float percentBoost50To75 = 6;
+  float percentBoost75To100 = 7;
+}
+
+message PlayerMovement {
+  GeneralMovement generalMovement = 1;
+  int32 avgSpeed = 2;
+  float avgPowerslideDuration = 3;
+  float avgSpeedPercentage = 4;
+  float percentSlowSpeed = 5;
+  float percentBoostSpeed = 6;
+  float percentSupersonicSpeed = 7;
+  float percentGround = 8;
+  float percentLowAir = 9;
+  float percentHighAir = 10;
+}
+
+message PlayerPositioning {
+  GeneralPositioning generalPositioning = 1;
+  int32 avgDistanceToBall = 2;
+  int32 avgDistanceToBallPossession = 3;
+  int32 avgDistanceToBallNoPossession = 4;
+  int32 avgDistanceToMates = 5;
+  float timeMostBack = 6;
+  float timeMostForward = 7;
+  float timeClosestToBall = 8;
+  float timeFarthestFromBall = 9;
+  float percentDefensiveThird = 10;
+  float percentOffensiveThird = 11;
+  float percentNeutralThird = 12;
+  float percentDefensiveHalf = 13;
+  float percentOffensiveHalf = 14;
+  float percentBehindBall = 15;
+  float percentInfrontBall = 16;
+  float percentMostBack = 17;
+  float percentMostForward = 18;
+  float percentClosestToBall = 19;
+  float percentFarthestFromBall = 20;
+  int32 goalsAgainstWhileLastDefender = 21;
+}
+
+message Camera {
+  int32 fov = 1;
+  int32 height = 2;
+  int32 pitch = 3;
+  int32 distance = 4;
+  float stiffness = 5;
+  float swivelSpeed = 6;
+  float transitionSpeed = 7;
+}
+
+message TeamStats {
+  Ball ball = 1;
+  GeneralCore core = 2;
+  GeneralBoost boost = 3;
+  GeneralMovement movement = 4;
+  GeneralPositioning positioning = 5;
+  Demo demo = 6;
+}
+
+message Demo {
+  int32 inflicted = 1;
+  int32 taken = 2;
+}
+
+message GeneralPositioning {
+  float timeDefensiveThird = 1;
+  float timeNeutralThird = 2;
+  float timeOffensiveThird = 3;
+  float timeDefensiveHalf = 4;
+  float timeOffensiveHalf = 5;
+  float timeBehindBall = 6;
+  float timeInfrontBall = 7;
+}
+
+message GeneralMovement {
+  int32 totalDistance = 1;
+  float timeSupersonicSpeed = 2;
+  float timeBoostSpeed = 3;
+  float timeSlowSpeed = 4;
+  float timeGround = 5;
+  float timeLowAir = 6;
+  float timeHighAir = 7;
+  float timePowerslide = 8;
+  int32 countPowerslide = 9;
+}
+
+message GeneralBoost {
+  int32 bpm = 1;
+  float bcpm = 2;
+  float avgAmount = 3;
+  int32 amountCollected = 4;
+  int32 amountStolen = 5;
+  int32 amountCollectedBig = 6;
+  int32 amountStolenBig = 7;
+  int32 amountCollectedSmall = 8;
+  int32 amountStolenSmall = 9;
+  int32 countCollectedBig = 10;
+  int32 countStolenBig = 11;
+  int32 countCollectedSmall = 12;
+  int32 countStolenSmall = 13;
+  int32 amountOverfill = 14;
+  int32 amountOverfillStolen = 15;
+  int32 amountUsedWhileSupersonic = 16;
+  float timeZeroBoost = 17;
+  float timeFullBoost = 18;
+  float timeBoost0To25 = 19;
+  float timeBoost25To50 = 20;
+  float timeBoost50To75 = 21;
+  float timeBoost75To100 = 22;
+}
+
+message GeneralCore {
+  int32 shots = 1;
+  int32 shotsAgainst = 2;
+  int32 goals = 3;
+  int32 goalsAgainst = 4;
+  int32 saves = 5;
+  int32 assists = 6;
+  int32 score = 7;
+  float shootingPercentage = 8;
+}
+
+message Ball {
+  float possessionTime = 1;
+  float timeInSide = 2;
+}
+
+message Server {
+  string name = 1;
+  string region = 2;
+}
+
+enum Visibility{
+  Unknown = 0;
+  Public = 1;
+  Private = 2;
+  Unlisted = 3;
 }
 
 message IdRequest {

@@ -1,6 +1,6 @@
 ﻿namespace BallchasingWrapper.Models.ReplayModels.Advanced
 {
-    public class PlayerBoost : Boost
+    public class PlayerBoost : GeneralBoost
     {
         [JsonProperty("percent_zero_boost")] public float PercentZeroBoost { get; set; }
         [JsonProperty("percent_full_boost")] public float PercentFullBoost { get; set; }

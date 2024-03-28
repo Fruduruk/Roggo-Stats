@@ -22,13 +22,13 @@
         [JsonProperty("date")] public DateTime Date { get; set; }
         [JsonProperty("date_has_timezone")] public bool? DateHasTimezone { get; set; }
         [JsonProperty("visibility")] public string Visibility { get; set; } = string.Empty;
-        [JsonProperty("min_rank")] public Rank MinRank { get; set; } = new();
-        [JsonProperty("max_rank")] public Rank MaxRank { get; set; } = new();
+        [JsonProperty("min_rank")] public Rank? MinRank { get; set; } = new();
+        [JsonProperty("max_rank")] public Rank? MaxRank { get; set; } = new();
         [JsonProperty("blue")] public AdvancedTeam TeamBlue { get; set; } = new();
         [JsonProperty("orange")] public AdvancedTeam TeamOrange { get; set; } = new();
         [JsonProperty("playlist_name")] public string PlaylistName { get; set; } = string.Empty;
         [JsonProperty("map_name")] public string MapName { get; set; } = string.Empty;
-        [JsonProperty("server")] public Server Server = new();
+        [JsonProperty("server")] public Server? Server { get; set; }
         public override bool Equals(object obj)
         {
             return Equals(obj as AdvancedReplay);
