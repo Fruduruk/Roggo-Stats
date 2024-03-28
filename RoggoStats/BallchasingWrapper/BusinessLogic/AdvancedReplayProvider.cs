@@ -24,7 +24,7 @@ namespace BallchasingWrapper.BusinessLogic
 
             _logger.LogInformation("Loading advanced replays from database.");
             var dbReplays =
-                await ReplayDatabase.LoadReplaysAsync(replays.Select(r => r.Id), cancellationToken);
+                await ReplayDatabase.LoadReplaysByIdsAsync(replays.Select(r => r.Id), cancellationToken);
             advancedReplays.AddRange(dbReplays);
             if (cancellationToken.IsCancellationRequested)
                 return new List<AdvancedReplay>();

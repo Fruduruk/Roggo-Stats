@@ -41,7 +41,7 @@ namespace BallchasingWrapper.DB.MongoDB
 
 
         #region IDatabase
-        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
         {
             var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
             var wrappers = (await coll.FindAsync(wrapper => ids.Contains(wrapper.Value.Id), cancellationToken: cancellationToken)).ToList(cancellationToken: cancellationToken);
@@ -50,10 +50,17 @@ namespace BallchasingWrapper.DB.MongoDB
             return wrappers.Select(w => w.Value);
         }
 
-        public async void SaveReplayAsync(AdvancedReplay replay)
+        public async Task SaveReplayAsync(AdvancedReplay replay)
         {
-            var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
-            await coll.InsertOneAsync(new Wrapper<AdvancedReplay> { Value = replay });
+            await Task.Run(() =>
+            {
+                var coll = Database.GetCollection<Wrapper<AdvancedReplay>>(AdvancedReplayCollectionName);
+                lock (Client)
+                { 
+                    if (coll.Find(document => document.Value.Id == replay.Id).FirstOrDefault() is null)
+                        coll.InsertOne(new Wrapper<AdvancedReplay> { Value = replay });
+                }
+            });
         }
         #endregion
         #region IReplayCache
