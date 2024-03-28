@@ -2,11 +2,11 @@
 {
     public class PlayerBoost : Boost
     {
-        public float? Percent_zero_boost { get; set; }
-        public float? Percent_full_boost { get; set; }
-        public float? Percent_boost_0_25 { get; set; }
-        public float? Percent_boost_25_50 { get; set; }
-        public float? Percent_boost_50_75 { get; set; }
-        public float? Percent_boost_75_100 { get; set; }
+        [JsonProperty("percent_zero_boost")] public float PercentZeroBoost { get; set; }
+        [JsonProperty("percent_full_boost")] public float PercentFullBoost { get; set; }
+        [JsonProperty("percent_boost_0_25")] public float PercentBoost0To25 { get; set; }
+        [JsonProperty("percent_boost_25_50")] public float PercentBoost25To50 { get; set; }
+        [JsonProperty("percent_boost_50_75")] public float PercentBoost50To75 { get; set; }
+        [JsonProperty("percent_boost_75_100")] public float PercentBoost75To100 { get; set; }
     }
 }

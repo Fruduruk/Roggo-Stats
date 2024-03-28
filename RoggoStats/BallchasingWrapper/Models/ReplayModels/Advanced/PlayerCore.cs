@@ -2,6 +2,7 @@
 {
     public class PlayerCore : Core
     {
-        public bool? Mvp { get; set; }
+        [JsonProperty("mvp")]
+        public bool Mvp { get; set; }
     }
 }

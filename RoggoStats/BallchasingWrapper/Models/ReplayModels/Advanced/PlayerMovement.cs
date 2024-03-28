@@ -2,14 +2,14 @@
 {
     public class PlayerMovement : GeneralMovement
     {
-        public int? Avg_speed { get; set; }
-        public float? Avg_powerslide_duration { get; set; }
-        public float? Avg_speed_percentage { get; set; }
-        public float? Percent_slow_speed { get; set; }
-        public float? Percent_boost_speed { get; set; }
-        public float? Percent_supersonic_speed { get; set; }
-        public float? Percent_ground { get; set; }
-        public float? Percent_low_air { get; set; }
-        public float? Percent_high_air { get; set; }
+        [JsonProperty("avg_speed")] public int AvgSpeed { get; set; }
+        [JsonProperty("avg_powerslide_duration")] public float AvgPowerslideDuration { get; set; }
+        [JsonProperty("avg_speed_percentage")] public float AvgSpeedPercentage { get; set; }
+        [JsonProperty("percent_slow_speed")] public float PercentSlowSpeed { get; set; }
+        [JsonProperty("percent_boost_speed")] public float PercentBoostSpeed { get; set; }
+        [JsonProperty("percent_supersonic_speed")] public float PercentSupersonicSpeed { get; set; }
+        [JsonProperty("percent_ground")] public float PercentGround { get; set; }
+        [JsonProperty("percent_low_air")] public float PercentLowAir { get; set; }
+        [JsonProperty("percent_high_air")] public float PercentHighAir { get; set; }
     }
 }
