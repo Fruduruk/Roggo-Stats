@@ -1,6 +1,6 @@
 ﻿namespace BallchasingWrapper.Models.ReplayModels.Advanced
 {
-    public class Boost
+    public class GeneralBoost
     {
         [JsonProperty("bpm")] public int Bpm { get; set; }
         [JsonProperty("bcpm")] public float Bcpm { get; set; }
