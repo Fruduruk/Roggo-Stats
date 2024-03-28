@@ -2,7 +2,7 @@
 {
     public class Ball
     {
-        public float? Possession_time { get; set; }
-        public float? Time_in_side { get; set; }
+        [JsonProperty("possession_time")] public float PossessionTime { get; set; }
+        [JsonProperty("time_in_side")] public float TimeInSide { get; set; }
     }
 }

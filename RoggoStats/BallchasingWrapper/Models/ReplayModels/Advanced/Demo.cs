@@ -2,7 +2,9 @@
 {
     public class Demo
     {
-        public int? Inflicted { get; set; }
-        public int? Taken { get; set; }
+        [JsonProperty("inflicted")]
+        public int Inflicted { get; set; }
+        [JsonProperty("taken")]
+        public int Taken { get; set; }
     }
 }

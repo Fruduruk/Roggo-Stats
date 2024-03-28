@@ -2,13 +2,20 @@
 {
     public class Core
     {
-        public int? Shots { get; set; }
-        public int? Shots_against { get; set; }
-        public int? Goals { get; set; }
-        public int? Goals_against { get; set; }
-        public int? Saves { get; set; }
-        public int? Assists { get; set; }
-        public int? Score { get; set; }
-        public float? Shooting_percentage { get; set; }
+        [JsonProperty("shots")] public int Shots { get; set; }
+        
+        [JsonProperty("shots_against")] public int ShotsAgainst { get; set; }
+        
+        [JsonProperty("goals")] public int Goals { get; set; }
+        
+        [JsonProperty("goals_against")] public int GoalsAgainst { get; set; }
+        
+        [JsonProperty("saves")] public int Saves { get; set; }
+        
+        [JsonProperty("assists")] public int Assists { get; set; }
+        
+        [JsonProperty("score")] public int Score { get; set; }
+        
+        [JsonProperty("shooting_percentage")] public float ShootingPercentage { get; set; }
     }
 }

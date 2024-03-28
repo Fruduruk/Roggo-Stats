@@ -2,14 +2,14 @@
 {
     public class GeneralMovement
     {
-        public int? Total_distance { get; set; }
-        public float? Time_supersonic_speed { get; set; }
-        public float? Time_boost_speed { get; set; }
-        public float? Time_slow_speed { get; set; }
-        public float? Time_ground { get; set; }
-        public float? Time_low_air { get; set; }
-        public float? Time_high_air { get; set; }
-        public float? Time_powerslide { get; set; }
-        public int? Count_powerslide { get; set; }
+        [JsonProperty("total_distance")] public int TotalDistance { get; set; }
+        [JsonProperty("time_supersonic_speed")] public float TimeSupersonicSpeed { get; set; }
+        [JsonProperty("time_boost_speed")] public float TimeBoostSpeed { get; set; }
+        [JsonProperty("time_slow_speed")] public float TimeSlowSpeed { get; set; }
+        [JsonProperty("time_ground")] public float TimeGround { get; set; }
+        [JsonProperty("time_low_air")] public float TimeLowAir { get; set; }
+        [JsonProperty("time_high_air")] public float TimeHighAir { get; set; }
+        [JsonProperty("time_powerslide")] public float TimePowerslide { get; set; }
+        [JsonProperty("count_powerslide")] public int CountPowerslide { get; set; }
     }
 }
