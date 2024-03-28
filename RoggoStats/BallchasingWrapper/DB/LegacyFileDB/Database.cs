@@ -43,7 +43,7 @@ namespace BallchasingWrapper.DB.LegacyFileDB
             }
         }
 
-        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+        public async Task<IEnumerable<AdvancedReplay>> LoadReplaysByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
         {
             CacheHits = 0;
             CacheMisses = 0;
@@ -68,7 +68,7 @@ namespace BallchasingWrapper.DB.LegacyFileDB
         }
 
 
-        public async void SaveReplayAsync(AdvancedReplay replay)
+        public async Task SaveReplayAsync(AdvancedReplay replay)
         {
             await Task.Run(() =>
             {

@@ -11,12 +11,12 @@ namespace BallchasingWrapper.Interfaces
         /// <param name="ids"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<AdvancedReplay>> LoadReplaysAsync(IEnumerable<string> ids, CancellationToken cancellationToken);
+        Task<IEnumerable<AdvancedReplay>> LoadReplaysByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Inserts one replay into the database
         /// </summary>
         /// <param name="replay"></param>
-        void SaveReplayAsync(AdvancedReplay replay);
+        Task SaveReplayAsync(AdvancedReplay replay);
     }
 }

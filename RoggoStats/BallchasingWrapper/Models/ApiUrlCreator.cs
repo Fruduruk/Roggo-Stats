@@ -5,13 +5,13 @@ namespace BallchasingWrapper.Models
 {
     public class ApiUrlCreator
     {
-        private readonly Grpc.RequestFilter _request;
+        private readonly Grpc.FilterRequest _request;
         public IEnumerable<string> Urls { get; }
         public List<Grpc.Identity> Identities { get; }
         public int Cap { get; } = 0;
         public Grpc.GroupType GroupType { get; }
 
-        public ApiUrlCreator(Grpc.RequestFilter request)
+        public ApiUrlCreator(Grpc.FilterRequest request)
         {
             if (request.HasReplayCap)
                 Cap = request.ReplayCap;
@@ -67,7 +67,7 @@ namespace BallchasingWrapper.Models
             }
         }
 
-        private static IEnumerable<ApiRequestBuilder> AddPlaylist(ApiRequestBuilder builder, Grpc.RequestFilter request)
+        private static IEnumerable<ApiRequestBuilder> AddPlaylist(ApiRequestBuilder builder, Grpc.FilterRequest request)
         {
             if (request.Playlist is Grpc.Playlist.All && request.MatchType is Grpc.MatchType.Both)
                 return new []{builder};
@@ -85,7 +85,7 @@ namespace BallchasingWrapper.Models
             return builders;
         }
 
-        private static IEnumerable<ApiRequestBuilder> CreateIndividualBuilders(Grpc.RequestFilter request)
+        private static IEnumerable<ApiRequestBuilder> CreateIndividualBuilders(Grpc.FilterRequest request)
         {
             foreach (var identity in request.Identities)
             {
@@ -112,7 +112,7 @@ namespace BallchasingWrapper.Models
             }
         }
 
-        private static IEnumerable<string> ComputePlaylists(Grpc.RequestFilter request)
+        private static IEnumerable<string> ComputePlaylists(Grpc.FilterRequest request)
         {
             var playlists = request.MatchType == Grpc.MatchType.Both
                 ? GetAllPlaylists()
@@ -140,7 +140,7 @@ namespace BallchasingWrapper.Models
             };
         }
 
-        private static IEnumerable<string> ComputeMatchTypePlaylists(Grpc.RequestFilter request)
+        private static IEnumerable<string> ComputeMatchTypePlaylists(Grpc.FilterRequest request)
         {
             var playlists = GetAllPlaylists();
             if (request.MatchType is Grpc.MatchType.Ranked)
@@ -162,7 +162,7 @@ namespace BallchasingWrapper.Models
             return playlists;
         }
 
-        private static string CompleteBuilder(ApiRequestBuilder builder, Grpc.RequestFilter request)
+        private static string CompleteBuilder(ApiRequestBuilder builder, Grpc.FilterRequest request)
         {
             if (request.HasTitle)
             {

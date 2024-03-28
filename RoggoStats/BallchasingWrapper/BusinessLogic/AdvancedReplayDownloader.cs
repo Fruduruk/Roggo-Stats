@@ -15,8 +15,44 @@ public class AdvancedReplayDownloader
         _logger = logger;
         _replayDatabase = database;
     }
+
+    public async Task<IEnumerable<AdvancedReplay>> LoadAdvancedReplaysByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+    {
+        var idList = ids.ToList();
+        var cachedAdvancedReplays =
+            (await _replayDatabase.LoadReplaysByIdsAsync(idList, cancellationToken)).ToList();
+        if (cancellationToken.IsCancellationRequested)
+            return Array.Empty<AdvancedReplay>();
+
+        var downloadedReplays = new List<AdvancedReplay>();
+        foreach (var id in idList.Where(id => !cachedAdvancedReplays.Select(replay => replay.Id).Contains(id)))
+        {
+            var downloadedReplay = await DownloadAdvancedReplayById(id, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return Array.Empty<AdvancedReplay>();
+            if (downloadedReplay is null)
+                throw new Exception("Replay was null but cancellation is not requested.");
+            downloadedReplays.Add(downloadedReplay);
+            await _replayDatabase.SaveReplayAsync(downloadedReplay);
+        }
+        return cachedAdvancedReplays.Concat(downloadedReplays).OrderByDescending(advancedReplay => advancedReplay.Created);
+    }
     
-    public async Task<AdvancedReplay?> DownloadAdvancedReplayById(string id, CancellationToken cancellationToken)
+    public async Task<AdvancedReplay?> LoadAdvancedReplayByIdAsync(string id, CancellationToken cancellationToken)
+    {
+        var cachedAdvancedReplay =
+            (await _replayDatabase.LoadReplaysByIdsAsync(new[] { id }, cancellationToken)).FirstOrDefault();
+        if (cancellationToken.IsCancellationRequested)
+            return null;
+        if (cachedAdvancedReplay is not null)
+            return cachedAdvancedReplay;
+
+        var downloadedReplay = await DownloadAdvancedReplayById(id, cancellationToken);
+        return downloadedReplay;
+    }
+
+    private async Task<AdvancedReplay?> DownloadAdvancedReplayById(string id,
+        CancellationToken cancellationToken = default)
     {
         var url = ApiRequestBuilder.GetSpecificReplayUrl(id);
         var response = await _api.GetAsync(url, cancellationToken);
@@ -30,7 +66,8 @@ public class AdvancedReplayDownloader
         if (cancellationToken.IsCancellationRequested)
             return null;
         var dataString = await reader.ReadToEndAsync(cancellationToken);
-        return cancellationToken.IsCancellationRequested ? 
-            null : JsonConvert.DeserializeObject<AdvancedReplay>(dataString);
+        return cancellationToken.IsCancellationRequested
+            ? null
+            : JsonConvert.DeserializeObject<AdvancedReplay>(dataString);
     }
 }

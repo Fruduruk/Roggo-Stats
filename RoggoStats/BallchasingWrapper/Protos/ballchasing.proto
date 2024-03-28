@@ -5,8 +5,13 @@ option csharp_namespace = "BallchasingWrapper.Grpc";
 package ballchasing;
 
 service Ballchasing {
-  rpc GetSimpleReplays (RequestFilter) returns (SimpleReplaysResponse);
+  rpc GetSimpleReplays (FilterRequest) returns (SimpleReplaysResponse);
   rpc GetAdvancedReplayById (IdRequest) returns (AdvancedReplay);
+  rpc GetAdvancedReplays (FilterRequest) returns (AdvancedReplaysResponse);
+}
+
+message AdvancedReplaysResponse {
+  repeated AdvancedReplay replays = 1;
 }
 
 message AdvancedReplay {
@@ -218,7 +223,7 @@ message IdRequest {
   string id = 1;
 }
 
-message RequestFilter {
+message FilterRequest {
   optional int32 replayCap = 1;
   repeated Identity identities = 2;
   GroupType groupType = 3;
