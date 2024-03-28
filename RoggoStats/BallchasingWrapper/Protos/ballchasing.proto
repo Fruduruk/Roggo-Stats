@@ -6,6 +6,15 @@ package ballchasing;
 
 service Ballchasing {
   rpc GetSimpleReplays (RequestFilter) returns (SimpleReplaysResponse);
+  rpc GetAdvancedReplayById (IdRequest) returns (AdvancedReplay);
+}
+
+message AdvancedReplay {
+  string id = 1;
+}
+
+message IdRequest {
+  string id = 1;
 }
 
 message RequestFilter {

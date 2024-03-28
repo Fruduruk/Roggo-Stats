@@ -28,12 +28,28 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         var response =
             await collector.CollectReplaysAsync(_logger, context.CancellationToken);
 
+        if (context.CancellationToken.IsCancellationRequested)
+            return new Grpc.SimpleReplaysResponse();
+        
         var grpcReplays = response.Replays.Select(replay =>replay.ToGrpcReplay()).ToList();
 
-        return await Task.FromResult(new Grpc.SimpleReplaysResponse
+        return new Grpc.SimpleReplaysResponse
         {
             Count = grpcReplays.Count,
             Replays = { grpcReplays }
-        });
+        };
+    }
+
+    public override async Task<Grpc.AdvancedReplay> GetAdvancedReplayById(Grpc.IdRequest request, ServerCallContext context)
+    {
+        var downloader = new AdvancedReplayDownloader(_api, _db, _logger);
+        var replay = await downloader.DownloadAdvancedReplayById(request.Id, context.CancellationToken);
+        if (context.CancellationToken.IsCancellationRequested || replay is null)
+            return new Grpc.AdvancedReplay();
+
+        return new Grpc.AdvancedReplay()
+        {
+            Id = replay.Id
+        };
     }
 }
