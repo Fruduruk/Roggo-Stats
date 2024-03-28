@@ -69,21 +69,20 @@ namespace BallchasingWrapper.Models
 
         private static IEnumerable<ApiRequestBuilder> AddPlaylist(ApiRequestBuilder builder, Grpc.RequestFilter request)
         {
-            if (request is
-                {
-                    Playlist: Grpc.Playlist.All,
-                    MatchType: Grpc.MatchType.Both
-                })
-                yield return builder;
+            if (request.Playlist is Grpc.Playlist.All && request.MatchType is Grpc.MatchType.Both)
+                return new []{builder};
 
+            var builders = new List<ApiRequestBuilder>();
             var playlists = ComputePlaylists(request);
 
             foreach (var playlist in playlists)
             {
                 var clone = new ApiRequestBuilder(builder);
                 clone.SetPlaylist(playlist);
-                yield return clone;
+                builders.Add(clone);
             }
+
+            return builders;
         }
 
         private static IEnumerable<ApiRequestBuilder> CreateIndividualBuilders(Grpc.RequestFilter request)

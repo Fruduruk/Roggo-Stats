@@ -22,8 +22,8 @@
         [JsonProperty("date")] public DateTime Date { get; set; }
         [JsonProperty("date_has_timezone")] public bool? DateHasTimezone { get; set; }
         [JsonProperty("visibility")] public string Visibility { get; set; } = string.Empty;
-        [JsonProperty("min_rank")] public Rank? MinRank { get; set; } = new();
-        [JsonProperty("max_rank")] public Rank? MaxRank { get; set; } = new();
+        [JsonProperty("min_rank")] public Rank? MinRank { get; set; }
+        [JsonProperty("max_rank")] public Rank? MaxRank { get; set; }
         [JsonProperty("blue")] public AdvancedTeam TeamBlue { get; set; } = new();
         [JsonProperty("orange")] public AdvancedTeam TeamOrange { get; set; } = new();
         [JsonProperty("playlist_name")] public string PlaylistName { get; set; } = string.Empty;

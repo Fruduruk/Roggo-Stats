@@ -1,6 +1,6 @@
 use ballchasing::ballchasing_client;
 use crate::ballchasing::ballchasing_client::BallchasingClient;
-use crate::ballchasing::{GroupType, Identity, IdentityType, MatchType, Playlist, RequestFilter};
+use crate::ballchasing::{GroupType, Identity, IdentityType, IdRequest, MatchType, Playlist, RequestFilter};
 
 pub mod ballchasing {
     tonic::include_proto!("ballchasing");
@@ -13,11 +13,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = BallchasingClient::connect("http://localhost:5007").await?;
 
     let request = tonic::Request::new(RequestFilter {
-        replay_cap: None,
+        replay_cap: Some(20),
         identities: vec![
             Identity {
                 identity_type: IdentityType::Name.into(),
-                name_or_id: "Fruduruk".into()
+                name_or_id: "Fruduruk".into(),
             }
         ],
         title: None,
@@ -35,7 +35,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.get_simple_replays(request).await?;
 
 
-    println!("{:?}", response);
+    println!("{:?}", &response);
 
+    println!("That was the replay now follows the advanced replay");
+
+    let advanced_request = tonic::Request::new(IdRequest {
+        id: response.into_inner().replays.first().unwrap().id.clone()
+    });
+
+    let advanced_response = client.get_advanced_replay_by_id(advanced_request).await?;
+
+    println!("{:?}", &advanced_response);
     Ok(())
 }
