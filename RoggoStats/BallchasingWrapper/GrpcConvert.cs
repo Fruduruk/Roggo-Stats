@@ -171,7 +171,7 @@ public static class GrpcConvert
 
     private static Grpc.AdvancedPlayer ConvertToGrpcAdvancedPlayer(AdvancedPlayer player)
     {
-        return new Grpc.AdvancedPlayer
+        var advancedPlayer = new Grpc.AdvancedPlayer
         {
             StartTime = player.StartTime,
             EndTime = player.EndTime,
@@ -181,13 +181,15 @@ public static class GrpcConvert
                 Platform = player.Id.Platform,
                 Id = player.Id.Id
             },
-            Rank = ConvertToGrpcRank(player.Rank),
             CarId = player.CarId,
             CarName = player.CarName,
             Camera = ConvertToGrpcCamera(player.Camera),
             SteeringSensitivity = player.SteeringSensitivity,
             Stats = ConvertToGrpcPlayerStats(player.Stats)
         };
+        if (player.Rank is not null)
+            advancedPlayer.Rank = ConvertToGrpcRank(player.Rank);
+        return advancedPlayer;
     }
 
     private static Grpc.PlayerStats ConvertToGrpcPlayerStats(PlayerStats stats)

@@ -47,7 +47,7 @@ message AdvancedPlayer{
   float endTime = 2;
   string name = 3;
   PlayerId id = 4;
-  Rank rank = 5;
+  optional Rank rank = 5;
   int32 carId = 6;
   string carName = 7;
   Camera camera = 8;
