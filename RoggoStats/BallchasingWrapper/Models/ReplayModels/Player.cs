@@ -1,28 +1,14 @@
-﻿
-namespace BallchasingWrapper.Models.ReplayModels
+﻿namespace BallchasingWrapper.Models.ReplayModels
 {
     public class Player : IEquatable<Player>, IComparable<Player>
     {
-        [JsonProperty("start_time")]
-        public double StartTime { get; set; }
-
-        [JsonProperty("end_time")]
-        public double EndTime { get; set; }
-
-        [JsonProperty("name")]
-        public string? Name { get; set; }
-
-        [JsonProperty("id")]
-        public PlatformId? Id { get; set; }
-
-        [JsonProperty("mvp")]
-        public bool MVP { get; set; }
-
-        [JsonProperty("rank")]
-        public Rank? Rank { get; set; }
-
-        [JsonProperty("score")]
-        public int Score { get; set; }
+        [JsonProperty("start_time")] public double StartTime { get; set; }
+        [JsonProperty("end_time")] public double EndTime { get; set; }
+        [JsonProperty("name")] public string? Name { get; set; }
+        [JsonProperty("id")] public PlatformId? Id { get; set; }
+        [JsonProperty("mvp")] public bool Mvp { get; set; }
+        [JsonProperty("rank")] public Rank? Rank { get; set; }
+        [JsonProperty("score")] public int Score { get; set; }
 
         public int CompareTo(Player other)
         {
@@ -46,7 +32,7 @@ namespace BallchasingWrapper.Models.ReplayModels
                 return false;
             if (!Name.Equals(other.Name))
                 return false;
-            if (!MVP.Equals(other.MVP))
+            if (!Mvp.Equals(other.Mvp))
                 return false;
             return true;
         }
@@ -55,7 +41,7 @@ namespace BallchasingWrapper.Models.ReplayModels
         {
             var hashCode = new HashCode();
             hashCode.Add(Name);
-            hashCode.Add(MVP);
+            hashCode.Add(Mvp);
             var hash = hashCode.ToHashCode();
             return hash;
         }

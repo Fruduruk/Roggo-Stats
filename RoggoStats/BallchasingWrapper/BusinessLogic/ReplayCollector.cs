@@ -40,7 +40,6 @@ namespace BallchasingWrapper.BusinessLogic
 
             sw.Stop();
 
-            response.ElapsedMilliseconds = sw.ElapsedMilliseconds;
 
             if (cancellationToken.IsCancellationRequested)
             {

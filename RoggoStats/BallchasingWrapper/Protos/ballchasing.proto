@@ -30,7 +30,7 @@ message AdvancedReplay {
   int32 duration = 13;
   bool overtime = 14;
   int32 overtimeSeconds = 15;
-  //Season season = 16;
+  Season season = 16;
   string date = 17;
   Visibility visibility = 18;
   Rank minRank = 19;
