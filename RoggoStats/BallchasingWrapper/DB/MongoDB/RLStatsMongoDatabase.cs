@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace BallchasingWrapper.DB.MongoDB
 {
-    public class RlStatsMongoDatabase : IDatabase, IReplayCache, IServiceInfoIO
+    public class RlStatsMongoDatabase : IDatabase, IReplayCache
     {
         private const string AdvancedReplayCollectionName = "AdvancedReplays";
         private const string ServiceInfoCollectionName = "ServiceInfo";

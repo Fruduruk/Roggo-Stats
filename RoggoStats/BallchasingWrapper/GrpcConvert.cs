@@ -34,6 +34,11 @@ public static class GrpcConvert
             MapName = advancedReplay.MapName,
             Blue = ConvertToGrpcAdvancedTeam(advancedReplay.TeamBlue),
             Orange = ConvertToGrpcAdvancedTeam(advancedReplay.TeamOrange),
+            Season = new Grpc.Season
+            {
+                Number = advancedReplay.Season,
+                FreeToPlay = !advancedReplay.SeasonType.Contains("before")
+            }
         };
         if (advancedReplay.MinRank is not null)
             grpcAdvancedReplay.MinRank = ConvertToGrpcRank(advancedReplay.MinRank);
@@ -383,7 +388,7 @@ public static class GrpcConvert
         var grpcPlayer = new Grpc.Player
         {
             Name = player.Name ?? string.Empty,
-            Mvp = player.MVP,
+            Mvp = player.Mvp,
             Score = player.Score,
             StartTime = player.StartTime,
             EndTime = player.EndTime,
