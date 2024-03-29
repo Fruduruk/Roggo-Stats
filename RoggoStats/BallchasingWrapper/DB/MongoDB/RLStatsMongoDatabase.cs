@@ -11,7 +11,7 @@ namespace BallchasingWrapper.DB.MongoDB
     {
         private const string AdvancedReplayCollectionName = "AdvancedReplays";
         private const string ServiceInfoCollectionName = "ServiceInfo";
-        private const string ReplayCacheCollectionName = "ReplayCache";
+        private const string SimpleReplaysCollectionName = "SimpleReplays";
         private MongoClient Client { get; }
         private IMongoDatabase Database { get; }
 
@@ -66,7 +66,7 @@ namespace BallchasingWrapper.DB.MongoDB
         #region IReplayCache
         public async Task<HashSet<Replay>?> LoadCachedReplays(ApiUrlCreator filter)
         {
-            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(SimpleReplaysCollectionName);
             var filterString = filter.ToString();
             var wrapper = await (await coll.FindAsync(doc => doc.Value.FilterString == filterString)).FirstOrDefaultAsync();
             return wrapper?.Value.Replays.ToHashSet();
@@ -74,7 +74,7 @@ namespace BallchasingWrapper.DB.MongoDB
 
         public async Task WriteReplayCache(ApiUrlCreator filter, IEnumerable<Replay> replays)
         {
-            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(ReplayCacheCollectionName);
+            var coll = Database.GetCollection<Wrapper<ReplayCacheDocument>>(SimpleReplaysCollectionName);
             var filterString = filter.ToString();
             var document = new ReplayCacheDocument
             {
