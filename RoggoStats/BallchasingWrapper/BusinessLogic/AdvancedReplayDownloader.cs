@@ -16,17 +16,27 @@ public class AdvancedReplayDownloader
         _replayDatabase = database;
     }
 
-    public async Task<IEnumerable<AdvancedReplay>> LoadAdvancedReplaysByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AdvancedReplay>> LoadAdvancedReplaysByIdsAsync(IEnumerable<string> ids,
+        CancellationToken cancellationToken)
     {
         var idList = ids.ToList();
         var cachedAdvancedReplays =
             (await _replayDatabase.LoadReplaysByIdsAsync(idList, cancellationToken)).ToList();
         if (cancellationToken.IsCancellationRequested)
             return Array.Empty<AdvancedReplay>();
-
+        
         var downloadedReplays = new List<AdvancedReplay>();
-        foreach (var id in idList.Where(id => !cachedAdvancedReplays.Select(replay => replay.Id).Contains(id)))
+        
+        _logger.LogInformation($"Found {cachedAdvancedReplays.Count}/{idList.Count} advanced replays in cache.");
+        var idsToDownload = idList
+            .Where(id => !cachedAdvancedReplays
+                .Select(replay => replay.Id)
+                .Contains(id))
+            .ToList();
+        _logger.LogInformation($"Downloading {idsToDownload.Count} advanced replays...");
+        foreach (var id in idsToDownload)
         {
+            _logger.LogInformation($"Downloading replay {id}...");
             var downloadedReplay = await DownloadAdvancedReplayById(id, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return Array.Empty<AdvancedReplay>();
@@ -35,9 +45,11 @@ public class AdvancedReplayDownloader
             downloadedReplays.Add(downloadedReplay);
             await _replayDatabase.SaveReplayAsync(downloadedReplay);
         }
-        return cachedAdvancedReplays.Concat(downloadedReplays).OrderByDescending(advancedReplay => advancedReplay.Created);
+
+        return cachedAdvancedReplays.Concat(downloadedReplays)
+            .OrderByDescending(advancedReplay => advancedReplay.Created);
     }
-    
+
     public async Task<AdvancedReplay?> LoadAdvancedReplayByIdAsync(string id, CancellationToken cancellationToken)
     {
         var cachedAdvancedReplay =
