@@ -39,7 +39,10 @@ namespace BallchasingWrapper.BusinessLogic
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Locked);
                 lock (_calls)
                     _calls.Add(url);
-                return await _client.GetAsync(url, cancellationToken);
+                var response = await _client.GetAsync(url, cancellationToken);
+                return cancellationToken.IsCancellationRequested
+                    ? new HttpResponseMessage(System.Net.HttpStatusCode.Locked)
+                    : response;
             }, cancellationToken);
         }
 
@@ -58,7 +61,8 @@ namespace BallchasingWrapper.BusinessLogic
                     {
                         var actualTimeToWait = Math.Round(timeToWait, MidpointRounding.ToPositiveInfinity) -
                                                _stopWatch.ElapsedMilliseconds;
-                        var task = Task.Run(() => Task.Delay((int)actualTimeToWait, cancellationToken), cancellationToken);
+                        var task = Task.Run(() => Task.Delay((int)actualTimeToWait, cancellationToken),
+                            cancellationToken);
                         task.Wait(cancellationToken);
                     }
 
@@ -71,7 +75,7 @@ namespace BallchasingWrapper.BusinessLogic
 
         public async Task<ApiDataPack> GetApiDataPackAsync(string url, CancellationToken cancellationToken)
         {
-            var response = await GetAsync(url,cancellationToken);
+            var response = await GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return new ApiDataPack { Success = false };
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));

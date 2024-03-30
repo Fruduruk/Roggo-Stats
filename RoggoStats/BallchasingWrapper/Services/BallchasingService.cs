@@ -75,10 +75,13 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         };
     }
 
-    public override Task<Grpc.BackgroundDownloadResponse> GetBackgroundDownloadOperations(Empty request,
+    public override async Task<Grpc.BackgroundDownloadResponse> GetBackgroundDownloadOperations(Empty request,
         ServerCallContext context)
     {
-        return base.GetBackgroundDownloadOperations(request, context);
+        return new Grpc.BackgroundDownloadResponse
+        {
+            Operations = { await _backgroundDownloadingService.GetBackgroundDownloadOperations() }
+        };
     }
 
     public override async Task<Grpc.BasicResponse> StartBackgroundDownload(Grpc.BackgroundDownloadRequest request,
@@ -93,8 +96,14 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         };
     }
 
-    public override Task<Grpc.BasicResponse> CancelBackgroundDownload(Grpc.Identity request, ServerCallContext context)
+    public override async Task<Grpc.BasicResponse> CancelBackgroundDownload(Grpc.Identity request, ServerCallContext context)
     {
-        return base.CancelBackgroundDownload(request, context);
+        var success = await
+            _backgroundDownloadingService.CancelBackgroundDownloadAsync(request);
+        return new Grpc.BasicResponse
+        {
+            Success = success,
+            Error = success ? string.Empty : "Downloader does not exist."
+        };
     }
 }

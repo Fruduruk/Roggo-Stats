@@ -12,6 +12,7 @@ public class BackgroundReplayDownloader
     private readonly double _cycleIntervalInHours;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _manualCancellationTokenSource;
+    private CancellationTokenSource _combinedTokenSource;
 
     public BackgroundReplayDownloader(IBallchasingApi api, IReplayCache replayCache, IDatabase database,
         Grpc.Identity identity, double cycleIntervalInHours, ILogger logger)
@@ -25,20 +26,28 @@ public class BackgroundReplayDownloader
         _manualCancellationTokenSource = new CancellationTokenSource();
     }
 
-    public async Task RepeatedlyDownloadAdvancedReplaysAsync(CancellationToken cancellationToken)
+    public async Task RepeatedlyDownloadAdvancedReplaysAsync(CancellationToken appCancellationToken)
     {
-        var combinedToken =
-            CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _manualCancellationTokenSource.Token)
-                .Token;
+        _combinedTokenSource =
+            CancellationTokenSource.CreateLinkedTokenSource(appCancellationToken, _manualCancellationTokenSource.Token);
+            
         while (true)
         {
-            await Task.Delay(TimeSpan.FromSeconds(_cycleIntervalInHours), combinedToken);
-            if (combinedToken.IsCancellationRequested)
-                break;
-            _logger.LogInformation("Downloaded for " + Identity.NameOrId);
-            await StartDownloadCycle(combinedToken);
-            if (combinedToken.IsCancellationRequested)
-                break;
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(_cycleIntervalInHours), _combinedTokenSource.Token);
+                if (_combinedTokenSource.Token.IsCancellationRequested)
+                    break;
+                _logger.LogInformation("Downloaded for " + Identity.NameOrId);
+                await StartDownloadCycle(_combinedTokenSource.Token);
+                if (_combinedTokenSource.Token.IsCancellationRequested)
+                    break;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            
         }
     }
 
