@@ -35,7 +35,7 @@ public class BackgroundReplayDownloader
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(_cycleIntervalInHours), combinedToken);
+                await Task.Delay(TimeSpan.FromHours(_cycleIntervalInHours), combinedToken);
                 if (combinedToken.IsCancellationRequested)
                     break;
                 _logger.LogInformation("Downloaded for " + Identity.NameOrId);
@@ -60,14 +60,9 @@ public class BackgroundReplayDownloader
 
         if (cancellationToken.IsCancellationRequested)
             return;
-
-        // Shorten for debugging
-        ids = new[] { ids.First() };
-        // remove after debugging
         
         var downloader = new AdvancedReplayDownloader(_api, _database, _logger);
-        var advancedReplays =
-            await downloader.LoadAdvancedReplaysByIdsAsync(ids, cancellationToken);
+        await downloader.LoadAdvancedReplaysByIdsAsync(ids, cancellationToken);
     }
 
     public void Cancel()

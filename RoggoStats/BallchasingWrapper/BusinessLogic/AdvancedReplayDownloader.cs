@@ -36,10 +36,11 @@ public class AdvancedReplayDownloader
                     .Contains(id))
                 .ToList();
             _logger.LogInformation($"Downloading {idsToDownload.Count} advanced replays...");
+            int count = 0;
             foreach (var id in idsToDownload)
             {
-                _logger.LogInformation($"Downloading replay {id}...");
-                var downloadedReplay = await DownloadAdvancedReplayById(id, cancellationToken);
+                _logger.LogInformation($"Downloading replay {++count}/{idsToDownload.Count} {id}...");
+                var downloadedReplay = await LoadAdvancedReplayByIdAsync(id, cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                     return Array.Empty<AdvancedReplay>();
                 if (downloadedReplay is null)
@@ -68,7 +69,7 @@ public class AdvancedReplayDownloader
             if (cachedAdvancedReplay is not null)
                 return cachedAdvancedReplay;
 
-            var downloadedReplay = await DownloadAdvancedReplayById(id, cancellationToken);
+            var downloadedReplay = await DownloadAdvancedReplayByIdAsync(id, cancellationToken);
             return downloadedReplay;
         }
         catch (OperationCanceledException)
@@ -77,7 +78,7 @@ public class AdvancedReplayDownloader
         }
     }
 
-    private async Task<AdvancedReplay?> DownloadAdvancedReplayById(string id,
+    private async Task<AdvancedReplay?> DownloadAdvancedReplayByIdAsync(string id,
         CancellationToken cancellationToken = default)
     {
         var url = ApiRequestBuilder.GetSpecificReplayUrl(id);
