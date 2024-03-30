@@ -40,7 +40,6 @@ public class BackgroundDownloadingService
             _downloaders.Add(downloader);
             return downloader.RepeatedlyDownloadAdvancedReplaysAsync(_lifetime.ApplicationStopping);
         }).ToList());
-        _logger.LogInformation("All background tasks done...");
     }
 
     private void CancelAllBackgroundDownloaders()
@@ -58,6 +57,22 @@ public class BackgroundDownloadingService
         if (!success)
             return false;
 
+        CancelAllBackgroundDownloaders();
+        StartBackgroundDownloadAsync();
+        return true;
+    }
+
+    public async Task<IEnumerable<Grpc.BackgroundDownloadOperation>> GetBackgroundDownloadOperations()
+    {
+        return await _backgroundDownloaderConfig.LoadOperationsAsync();
+    }
+
+    public async Task<bool> CancelBackgroundDownloadAsync(Grpc.Identity identity)
+    {
+        var success = await _backgroundDownloaderConfig.DeleteOperationAsync(identity);
+        if (!success)
+            return false;
+        
         CancelAllBackgroundDownloaders();
         StartBackgroundDownloadAsync();
         return true;
