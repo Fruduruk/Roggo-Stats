@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "BallchasingWrapper.Grpc";
 
@@ -8,10 +9,33 @@ service Ballchasing {
   rpc GetSimpleReplays (FilterRequest) returns (SimpleReplaysResponse);
   rpc GetAdvancedReplayById (IdRequest) returns (AdvancedReplay);
   rpc GetAdvancedReplays (FilterRequest) returns (AdvancedReplaysResponse);
+
+  rpc StartBackgroundDownload (BackgroundDownloadRequest) returns (BasicResponse);
+  rpc CancelBackgroundDownload (Identity) returns (BasicResponse);
+  rpc GetBackgroundDownloadOperations (google.protobuf.Empty) returns (BackgroundDownloadResponse);
+}
+
+message BackgroundDownloadResponse {
+  repeated BackgroundDownloadOperation operations = 1;
+}
+
+message BackgroundDownloadRequest {
+  BackgroundDownloadOperation operation = 1;
+}
+
+message BackgroundDownloadOperation {
+  Identity identity = 1;
+  double cycleIntervalInHours = 2;
+}
+
+message BasicResponse {
+  bool success = 1;
+  string error = 2;
 }
 
 message AdvancedReplaysResponse {
-  repeated AdvancedReplay replays = 1;
+  int32 count = 1;
+  repeated AdvancedReplay replays = 2;
 }
 
 message AdvancedReplay {

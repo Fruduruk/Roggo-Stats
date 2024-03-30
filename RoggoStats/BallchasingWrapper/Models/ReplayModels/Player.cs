@@ -6,7 +6,7 @@
         [JsonProperty("end_time")] public double EndTime { get; set; }
         [JsonProperty("name")] public string? Name { get; set; }
         [JsonProperty("id")] public PlatformId? Id { get; set; }
-        [JsonProperty("mvp")] public bool Mvp { get; set; }
+        [JsonProperty("mvp")] public bool MVP { get; set; }
         [JsonProperty("rank")] public Rank? Rank { get; set; }
         [JsonProperty("score")] public int Score { get; set; }
 
@@ -32,7 +32,7 @@
                 return false;
             if (!Name.Equals(other.Name))
                 return false;
-            if (!Mvp.Equals(other.Mvp))
+            if (!MVP.Equals(other.MVP))
                 return false;
             return true;
         }
@@ -41,7 +41,7 @@
         {
             var hashCode = new HashCode();
             hashCode.Add(Name);
-            hashCode.Add(Mvp);
+            hashCode.Add(MVP);
             var hash = hashCode.ToHashCode();
             return hash;
         }

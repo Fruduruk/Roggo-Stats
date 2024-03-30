@@ -1,7 +1,7 @@
 using BallchasingWrapper.BusinessLogic;
-using BallchasingWrapper.DB.MongoDB;
 using BallchasingWrapper.Interfaces;
 using BallchasingWrapper.Models;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
 namespace BallchasingWrapper.Services;
@@ -9,13 +9,19 @@ namespace BallchasingWrapper.Services;
 public class BallchasingService : Grpc.Ballchasing.BallchasingBase
 {
     private readonly IBallchasingApi _api;
-    private readonly RlStatsMongoDatabase _db;
+    private readonly IReplayCache _replayCache;
+    private readonly IDatabase _database;
+    private readonly BackgroundDownloadingService _backgroundDownloadingService;
     private readonly ILogger<BallchasingService> _logger;
 
-    public BallchasingService(IBallchasingApi api, RlStatsMongoDatabase db, ILogger<BallchasingService> logger)
+    public BallchasingService(IBallchasingApi api, IReplayCache replayCache, IDatabase database,
+        BackgroundDownloadingService backgroundDownloadingService,
+        ILogger<BallchasingService> logger)
     {
         _api = api;
-        _db = db;
+        _replayCache = replayCache;
+        _database = database;
+        _backgroundDownloadingService = backgroundDownloadingService;
         _logger = logger;
     }
 
@@ -23,7 +29,7 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         ServerCallContext context)
     {
         var urlCreator = new ApiUrlCreator(request);
-        var collector = new ReplayCollector(urlCreator, _api, _db, _logger);
+        var collector = new ReplayCollector(urlCreator, _api, _replayCache, _logger);
 
         var response =
             await collector.CollectReplaysAsync(_logger, context.CancellationToken);
@@ -43,7 +49,7 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
     public override async Task<Grpc.AdvancedReplay> GetAdvancedReplayById(Grpc.IdRequest request,
         ServerCallContext context)
     {
-        var downloader = new AdvancedReplayDownloader(_api, _db, _logger);
+        var downloader = new AdvancedReplayDownloader(_api, _database, _logger);
         var replay = await downloader.LoadAdvancedReplayByIdAsync(request.Id, context.CancellationToken);
         if (context.CancellationToken.IsCancellationRequested || replay is null)
             return new Grpc.AdvancedReplay();
@@ -55,16 +61,40 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         ServerCallContext context)
     {
         var simpleReplays = await GetSimpleReplays(request, context);
-        var downloader = new AdvancedReplayDownloader(_api, _db, _logger);
+        var downloader = new AdvancedReplayDownloader(_api, _database, _logger);
         var advancedReplays =
-            await downloader.LoadAdvancedReplaysByIdsAsync(simpleReplays.Replays.Select(replay => replay.Id),
-                context.CancellationToken);
+            (await downloader.LoadAdvancedReplaysByIdsAsync(simpleReplays.Replays.Select(replay => replay.Id),
+                context.CancellationToken)).ToList();
         if (context.CancellationToken.IsCancellationRequested)
-            return new Grpc.AdvancedReplaysResponse{Replays = { Array.Empty<Grpc.AdvancedReplay>() }};
+            return new Grpc.AdvancedReplaysResponse { Replays = { Array.Empty<Grpc.AdvancedReplay>() } };
 
         return new Grpc.AdvancedReplaysResponse
         {
+            Count = advancedReplays.Count,
             Replays = { advancedReplays.Select(advancedReplay => advancedReplay.ToGrpcAdvancedReplay()) }
         };
+    }
+
+    public override Task<Grpc.BackgroundDownloadResponse> GetBackgroundDownloadOperations(Empty request,
+        ServerCallContext context)
+    {
+        return base.GetBackgroundDownloadOperations(request, context);
+    }
+
+    public override async Task<Grpc.BasicResponse> StartBackgroundDownload(Grpc.BackgroundDownloadRequest request,
+        ServerCallContext context)
+    {
+        var success = await
+            _backgroundDownloadingService.InsertNewBackgroundDownloadAsync(request.Operation);
+        return new Grpc.BasicResponse
+        {
+            Success = success,
+            Error = success ? string.Empty : "Downloader already exists."
+        };
+    }
+
+    public override Task<Grpc.BasicResponse> CancelBackgroundDownload(Grpc.Identity request, ServerCallContext context)
+    {
+        return base.CancelBackgroundDownload(request, context);
     }
 }

@@ -31,17 +31,33 @@ namespace BallchasingWrapper
             var ballchasingApi = new BallchasingApi(_tokenInfo);
             
             builder.Services.AddGrpc();
-            builder.Services.AddSingleton(mongoDb);
+            builder.Services.AddSingleton<IReplayCache>(mongoDb);
+            builder.Services.AddSingleton<IDatabase>(mongoDb);
+            builder.Services.AddSingleton<IBackgroundDownloaderConfig>(mongoDb);
             builder.Services.AddSingleton<IBallchasingApi>(ballchasingApi);
-
+            builder.Services.AddSingleton(mongoDb.ToLoggerProvider());
+            builder.Services.AddSingleton<BackgroundDownloadingService>();
+            
             var app = builder.Build();
+            var logger = app.Services.GetService<ILogger<WebApplication>>();
+            app.StartBackgroundDownloader(logger);
             app.MapGrpcService<BallchasingService>();
             app.MapGet("/",
                 () =>
                     "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
+            
             app.Run();
-            Console.WriteLine("Replay collector shutdown successful.");
+            logger?.LogInformation("Replay collector shutdown successful.");
+        }
+
+        private static void StartBackgroundDownloader(this WebApplication app, ILogger? logger)
+        {
+            var service = app.Services.GetService<BackgroundDownloadingService>();
+            if (service is null)
+                logger?.LogError("Failed to start Background Download.");
+            else
+                service.StartBackgroundDownload();
         }
 
         private static bool IsAnyEnvironmentVariableMissing()

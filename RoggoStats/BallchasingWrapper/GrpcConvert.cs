@@ -388,7 +388,7 @@ public static class GrpcConvert
         var grpcPlayer = new Grpc.Player
         {
             Name = player.Name ?? string.Empty,
-            Mvp = player.Mvp,
+            Mvp = player.MVP,
             Score = player.Score,
             StartTime = player.StartTime,
             EndTime = player.EndTime,

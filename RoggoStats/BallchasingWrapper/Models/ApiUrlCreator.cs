@@ -266,5 +266,15 @@ namespace BallchasingWrapper.Models
                 "heatseeker",
             };
         }
+
+        public static ApiUrlCreator CreateSimpleIdentityFilter(Grpc.Identity identity)
+        {
+            return new ApiUrlCreator(new Grpc.FilterRequest
+            {
+                Identities = { identity },
+                Playlist = Grpc.Playlist.All,
+                MatchType = Grpc.MatchType.Both,
+            });
+        }
     }
 }
