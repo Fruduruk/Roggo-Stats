@@ -12,16 +12,18 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
     private readonly IReplayCache _replayCache;
     private readonly IDatabase _database;
     private readonly BackgroundDownloadingService _backgroundDownloadingService;
+    private readonly IHostApplicationLifetime _lifetime;
     private readonly ILogger<BallchasingService> _logger;
 
     public BallchasingService(IBallchasingApi api, IReplayCache replayCache, IDatabase database,
-        BackgroundDownloadingService backgroundDownloadingService,
+        BackgroundDownloadingService backgroundDownloadingService, IHostApplicationLifetime lifetime,
         ILogger<BallchasingService> logger)
     {
         _api = api;
         _replayCache = replayCache;
         _database = database;
         _backgroundDownloadingService = backgroundDownloadingService;
+        _lifetime = lifetime;
         _logger = logger;
     }
 
@@ -32,7 +34,9 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         var collector = new ReplayCollector(urlCreator, _api, _replayCache, _logger);
 
         var response =
-            await collector.CollectReplaysAsync(_logger, context.CancellationToken);
+            await collector.CollectReplaysAsync(_logger,
+                CancellationTokenSource
+                    .CreateLinkedTokenSource(context.CancellationToken, _lifetime.ApplicationStopping).Token);
 
         if (context.CancellationToken.IsCancellationRequested)
             return new Grpc.SimpleReplaysResponse();
@@ -49,9 +53,11 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
     public override async Task<Grpc.AdvancedReplay> GetAdvancedReplayById(Grpc.IdRequest request,
         ServerCallContext context)
     {
+        var combinedToken = CancellationTokenSource
+            .CreateLinkedTokenSource(context.CancellationToken, _lifetime.ApplicationStopping).Token;
         var downloader = new AdvancedReplayDownloader(_api, _database, _logger);
-        var replay = await downloader.LoadAdvancedReplayByIdAsync(request.Id, context.CancellationToken);
-        if (context.CancellationToken.IsCancellationRequested || replay is null)
+        var replay = await downloader.LoadAdvancedReplayByIdAsync(request.Id, combinedToken);
+        if (combinedToken.IsCancellationRequested || replay is null)
             return new Grpc.AdvancedReplay();
 
         return replay.ToGrpcAdvancedReplay();
@@ -60,12 +66,14 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
     public override async Task<Grpc.AdvancedReplaysResponse> GetAdvancedReplays(Grpc.FilterRequest request,
         ServerCallContext context)
     {
+        var combinedToken = CancellationTokenSource
+            .CreateLinkedTokenSource(context.CancellationToken, _lifetime.ApplicationStopping).Token;
         var simpleReplays = await GetSimpleReplays(request, context);
         var downloader = new AdvancedReplayDownloader(_api, _database, _logger);
         var advancedReplays =
             (await downloader.LoadAdvancedReplaysByIdsAsync(simpleReplays.Replays.Select(replay => replay.Id),
-                context.CancellationToken)).ToList();
-        if (context.CancellationToken.IsCancellationRequested)
+                combinedToken)).ToList();
+        if (combinedToken.IsCancellationRequested)
             return new Grpc.AdvancedReplaysResponse { Replays = { Array.Empty<Grpc.AdvancedReplay>() } };
 
         return new Grpc.AdvancedReplaysResponse
@@ -96,7 +104,8 @@ public class BallchasingService : Grpc.Ballchasing.BallchasingBase
         };
     }
 
-    public override async Task<Grpc.BasicResponse> CancelBackgroundDownload(Grpc.Identity request, ServerCallContext context)
+    public override async Task<Grpc.BasicResponse> CancelBackgroundDownload(Grpc.Identity request,
+        ServerCallContext context)
     {
         var success = await
             _backgroundDownloadingService.CancelBackgroundDownloadAsync(request);

@@ -36,16 +36,19 @@ namespace BallchasingWrapper.BusinessLogic
             var sw = new Stopwatch();
             sw.Start();
 
-            var replays = await GetReplays(logger, cancellationToken);
-
-            sw.Stop();
-
-
-            if (cancellationToken.IsCancellationRequested)
+            IEnumerable<Replay> replays = new List<Replay>();
+            try
             {
+                replays = await GetReplays(logger, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                sw.Stop();
                 logger.LogInformation("Cancelled collecting replays.");
                 return response;
             }
+
+            sw.Stop();
 
             response.Replays = replays.ToList();
 
