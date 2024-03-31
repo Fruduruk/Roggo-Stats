@@ -1,21 +1,15 @@
 version: '3.3'
+volumes:
+  mongo_data_volume:
+networks:
+  rl_stats_network:
 services:
-  ballchasing_wrapper:
-    ports:
-      - '81:80'
-    container_name: ballchasing_wrapper
-    environment:
-      - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
-      - MONGO_HOST=ballchasing_db
-      - MONGO_PORT=27017
-      - MONGO_USER=BallchasingWrapper
-      - MONGO_PASSWORD=chaser
-      - DATABASE_NAME=RLStatsData
-    image: ballchasingwrapper:0.1
   ballchasing_db:
     ports:
-      - '27018:27017'
+      - '29017:27017'
     container_name: ballchasing_db
+    networks:
+      - rl_stats_network
     volumes:
       - mongo_data_volume:/data/db
     logging:
@@ -25,5 +19,17 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=BallchasingWrapper
       - MONGO_INITDB_ROOT_PASSWORD=chaser
     image: mongo
-volumes:
-  mongo_data_volume:
+  ballchasing_wrapper:
+    ports:
+      - '9000:80'
+    container_name: ballchasing_wrapper
+    networks:
+      - rl_stats_network
+    environment:
+      - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
+      - MONGO_HOST=ballchasing_db
+      - MONGO_PORT=27017
+      - MONGO_USER=BallchasingWrapper
+      - MONGO_PASSWORD=chaser
+      - DATABASE_NAME=RLStatsData
+    image: ballchasingwrapper:0.1
