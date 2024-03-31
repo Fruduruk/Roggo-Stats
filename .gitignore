@@ -21,3 +21,4 @@
 # Ballchasing Wrapper launchsettings
 /RoggoStats/BallchasingWrapper/Properties/launchSettings.json
 /RoggoStats/Kreya/ballchasing/Ballchasing/**
+/RoggoStats/BallchasingWrapper/.env

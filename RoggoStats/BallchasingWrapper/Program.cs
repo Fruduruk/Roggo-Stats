@@ -15,6 +15,7 @@ namespace BallchasingWrapper
         private const string DatabaseName = "DATABASE_NAME";
         private const string MongoUser = "MONGO_USER";
         private const string MongoPassword = "MONGO_PASSWORD";
+        private const string AuthenticationDatabaseName = "admin";
 
         private static AuthTokenInfo? _tokenInfo;
 
@@ -143,8 +144,11 @@ namespace BallchasingWrapper
             var username = Environment.GetEnvironmentVariable(MongoUser);
             var password = Environment.GetEnvironmentVariable(MongoPassword);
             if (username != null && password != null)
+            {
                 settings.MongoSettings.Credential =
-                    MongoDB.Driver.MongoCredential.CreateCredential("admin", username, password);
+                    MongoDB.Driver.MongoCredential.CreateCredential(AuthenticationDatabaseName, username, password);
+            }
+
             return new RlStatsMongoDatabase(settings);
         }
     }

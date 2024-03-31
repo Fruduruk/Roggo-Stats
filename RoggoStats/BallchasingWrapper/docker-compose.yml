@@ -1,0 +1,29 @@
+version: '3.3'
+services:
+  ballchasing_wrapper:
+    ports:
+      - '81:80'
+    container_name: ballchasing_wrapper
+    environment:
+      - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
+      - MONGO_HOST=ballchasing_db
+      - MONGO_PORT=27017
+      - MONGO_USER=BallchasingWrapper
+      - MONGO_PASSWORD=chaser
+      - DATABASE_NAME=RLStatsData
+    image: ballchasingwrapper:0.1
+  ballchasing_db:
+    ports:
+      - '27018:27017'
+    container_name: ballchasing_db
+    volumes:
+      - mongo_data_volume:/data/db
+    logging:
+      options:
+        max-size: 1g
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=BallchasingWrapper
+      - MONGO_INITDB_ROOT_PASSWORD=chaser
+    image: mongo
+volumes:
+  mongo_data_volume:
