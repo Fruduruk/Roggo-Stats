@@ -1,0 +1,384 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "BallchasingWrapper.Grpc";
+
+package ballchasing;
+
+service Ballchasing {
+  rpc GetSimpleReplays (FilterRequest) returns (SimpleReplaysResponse);
+  rpc GetAdvancedReplayById (IdRequest) returns (AdvancedReplay);
+  rpc GetAdvancedReplays (FilterRequest) returns (AdvancedReplaysResponse);
+
+  rpc StartBackgroundDownload (BackgroundDownloadRequest) returns (BasicResponse);
+  rpc CancelBackgroundDownload (Identity) returns (BasicResponse);
+  rpc GetBackgroundDownloadOperations (google.protobuf.Empty) returns (BackgroundDownloadResponse);
+}
+
+message BackgroundDownloadResponse {
+  repeated BackgroundDownloadOperation operations = 1;
+}
+
+message BackgroundDownloadRequest {
+  BackgroundDownloadOperation operation = 1;
+}
+
+message BackgroundDownloadOperation {
+  Identity identity = 1;
+  double cycleIntervalInHours = 2;
+}
+
+message BasicResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message AdvancedReplaysResponse {
+  int32 count = 1;
+  repeated AdvancedReplay replays = 2;
+}
+
+message AdvancedReplay {
+  string id = 1;
+  string link = 2;
+  string created = 3;
+  string status = 4;
+  string rocketLeagueId = 5;
+  string matchGuid = 6;
+  string title = 7;
+  string mapCode = 8;
+  string serverType = 9;
+  int32 teamSize = 10;
+  MatchType matchType = 11;
+  Playlist playlist = 12;
+  int32 duration = 13;
+  bool overtime = 14;
+  int32 overtimeSeconds = 15;
+  Season season = 16;
+  string date = 17;
+  Visibility visibility = 18;
+  Rank minRank = 19;
+  Rank maxRank = 20;
+  AdvancedTeam blue = 21;
+  AdvancedTeam orange = 22;
+  string mapName = 23;
+  optional Server server = 24;
+}
+
+message AdvancedTeam {
+  string color = 1;
+  TeamStats stats = 2;
+  repeated AdvancedPlayer players = 3;
+}
+
+message AdvancedPlayer{
+  float startTime = 1;
+  float endTime = 2;
+  string name = 3;
+  PlayerId id = 4;
+  optional Rank rank = 5;
+  int32 carId = 6;
+  string carName = 7;
+  Camera camera = 8;
+  double steeringSensitivity = 9;
+  PlayerStats stats = 10;
+}
+
+message PlayerStats {
+  PlayerCore core = 1;
+  PlayerBoost boost = 2;
+  PlayerMovement movement = 3;
+  PlayerPositioning positioning = 4;
+  Demo demo = 5;
+}
+
+message PlayerCore{
+  GeneralCore generalCore = 1;
+  bool mvp = 2;
+}
+
+message PlayerBoost {
+  GeneralBoost generalBoost = 1;
+  float percentZeroBoost = 2;
+  float percentFullBoost = 3;
+  float percentBoost0To25 = 4;
+  float percentBoost25To50 = 5;
+  float percentBoost50To75 = 6;
+  float percentBoost75To100 = 7;
+}
+
+message PlayerMovement {
+  GeneralMovement generalMovement = 1;
+  int32 avgSpeed = 2;
+  float avgPowerslideDuration = 3;
+  float avgSpeedPercentage = 4;
+  float percentSlowSpeed = 5;
+  float percentBoostSpeed = 6;
+  float percentSupersonicSpeed = 7;
+  float percentGround = 8;
+  float percentLowAir = 9;
+  float percentHighAir = 10;
+}
+
+message PlayerPositioning {
+  GeneralPositioning generalPositioning = 1;
+  int32 avgDistanceToBall = 2;
+  int32 avgDistanceToBallPossession = 3;
+  int32 avgDistanceToBallNoPossession = 4;
+  int32 avgDistanceToMates = 5;
+  float timeMostBack = 6;
+  float timeMostForward = 7;
+  float timeClosestToBall = 8;
+  float timeFarthestFromBall = 9;
+  float percentDefensiveThird = 10;
+  float percentOffensiveThird = 11;
+  float percentNeutralThird = 12;
+  float percentDefensiveHalf = 13;
+  float percentOffensiveHalf = 14;
+  float percentBehindBall = 15;
+  float percentInfrontBall = 16;
+  float percentMostBack = 17;
+  float percentMostForward = 18;
+  float percentClosestToBall = 19;
+  float percentFarthestFromBall = 20;
+  int32 goalsAgainstWhileLastDefender = 21;
+}
+
+message Camera {
+  int32 fov = 1;
+  int32 height = 2;
+  int32 pitch = 3;
+  int32 distance = 4;
+  float stiffness = 5;
+  float swivelSpeed = 6;
+  float transitionSpeed = 7;
+}
+
+message TeamStats {
+  Ball ball = 1;
+  GeneralCore core = 2;
+  GeneralBoost boost = 3;
+  GeneralMovement movement = 4;
+  GeneralPositioning positioning = 5;
+  Demo demo = 6;
+}
+
+message Demo {
+  int32 inflicted = 1;
+  int32 taken = 2;
+}
+
+message GeneralPositioning {
+  float timeDefensiveThird = 1;
+  float timeNeutralThird = 2;
+  float timeOffensiveThird = 3;
+  float timeDefensiveHalf = 4;
+  float timeOffensiveHalf = 5;
+  float timeBehindBall = 6;
+  float timeInfrontBall = 7;
+}
+
+message GeneralMovement {
+  int32 totalDistance = 1;
+  float timeSupersonicSpeed = 2;
+  float timeBoostSpeed = 3;
+  float timeSlowSpeed = 4;
+  float timeGround = 5;
+  float timeLowAir = 6;
+  float timeHighAir = 7;
+  float timePowerslide = 8;
+  int32 countPowerslide = 9;
+}
+
+message GeneralBoost {
+  int32 bpm = 1;
+  float bcpm = 2;
+  float avgAmount = 3;
+  int32 amountCollected = 4;
+  int32 amountStolen = 5;
+  int32 amountCollectedBig = 6;
+  int32 amountStolenBig = 7;
+  int32 amountCollectedSmall = 8;
+  int32 amountStolenSmall = 9;
+  int32 countCollectedBig = 10;
+  int32 countStolenBig = 11;
+  int32 countCollectedSmall = 12;
+  int32 countStolenSmall = 13;
+  int32 amountOverfill = 14;
+  int32 amountOverfillStolen = 15;
+  int32 amountUsedWhileSupersonic = 16;
+  float timeZeroBoost = 17;
+  float timeFullBoost = 18;
+  float timeBoost0To25 = 19;
+  float timeBoost25To50 = 20;
+  float timeBoost50To75 = 21;
+  float timeBoost75To100 = 22;
+}
+
+message GeneralCore {
+  int32 shots = 1;
+  int32 shotsAgainst = 2;
+  int32 goals = 3;
+  int32 goalsAgainst = 4;
+  int32 saves = 5;
+  int32 assists = 6;
+  int32 score = 7;
+  float shootingPercentage = 8;
+}
+
+message Ball {
+  float possessionTime = 1;
+  float timeInSide = 2;
+}
+
+message Server {
+  string name = 1;
+  string region = 2;
+}
+
+enum Visibility{
+  Unknown = 0;
+  Public = 1;
+  Private = 2;
+  Unlisted = 3;
+}
+
+message IdRequest {
+  string id = 1;
+}
+
+message FilterRequest {
+  optional int32 replayCap = 1;
+  repeated Identity identities = 2;
+  GroupType groupType = 3;
+  Playlist playlist = 4;
+  MatchType matchType = 5;
+  optional string title = 6;
+  optional Season season = 7;
+  optional string minDate = 8;
+  optional string maxDate = 9;
+  optional RankType minRank = 10;
+  optional RankType maxRank = 11;
+}
+
+message Identity {
+  IdentityType identityType = 1;
+  string nameOrId = 2;
+}
+
+enum IdentityType{
+  NAME = 0;
+  STEAM_ID = 1;
+  EPIC_ID = 2;
+  PS4_GAMER_TAG = 3;
+}
+
+// Search multiple players that form a team or played alone
+enum GroupType {
+  TOGETHER = 0;
+  INDIVIDUALLY = 1;
+}
+
+message Season {
+  int32 number = 1;
+  bool freeToPlay = 2;
+}
+
+enum MatchType {
+  BOTH = 0;
+  RANKED = 1;
+  UNRANKED = 2;
+}
+
+enum Playlist {
+  ALL = 0;
+  DUELS = 1;
+  DOUBLES = 2;
+  STANDARD = 3;
+  CHAOS = 4;
+  PRIVATE_GAME = 5;
+  OFFLINE = 6;
+  SNOW_DAY = 7;
+  ROCKET_LABS = 8;
+  HOOPS = 9;
+  RUMBLE = 10;
+  TOURNAMENT = 11;
+  DROP_SHOT = 12;
+  DROP_SHOT_RUMBLE = 13;
+  HEAT_SEEKER = 14;
+}
+
+message SimpleReplaysResponse {
+  int32 count = 1;
+  repeated Replay replays = 2;
+}
+
+message Replay {
+  string id = 1;
+  string title = 2;
+  string mapName = 3;
+  Playlist playlist = 4;
+  MatchType matchType = 5;
+  int32 duration = 6;
+  bool overtime = 7;
+  string date = 8;
+  Team blue = 11;
+  Team orange = 12;
+  optional Rank minRank = 9;
+  optional Rank maxRank = 10;
+}
+
+message Rank {
+  RankType id = 1;
+  int32 tier = 2;
+  int32 division = 3;
+  string name = 4;
+}
+
+enum RankType {
+  UNKNOWN = 0;
+  NO_RANK = 1;
+  BRONZE_1 = 2;
+  BRONZE_2 = 3;
+  BRONZE_3 = 4;
+  SILVER_1 = 5;
+  SILVER_2 = 6;
+  SILVER_3 = 7;
+  GOLD_1 = 8;
+  GOLD_2 = 9;
+  GOLD_3 = 10;
+  PLATINUM_1 = 11;
+  PLATINUM_2 = 12;
+  PLATINUM_3 = 13;
+  DIAMOND_1 = 14;
+  DIAMOND_2 = 15;
+  DIAMOND_3 = 16;
+  CHAMPION_1 = 17;
+  CHAMPION_2 = 18;
+  CHAMPION_3 = 19;
+  GRAND_CHAMPION_1 = 20;
+  GRAND_CHAMPION_2 = 21;
+  GRAND_CHAMPION_3 = 22;
+  SUPERSONIC_LEGEND = 23;
+  OLD_GRAND_CHAMPION = 24;
+}
+
+message Team {
+  int32 goals = 1;
+  repeated Player players = 2;
+}
+
+message Player {
+  double startTime = 1;
+  double endTime = 2;
+  string name = 3;
+  optional PlayerId id = 4;
+  bool mvp = 5;
+  optional Rank rank = 6;
+  int32 score = 7;
+}
+
+message PlayerId {
+  string platform = 1;
+  string id = 2;
+}
