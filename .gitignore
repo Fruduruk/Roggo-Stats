@@ -22,3 +22,5 @@
 /RoggoStats/BallchasingWrapper/Properties/launchSettings.json
 /RoggoStats/Kreya/ballchasing/Ballchasing/**
 /RoggoStats/BallchasingWrapper/.env
+/RoggoStats/RoggoDiscordBot/.env
+**/__pycache__/**
