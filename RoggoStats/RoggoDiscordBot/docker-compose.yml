@@ -1,0 +1,13 @@
+version: '3.3'
+networks:
+  rl_stats_network:
+services:
+  roggo_discord_bot:
+    container_name: 'roggo_discord_bot'
+    networks:
+      - rl_stats_network
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - BALLCHASING_HOST=${BALLCHASING_HOST}
+      - BALLCHASING_PORT=${BALLCHASING_PORT}
+    image: roggo-discord-bot:dev
