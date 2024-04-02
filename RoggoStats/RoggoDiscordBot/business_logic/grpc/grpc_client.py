@@ -4,6 +4,8 @@ import ballchasing_pb2
 import ballchasing_pb2_grpc
 from config import BALLCHASING_HOST, BALLCHASING_PORT
 
+print("loading grpc client...")
+
 
 def create_stub() -> ballchasing_pb2_grpc.BallchasingStub:
     channel = grpc.insecure_channel(BALLCHASING_HOST + ':' + BALLCHASING_PORT)
