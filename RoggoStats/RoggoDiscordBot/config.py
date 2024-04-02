@@ -1,5 +1,7 @@
 import os
 
+print("loading config...")
+
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 BALLCHASING_HOST = os.getenv('BALLCHASING_HOST')
 BALLCHASING_PORT = os.getenv('BALLCHASING_PORT')
