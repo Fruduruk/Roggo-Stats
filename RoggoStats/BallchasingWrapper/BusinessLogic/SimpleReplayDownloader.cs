@@ -8,6 +8,7 @@ public class SimpleReplayDownloader
     private readonly IBallchasingApi _api;
     public string StartUrl { get; }
     private string? _url;
+    private readonly DateTime _earliestDate;
     private readonly ILogger _logger;
     private int _index;
     private readonly List<Replay> _downloadedReplays = new();
@@ -16,11 +17,12 @@ public class SimpleReplayDownloader
     public bool EndReached { get; private set; }
     private int _count = -1;
 
-    public SimpleReplayDownloader(IBallchasingApi api, string url, ILogger logger)
+    public SimpleReplayDownloader(IBallchasingApi api, string url, DateTime earliestDate, ILogger logger)
     {
         _api = api;
         StartUrl = url;
         _url = url;
+        _earliestDate = earliestDate;
         _logger = logger;
     }
 
@@ -33,7 +35,7 @@ public class SimpleReplayDownloader
         if (cancellationToken.IsCancellationRequested)
             return null;
 
-        if (replay is null)
+        if (replay is null || replay.Date < _earliestDate)
             EndReached = true;
         else
             _triedReplays.Push(replay);

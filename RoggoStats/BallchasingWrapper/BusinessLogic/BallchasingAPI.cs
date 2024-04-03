@@ -115,29 +115,13 @@ namespace BallchasingWrapper.BusinessLogic
             }
         }
 
-        public string[] GetCalls()
-        {
-            lock (_calls)
-            {
-                return _calls.ToArray();
-            }
-        }
-
-        public string[] GetAndDeleteCalls()
+        public IEnumerable<string> GetAndDeleteCalls()
         {
             lock (_calls)
             {
                 var callArray = _calls.ToArray();
                 _calls.Clear();
                 return callArray;
-            }
-        }
-
-        public void DeleteCalls()
-        {
-            lock (_calls)
-            {
-                _calls.Clear();
             }
         }
     }
