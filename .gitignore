@@ -8,8 +8,6 @@
 **/.[Ii]dea/*
 #dotsettings
 *.dotsettings.user
-#ignore tokens
-**/appsettings.json
 
 #Rust
 **/target/*
