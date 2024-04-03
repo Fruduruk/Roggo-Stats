@@ -24,7 +24,7 @@ namespace BallchasingWrapper.BusinessLogic
             _api = api;
             _replayCache = replayCache;
             _downloaders = urlCreator.Urls.Select(url =>
-                new SimpleReplayDownloader(_api, url, logger)).ToList();
+                new SimpleReplayDownloader(_api, url, urlCreator.TimeRange.ToDateTimes().begin, logger)).ToList();
         }
 
         public async Task<CollectReplaysResponse> CollectReplaysAsync(ILogger logger,
@@ -50,16 +50,15 @@ namespace BallchasingWrapper.BusinessLogic
 
             sw.Stop();
 
-            response.Replays = replays.ToList();
+            response.Replays = replays.OrderByDescending(replay => replay.Date).ToList();
 
             logger.LogInformation("Finished collecting replays.");
             logger.LogDebugObject(new
             {
                 ReplayCount = response.Replays.Count(),
-                sw.ElapsedMilliseconds
+                sw.ElapsedMilliseconds,
+                Calls = _api.GetAndDeleteCalls()
             });
-            logger.LogDebugObject(_api);
-
             return response;
         }
 
@@ -116,7 +115,7 @@ namespace BallchasingWrapper.BusinessLogic
                         continue;
                     }
 
-                    if (!condition.Invoke(replay))
+                    if (!condition.Invoke(replay) || !replay.IsInTimeRange(_urlCreator.TimeRange))
                     {
                         continue;
                     }
@@ -151,7 +150,7 @@ namespace BallchasingWrapper.BusinessLogic
                     if (activeDownloaders.Where(downloader => downloader.ReplaysProvided.Any()).All(
                             downloader => downloader.ReplaysProvided.Any(replay => cachedReplays.Contains(replay))))
                     {
-                        FillUpWithCachedReplays(allReplays, cachedReplays, filter.Cap);
+                        FillUpWithCachedReplays(allReplays, cachedReplays, filter.Cap, filter.TimeRange);
                         await _replayCache.WriteReplayCache(filter, allReplays);
                         return allReplays;
                     }
@@ -166,14 +165,15 @@ namespace BallchasingWrapper.BusinessLogic
 
 
         private static void FillUpWithCachedReplays(HashSet<Replay> allReplays, IEnumerable<Replay> cachedReplays,
-            int filterCap)
+            int filterCap, Grpc.TimeRange timeRange)
         {
             foreach (var replay in cachedReplays)
             {
-                if (filterCap == 0 || allReplays.Count < filterCap)
-                {
+                if (filterCap != 0 && allReplays.Count >= filterCap)
+                    break;
+
+                if (replay.IsInTimeRange(timeRange))
                     allReplays.Add(replay);
-                }
             }
         }
     }

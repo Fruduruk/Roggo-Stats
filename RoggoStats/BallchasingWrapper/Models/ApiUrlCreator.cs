@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using BallchasingWrapper.BusinessLogic;
+using BallchasingWrapper.Extensions;
+using Microsoft.Extensions.Primitives;
 
 namespace BallchasingWrapper.Models
 {
@@ -10,6 +12,7 @@ namespace BallchasingWrapper.Models
         public List<Grpc.Identity> Identities { get; }
         public int Cap { get; } = 0;
         public Grpc.GroupType GroupType { get; }
+        public Grpc.TimeRange TimeRange { get; }
 
         public ApiUrlCreator(Grpc.FilterRequest request)
         {
@@ -17,6 +20,7 @@ namespace BallchasingWrapper.Models
                 Cap = request.ReplayCap;
             Identities = request.Identities.ToList();
             GroupType = request.GroupType;
+            TimeRange = request.TimeRange;
             _request = request;
             Urls = CreateUrls().ToArray();
         }
@@ -41,6 +45,9 @@ namespace BallchasingWrapper.Models
             return hashCode.ToHashCode();
         }
 
+        /// <summary>
+        /// This string is unique
+        /// </summary>
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -53,6 +60,7 @@ namespace BallchasingWrapper.Models
 
             builder.Append($" Cap: {Cap}");
             builder.Append($" GroupType: {GroupType.ToString()}");
+            builder.Append($" TimeRange: {TimeRange.ToDateTimes()}");
 
             return builder.ToString();
         }
@@ -70,7 +78,7 @@ namespace BallchasingWrapper.Models
         private static IEnumerable<ApiRequestBuilder> AddPlaylist(ApiRequestBuilder builder, Grpc.FilterRequest request)
         {
             if (request.Playlist is Grpc.Playlist.All && request.MatchType is Grpc.MatchType.Both)
-                return new []{builder};
+                return new[] { builder };
 
             var builders = new List<ApiRequestBuilder>();
             var playlists = ComputePlaylists(request);

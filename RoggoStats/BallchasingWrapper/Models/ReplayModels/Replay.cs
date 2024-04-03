@@ -1,4 +1,6 @@
-﻿namespace BallchasingWrapper.Models.ReplayModels
+﻿using BallchasingWrapper.Extensions;
+
+namespace BallchasingWrapper.Models.ReplayModels
 {
     public class Replay
     {
@@ -99,6 +101,12 @@
                 Grpc.IdentityType.Ps4GamerTag => HasIdInIt(identity.NameOrId),
                 _ => throw new ArgumentOutOfRangeException()
             });
+        }
+
+        public bool IsInTimeRange(Grpc.TimeRange timeRange)
+        {
+            var (begin, end) = timeRange.ToDateTimes();
+            return begin <= Date && Date <= end;
         }
     }
 }
