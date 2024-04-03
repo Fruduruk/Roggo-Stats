@@ -5,6 +5,7 @@ networks:
   rl_stats_network:
 services:
   ballchasing_db:
+    image: mongo
     ports:
       - '29017:27017'
     container_name: ballchasing_db
@@ -18,13 +19,17 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=BallchasingWrapper
       - MONGO_INITDB_ROOT_PASSWORD=chaser
-    image: mongo
+  
   ballchasing_wrapper:
+    image: ballchasingwrapper:0.2
     ports:
       - '9000:9000'
     container_name: ballchasing_wrapper
     networks:
       - rl_stats_network
+    depends_on:
+      ballchasing_db:
+        condition: service_started
     environment:
       - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
       - MONGO_HOST=ballchasing_db
@@ -32,4 +37,3 @@ services:
       - MONGO_USER=BallchasingWrapper
       - MONGO_PASSWORD=chaser
       - DATABASE_NAME=RLStatsData
-    image: ballchasingwrapper:0.1
