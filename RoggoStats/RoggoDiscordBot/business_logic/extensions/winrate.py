@@ -36,7 +36,7 @@ class Winrate(Extension):
     async def winrate(self, ctx: SlashContext,
                       time_range: int,
                       names: str): await ctx.send(
-        embed=create_winrate_embed(winrate_result=calculate_winrate(
+        embed=create_winrate_embed(winrate_result=await calculate_winrate(
             time_range=TimeRange(time_range),
             names=split_strings(names)
         ))

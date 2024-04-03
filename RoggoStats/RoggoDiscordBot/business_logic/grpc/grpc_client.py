@@ -12,7 +12,7 @@ def create_stub() -> ballchasing_pb2_grpc.BallchasingStub:
     return ballchasing_pb2_grpc.BallchasingStub(channel)
 
 
-async def get_advanced_replays(identities: List[ballchasing_pb2.Identity]) -> None:
+async def get_simple_replays(identities: List[ballchasing_pb2.Identity]):
     stub = create_stub()
     request = ballchasing_pb2.FilterRequest(
         replayCap=20,
@@ -23,7 +23,7 @@ async def get_advanced_replays(identities: List[ballchasing_pb2.Identity]) -> No
     )
 
     try:
-        response = stub.GetAdvancedReplays(request)
+        response = stub.GetSimpleReplays(request)
         return response.replays
     except grpc.RpcError as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
