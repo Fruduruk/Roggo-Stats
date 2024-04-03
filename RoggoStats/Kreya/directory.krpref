@@ -3,7 +3,7 @@
     {
       "options": {
         "grpc": {
-          "endpoint": "http://localhost:5007",
+          "endpoint": "http://localhost:9000",
           "disableServerCertificateValidation": true
         },
         "rest": {
