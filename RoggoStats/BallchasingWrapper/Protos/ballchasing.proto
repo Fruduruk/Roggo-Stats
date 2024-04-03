@@ -259,6 +259,16 @@ message FilterRequest {
   optional string maxDate = 9;
   optional RankType minRank = 10;
   optional RankType maxRank = 11;
+  optional TimeRange timeRange = 12;
+}
+
+enum TimeRange{
+  EVERY_TIME = 0;
+  TODAY = 1;
+  YESTERDAY = 2;
+  WEEK = 3;
+  MONTH = 4;
+  YEAR = 5;
 }
 
 message Identity {

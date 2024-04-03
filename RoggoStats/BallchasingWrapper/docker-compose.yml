@@ -21,7 +21,7 @@ services:
     image: mongo
   ballchasing_wrapper:
     ports:
-      - '9000:80'
+      - '9000:9000'
     container_name: ballchasing_wrapper
     networks:
       - rl_stats_network
