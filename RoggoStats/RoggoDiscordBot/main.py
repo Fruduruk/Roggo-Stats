@@ -6,7 +6,7 @@ def main() -> None:
         print('Stopping program...')
     else:
         print('starting discord bot...')
-        bot.run(config.DISCORD_BOT_TOKEN)
+        bot.start(config.DISCORD_BOT_TOKEN)
         print('Roggo Discord Bot started.')
 
 
