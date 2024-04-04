@@ -1,6 +1,6 @@
-import ballchasing_pb2
+import ballchasing_pb2 as bc
 from business_logic.calculation.winrate_calculator import calculate_winrate
-from business_logic.embedder import create_winrate_embed
+from business_logic.embedder import create_winrate_embed, create_error_embed
 
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
@@ -77,16 +77,23 @@ class Winrate(Extension):
                       playlist: int = None,
                       match_type: int = None,
                       cap: int = None):
-        await ctx.send(
-            embed=create_winrate_embed(winrate_result=await calculate_winrate(
-                request=ballchasing_pb2.FilterRequest(
-                    replayCap=cap,
-                    identities=[to_name_identity(name) for name in
-                                names.split(",")],
-                    groupType=ballchasing_pb2.TOGETHER,
-                    playlist=playlist if playlist else ballchasing_pb2.Playlist.ALL,
-                    matchType=match_type if match_type else ballchasing_pb2.MatchType.BOTH,
-                    timeRange=time_range if time_range else ballchasing_pb2.TimeRange.EVERY_TIME,
-                )
-            ))
-        )
+        message = await ctx.send("Roggo Stats is thinking...")
+        # noinspection PyBroadException
+        # broad except so it will never reach the user
+        try:
+            await message.edit(
+                content="Roggo Stats computed for you:",
+                embed=create_winrate_embed(winrate_result=await calculate_winrate(
+                    request=bc.FilterRequest(
+                        replayCap=cap,
+                        identities=[to_name_identity(name) for name in
+                                    names.split(",")],
+                        groupType=bc.TOGETHER,
+                        playlist=playlist if playlist else bc.Playlist.ALL,
+                        matchType=match_type if match_type else bc.MatchType.BOTH,
+                        timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
+                    )
+                ))
+            )
+        except:
+            await ctx.send(embed=create_error_embed())
