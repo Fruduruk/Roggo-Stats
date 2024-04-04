@@ -1,3 +1,5 @@
+from typing import List
+
 import ballchasing_pb2 as bc
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,14 +10,7 @@ from business_logic.utils import get_basic_result
 from models.trend_result import TrendResult
 
 
-async def calculate_trend(request: bc.FilterRequest) -> TrendResult:
-    replays = await get_advanced_replays(request)
-    trend_result = TrendResult(get_basic_result(request, len(replays)))
-    replays.reverse()
-
-    advanced_player = [find_advanced_player_in_advanced_replay(replay, request.identities[0]) for replay in replays if
-                       find_advanced_player_in_advanced_replay(replay, request.identities[0]) is not None]
-    values = [advanced_player.stats.movement.avgSpeed for advanced_player in advanced_player]
+def generate_image(values: List[float]) -> str:
     nums = np.arange(len(values))
 
     m, b = np.polyfit(nums, values, 1)
@@ -33,6 +28,19 @@ async def calculate_trend(request: bc.FilterRequest) -> TrendResult:
     path = "trend_over_time.png"
     plt.savefig(path)
     plt.close()
+    return path
 
+
+async def calculate_trend(request: bc.FilterRequest) -> TrendResult:
+    replays = await get_advanced_replays(request)
+    trend_result = TrendResult(get_basic_result(request, len(replays)))
+    replays.reverse()
+
+    advanced_player = [find_advanced_player_in_advanced_replay(replay, request.identities[0]) for replay in replays if
+                       find_advanced_player_in_advanced_replay(replay, request.identities[0]) is not None]
+    values = [advanced_player.stats.movement.avgSpeed for advanced_player in advanced_player]
+
+    path = generate_image(values)
     trend_result.image_path = path
+    trend_result.stat_name = "Average Speed"
     return trend_result

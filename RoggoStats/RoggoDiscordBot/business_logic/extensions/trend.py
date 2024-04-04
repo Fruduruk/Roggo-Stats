@@ -1,6 +1,6 @@
 import ballchasing_pb2 as bc
 from business_logic.calculation.trend_calculator import calculate_trend
-from business_logic.embedder import create_error_embed
+from business_logic.embedder import create_error_embed, create_trend_embed
 
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
@@ -98,7 +98,8 @@ class Trend(Extension):
         )
         await message.edit(
             content="Roggo Stats computed for you:",
-            file=trend_result.image_path
+            embed=create_trend_embed(trend_result),
+            file=trend_result.image_path,
         )
 # except:
 # await ctx.send(embed=create_error_embed())
