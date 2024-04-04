@@ -1,14 +1,14 @@
+import ballchasing_pb2
 from business_logic.calculation.winrate_calculator import calculate_winrate
 from business_logic.embedder import create_winrate_embed
-from business_logic.utils import split_strings
 
-from business_logic.enums import TimeRange
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
 )
 
-print("loading winrate extension...")
+from business_logic.grpc.grpc_helper_functions import to_name_identity
 
+print("loading winrate extension...")
 
 
 class Winrate(Extension):
@@ -16,7 +16,7 @@ class Winrate(Extension):
     @slash_command(name="winrate", description="Erhalte die Winrate für gegebene Spieler")
     @slash_option(
         name="time_range",
-        description="Zeitangabe",
+        description="Wähle ein Zeitintervall",
         required=True,
         opt_type=OptionType.INTEGER,
         choices=[
@@ -29,15 +29,64 @@ class Winrate(Extension):
     )
     @slash_option(
         name="names",
-        description="Namen getrennt mit Komma",
+        description="Trage Namen getrennt mit Komma ein",
         required=True,
         opt_type=OptionType.STRING,
     )
+    @slash_option(
+        name="playlist",
+        description="Wähle eine Playlist",
+        required=False,
+        opt_type=OptionType.INTEGER,
+        choices=[
+            SlashCommandChoice(name="Duels", value=1),
+            SlashCommandChoice(name="Doubles", value=2),
+            SlashCommandChoice(name="Standard", value=3),
+            SlashCommandChoice(name="Chaos", value=4),
+            SlashCommandChoice(name="Private", value=5),
+            SlashCommandChoice(name="Offline", value=6),
+            SlashCommandChoice(name="Snow Day", value=7),
+            SlashCommandChoice(name="Rocket Labs", value=8),
+            SlashCommandChoice(name="Hoops", value=9),
+            SlashCommandChoice(name="Rumble", value=10),
+            SlashCommandChoice(name="Tournament", value=11),
+            SlashCommandChoice(name="Drop Shot", value=12),
+            SlashCommandChoice(name="Drop Shot Rumble", value=13),
+            SlashCommandChoice(name="Heat Seeker", value=14),
+        ]
+    )
+    @slash_option(
+        name="match_type",
+        description="Wähle ob gewertet oder nicht",
+        required=False,
+        opt_type=OptionType.INTEGER,
+        choices=[
+            SlashCommandChoice(name="Ranked", value=1),
+            SlashCommandChoice(name="Unranked", value=2)
+        ]
+    )
+    @slash_option(
+        name="cap",
+        description="Wähle die maximale Anzahl",
+        required=False,
+        opt_type=OptionType.INTEGER,
+    )
     async def winrate(self, ctx: SlashContext,
                       time_range: int,
-                      names: str): await ctx.send(
-        embed=create_winrate_embed(winrate_result=await calculate_winrate(
-            time_range=TimeRange(time_range),
-            names=split_strings(names)
-        ))
-    )
+                      names: str,
+                      playlist: int = None,
+                      match_type: int = None,
+                      cap: int = None):
+        await ctx.send(
+            embed=create_winrate_embed(winrate_result=await calculate_winrate(
+                request=ballchasing_pb2.FilterRequest(
+                    replayCap=cap,
+                    identities=[to_name_identity(name) for name in
+                                names.split(",")],
+                    groupType=ballchasing_pb2.TOGETHER,
+                    playlist=playlist if playlist else ballchasing_pb2.Playlist.ALL,
+                    matchType=match_type if match_type else ballchasing_pb2.MatchType.BOTH,
+                    timeRange=time_range if time_range else ballchasing_pb2.TimeRange.EVERY_TIME,
+                )
+            ))
+        )

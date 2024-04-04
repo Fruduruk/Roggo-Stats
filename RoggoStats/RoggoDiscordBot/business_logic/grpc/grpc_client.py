@@ -12,15 +12,8 @@ def create_stub() -> ballchasing_pb2_grpc.BallchasingStub:
     return ballchasing_pb2_grpc.BallchasingStub(channel)
 
 
-async def get_simple_replays(identities: List[ballchasing_pb2.Identity]):
+async def get_simple_replays(request: ballchasing_pb2.FilterRequest):
     stub = create_stub()
-    request = ballchasing_pb2.FilterRequest(
-        replayCap=20,
-        identities=identities,
-        groupType=ballchasing_pb2.TOGETHER,
-        playlist=ballchasing_pb2.DOUBLES,
-        matchType=ballchasing_pb2.RANKED
-    )
 
     try:
         response = stub.GetSimpleReplays(request)

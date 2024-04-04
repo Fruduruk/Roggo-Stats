@@ -1,7 +1,12 @@
-from business_logic.enums import TimeRange
+from models.result import Result
 
 
-class WinrateResult:
+class WinrateResult(Result):
     winrate: float
-    names: list
-    time_range: TimeRange
+
+    def __init__(self, result: Result):
+        self.names = result.names
+        self.time_range = result.time_range
+        self.replay_count = result.replay_count
+        self.match_type = result.match_type
+        self.playlist = result.playlist
