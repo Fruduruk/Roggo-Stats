@@ -23,7 +23,7 @@ async def get_simple_replays(request: bc.FilterRequest) -> List[bc.Replay]:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
 
-async def get_advanced_replays(request: bc.FilterRequest) -> List[bc.AdvancedPlayer]:
+def get_advanced_replays(request: bc.FilterRequest) -> List[bc.AdvancedPlayer]:
     stub = create_stub()
 
     try:

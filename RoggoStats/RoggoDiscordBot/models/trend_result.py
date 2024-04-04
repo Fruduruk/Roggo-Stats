@@ -2,7 +2,7 @@ from models.result import Result
 
 
 class TrendResult(Result):
-    image_path: str
+    image_path: str = None
     stat_name: str
 
     def __init__(self, result: Result):
