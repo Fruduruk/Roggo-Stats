@@ -13,12 +13,12 @@ def create_error_embed() -> discord.Embed:
     return embed
 
 
-def create_basic_embed(result: Result) -> discord.Embed:
+def create_basic_embed(result: Result, inline: bool = False) -> discord.Embed:
     embed = interactions.Embed(color=discord.BrandColors.BLURPLE)
-    embed.add_field("Time Range", time_range_to_string(result.time_range))
-    embed.add_field("Playlist", playlist_to_string(result.playlist))
-    embed.add_field("Match Type", match_type_to_string(result.match_type))
-    embed.add_field("Replay Count", result.replay_count)
+    embed.add_field("Time Range", time_range_to_string(result.time_range), inline=inline)
+    embed.add_field("Playlist", playlist_to_string(result.playlist), inline=inline)
+    embed.add_field("Match Type", match_type_to_string(result.match_type), inline=inline)
+    embed.add_field("Replay Count", result.replay_count, inline=inline)
     return embed
 
 
@@ -30,6 +30,6 @@ def create_winrate_embed(winrate_result: WinrateResult) -> discord.Embed:
 
 
 def create_trend_embed(trend_result: TrendResult) -> discord.Embed:
-    embed = create_basic_embed(trend_result)
-
+    embed = create_basic_embed(trend_result, inline=True)
+    embed.add_field("Statistic value", trend_result.stat_name, inline=True)
     return embed
