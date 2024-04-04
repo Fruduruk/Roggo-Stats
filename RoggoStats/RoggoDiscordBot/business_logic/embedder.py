@@ -18,6 +18,6 @@ def create_basic_embed(result: Result):
 def create_winrate_embed(winrate_result: WinrateResult):
     embed = create_basic_embed(winrate_result)
     embed.title = "Winrate of " + str(winrate_result.names)
-    embed.add_field("Winrate", str(winrate_result.winrate) + "%")
+    embed.add_field("Winrate", str(winrate_result.winrate * 100) + "%")
 
     return embed
