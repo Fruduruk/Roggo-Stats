@@ -1,6 +1,6 @@
 import ballchasing_pb2 as bc
-from business_logic.calculation.winrate_calculator import calculate_winrate
-from business_logic.embedder import create_winrate_embed, create_error_embed
+from business_logic.calculation.trend_calculator import calculate_trend
+from business_logic.embedder import create_error_embed, create_trend_embed
 
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
@@ -11,9 +11,8 @@ from business_logic.grpc.grpc_helper_functions import to_name_identity
 print("loading winrate extension...")
 
 
-class Winrate(Extension):
-
-    @slash_command(name="winrate", description="Erhalte die Winrate für gegebene Spieler")
+class Trend(Extension):
+    @slash_command(name="trend", description="Erhalte einen statistik trend für gegebene Spieler")
     @slash_option(
         name="time_range",
         description="Wähle ein Zeitintervall",
@@ -66,30 +65,35 @@ class Winrate(Extension):
         ]
     )
     @slash_option(
-        name="cap",
-        description="Wähle die maximale Anzahl",
+        name="group_type",
+        description="Wähle, ob die Spieler in einem Team gespielt haben müssen, oder ob auch solo games erlaubt sind",
         required=False,
         opt_type=OptionType.INTEGER,
+        choices=[
+            SlashCommandChoice(name="Together", value=0),
+            SlashCommandChoice(name="Individually", value=1),
+        ]
     )
-    async def winrate(self, ctx: SlashContext,
-                      time_range: int,
-                      names: str,
-                      playlist: int = None,
-                      match_type: int = None,
-                      cap: int = None):
-        message = await ctx.send("Roggo Stats is thinking...")
+    async def trend(self, ctx: SlashContext,
+                    time_range: int,
+                    names: str,
+                    playlist: int = None,
+                    match_type: int = None,
+                    group_type: int = 0):
+        message = await ctx.send(
+            "Roggo Stats is thinking...\n" +
+            "Trend calculations are hard work, all the number crunching, please wait, this may take a while...")
         # noinspection PyBroadException
         # broad except so it will never reach the user
         try:
             await message.edit(
                 content="Roggo Stats computed for you:",
-                embed=create_winrate_embed(
-                    winrate_result=await calculate_winrate(
+                embed=create_trend_embed(
+                    trend_result=await calculate_trend(
                         request=bc.FilterRequest(
-                            replayCap=cap,
                             identities=[to_name_identity(name) for name in
                                         names.split(",")],
-                            groupType=bc.TOGETHER,
+                            groupType=group_type,
                             playlist=playlist if playlist else bc.Playlist.ALL,
                             matchType=match_type if match_type else bc.MatchType.BOTH,
                             timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,

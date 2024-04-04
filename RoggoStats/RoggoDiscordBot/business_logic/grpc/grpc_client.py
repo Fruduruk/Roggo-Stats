@@ -1,3 +1,5 @@
+from typing import List
+
 import grpc
 import ballchasing_pb2 as bc
 import ballchasing_pb2_grpc as bc_grpc
@@ -11,11 +13,21 @@ def create_stub() -> bc_grpc.BallchasingStub:
     return bc_grpc.BallchasingStub(channel)
 
 
-async def get_simple_replays(request: bc.FilterRequest):
+async def get_simple_replays(request: bc.FilterRequest) -> List[bc.Replay]:
     stub = create_stub()
 
     try:
         response = stub.GetSimpleReplays(request)
+        return response.replays
+    except grpc.RpcError as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+
+async def get_advanced_replays(request: bc.FilterRequest) -> List[bc.AdvancedPlayer]:
+    stub = create_stub()
+
+    try:
+        response = stub.GetAdvancedReplays(request)
         return response.replays
     except grpc.RpcError as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
