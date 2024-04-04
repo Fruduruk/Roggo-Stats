@@ -3,6 +3,7 @@ from interactions.models import discord
 
 from business_logic.utils import time_range_to_string, playlist_to_string, match_type_to_string
 from models.result import Result
+from models.trend_result import TrendResult
 from models.winrate_result import WinrateResult
 
 
@@ -23,6 +24,12 @@ def create_basic_embed(result: Result) -> discord.Embed:
 
 def create_winrate_embed(winrate_result: WinrateResult) -> discord.Embed:
     embed = create_basic_embed(winrate_result)
-    embed.title = "Winrate of " + str(winrate_result.names)
+    embed.title = "Winrate of " + ", ".join(winrate_result.names)
     embed.add_field("Winrate", str(winrate_result.winrate * 100) + "%")
+    return embed
+
+
+def create_trend_embed(trend_result: TrendResult) -> discord.Embed:
+    embed = create_basic_embed(trend_result)
+
     return embed

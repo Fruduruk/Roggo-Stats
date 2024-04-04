@@ -1,6 +1,7 @@
 import config
 from business_logic.discord_bot import bot
 
+
 def main() -> None:
     if not config.check_environment_variables():
         print('Stopping program...')
