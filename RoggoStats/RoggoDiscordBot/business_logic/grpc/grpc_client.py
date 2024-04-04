@@ -1,18 +1,17 @@
-from typing import List
 import grpc
-import ballchasing_pb2
-import ballchasing_pb2_grpc
+import ballchasing_pb2 as bc
+import ballchasing_pb2_grpc as bc_grpc
 from config import BALLCHASING_HOST, BALLCHASING_PORT
 
 print("loading grpc client...")
 
 
-def create_stub() -> ballchasing_pb2_grpc.BallchasingStub:
+def create_stub() -> bc_grpc.BallchasingStub:
     channel = grpc.insecure_channel(BALLCHASING_HOST + ':' + BALLCHASING_PORT)
-    return ballchasing_pb2_grpc.BallchasingStub(channel)
+    return bc_grpc.BallchasingStub(channel)
 
 
-async def get_simple_replays(request: ballchasing_pb2.FilterRequest):
+async def get_simple_replays(request: bc.FilterRequest):
     stub = create_stub()
 
     try:
