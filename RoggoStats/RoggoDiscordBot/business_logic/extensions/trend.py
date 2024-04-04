@@ -1,6 +1,6 @@
 import ballchasing_pb2 as bc
 from business_logic.calculation.trend_calculator import calculate_trend
-from business_logic.embedder import create_error_embed, create_trend_embed
+from business_logic.embedder import create_error_embed
 
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
@@ -85,21 +85,20 @@ class Trend(Extension):
             "Trend calculations are hard work, all the number crunching, please wait, this may take a while...")
         # noinspection PyBroadException
         # broad except so it will never reach the user
-        try:
-            await message.edit(
-                content="Roggo Stats computed for you:",
-                embed=create_trend_embed(
-                    trend_result=await calculate_trend(
-                        request=bc.FilterRequest(
-                            identities=[to_name_identity(name) for name in
-                                        names.split(",")],
-                            groupType=group_type,
-                            playlist=playlist if playlist else bc.Playlist.ALL,
-                            matchType=match_type if match_type else bc.MatchType.BOTH,
-                            timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
-                        )
-                    )
-                )
+        # try:
+        trend_result = await calculate_trend(
+            request=bc.FilterRequest(
+                identities=[to_name_identity(name) for name in
+                            names.split(",")],
+                groupType=group_type,
+                playlist=playlist if playlist else bc.Playlist.ALL,
+                matchType=match_type if match_type else bc.MatchType.BOTH,
+                timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
             )
-        except:
-            await ctx.send(embed=create_error_embed())
+        )
+        await message.edit(
+            content="Roggo Stats computed for you:",
+            file=trend_result.image_path
+        )
+# except:
+# await ctx.send(embed=create_error_embed())

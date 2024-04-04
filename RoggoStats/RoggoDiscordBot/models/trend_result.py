@@ -2,7 +2,7 @@ from models.result import Result
 
 
 class TrendResult(Result):
-    winrate: float
+    image_path: str
 
     def __init__(self, result: Result):
         self.names = result.names
