@@ -31,5 +31,6 @@ def create_winrate_embed(winrate_result: WinrateResult) -> discord.Embed:
 
 def create_trend_embed(trend_result: TrendResult) -> discord.Embed:
     embed = create_basic_embed(trend_result, inline=True)
+    embed.title = "Trend of " + ", ".join(trend_result.names)
     embed.add_field("Statistic value", trend_result.stat_name, inline=True)
     return embed

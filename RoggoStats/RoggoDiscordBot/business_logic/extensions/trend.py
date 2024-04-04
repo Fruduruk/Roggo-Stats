@@ -7,12 +7,28 @@ from interactions import (
 )
 
 from business_logic.grpc.grpc_helper_functions import to_name_identity
+from models.statistic import Statistic
 
 print("loading winrate extension...")
 
 
 class Trend(Extension):
     @slash_command(name="trend", description="Erhalte einen statistik trend für gegebene Spieler")
+    @slash_option(
+        name="statistic",
+        description="Wähle einen Wert",
+        required=True,
+        opt_type=OptionType.INTEGER,
+        choices=[
+            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=0)
+        ]
+    )
+    @slash_option(
+        name="names",
+        description="Trage Namen getrennt mit Komma ein",
+        required=True,
+        opt_type=OptionType.STRING,
+    )
     @slash_option(
         name="time_range",
         description="Wähle ein Zeitintervall",
@@ -25,12 +41,6 @@ class Trend(Extension):
             SlashCommandChoice(name="Month", value=4),
             SlashCommandChoice(name="Year", value=5),
         ]
-    )
-    @slash_option(
-        name="names",
-        description="Trage Namen getrennt mit Komma ein",
-        required=True,
-        opt_type=OptionType.STRING,
     )
     @slash_option(
         name="playlist",
@@ -75,8 +85,9 @@ class Trend(Extension):
         ]
     )
     async def trend(self, ctx: SlashContext,
-                    time_range: int,
+                    statistic: int,
                     names: str,
+                    time_range: int = None,
                     playlist: int = None,
                     match_type: int = None,
                     group_type: int = 0):
@@ -94,7 +105,8 @@ class Trend(Extension):
                 playlist=playlist if playlist else bc.Playlist.ALL,
                 matchType=match_type if match_type else bc.MatchType.BOTH,
                 timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
-            )
+            ),
+            statistic=Statistic(statistic)
         )
         await message.edit(
             content="Roggo Stats computed for you:",
