@@ -19,14 +19,11 @@ def to_platform(identity_type: bc.IdentityType):
 
 
 def contains_player(identities: List[bc.Identity], player: bc.Player) -> bool:
-    for identity in identities:
-        if identity.identityType == bc.IdentityType.NAME:
-            if identity.nameOrId == player.name:
-                return True
-        if to_platform(identity.identityType) == player.id.platform:
-            if identity.nameOrId == player.id:
-                return True
-    return False
+    return any(
+        identity.nameOrId == player.name if identity.identityType == bc.IdentityType.NAME
+        else identity.nameOrId == player.id.id and to_platform(identity.identityType) == player.id.platform
+        for identity in identities
+    )
 
 
 def contains_all_identities(players: List[bc.Player], identities: List[bc.Identity]):
@@ -49,10 +46,7 @@ async def calculate_winrate(request: bc.FilterRequest) -> WinrateResult:
     wr_result = WinrateResult(get_basic_result(request, len(replays)))
 
     if replays:
-        won_count = 0
-        for replay in replays:
-            if won(replay, request.identities):
-                won_count += 1
+        won_count = sum(won(replay, request.identities) for replay in replays)
         wr_result.winrate = won_count / len(replays)
 
     return wr_result
