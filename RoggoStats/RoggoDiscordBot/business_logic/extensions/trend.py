@@ -6,7 +6,7 @@ from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
 )
 
-from business_logic.grpc.grpc_helper_functions import to_name_identity
+from business_logic.grpc.grpc_helper_functions import to_identity
 from models.statistic import Statistic
 
 print("loading winrate extension...")
@@ -117,7 +117,7 @@ class Trend(Extension):
         try:
             trend_result = await calculate_trend(
                 request=bc.FilterRequest(
-                    identities=[to_name_identity(name) for name in
+                    identities=[to_identity(name) for name in
                                 names.split(",")],
                     groupType=group_type,
                     playlist=playlist if playlist else bc.Playlist.ALL,

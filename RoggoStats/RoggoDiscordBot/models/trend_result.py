@@ -3,7 +3,7 @@ from models.result import Result
 
 class TrendResult(Result):
     image_path: str = None
-    stat_name: str
+    stat_name: str = None
 
     def __init__(self, result: Result):
         self.names = result.names

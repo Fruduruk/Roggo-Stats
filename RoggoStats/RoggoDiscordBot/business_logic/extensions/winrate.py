@@ -6,7 +6,7 @@ from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
 )
 
-from business_logic.grpc.grpc_helper_functions import to_name_identity
+from business_logic.grpc.grpc_helper_functions import to_identity
 
 print("loading winrate extension...")
 
@@ -87,7 +87,7 @@ class Winrate(Extension):
                     winrate_result=await calculate_winrate(
                         request=bc.FilterRequest(
                             replayCap=cap,
-                            identities=[to_name_identity(name) for name in
+                            identities=[to_identity(name) for name in
                                         names.split(",")],
                             groupType=bc.TOGETHER,
                             playlist=playlist if playlist else bc.Playlist.ALL,

@@ -1,10 +1,12 @@
+from typing import List
+
 import ballchasing_pb2 as bc
 from models.result import Result
 
 
-def get_basic_result(request: bc.FilterRequest, replay_count: int) -> Result:
+def get_basic_result(request: bc.FilterRequest, replay_count: int, names: List[str]) -> Result:
     result = Result()
-    result.names = [identity.nameOrId for identity in request.identities]
+    result.names = names
     result.time_range = request.timeRange
     result.playlist = request.playlist
     result.replay_count = replay_count

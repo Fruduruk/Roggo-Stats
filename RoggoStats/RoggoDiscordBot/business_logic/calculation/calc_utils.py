@@ -1,30 +1,12 @@
 from typing import List
 
 import ballchasing_pb2 as bc
-
-
-def to_platform(identity_type: bc.IdentityType):
-    match identity_type:
-        case bc.IdentityType.NAME:
-            return None
-        case bc.IdentityType.STEAM_ID:
-            return "steam"
-        case bc.IdentityType.EPIC_ID:
-            return "epic"
-        case bc.IdentityType.PS4_GAMER_TAG:
-            return "ps4"
-
-
-def identity_equals_player(identity: bc.Identity, player: bc.Player) -> bool:
-    if identity.identityType == bc.IdentityType.NAME and identity.nameOrId == player.name:
-        return True
-    else:
-        return to_platform(identity.identityType) == player.id.platform and identity.nameOrId == player.id.id
+from business_logic.grpc.grpc_helper_functions import identity_equals_advanced_player, identity_equals_simple_player
 
 
 def find_advanced_player_in_advanced_team(team: bc.AdvancedTeam, identity: bc.Identity) -> bc.AdvancedPlayer:
     for player in team.players:
-        if identity_equals_player(identity, player):
+        if identity_equals_advanced_player(identity, player):
             return player
     return None
 
@@ -41,7 +23,7 @@ def find_advanced_player_in_advanced_replay(replay: bc.AdvancedReplay, identity:
 
 def contains_player(identities: List[bc.Identity], player: bc.Player) -> bool:
     for identity in identities:
-        if identity_equals_player(identity, player):
+        if identity_equals_simple_player(identity, player):
             return True
 
     return False
