@@ -49,7 +49,7 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
                 plt.plot(nums, m * np.array(nums) + b, linestyle="--", color=color)
 
     plt.xticks(ticks=tick_indices, labels=tick_labels, rotation=45)
-    plt.title("Trend over time")
+    plt.title("Trend over time: "+str(statistic))
     plt.xlabel("Time")
     plt.ylabel(str(statistic))
     plt.legend()
@@ -90,7 +90,10 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
             find_advanced_player_in_advanced_replay(replay, identity) is not None
         ]
 
-        player_stats = TimeSeriesPlayerStats(name=find_name_of_identity_in_advanced_replays(identity, replays), tuples=value_tuple_list)
+        player_stats = TimeSeriesPlayerStats(
+            name=find_name_of_identity_in_advanced_replays(identity, replays),
+            tuples=value_tuple_list
+        )
 
         player_statistic_value_maps.append(player_stats)
 
