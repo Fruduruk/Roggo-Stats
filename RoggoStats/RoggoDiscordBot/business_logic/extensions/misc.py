@@ -1,5 +1,5 @@
 from business_logic.grpc.grpc_client import get_simple_replays
-from business_logic.grpc.grpc_helper_functions import to_name_identity
+from business_logic.grpc.grpc_helper_functions import to_identity
 import interactions
 from interactions import (
     Extension, slash_command, SlashContext, slash_option, OptionType, SlashCommandChoice
@@ -14,7 +14,7 @@ class Misc(Extension):
 
 
 async def replays(ctx, name: str):
-    identity = to_name_identity(name)
+    identity = to_identity(name)
 
     advanced_replays = await get_simple_replays([identity])
     if advanced_replays:

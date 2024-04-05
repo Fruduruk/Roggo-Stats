@@ -2,7 +2,7 @@ from models.result import Result
 
 
 class WinrateResult(Result):
-    winrate: float
+    winrate: float = 0
 
     def __init__(self, result: Result):
         self.names = result.names
