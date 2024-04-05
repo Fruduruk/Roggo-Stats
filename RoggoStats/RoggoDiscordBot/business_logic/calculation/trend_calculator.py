@@ -8,12 +8,12 @@ import numpy as np
 from business_logic.calculation.calc_utils import find_advanced_player_in_advanced_replay
 from business_logic.grpc.grpc_client import get_advanced_replays
 from business_logic.utils import get_basic_result
-from models.player_statistic_value_map import PlayerStatisticValueMap
+from models.time_series_player_stats import TimeSeriesPlayerStats
 from models.statistic import Statistic
 from models.trend_result import TrendResult
 
 
-def generate_image(maps: List[PlayerStatisticValueMap], statistic: Statistic) -> str:
+def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> str:
     plt.figure(figsize=(10, 6))
     colors = ["g", "y", "r", "b"]
 
@@ -65,9 +65,9 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
             find_advanced_player_in_advanced_replay(replay, identity) is not None
         ]
 
-        player_statistic = PlayerStatisticValueMap(name=identity.nameOrId, tuples=value_tuple_list)
+        player_stats = TimeSeriesPlayerStats(name=identity.nameOrId, tuples=value_tuple_list)
 
-        player_statistic_value_maps.append(player_statistic)
+        player_statistic_value_maps.append(player_stats)
 
     path = generate_image(player_statistic_value_maps, statistic)
     trend_result.image_path = path

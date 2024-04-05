@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Mapping, List, Tuple
 
 
-class PlayerStatisticValueMap:
+class TimeSeriesPlayerStats:
     name: str
     values: Mapping[datetime, float] = {}
 
