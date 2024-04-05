@@ -14,24 +14,35 @@ from models.trend_result import TrendResult
 
 
 def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> str:
-    plt.figure(figsize=(10, 6))
-    colors = ["g", "y", "r", "b"]
+    plt.figure(figsize=(12, 6))
+    colors = ["b", "r", "g", "y"]
 
-    for value_map in maps:
-        values = [value for value in value_map.values.values()]
-        dates = [str(key) for key in value_map.values.keys()]
+    all_dates = sorted({date for value_map in maps for date in value_map.values.keys()})
+    date_labels = [date.strftime("%Y-%m-%d") for date in all_dates]
 
-        nums = np.arange(len(values))
+    tick_interval = len(all_dates) // 10
+    tick_interval = max(1, tick_interval)
 
-        m, b = np.polyfit(nums, values, 1)
-        color = colors.pop()
-        plt.plot(values,  linestyle="-", color=color)
-        plt.plot(m * nums + b, linestyle="--", label="Trend line", color=color)
+    tick_indices = range(0, len(all_dates), tick_interval)
+    tick_labels = [date_labels[i] for i in tick_indices]
 
+    for value_map, color in zip(maps, colors):
+        if len(value_map.values) > 0:
+            values = [value_map.values.get(date) for date in all_dates]
+
+            nums, valid_values = zip(*[(i, val) for i, val in enumerate(values) if val is not None])
+
+            if valid_values:
+                m, b = np.polyfit(nums, valid_values, 1)
+                plt.plot(nums, valid_values, marker="o", linestyle=" ", color=color, label=f"{value_map.name}")
+                plt.plot(nums, m * np.array(nums) + b, linestyle="--", color=color)
+
+    plt.xticks(ticks=tick_indices, labels=tick_labels, rotation=45)
     plt.title("Trend over time")
     plt.xlabel("Time")
     plt.ylabel(str(statistic))
-    plt.grid(False)
+    plt.legend()
+    plt.tight_layout()
 
     path = "trend_over_time.png"
     plt.savefig(path)
@@ -43,6 +54,8 @@ def get_value(advanced_player: bc.AdvancedPlayer, statistic: Statistic) -> float
     match statistic:
         case Statistic.PERCENT_SUPERSONIC_SPEED:
             return advanced_player.stats.movement.percentSupersonicSpeed
+        case Statistic.BOOST_COLLECTED_PER_MINUTE:
+            return advanced_player.stats.boost.generalBoost.bcpm
 
 
 async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> TrendResult:

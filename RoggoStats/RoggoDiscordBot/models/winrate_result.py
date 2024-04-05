@@ -10,3 +10,4 @@ class WinrateResult(Result):
         self.replay_count = result.replay_count
         self.match_type = result.match_type
         self.playlist = result.playlist
+        self.group_type = result.group_type

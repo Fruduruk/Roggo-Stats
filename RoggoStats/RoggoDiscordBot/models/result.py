@@ -7,3 +7,4 @@ class Result:
     replay_count: int
     match_type: bc.MatchType
     playlist: bc.Playlist
+    group_type: bc.GroupType

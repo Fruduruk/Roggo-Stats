@@ -20,7 +20,8 @@ class Trend(Extension):
         required=True,
         opt_type=OptionType.INTEGER,
         choices=[
-            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=0)
+            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=0),
+            SlashCommandChoice(name=str(Statistic.BOOST_COLLECTED_PER_MINUTE), value=1)
         ]
     )
     @slash_option(
