@@ -20,8 +20,25 @@ class Trend(Extension):
         required=True,
         opt_type=OptionType.INTEGER,
         choices=[
-            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=0),
-            SlashCommandChoice(name=str(Statistic.BOOST_COLLECTED_PER_MINUTE), value=1)
+            SlashCommandChoice(name=str(Statistic.BOOST_USED_PER_MINUTE), value=0),
+            SlashCommandChoice(name=str(Statistic.BOOST_COLLECTED_PER_MINUTE), value=1),
+            SlashCommandChoice(name=str(Statistic.BOOST_AMOUNT_STOLEN), value=2),
+            SlashCommandChoice(name=str(Statistic.BOOST_AMOUNT_USED_WHILE_SUPERSONIC), value=3),
+            SlashCommandChoice(name=str(Statistic.PERCENT_SLOW_SPEED), value=4),
+            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=5),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_SPEED), value=6),
+            SlashCommandChoice(name=str(Statistic.PERCENT_HIGH_AIR), value=7),
+            SlashCommandChoice(name=str(Statistic.TIME_POWERSLIDE), value=8),
+            SlashCommandChoice(name=str(Statistic.COUNT_POWERSLIDE), value=9),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_DISTANCE_TO_BALL), value=10),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_DISTANCE_TO_MATES), value=11),
+            SlashCommandChoice(name=str(Statistic.PERCENT_CLOSEST_TO_BALL), value=12),
+            SlashCommandChoice(name=str(Statistic.PERCENT_FARTHEST_FROM_BALL), value=13),
+            SlashCommandChoice(name=str(Statistic.PERCENT_MOST_BACK), value=14),
+            SlashCommandChoice(name=str(Statistic.PERCENT_MOST_FORWARD), value=15),
+            SlashCommandChoice(name=str(Statistic.GOALS_AGAINST_WHILE_LAST_DEFENDER), value=16),
+            SlashCommandChoice(name=str(Statistic.DEMOS_INFLICTED), value=17),
+            SlashCommandChoice(name=str(Statistic.DEMOS_TAKEN), value=18),
         ]
     )
     @slash_option(
@@ -97,22 +114,22 @@ class Trend(Extension):
             "Trend calculations are hard work, all the number crunching, please wait, this may take a while...")
         # noinspection PyBroadException
         # broad except so it will never reach the user
-        # try:
-        trend_result = await calculate_trend(
-            request=bc.FilterRequest(
-                identities=[to_name_identity(name) for name in
-                            names.split(",")],
-                groupType=group_type,
-                playlist=playlist if playlist else bc.Playlist.ALL,
-                matchType=match_type if match_type else bc.MatchType.BOTH,
-                timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
-            ),
-            statistic=Statistic(statistic)
-        )
-        await message.edit(
-            content="Roggo Stats computed for you:",
-            embed=create_trend_embed(trend_result),
-            file=trend_result.image_path,
-        )
-# except:
-# await ctx.send(embed=create_error_embed())
+        try:
+            trend_result = await calculate_trend(
+                request=bc.FilterRequest(
+                    identities=[to_name_identity(name) for name in
+                                names.split(",")],
+                    groupType=group_type,
+                    playlist=playlist if playlist else bc.Playlist.ALL,
+                    matchType=match_type if match_type else bc.MatchType.BOTH,
+                    timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
+                ),
+                statistic=Statistic(statistic)
+            )
+            await message.edit(
+                content="Roggo Stats computed for you:",
+                embed=create_trend_embed(trend_result),
+                file=trend_result.image_path,
+            )
+        except:
+            await ctx.send(embed=create_error_embed())
