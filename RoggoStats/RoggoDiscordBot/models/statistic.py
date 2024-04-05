@@ -2,14 +2,65 @@ from enum import Enum
 
 
 class Statistic(Enum):
-    PERCENT_SUPERSONIC_SPEED = 0
+    BOOST_USED_PER_MINUTE = 0
     BOOST_COLLECTED_PER_MINUTE = 1
+    BOOST_AMOUNT_STOLEN = 2
+    BOOST_AMOUNT_USED_WHILE_SUPERSONIC = 3
+    PERCENT_SLOW_SPEED = 4
+    PERCENT_SUPERSONIC_SPEED = 5
+    AVERAGE_SPEED = 6
+    PERCENT_HIGH_AIR = 7
+    TIME_POWERSLIDE = 8
+    COUNT_POWERSLIDE = 9
+    AVERAGE_DISTANCE_TO_BALL = 10
+    AVERAGE_DISTANCE_TO_MATES = 11
+    PERCENT_CLOSEST_TO_BALL = 12
+    PERCENT_FARTHEST_FROM_BALL = 13
+    PERCENT_MOST_BACK = 14
+    PERCENT_MOST_FORWARD = 15
+    GOALS_AGAINST_WHILE_LAST_DEFENDER = 16
+    DEMOS_INFLICTED = 17
+    DEMOS_TAKEN = 18
 
     def __str__(self) -> str:
         match self:
-            case Statistic.PERCENT_SUPERSONIC_SPEED:
-                return "percent supersonic speed"
+            case Statistic.BOOST_USED_PER_MINUTE:
+                return "boost used per minute"
             case Statistic.BOOST_COLLECTED_PER_MINUTE:
                 return "boost collected per minute"
+            case Statistic.BOOST_AMOUNT_STOLEN:
+                return "boost amount stolen"
+            case Statistic.BOOST_AMOUNT_USED_WHILE_SUPERSONIC:
+                return "boost amount used when supersonic"
+            case Statistic.PERCENT_SLOW_SPEED:
+                return "percent slow speed"
+            case Statistic.PERCENT_SUPERSONIC_SPEED:
+                return "percent supersonic speed"
+            case Statistic.AVERAGE_SPEED:
+                return "average speed"
+            case Statistic.PERCENT_HIGH_AIR:
+                return "percent high air"
+            case Statistic.TIME_POWERSLIDE:
+                return "time powerslide"
+            case Statistic.COUNT_POWERSLIDE:
+                return "count powerslide"
+            case Statistic.AVERAGE_DISTANCE_TO_BALL:
+                return "average distance to ball"
+            case Statistic.AVERAGE_DISTANCE_TO_MATES:
+                return "average distance to mates"
+            case Statistic.PERCENT_CLOSEST_TO_BALL:
+                return "percent closest to ball"
+            case Statistic.PERCENT_FARTHEST_FROM_BALL:
+                return "percent farthest from ball"
+            case Statistic.PERCENT_MOST_BACK:
+                return "percent most back"
+            case Statistic.PERCENT_MOST_FORWARD:
+                return "percent most forward"
+            case Statistic.GOALS_AGAINST_WHILE_LAST_DEFENDER:
+                return "goals against while last defender"
+            case Statistic.DEMOS_INFLICTED:
+                return "demos inflicted"
+            case Statistic.DEMOS_TAKEN:
+                return "demos taken"
             case None:
                 return "unknown"
