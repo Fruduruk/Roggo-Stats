@@ -9,7 +9,16 @@ def get_basic_result(request: bc.FilterRequest, replay_count: int) -> Result:
     result.playlist = request.playlist
     result.replay_count = replay_count
     result.match_type = request.matchType
+    result.group_type = request.groupType
     return result
+
+
+def group_type_to_string(group_type: bc.GroupType) -> str:
+    match group_type:
+        case bc.GroupType.TOGETHER:
+            return "together"
+        case bc.GroupType.INDIVIDUALLY:
+            return "individually"
 
 
 def match_type_to_string(match_type: bc.MatchType) -> str:
