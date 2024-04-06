@@ -2,6 +2,8 @@ import os
 from interactions import Client
 
 
+# author: Mario
+
 def load_extensions(bot: Client):
     """Automatically load all extension in the ./extensions folder"""
 

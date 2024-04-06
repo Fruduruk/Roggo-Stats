@@ -109,6 +109,7 @@ class Trend(Extension):
                     playlist: int = None,
                     match_type: int = None,
                     group_type: int = 0):
+        print(f"calculating trend for {time_range},{names},{playlist},{match_type},{statistic}...")
         message = await ctx.send(
             "Roggo Stats is thinking...\n" +
             "Trend calculations are hard work, all the number crunching, please wait, this may take a while...")
@@ -117,7 +118,7 @@ class Trend(Extension):
         try:
             trend_result = await calculate_trend(
                 request=bc.FilterRequest(
-                    identities=[to_identity(name) for name in
+                    identities=[to_identity(name.strip()) for name in
                                 names.split(",")],
                     groupType=group_type,
                     playlist=playlist if playlist else bc.Playlist.ALL,
