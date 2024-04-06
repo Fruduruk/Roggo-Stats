@@ -77,6 +77,7 @@ class Winrate(Extension):
                       playlist: int = None,
                       match_type: int = None,
                       cap: int = None):
+        print(f"calculating winrate for {time_range},{names},{playlist},{match_type},{cap}...")
         message = await ctx.send("Roggo Stats is thinking...")
         # noinspection PyBroadException
         # broad except so it will never reach the user
@@ -87,7 +88,7 @@ class Winrate(Extension):
                     winrate_result=await calculate_winrate(
                         request=bc.FilterRequest(
                             replayCap=cap,
-                            identities=[to_identity(name) for name in
+                            identities=[to_identity(name.strip()) for name in
                                         names.split(",")],
                             groupType=bc.TOGETHER,
                             playlist=playlist if playlist else bc.Playlist.ALL,
