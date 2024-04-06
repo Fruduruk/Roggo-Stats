@@ -5,4 +5,4 @@ COPY .. ./
 RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "-u", "./main.phab 3.y"]
+CMD ["python", "-u", "./main.py"]
