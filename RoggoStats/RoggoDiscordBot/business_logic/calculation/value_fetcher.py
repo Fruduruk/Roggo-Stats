@@ -4,6 +4,13 @@ import ballchasing_pb2 as bc
 from models.statistic import Statistic
 
 
+def calculate_boost_collected_small_to_big_ratio(advanced_player: bc.AdvancedPlayer) -> float:
+    if advanced_player.stats.boost.generalBoost.countCollectedBig == 0:
+        return advanced_player.stats.boost.generalBoost.countCollectedSmall
+    return (advanced_player.stats.boost.generalBoost.countCollectedSmall /
+            advanced_player.stats.boost.generalBoost.countCollectedBig)
+
+
 def get_value(advanced_player: bc.AdvancedPlayer, statistic: Statistic) -> float:
     match statistic:
         case Statistic.BOOST_USED_PER_MINUTE:
@@ -14,6 +21,8 @@ def get_value(advanced_player: bc.AdvancedPlayer, statistic: Statistic) -> float
             return advanced_player.stats.boost.generalBoost.amountStolen
         case Statistic.BOOST_AMOUNT_USED_WHILE_SUPERSONIC:
             return advanced_player.stats.boost.generalBoost.amountUsedWhileSupersonic
+        case Statistic.BOOST_COLLECTED_SMALL_TO_BIG_RATIO:
+            return calculate_boost_collected_small_to_big_ratio(advanced_player)
         case Statistic.PERCENT_SLOW_SPEED:
             return advanced_player.stats.movement.percentSlowSpeed
         case Statistic.PERCENT_SUPERSONIC_SPEED:
