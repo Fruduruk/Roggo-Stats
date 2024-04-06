@@ -37,3 +37,13 @@ services:
       - MONGO_USER=BallchasingWrapper
       - MONGO_PASSWORD=chaser
       - DATABASE_NAME=RLStatsData
+
+  roggo_discord_bot:
+    container_name: 'roggo_discord_bot'
+    networks:
+      - rl_stats_network
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - BALLCHASING_HOST=ballchasing_wrapper
+      - BALLCHASING_PORT=9000
+    image: roggo-discord-bot:0.1
