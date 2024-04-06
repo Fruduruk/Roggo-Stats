@@ -8,7 +8,7 @@ def main() -> None:
     else:
         print('starting discord bot...')
         bot.start(config.DISCORD_BOT_TOKEN)
-        print('Roggo Discord Bot started.')
+        print('Stopping program...')
 
 
 if __name__ == '__main__':
