@@ -1,5 +1,5 @@
 import ballchasing_pb2 as bc
-from business_logic.calculation.trend_calculator import calculate_trend
+from business_logic.calculation.double_trend_calculator import calculate_double_trend
 from business_logic.embedder import create_error_embed, create_trend_embed
 
 from interactions import (
@@ -9,13 +9,41 @@ from interactions import (
 from business_logic.grpc.grpc_helper_functions import to_identity
 from models.statistic import Statistic
 
-print("loading trend extension...")
+print("loading double trend extension...")
 
 
 class Trend(Extension):
-    @slash_command(name="trend", description="Erhalte einen statistik trend für gegebene Spieler")
+    @slash_command(name="double-trend", description="Erhalte einen statistik trend für gegebene Spieler")
     @slash_option(
         name="statistic",
+        description="Wähle einen Wert",
+        required=True,
+        opt_type=OptionType.INTEGER,
+        choices=[
+            SlashCommandChoice(name=str(Statistic.BOOST_USED_PER_MINUTE), value=0),
+            SlashCommandChoice(name=str(Statistic.BOOST_COLLECTED_PER_MINUTE), value=1),
+            SlashCommandChoice(name=str(Statistic.BOOST_AMOUNT_STOLEN), value=2),
+            SlashCommandChoice(name=str(Statistic.BOOST_AMOUNT_USED_WHILE_SUPERSONIC), value=3),
+            SlashCommandChoice(name=str(Statistic.BOOST_COLLECTED_SMALL_TO_BIG_RATIO), value=4),
+            SlashCommandChoice(name=str(Statistic.PERCENT_SLOW_SPEED), value=5),
+            SlashCommandChoice(name=str(Statistic.PERCENT_SUPERSONIC_SPEED), value=6),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_SPEED), value=7),
+            SlashCommandChoice(name=str(Statistic.PERCENT_HIGH_AIR), value=8),
+            SlashCommandChoice(name=str(Statistic.TIME_POWERSLIDE), value=9),
+            SlashCommandChoice(name=str(Statistic.COUNT_POWERSLIDE), value=10),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_DISTANCE_TO_BALL), value=11),
+            SlashCommandChoice(name=str(Statistic.AVERAGE_DISTANCE_TO_MATES), value=12),
+            SlashCommandChoice(name=str(Statistic.PERCENT_CLOSEST_TO_BALL), value=13),
+            SlashCommandChoice(name=str(Statistic.PERCENT_FARTHEST_FROM_BALL), value=14),
+            SlashCommandChoice(name=str(Statistic.PERCENT_MOST_BACK), value=15),
+            SlashCommandChoice(name=str(Statistic.PERCENT_MOST_FORWARD), value=16),
+            SlashCommandChoice(name=str(Statistic.GOALS_AGAINST_WHILE_LAST_DEFENDER), value=17),
+            SlashCommandChoice(name=str(Statistic.DEMOS_INFLICTED), value=18),
+            SlashCommandChoice(name=str(Statistic.DEMOS_TAKEN), value=19),
+        ]
+    )
+    @slash_option(
+        name="divided_by_statistic",
         description="Wähle einen Wert",
         required=True,
         opt_type=OptionType.INTEGER,
@@ -105,17 +133,18 @@ class Trend(Extension):
     )
     async def trend(self, ctx: SlashContext,
                     statistic: int,
+                    divided_by_statistic: int,
                     names: str,
                     time_range: int = None,
                     playlist: int = None,
                     match_type: int = None,
                     group_type: int = 0):
-        print(f"calculating trend for {time_range},{names},{playlist},{match_type},{statistic}...")
+        print(f"calculating trend for {time_range},{names},{playlist},{match_type},{statistic}/{divided_by_statistic}...")
         message = await ctx.send("Roggo Stats is thinking...")
         # noinspection PyBroadException
         # broad except so it will never reach the user
         try:
-            trend_result = await calculate_trend(
+            trend_result = await calculate_double_trend(
                 request=bc.FilterRequest(
                     identities=[to_identity(name.strip()) for name in
                                 names.split(",")],
@@ -124,7 +153,8 @@ class Trend(Extension):
                     matchType=match_type if match_type else bc.MatchType.BOTH,
                     timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
                 ),
-                statistic=Statistic(statistic)
+                statistic=Statistic(statistic),
+                divided_by_statistic=Statistic(divided_by_statistic)
             )
             await message.edit(
                 content="",

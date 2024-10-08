@@ -130,7 +130,7 @@ namespace BallchasingWrapper.BusinessLogic
                 }
 
                 // Load the first [downloader count] replays and check if they are in cache.
-                // We have to check every downloader unfortunately.
+                // We have to check every downloader, unfortunately.
                 // If true then the cache can be safely loaded.
                 // If false then the cache should be overwritten.
                 if (cachedReplays is not null && allReplays.Count > 0)
@@ -145,7 +145,7 @@ namespace BallchasingWrapper.BusinessLogic
 
                     // If there is at least one replay from every downloader in cache
                     // the rest of the cache can be loaded and updated.
-                    // Only check active downloaders because the others won't have any new replays
+                    // Only check active downloaders because the others won't have any new replays,
                     // and we are checking if the download should continue.
                     if (activeDownloaders.Where(downloader => downloader.ReplaysProvided.Any()).All(
                             downloader => downloader.ReplaysProvided.Any(replay => cachedReplays.Contains(replay))))
