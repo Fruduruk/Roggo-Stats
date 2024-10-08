@@ -32,6 +32,8 @@ def identity_equals_advanced_player(identity: bc.Identity, advanced_player: bc.A
 def to_identity(name: str):
     if name == "danschl":
         return bc.Identity(identityType=bc.STEAM_ID, nameOrId="76561198095673686")
+    if name == "lön":
+        return bc.Identity(identityType=bc.STEAM_ID, nameOrId="76561198129759987")
     return bc.Identity(identityType=bc.NAME, nameOrId=name)
 
 

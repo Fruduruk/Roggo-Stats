@@ -16,7 +16,7 @@ from models.statistic import Statistic
 from models.trend_result import TrendResult
 
 
-def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> str:
+def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic, divided_by_statistic: Statistic) -> str:
     plt.figure(figsize=(10, 6))
     colors = ["b", "r", "g", "y"]
 
@@ -49,9 +49,9 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
                 plt.plot(nums, m * np.array(nums) + b, linestyle="--", color=color)
 
     plt.xticks(ticks=tick_indices, labels=tick_labels, rotation=45)
-    plt.title(str(statistic), fontweight="bold")
+    plt.title(str(statistic)+" / "+str(divided_by_statistic), fontweight="bold")
     plt.xlabel("Time")
-    plt.ylabel(str(statistic))
+    plt.ylabel(str(statistic)+" / "+str(divided_by_statistic))
     plt.legend()
     plt.tight_layout()
 
@@ -63,7 +63,7 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
     return path
 
 
-async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> TrendResult:
+async def calculate_double_trend(request: bc.FilterRequest, statistic: Statistic, divided_by_statistic: Statistic) -> TrendResult:
     replays = get_advanced_replays(request)
     if not replays:
         replays = []
@@ -73,7 +73,7 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
 
     names = [find_name_of_identity_in_advanced_replays(identity, replays) for identity in request.identities]
     trend_result = TrendResult(get_basic_result(request, len(replays), names=names))
-    trend_result.stat_name = str(statistic)
+    trend_result.stat_name = str(statistic) + " / " + str(divided_by_statistic)
 
     if len(replays) == 0:
         return trend_result
@@ -85,7 +85,11 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
         value_tuple_list: list[tuple[datetime, float]] = [
             (
                 datetime.fromisoformat(replay.date.replace("Z", "+00:00")),
-                get_value(find_advanced_player_in_advanced_replay(replay, identity), statistic))
+                (
+                    get_value(find_advanced_player_in_advanced_replay(replay, identity), statistic) /
+                    get_value(find_advanced_player_in_advanced_replay(replay, identity), divided_by_statistic)
+                )
+            )
             for replay in replays if
             find_advanced_player_in_advanced_replay(replay, identity) is not None
         ]
@@ -97,6 +101,6 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
 
         player_statistic_value_maps.append(player_stats)
 
-    path = generate_image(player_statistic_value_maps, statistic)
+    path = generate_image(player_statistic_value_maps, statistic, divided_by_statistic)
     trend_result.image_path = path
     return trend_result

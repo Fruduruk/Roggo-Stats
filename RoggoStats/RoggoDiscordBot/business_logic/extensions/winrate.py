@@ -83,7 +83,7 @@ class Winrate(Extension):
         # broad except so it will never reach the user
         try:
             await message.edit(
-                content="Roggo Stats computed for you:",
+                content="",
                 embed=create_winrate_embed(
                     winrate_result=await calculate_winrate(
                         request=bc.FilterRequest(
