@@ -46,4 +46,4 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - BALLCHASING_HOST=ballchasing_wrapper
       - BALLCHASING_PORT=9000
-    image: roggo-discord-bot:0.1
+    image: roggo-discord-bot:0.2
