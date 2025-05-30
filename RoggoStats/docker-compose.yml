@@ -1,4 +1,3 @@
-version: '3.3'
 volumes:
   mongo_data_volume:
 networks:
