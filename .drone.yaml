@@ -3,15 +3,15 @@ type: docker
 name: release
 
 steps:
-  - name: build and push ballchasing-wrapper
-    image: plugins/docker
-    settings:
-      registry: registry.local.frudd.dev
-      repo: registry.local.frudd.dev/ballchasing-wrapper
-      tags:
-        - latest
-      dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
-      context: ./RoggoStats/BallchasingWrapper/.
+  # - name: build and push ballchasing-wrapper
+  #   image: plugins/docker
+  #   settings:
+  #     registry: registry.local.frudd.dev
+  #     repo: registry.local.frudd.dev/ballchasing-wrapper
+  #     tags:
+  #       - latest
+  #     dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
+  #     context: ./RoggoStats/BallchasingWrapper/.
 
   - name: build and push roggo-discord-bot
     image: plugins/docker
@@ -23,16 +23,19 @@ steps:
       dockerfile: ./RoggoStats/RoggoDiscordBot/Dockerfile
       context: ./RoggoStats/RoggoDiscordBot/.
 
-  - name: deploy
-    image: appleboy/drone-ssh
-    settings:
-      host: homepage.local.frudd.dev
-      username: fish
-      password:
-        from_secret: local_docker_ssh_password
-      port: 22
-      script:
-        - cd /home/fish/docker/roggo-stats/
-        - docker compose pull
-        - docker compose down
-        - docker compose up -d
+  # - name: deploy
+  #   image: appleboy/drone-ssh
+  #   depends_on:
+  #     - build and push ballchasing-wrapper
+  #     - build and push roggo-discord-bot
+  #   settings:
+  #     host: homepage.local.frudd.dev
+  #     username: fish
+  #     password:
+  #       from_secret: local_docker_ssh_password
+  #     port: 22
+  #     script:
+  #       - cd /home/fish/docker/roggo-stats/
+  #       - docker compose pull
+  #       - docker compose down
+  #       - docker compose up -d
