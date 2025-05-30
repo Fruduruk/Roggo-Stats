@@ -10,8 +10,8 @@ steps:
       repo: registry.local.frudd.dev/ballchasing-wrapper
       tags:
         - latest
-      dockerfile: ./BallchasingWrapper/Dockerfile
-      context: ./BallchasingWrapper/.
+      dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
+      context: ./RoggoStats/BallchasingWrapper/.
 
 
   # - name: deploy
