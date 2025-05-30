@@ -1,0 +1,29 @@
+kind: pipeline
+type: docker
+name: release
+
+steps:
+  - name: build and push ballchasing-wrapper
+    image: plugins/docker
+    settings:
+      registry: registry.local.frudd.dev
+      repo: registry.local.frudd.dev/ballchasing-wrapper
+      tags:
+        - latest
+      dockerfile: ./BallchasingWrapper/Dockerfile
+      context: ./BallchasingWrapper/.
+
+
+  # - name: deploy
+  #   image: appleboy/drone-ssh
+  #   settings:
+  #     host: homepage.local.frudd.dev
+  #     username: fish
+  #     password:
+  #       from_secret: local_docker_ssh_password
+  #     port: 22
+  #     script:
+  #       - cd /home/fish/docker/homepage/
+  #       - docker compose pull
+  #       - docker compose down
+  #       - docker compose up -d
