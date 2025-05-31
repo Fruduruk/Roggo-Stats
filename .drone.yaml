@@ -37,5 +37,4 @@ steps:
       script:
         - cd /home/fish/docker/roggo-stats/
         - docker compose pull
-        - docker compose down
         - docker compose up -d
