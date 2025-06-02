@@ -36,6 +36,9 @@ def to_identity(name: str):
         return bc.Identity(identityType=bc.STEAM_ID, nameOrId="76561198129759987")
     if name == "jan":
         return bc.Identity(identityType=bc.STEAM_ID, nameOrId="76561198269365717")
+    if name == "keno":
+        return bc.Identity(identityType=bc.STEAM_ID, nameOrId="76561198125752938")
+
     return bc.Identity(identityType=bc.NAME, nameOrId=name)
 
 
