@@ -1,0 +1,16 @@
+﻿volumes:
+  roggo_stats_dev_db:
+services:
+  ballchasing_db:
+    image: mongo
+    ports:
+      - '29017:27017'
+    container_name: ballchasing_db
+    volumes:
+      - roggo_stats_dev_db:/data/db
+    logging:
+      options:
+        max-size: 1g
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=BallchasingWrapper
+      - MONGO_INITDB_ROOT_PASSWORD=chaser
