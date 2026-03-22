@@ -2,7 +2,7 @@
   roggo_stats_dev_db:
 services:
   ballchasing_db:
-    image: mongo
+    image: mongo:8.0.10
     ports:
       - '29017:27017'
     container_name: ballchasing_db
