@@ -10,3 +10,6 @@ to generate the files ["ballchasing_pb2.py", "ballchasing_pb2_grpc.py"].
 ``docker build -t roggo-discord-bot:{version} .``
 
 ``docker save roggo-discord-bot:{version} -o roggo-discord-bot.tar``
+
+# Create venv
+``py -m venv .venv``

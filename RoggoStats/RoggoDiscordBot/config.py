@@ -5,6 +5,7 @@ print("loading config...")
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 BALLCHASING_HOST = os.getenv('BALLCHASING_HOST')
 BALLCHASING_PORT = os.getenv('BALLCHASING_PORT')
+APP_VERSION = os.getenv('APP_VERSION')
 
 def check_environment_variables() -> bool:
     missing_vars = []
@@ -14,6 +15,8 @@ def check_environment_variables() -> bool:
         missing_vars.append("BALLCHASING_HOST")
     if BALLCHASING_PORT is None:
         missing_vars.append("BALLCHASING_PORT")
+    if APP_VERSION is None:
+        missing_vars.append("APP_VERSION")
 
     if missing_vars:
         for var in missing_vars:
