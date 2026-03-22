@@ -12,7 +12,7 @@ from models.statistic import Statistic
 print("loading double trend extension...")
 
 
-class Trend(Extension):
+class DoubleTrend(Extension):
     @slash_command(name="double-trend", description="Erhalte einen statistik trend für gegebene Spieler")
     @slash_option(
         name="statistic",

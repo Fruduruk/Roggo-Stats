@@ -1,4 +1,4 @@
-FROM python:3.10.20-slim
+FROM python:3.14.3-slim-trixie
 WORKDIR /app
 
 ARG APP_VERSION=dev
