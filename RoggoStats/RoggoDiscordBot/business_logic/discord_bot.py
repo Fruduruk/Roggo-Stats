@@ -1,4 +1,5 @@
 import interactions
+import config
 
 from business_logic.extensions_loader import load_extensions
 from interactions.models import discord
@@ -12,7 +13,8 @@ load_extensions(bot)
 @bot.listen()
 async def on_startup():
     activity = discord.Activity.create(
-        name="Rocket League Replays",
-        type=discord.activity.ActivityType.WATCHING
+        name="Version => " + config.APP_VERSION,
+        type=discord.activity.ActivityType.PLAYING
     )
     await bot.change_presence(status=discord.Status.ONLINE, activity=activity)
+
