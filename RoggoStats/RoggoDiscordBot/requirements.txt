@@ -1,5 +1,5 @@
-grpcio==1.73.0
-protobuf==6.31.1
+grpcio==1.78.0
+protobuf==7.34.1
 matplotlib==3.10.3
 numpy==2.2.6
 discord-py-interactions==5.11.0
