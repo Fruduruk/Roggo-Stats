@@ -14,6 +14,9 @@ steps:
       repo: registry.local.frudd.dev/ballchasing-wrapper
       tags:
         - latest
+        - ${DRONE_TAG##v}
+      build_args:
+        - APP_VERSION=${DRONE_TAG##v}
       dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
       context: ./RoggoStats/BallchasingWrapper/.
 
@@ -24,6 +27,9 @@ steps:
       repo: registry.local.frudd.dev/roggo-discord-bot
       tags:
         - latest
+        - ${DRONE_TAG##v}
+      build_args:
+        - APP_VERSION=${DRONE_TAG##v}
       dockerfile: ./RoggoStats/RoggoDiscordBot/Dockerfile
       context: ./RoggoStats/RoggoDiscordBot/.
 
