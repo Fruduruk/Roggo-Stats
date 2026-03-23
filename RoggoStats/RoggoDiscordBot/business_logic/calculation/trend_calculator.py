@@ -67,8 +67,9 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
                 ax.plot(nums, m * np.array(nums) + b, linestyle="-", color=color)
 
     ax.set_xticks(list(tick_indices))
+    # ax.set_ylim(bottom=0)
     ax.set_xticklabels(tick_labels, rotation=45)
-    ax.set_title(str(statistic), fontweight="bold", color="#d4d4d4")
+    ax.set_title(str(statistic).upper(), fontweight="bold", color="#d4d4d4")
     ax.set_xlabel("Time", color="#d4d4d4")
     ax.set_ylabel(str(statistic), color="#d4d4d4")
     ax.tick_params(colors="#d4d4d4")

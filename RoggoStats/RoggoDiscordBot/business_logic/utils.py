@@ -18,33 +18,33 @@ def get_basic_result(request: bc.FilterRequest, replay_count: int, names: List[s
 def group_type_to_string(group_type: bc.GroupType) -> str:
     match group_type:
         case bc.GroupType.TOGETHER:
-            return "together"
+            return "Together"
         case bc.GroupType.INDIVIDUALLY:
-            return "individually"
+            return "Individually"
 
 
 def match_type_to_string(match_type: bc.MatchType) -> str:
     match match_type:
         case bc.MatchType.BOTH:
-            return "both"
+            return "Ranked and Unranked"
         case bc.MatchType.RANKED:
-            return "ranked"
+            return "Ranked"
         case bc.MatchType.UNRANKED:
-            return "unranked"
+            return "Unranked"
 
 
 def time_range_to_string(time_range: bc.TimeRange) -> str:
     match time_range:
         case bc.TimeRange.TODAY:
-            return "today"
+            return "Today"
         case bc.TimeRange.YESTERDAY:
-            return "yesterday"
+            return "Yesterday"
         case bc.TimeRange.WEEK:
-            return "last 7 days"
+            return "Last 7 days"
         case bc.TimeRange.MONTH:
-            return "last 30 days"
+            return "Last 30 days"
         case bc.TimeRange.YEAR:
-            return "last 365 days"
+            return "Last 365 days"
 
 
 def playlist_to_string(playlist: bc.Playlist) -> str:
@@ -52,13 +52,13 @@ def playlist_to_string(playlist: bc.Playlist) -> str:
         case bc.Playlist.ALL:
             return "all"
         case bc.Playlist.DUELS:
-            return "duels"
+            return "1v1"
         case bc.Playlist.DOUBLES:
-            return "doubles"
+            return "2v2"
         case bc.Playlist.STANDARD:
-            return "standard"
+            return "3v3"
         case bc.Playlist.CHAOS:
-            return "chaos"
+            return "4v4"
         case bc.Playlist.PRIVATE_GAME:
             return "private"
         case bc.Playlist.OFFLINE:
