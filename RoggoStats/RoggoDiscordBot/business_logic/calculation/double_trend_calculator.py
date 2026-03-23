@@ -64,7 +64,7 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic, divi
 
 
 async def calculate_double_trend(request: bc.FilterRequest, statistic: Statistic, divided_by_statistic: Statistic) -> TrendResult:
-    replays = get_advanced_replays(request)
+    replays = await get_advanced_replays(request)
     if not replays:
         replays = []
     if len(replays) == 0:

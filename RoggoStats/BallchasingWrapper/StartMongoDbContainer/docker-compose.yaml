@@ -1,13 +1,17 @@
-﻿volumes:
-  roggo_stats_dev_db:
+﻿name: RoggoStatsDevEnv
+
+volumes:
+  dev_db:
+  dev_configdb:
 services:
   ballchasing_db:
-    image: mongo:8.0.10
+    image: mongo:8.2.6
     ports:
       - '29017:27017'
     container_name: ballchasing_db
     volumes:
-      - roggo_stats_dev_db:/data/db
+      - dev_db:/data/db
+      - dev_configdb:/data/configdb
     logging:
       options:
         max-size: 1g

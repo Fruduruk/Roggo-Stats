@@ -1,17 +1,27 @@
+name: RoggoStatsDevEnv
+
 volumes:
-  mongo_data_volume:
+  dev_db:
+  dev_configdb:
 networks:
-  rl_stats_network:
+  roggo_network:
 services:
   ballchasing_db:
-    image: mongo:8.0.10
+    image: mongo:8.2.6
     ports:
       - '29017:27017'
     container_name: ballchasing_db
     networks:
-      - rl_stats_network
+      - roggo_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     volumes:
-      - mongo_data_volume:/data/db
+      - dev_db:/data/db
+      - dev_configdb:/data/configdb
     logging:
       options:
         max-size: 1g
@@ -25,10 +35,10 @@ services:
       - '9000:9000'
     container_name: ballchasing_wrapper
     networks:
-      - rl_stats_network
+      - roggo_network
     depends_on:
       ballchasing_db:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BALLCHASING_API_KEY=${BALLCHASING_API_KEY}
       - MONGO_HOST=ballchasing_db

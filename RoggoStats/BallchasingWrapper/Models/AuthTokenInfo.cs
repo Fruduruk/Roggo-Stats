@@ -22,7 +22,7 @@ namespace BallchasingWrapper.Models
             return Type switch
             {
                 "gc" => 16,
-                "champion" => 8,
+                "champion" => 4,
                 "diamond" => 4,
                 "gold" => 2,
                 "regular" => 2,
@@ -37,9 +37,9 @@ namespace BallchasingWrapper.Models
             {
                 "gc" => 0,
                 "champion" => 0,
-                "diamond" => 2000,
-                "gold" => 1000,
-                "regular" => 500,
+                "diamond" => 5000,
+                "gold" => 2000,
+                "regular" => 1000,
                 _ => throw new Exception("Unknown type: " + Type)
             };
         }
