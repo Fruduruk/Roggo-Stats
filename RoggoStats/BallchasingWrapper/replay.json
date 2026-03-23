@@ -1,0 +1,123 @@
+{
+    "id": "f4d2edc6-1c11-4732-90c5-5fb89ca443a7",
+    "link": "https://ballchasing.com/api/replays/f4d2edc6-1c11-4732-90c5-5fb89ca443a7",
+    "rocket_league_id": "B327E15D4C6BA776CCFCF6A91819AF35",
+    "replay_title": "2026-03-23.12.54 Ced. Ranked Standard Win",
+    "map_code": "neotokyo_standard_p",
+    "map_name": "Neo Tokyo (Standard)",
+    "playlist_id": "ranked-standard",
+    "playlist_name": "Ranked Standard",
+    "duration": 434,
+    "overtime": true,
+    "overtime_seconds": 79,
+    "season": 21,
+    "season_type": "free2play",
+    "date": "2026-03-23T12:54:32Z",
+    "date_has_tz": true,
+    "visibility": "public",
+    "created": "2026-03-23T12:54:33.384549Z",
+    "min_rank": {
+        "tier": 18,
+        "division": 4,
+        "name": "Champion III Division 4",
+        "id": "champion-3"
+    },
+    "max_rank": {
+        "tier": 19,
+        "division": 4,
+        "name": "Grand Champion I Division 4",
+        "id": "grand-champion"
+    },
+    "uploader": {
+        "steam_id": "76561198355465057",
+        "name": "Ced.",
+        "profile_url": "https://steamcommunity.com/profiles/76561198355465057/",
+        "avatar": "https://avatars.steamstatic.com/1570c26e5e80622cc2534d71cf837016f3b36aea.jpg"
+    },
+    "blue": {
+        "goals": 2,
+        "players": [
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "zzenqy",
+                "id": {
+                    "platform": "steam",
+                    "id": "76561199016964092"
+                },
+                "score": 652
+            },
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "Arctic",
+                "id": {
+                    "platform": "steam",
+                    "id": "76561198075141817"
+                },
+                "rank": {
+                    "tier": 19,
+                    "division": 4,
+                    "name": "Grand Champion I Division 4",
+                    "id": "grand-champion"
+                },
+                "score": 337,
+                "pro": true
+            },
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "! armonikszn &",
+                "id": {
+                    "platform": "steam",
+                    "id": "76561199015018572"
+                },
+                "score": 303
+            }
+        ]
+    },
+    "orange": {
+        "goals": 3,
+        "players": [
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "Kashkami!",
+                "id": {
+                    "platform": "steam",
+                    "id": "76561198870167817"
+                },
+                "mvp": true,
+                "score": 609,
+                "pro": true
+            },
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "Ced.",
+                "id": {
+                    "platform": "steam",
+                    "id": "76561198355465057"
+                },
+                "rank": {
+                    "tier": 18,
+                    "division": 4,
+                    "name": "Champion III Division 4",
+                    "id": "champion-3"
+                },
+                "score": 476,
+                "pro": true
+            },
+            {
+                "start_time": 0,
+                "end_time": 434.67722,
+                "name": "Stelios.97",
+                "id": {
+                    "platform": "epic",
+                    "id": "d83b552d4ea640318a93c8ba10c220c6"
+                },
+                "score": 166
+            }
+        ]
+    }
+}
