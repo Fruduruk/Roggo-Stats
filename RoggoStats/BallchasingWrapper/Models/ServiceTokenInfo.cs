@@ -15,7 +15,7 @@ namespace BallchasingWrapper.Models
         public double GetSpeed()
         {
             if (Debugger.IsAttached)
-                return 16d;
+                return 8d;
             return 0.067d;
         }
         public double GetHourLimit()

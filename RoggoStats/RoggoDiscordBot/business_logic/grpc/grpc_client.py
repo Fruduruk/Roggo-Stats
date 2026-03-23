@@ -9,7 +9,7 @@ print("loading grpc client...")
 
 
 def create_stub() -> bc_grpc.BallchasingStub:
-    channel = grpc.insecure_channel(BALLCHASING_HOST + ':' + BALLCHASING_PORT)
+    channel = grpc.aio.insecure_channel(BALLCHASING_HOST + ":" + BALLCHASING_PORT)
     return bc_grpc.BallchasingStub(channel)
 
 
@@ -17,17 +17,17 @@ async def get_simple_replays(request: bc.FilterRequest) -> List[bc.Replay]:
     stub = create_stub()
 
     try:
-        response = stub.GetSimpleReplays(request)
+        response = await stub.GetSimpleReplays(request)
         return response.replays
-    except grpc.RpcError as e:
+    except grpc.AioRpcError as e:
         print(f"Ein Fehler ist aufgetreten: {e}")
 
 
-def get_advanced_replays(request: bc.FilterRequest) -> List[bc.AdvancedPlayer]:
+async def get_advanced_replays(request: bc.FilterRequest) -> List[bc.AdvancedPlayer]:
     stub = create_stub()
 
     try:
-        response = stub.GetAdvancedReplays(request)
+        response = await stub.GetAdvancedReplays(request)
         return response.replays
-    except grpc.RpcError as e:
+    except grpc.AioRpcError as e:
         print(f"Ein Fehler ist aufgetreten: {e}")

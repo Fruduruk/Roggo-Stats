@@ -102,6 +102,8 @@ namespace BallchasingWrapper
                 return false;
             }
 
+            Console.WriteLine($"Your limit is {tokenInfo.GetSpeed()}/s");
+
             _tokenInfo = tokenInfo;
             return true;
         }

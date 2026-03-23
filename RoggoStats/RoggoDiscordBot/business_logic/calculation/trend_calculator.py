@@ -5,11 +5,15 @@ import ballchasing_pb2 as bc
 import matplotlib.pyplot as plt
 import numpy as np
 
-from business_logic.calculation.calc_utils import find_advanced_player_in_advanced_replay
+from business_logic.calculation.calc_utils import (
+    find_advanced_player_in_advanced_replay,
+)
 from business_logic.calculation.value_fetcher import get_value
 from business_logic.grpc.grpc_client import get_advanced_replays
-from business_logic.grpc.grpc_helper_functions import find_name_of_identity_in_simple_replays, \
-    find_name_of_identity_in_advanced_replays
+from business_logic.grpc.grpc_helper_functions import (
+    find_name_of_identity_in_simple_replays,
+    find_name_of_identity_in_advanced_replays,
+)
 from business_logic.utils import get_basic_result
 from models.time_series_player_stats import TimeSeriesPlayerStats
 from models.statistic import Statistic
@@ -33,16 +37,27 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
         if len(value_map.values) > 0:
             values = [value_map.values.get(date) for date in all_dates]
 
-            nums, valid_values = zip(*[(i, val) for i, val in enumerate(values) if val is not None])
+            nums, valid_values = zip(
+                *[(i, val) for i, val in enumerate(values) if val is not None]
+            )
 
             if valid_values:
-                plt.plot(nums, valid_values, marker="o", linestyle=" ", color=color, label=f"{value_map.name}")
+                plt.plot(
+                    nums,
+                    valid_values,
+                    marker="o",
+                    linestyle=" ",
+                    color=color,
+                    label=f"{value_map.name}",
+                )
 
     for value_map, color in zip(maps, colors):
         if len(value_map.values) > 0:
             values = [value_map.values.get(date) for date in all_dates]
 
-            nums, valid_values = zip(*[(i, val) for i, val in enumerate(values) if val is not None])
+            nums, valid_values = zip(
+                *[(i, val) for i, val in enumerate(values) if val is not None]
+            )
 
             if valid_values:
                 m, b = np.polyfit(nums, valid_values, 1)
@@ -63,15 +78,25 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
     return path
 
 
-async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> TrendResult:
-    replays = get_advanced_replays(request)
+async def calculate_trend(
+    request: bc.FilterRequest, statistic: Statistic
+) -> TrendResult:
+    replays = await get_advanced_replays(request)
     if not replays:
         replays = []
     if len(replays) == 0:
         return TrendResult(
-            get_basic_result(request, len(replays), names=[identity.nameOrId for identity in request.identities]))
+            get_basic_result(
+                request,
+                len(replays),
+                names=[identity.nameOrId for identity in request.identities],
+            )
+        )
 
-    names = [find_name_of_identity_in_advanced_replays(identity, replays) for identity in request.identities]
+    names = [
+        find_name_of_identity_in_advanced_replays(identity, replays)
+        for identity in request.identities
+    ]
     trend_result = TrendResult(get_basic_result(request, len(replays), names=names))
     trend_result.stat_name = str(statistic)
 
@@ -85,14 +110,17 @@ async def calculate_trend(request: bc.FilterRequest, statistic: Statistic) -> Tr
         value_tuple_list: list[tuple[datetime, float]] = [
             (
                 datetime.fromisoformat(replay.date.replace("Z", "+00:00")),
-                get_value(find_advanced_player_in_advanced_replay(replay, identity), statistic))
-            for replay in replays if
-            find_advanced_player_in_advanced_replay(replay, identity) is not None
+                get_value(
+                    find_advanced_player_in_advanced_replay(replay, identity), statistic
+                ),
+            )
+            for replay in replays
+            if find_advanced_player_in_advanced_replay(replay, identity) is not None
         ]
 
         player_stats = TimeSeriesPlayerStats(
             name=find_name_of_identity_in_advanced_replays(identity, replays),
-            tuples=value_tuple_list
+            tuples=value_tuple_list,
         )
 
         player_statistic_value_maps.append(player_stats)
