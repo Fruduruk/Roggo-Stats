@@ -17,7 +17,7 @@ from business_logic.grpc.grpc_helper_functions import (
 from business_logic.utils import get_basic_result
 from models.time_series_player_stats import TimeSeriesPlayerStats
 from models.statistic import Statistic
-from models.trend_result import TrendResult
+from models.image_result import ImageResult
 
 
 def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> str:
@@ -96,12 +96,12 @@ def generate_image(maps: List[TimeSeriesPlayerStats], statistic: Statistic) -> s
 
 async def calculate_trend(
     request: bc.FilterRequest, statistic: Statistic
-) -> TrendResult:
+) -> ImageResult:
     replays = await get_advanced_replays(request)
     if not replays:
         replays = []
     if len(replays) == 0:
-        return TrendResult(
+        return ImageResult(
             get_basic_result(
                 request,
                 len(replays),
@@ -113,7 +113,7 @@ async def calculate_trend(
         find_name_of_identity_in_advanced_replays(identity, replays)
         for identity in request.identities
     ]
-    trend_result = TrendResult(get_basic_result(request, len(replays), names=names))
+    trend_result = ImageResult(get_basic_result(request, len(replays), names=names))
     trend_result.stat_name = str(statistic)
 
     if len(replays) == 0:
