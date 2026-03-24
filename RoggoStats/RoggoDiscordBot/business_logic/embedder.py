@@ -8,7 +8,7 @@ from business_logic.utils import (
     group_type_to_string,
 )
 from models.result import Result
-from models.trend_result import TrendResult
+from models.image_result import ImageResult
 from models.winrate_result import WinrateResult
 
 
@@ -33,23 +33,23 @@ def create_basic_embed(result: Result, inline: bool = False) -> discord.Embed:
     return embed
 
 
-def create_winrate_embed(winrate_result: WinrateResult) -> discord.Embed:
-    embed = create_basic_embed(winrate_result)
-    embed.title = "Winrate of " + ", ".join(winrate_result.names)
-    embed.add_field("Winrate", str(winrate_result.winrate * 100) + "%")
+def create_winrate_embed(result: WinrateResult) -> discord.Embed:
+    embed = create_basic_embed(result)
+    embed.title = "Winrate of " + ", ".join(result.names)
+    embed.add_field("Winrate", str(result.winrate * 100) + "%")
     return embed
 
 
-def create_weekday_winrate_embed(weekday_winrate_result: TrendResult) -> discord.Embed:
-    embed = create_basic_embed(weekday_winrate_result, inline=True)
+def create_weekday_winrate_embed(result: ImageResult) -> discord.Embed:
+    embed = create_basic_embed(result, inline=True)
     embed.title = "Winrate on every weekday of " + ", ".join(
-        weekday_winrate_result.names
+        result.names
     )
     return embed
 
 
-def create_trend_embed(trend_result: TrendResult) -> discord.Embed:
-    embed = create_basic_embed(trend_result, inline=True)
-    embed.title = "Trend of " + ", ".join(trend_result.names)
-    embed.add_field("Statistic Value", trend_result.stat_name, inline=True)
+def create_trend_embed(result: ImageResult) -> discord.Embed:
+    embed = create_basic_embed(result, inline=True)
+    embed.title = "Trend of " + ", ".join(result.names)
+    embed.add_field("Statistic Value", result.stat_name, inline=True)
     return embed

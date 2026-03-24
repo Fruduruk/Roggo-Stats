@@ -77,7 +77,7 @@ class Trend(Extension):
         )
         message = await ctx.send("Roggo Stats is thinking...")
         try:
-            trend_result = await calculate_trend(
+            result = await calculate_trend(
                 request=bc.FilterRequest(
                     identities=[to_identity(name.strip()) for name in names.split(",")],
                     groupType=group_type,
@@ -89,8 +89,8 @@ class Trend(Extension):
             )
             await message.edit(
                 content="",
-                embed=create_trend_embed(trend_result),
-                file=trend_result.image_path,
+                embed=create_trend_embed(result),
+                file=result.image_path,
             )
         except:
             await ctx.send(embed=create_error_embed())

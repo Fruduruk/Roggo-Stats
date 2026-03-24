@@ -1,7 +1,7 @@
 from models.result import Result
 
 
-class TrendResult(Result):
+class ImageResult(Result):
     image_path: str = None
     stat_name: str = None
 

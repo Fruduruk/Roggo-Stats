@@ -73,7 +73,7 @@ class Winrate(Extension):
             await message.edit(
                 content="",
                 embed=embedder.create_winrate_embed(
-                    winrate_result=await calculate_winrate(
+                    result=await calculate_winrate(
                         request=bc.FilterRequest(
                             replayCap=cap,
                             identities=[

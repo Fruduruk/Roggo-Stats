@@ -11,7 +11,7 @@ from business_logic.grpc.grpc_helper_functions import (
     find_name_of_identity_in_simple_replays,
 )
 from business_logic.utils import get_basic_result
-from models.trend_result import TrendResult
+from models.image_result import ImageResult
 from datetime import datetime
 
 from dataclasses import dataclass
@@ -74,12 +74,12 @@ def generate_image(data: List[WeekdayWinrate]) -> str:
     return path
 
 
-async def calculate_weekday_winrate(request: bc.FilterRequest) -> TrendResult:
+async def calculate_weekday_winrate(request: bc.FilterRequest) -> ImageResult:
     replays = await get_simple_replays(request)
     if not replays:
         replays = []
     if len(replays) == 0:
-        return TrendResult(
+        return ImageResult(
             get_basic_result(
                 request,
                 len(replays),
@@ -91,7 +91,7 @@ async def calculate_weekday_winrate(request: bc.FilterRequest) -> TrendResult:
         find_name_of_identity_in_simple_replays(identity, replays)
         for identity in request.identities
     ]
-    result = TrendResult(get_basic_result(request, len(replays), names))
+    result = ImageResult(get_basic_result(request, len(replays), names))
 
     weekday_winrates = []
 
