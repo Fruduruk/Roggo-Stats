@@ -50,7 +50,7 @@ def time_range_to_string(time_range: bc.TimeRange) -> str:
 def playlist_to_string(playlist: bc.Playlist) -> str:
     match playlist:
         case bc.Playlist.ALL:
-            return "all"
+            return "All"
         case bc.Playlist.DUELS:
             return "1v1"
         case bc.Playlist.DOUBLES:
@@ -60,22 +60,22 @@ def playlist_to_string(playlist: bc.Playlist) -> str:
         case bc.Playlist.CHAOS:
             return "4v4"
         case bc.Playlist.PRIVATE_GAME:
-            return "private"
+            return "Private"
         case bc.Playlist.OFFLINE:
-            return "offline"
+            return "Offline"
         case bc.Playlist.SNOW_DAY:
-            return "snow day"
+            return "Snow Day"
         case bc.Playlist.ROCKET_LABS:
-            return "rocket labs"
+            return "Rocket Labs"
         case bc.Playlist.HOOPS:
-            return "hoops"
+            return "Hoops"
         case bc.Playlist.RUMBLE:
-            return "rumble"
+            return "Rumble"
         case bc.Playlist.TOURNAMENT:
-            return "tournament"
+            return "Tournament"
         case bc.Playlist.DROP_SHOT:
-            return "drop shot"
+            return "Drop Shot"
         case bc.Playlist.DROP_SHOT_RUMBLE:
-            return "drop shot rumble"
+            return "Drop Shot Rumble"
         case bc.Playlist.HEAT_SEEKER:
-            return "heat seeker"
+            return "Heat Seeker"
