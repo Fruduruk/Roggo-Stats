@@ -11,9 +11,9 @@ from interactions import (
     SlashContext,
     slash_option,
     OptionType,
-    SlashCommandChoice,
 )
 
+from business_logic.slash_command_choices import MATCH_TYPE_CHOICES, PLAYLIST_CHOICES, TIME_CHOICES
 from business_logic.grpc.grpc_helper_functions import to_identity
 
 print("loading winrate extension...")
@@ -28,13 +28,7 @@ class Winrate(Extension):
         description="Wähle ein Zeitintervall",
         required=True,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Today", value=1),
-            SlashCommandChoice(name="Yesterday", value=2),
-            SlashCommandChoice(name="Week", value=3),
-            SlashCommandChoice(name="Month", value=4),
-            SlashCommandChoice(name="Year", value=5),
-        ],
+        choices=TIME_CHOICES,
     )
     @slash_option(
         name="names",
@@ -47,32 +41,14 @@ class Winrate(Extension):
         description="Wähle eine Playlist",
         required=False,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Duels", value=1),
-            SlashCommandChoice(name="Doubles", value=2),
-            SlashCommandChoice(name="Standard", value=3),
-            SlashCommandChoice(name="Chaos", value=4),
-            SlashCommandChoice(name="Private", value=5),
-            SlashCommandChoice(name="Offline", value=6),
-            SlashCommandChoice(name="Snow Day", value=7),
-            SlashCommandChoice(name="Rocket Labs", value=8),
-            SlashCommandChoice(name="Hoops", value=9),
-            SlashCommandChoice(name="Rumble", value=10),
-            SlashCommandChoice(name="Tournament", value=11),
-            SlashCommandChoice(name="Drop Shot", value=12),
-            SlashCommandChoice(name="Drop Shot Rumble", value=13),
-            SlashCommandChoice(name="Heat Seeker", value=14),
-        ],
+        choices=PLAYLIST_CHOICES,
     )
     @slash_option(
         name="match_type",
         description="Wähle ob gewertet oder nicht",
         required=False,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Ranked", value=1),
-            SlashCommandChoice(name="Unranked", value=2),
-        ],
+        choices=MATCH_TYPE_CHOICES,
     )
     @slash_option(
         name="cap",
@@ -93,8 +69,6 @@ class Winrate(Extension):
             f"calculating winrate for {time_range},{names},{playlist},{match_type},{cap}..."
         )
         message = await ctx.send("Roggo Stats is thinking...")
-        # noinspection PyBroadException
-        # broad except so it will never reach the user
         try:
             await message.edit(
                 content="",
@@ -127,11 +101,7 @@ class Winrate(Extension):
         description="Wähle ein Zeitintervall",
         required=True,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Week", value=3),
-            SlashCommandChoice(name="Month", value=4),
-            SlashCommandChoice(name="Year", value=5),
-        ],
+        choices=TIME_CHOICES,
     )
     @slash_option(
         name="names",
@@ -144,32 +114,14 @@ class Winrate(Extension):
         description="Wähle eine Playlist",
         required=False,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Duels", value=1),
-            SlashCommandChoice(name="Doubles", value=2),
-            SlashCommandChoice(name="Standard", value=3),
-            SlashCommandChoice(name="Chaos", value=4),
-            SlashCommandChoice(name="Private", value=5),
-            SlashCommandChoice(name="Offline", value=6),
-            SlashCommandChoice(name="Snow Day", value=7),
-            SlashCommandChoice(name="Rocket Labs", value=8),
-            SlashCommandChoice(name="Hoops", value=9),
-            SlashCommandChoice(name="Rumble", value=10),
-            SlashCommandChoice(name="Tournament", value=11),
-            SlashCommandChoice(name="Drop Shot", value=12),
-            SlashCommandChoice(name="Drop Shot Rumble", value=13),
-            SlashCommandChoice(name="Heat Seeker", value=14),
-        ],
+        choices=PLAYLIST_CHOICES,
     )
     @slash_option(
         name="match_type",
         description="Wähle ob gewertet oder nicht",
         required=False,
         opt_type=OptionType.INTEGER,
-        choices=[
-            SlashCommandChoice(name="Ranked", value=1),
-            SlashCommandChoice(name="Unranked", value=2),
-        ],
+        choices=MATCH_TYPE_CHOICES,
     )
     @slash_option(
         name="cap",
