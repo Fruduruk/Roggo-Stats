@@ -31,8 +31,8 @@ class User(Base):
 #     guild: Mapped["GuildConfig"] = relationship(
 #         back_populates="tracked_players")
 
-# os.remove("bot_state.db")
-engine = create_engine("sqlite:///bot_state.db")
+# os.remove("./data/state.db")
+engine = create_engine("sqlite:///data/state.db")
 SessionLocal = sessionmaker(bind=engine)
 
 
