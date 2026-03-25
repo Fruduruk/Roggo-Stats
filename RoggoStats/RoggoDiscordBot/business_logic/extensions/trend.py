@@ -1,3 +1,5 @@
+import os
+
 import ballchasing_pb2 as bc
 from business_logic.calculation.trend_calculator import calculate_trend
 from business_logic.embedder import create_error_embed, create_trend_embed
@@ -92,5 +94,6 @@ class Trend(Extension):
                 embed=create_trend_embed(result),
                 file=result.image_path,
             )
+            os.remove(result.image_path)
         except:
             await ctx.send(embed=create_error_embed())

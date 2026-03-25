@@ -1,3 +1,5 @@
+import os
+
 import ballchasing_pb2 as bc
 from business_logic.calculation.winrate_calculator import calculate_winrate
 from business_logic.calculation.weekday_winrate_calculator import (
@@ -159,5 +161,6 @@ class Winrate(Extension):
                 embed=embedder.create_weekday_winrate_embed(result),
                 file=result.image_path,
             )
+            os.remove(result.image_path)
         except:
             await ctx.send(embed=embedder.create_error_embed())
