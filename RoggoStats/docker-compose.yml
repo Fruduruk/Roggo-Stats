@@ -55,6 +55,8 @@ services:
     depends_on:
       ballchasing_wrapper:
         condition: service_started
+    volumes:
+      - ./data:/app/data
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - BALLCHASING_HOST=ballchasing_wrapper
