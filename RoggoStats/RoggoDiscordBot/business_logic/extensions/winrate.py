@@ -15,7 +15,7 @@ from interactions import (
     OptionType,
 )
 
-from business_logic.parser import try_parse_discord_id
+from business_logic.parser import parse_names, try_parse_discord_id
 from business_logic.slash_command_choices import MATCH_TYPE_CHOICES, PLAYLIST_CHOICES, TIME_CHOICES
 from business_logic.grpc.grpc_helper_functions import to_identity
 from db.storage import try_load_steam_id
@@ -69,34 +69,14 @@ class Winrate(Extension):
         match_type: int = None,
         cap: int = None,
     ):
-        strings = [
-            name.strip() for name in names.split(",")
-        ]
-        identities = []
-        unknown_identities = []
-        for name in strings:
-            if "@" not in name:
-                identities.append(to_identity(name))
-                continue
-            
-            discord_id = try_parse_discord_id(name)
-            if discord_id is None:
-                unknown_identities.append(name)
-                continue
-                
-            steam_id = try_load_steam_id(discord_id)
-            if steam_id is None:
-                unknown_identities.append(name)
-
-            identities.append(bc.Identity(identityType=bc.STEAM_ID, nameOrId=str(steam_id)))
-               
+        identities, unknown_identities = parse_names(names)
 
         if unknown_identities:
             await ctx.send(f"Users not registered: {unknown_identities}", ephemeral=True)
             return
 
         print(
-            f"calculating winrate for {time_range},{names},{playlist},{match_type},{cap}..."
+            f"calculating winrate for {time_range},{ctx.user.display_name},{playlist},{match_type},{cap}..."
         )
         message = await ctx.send("Roggo Stats is thinking...")
         try:
@@ -133,7 +113,7 @@ class Winrate(Extension):
     )
     @slash_option(
         name="names",
-        description="Trage Namen getrennt mit Komma ein",
+        description="Trage Namen oder @user getrennt mit Komma ein",
         required=True,
         opt_type=OptionType.STRING,
     )
@@ -166,16 +146,21 @@ class Winrate(Extension):
         match_type: int = None,
         cap: int = None,
     ):
+        identities, unknown_identities = parse_names(names)
+
+        if unknown_identities:
+            await ctx.send(f"Users not registered: {unknown_identities}", ephemeral=True)
+            return
+        
         print(
-            f"calculating weekday winrate for {time_range},{names},{playlist},{match_type},{cap}..."
+            f"calculating weekday winrate for {time_range},{ctx.user.display_name},{playlist},{match_type},{cap}..."
         )
         message = await ctx.send("Roggo Stats is thinking...")
         try:
             result = await calculate_weekday_winrate(
                 request=bc.FilterRequest(
                     replayCap=cap,
-                    identities=[to_identity(name.strip())
-                                for name in names.split(",")],
+                    identities=identities,
                     groupType=bc.TOGETHER,
                     playlist=playlist if playlist else bc.Playlist.ALL,
                     matchType=match_type if match_type else bc.MatchType.BOTH,

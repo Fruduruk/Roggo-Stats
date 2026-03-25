@@ -5,8 +5,8 @@ from business_logic.extensions_loader import load_extensions
 from interactions.models import discord
 
 print("loading discord bot...")
-bot = interactions.Client(debug_scope=806067744704823328)
-# bot = interactions.Client()
+# bot = interactions.Client(debug_scope=806067744704823328)
+bot = interactions.Client()
 print("loading extensions...")
 load_extensions(bot)
 
