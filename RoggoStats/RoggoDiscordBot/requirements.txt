@@ -4,3 +4,4 @@ matplotlib==3.10.8
 numpy==2.4.3
 discord-py-interactions==5.16.0
 discord-typings==0.9.0
+sqlalchemy==2.0.48
