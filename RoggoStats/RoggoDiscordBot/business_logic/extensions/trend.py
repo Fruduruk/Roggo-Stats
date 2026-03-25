@@ -3,6 +3,7 @@ from business_logic.calculation.trend_calculator import calculate_trend
 from business_logic.embedder import create_error_embed, create_trend_embed
 
 from interactions import (
+    AutocompleteContext,
     Extension,
     slash_command,
     SlashContext,
@@ -17,7 +18,11 @@ from models.statistic import Statistic
 
 print("loading trend extension...")
 
+
 class Trend(Extension):
+
+    USED = []
+
     @slash_command(
         name="trend", description="Erhalte einen statistik trend für gegebene Spieler"
     )
@@ -30,6 +35,7 @@ class Trend(Extension):
     )
     @slash_option(
         name="names",
+        autocomplete=True,
         description="Trage Namen getrennt mit Komma ein",
         required=True,
         opt_type=OptionType.STRING,
@@ -79,7 +85,8 @@ class Trend(Extension):
         try:
             result = await calculate_trend(
                 request=bc.FilterRequest(
-                    identities=[to_identity(name.strip()) for name in names.split(",")],
+                    identities=[to_identity(name.strip())
+                                for name in names.split(",")],
                     groupType=group_type,
                     playlist=playlist if playlist else bc.Playlist.ALL,
                     matchType=match_type if match_type else bc.MatchType.BOTH,
@@ -94,3 +101,17 @@ class Trend(Extension):
             )
         except:
             await ctx.send(embed=create_error_embed())
+
+
+    @trend.autocomplete("names")
+    async def trend_autocomplete(self, ctx: AutocompleteContext):
+        # i = (ctx.input_text or "").lower()
+        await ctx.send(choices=[{"name": ctx.input_text, "value": ctx.input_text}])
+        # if not self.USED:
+        #     await ctx.send(choices=[])
+        # else:
+        #     await ctx.send(choices=[
+        #         {"name": name, "value": name}
+        #         for name in self.USED
+        #     ])
+        pass
