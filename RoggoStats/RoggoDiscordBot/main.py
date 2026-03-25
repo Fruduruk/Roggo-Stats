@@ -3,6 +3,7 @@ import os
 import signal
 import config
 from business_logic.discord_bot import bot
+from db.db_models import init_db
 
 
 def install_shutdown_handlers():
@@ -21,6 +22,9 @@ async def main() -> None:
     if not config.check_environment_variables():
         print("Stopping program...")
         return
+
+    print("init database")
+    init_db()
 
     print("starting discord bot...")
     install_shutdown_handlers()
