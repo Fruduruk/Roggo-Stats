@@ -45,6 +45,16 @@ def unregister_user(discord_id: int) -> bool:
             session.rollback()
             return False
 
+def try_load_steam_id(discord_id: int) -> int | None:
+    with SessionLocal() as session:
+        entry = session.get(User, discord_id)
+        
+        if entry is None:
+            return None
+        
+        return entry.steam_id
+    
+
     # def ensure_guild_config(self, guild_id: str) -> None:
     #     with SessionLocal() as session:
     #         config = session.get(GuildConfig, guild_id)
