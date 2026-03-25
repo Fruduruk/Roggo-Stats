@@ -88,7 +88,7 @@ class Trend(Extension):
         try:
             result = await calculate_trend(
                 request=bc.FilterRequest(
-                    identities=[to_identity(name.strip()) for name in names.split(",")],
+                    identities=identities,
                     groupType=group_type,
                     playlist=playlist if playlist else bc.Playlist.ALL,
                     matchType=match_type if match_type else bc.MatchType.BOTH,
