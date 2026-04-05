@@ -8,17 +8,17 @@ from business_logic.grpc.grpc_helper_functions import (
 )
 from business_logic.utils import get_basic_result
 from models.statistic import Statistic
-from models.image_result import ImageResult
+from models.image_result import ImagesResult
 
 
-async def calculate_trend(
-    request: bc.FilterRequest, statistic: Statistic
-) -> ImageResult:
+async def calculate_summary(
+    request: bc.FilterRequest, statistics: list[Statistic]
+) -> ImagesResult:
     replays = await get_advanced_replays(request)
     if not replays:
         replays = []
     if len(replays) == 0:
-        return ImageResult(
+        return ImagesResult(
             get_basic_result(
                 request,
                 len(replays),
@@ -30,21 +30,25 @@ async def calculate_trend(
         find_name_of_identity_in_advanced_replays(identity, replays)
         for identity in request.identities
     ]
-    trend_result = ImageResult(get_basic_result(
+    result = ImagesResult(get_basic_result(
         request, len(replays), names=names))
-    trend_result.stat_name = str(statistic)
 
     if len(replays) == 0:
-        return trend_result
+        return result
 
     replays.reverse()
 
-    player_statistic_value_maps = await calculate_value_maps(
-        replays=replays,
-        request=request,
-        statistic=statistic
-    )
+    statistics_and_paths = []
 
-    path = generate_image(player_statistic_value_maps, statistic)
-    trend_result.image_path = path
-    return trend_result
+    for statistic in statistics:
+        player_statistic_value_maps = await calculate_value_maps(
+            replays=replays,
+            request=request,
+            statistic=statistic
+        )
+
+        path = generate_image(player_statistic_value_maps, statistic)
+        statistics_and_paths.append((str(statistic), path))
+
+    result.statistics_and_paths = statistics_and_paths
+    return result

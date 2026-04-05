@@ -1,12 +1,15 @@
 
 
+import os
+
 from interactions import Extension, OptionType, SlashContext, slash_command, slash_option
 import ballchasing_pb2 as bc
 
-from business_logic.calculation.trend_calculator import calculate_trend
-from business_logic.embedder import create_error_embed, create_trend_embed
+from business_logic.calculation.summary_calculator import calculate_summary
+from business_logic.embedder import create_error_embed, create_trends_embed
 from business_logic.parser import parse_names
 from business_logic.slash_command_choices import GROUP_TYPE_CHOICES, MATCH_TYPE_CHOICES, PLAYLIST_CHOICES
+from models.image_result import ImagesResult
 from models.statistic import Statistic
 
 
@@ -47,11 +50,13 @@ class Summary(Extension):
     async def summary(
         self,
         ctx: SlashContext,
-        names: str,
+        names: str = None,
         playlist: int = None,
         match_type: int = None,
         group_type: int = 0,
     ):
+        if not names:
+            names = "<@"+str(ctx.user.id)+">"
         identities, unknown_identities = parse_names(names)
 
         if unknown_identities:
@@ -67,30 +72,43 @@ class Summary(Extension):
             groupType=group_type,
             playlist=playlist if playlist else bc.Playlist.ALL,
             matchType=match_type if match_type else bc.MatchType.BOTH,
-            timeRange= bc.TimeRange.YESTERDAY,
+            timeRange=bc.TimeRange.YESTERDAY,
         )
-        STATISTICS = [
-            Statistic.AVERAGE_SPEED,
-            Statistic.AVERAGE_DISTANCE_TO_BALL,
-            Statistic.AVERAGE_DISTANCE_TO_MATES,
-            Statistic.BOOST_AMOUNT_STOLEN
-        ]
 
-        results = []
-
-        for statistic in STATISTICS:
-            result = await calculate_trend(
-                request=request,
-                statistic=statistic
-            )
-            results.append(result)
+        result: ImagesResult = await calculate_summary(
+            request=request,
+            statistics=[
+                Statistic.BOOST_USED_PER_MINUTE,
+                Statistic.BOOST_COLLECTED_PER_MINUTE,
+                # Statistic.BOOST_AMOUNT_STOLEN,
+                # Statistic.BOOST_AMOUNT_USED_WHILE_SUPERSONIC,
+                Statistic.BOOST_COLLECTED_SMALL_TO_BIG_RATIO,
+                # Statistic.PERCENT_SLOW_SPEED,
+                Statistic.PERCENT_SUPERSONIC_SPEED,
+                # Statistic.AVERAGE_SPEED,
+                Statistic.PERCENT_HIGH_AIR,
+                # Statistic.TIME_POWERSLIDE,
+                Statistic.COUNT_POWERSLIDE,
+                Statistic.AVERAGE_DISTANCE_TO_BALL,
+                Statistic.AVERAGE_DISTANCE_TO_MATES,
+                Statistic.PERCENT_CLOSEST_TO_BALL,
+                # Statistic.PERCENT_FARTHEST_FROM_BALL,
+                # Statistic.PERCENT_MOST_BACK,
+                # Statistic.PERCENT_MOST_FORWARD,
+                Statistic.GOALS_AGAINST_WHILE_LAST_DEFENDER,
+                # Statistic.DEMOS_INFLICTED,
+                # Statistic.DEMOS_TAKEN,
+            ]
+        )
+        paths = [path for statistic, path in result.statistics_and_paths]
         try:
             await message.edit(
                 content="",
-                embed=create_trend_embed(results[0]),
-                files=[result.image_path for result in results]
+                embed=create_trends_embed(result),
+                files=paths
             )
         except:
             await ctx.send(embed=create_error_embed())
         
-
+        for path in paths:
+            os.remove(path)

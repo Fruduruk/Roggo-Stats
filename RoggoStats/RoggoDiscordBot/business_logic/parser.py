@@ -13,6 +13,8 @@ def try_parse_discord_id(discord_id: str) -> int | None:
 
 
 def parse_names(names: str) -> tuple[list[bc.Identity], list[str]]:
+    if not names:
+        return [],[]
     strings = [
         name.strip() for name in names.split(",")
     ]
