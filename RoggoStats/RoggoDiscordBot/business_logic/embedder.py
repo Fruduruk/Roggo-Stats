@@ -8,7 +8,7 @@ from business_logic.utils import (
     group_type_to_string,
 )
 from models.result import Result
-from models.image_result import ImageResult
+from models.image_result import ImageResult, ImagesResult
 from models.winrate_result import WinrateResult
 
 
@@ -52,4 +52,11 @@ def create_trend_embed(result: ImageResult) -> discord.Embed:
     embed = create_basic_embed(result, inline=True)
     embed.title = "Trend of " + ", ".join(result.names)
     embed.add_field("Statistic Value", result.stat_name, inline=True)
+    return embed
+
+
+def create_trends_embed(result: ImagesResult) -> discord.Embed:
+    embed = create_basic_embed(result, inline=True)
+    embed.title = "Trends of " + ", ".join(result.names)
+    # embed.add_field("Statistic Values", , inline=True)
     return embed
