@@ -12,7 +12,9 @@ from models.image_result import ImageResult
 
 
 async def calculate_trend(
-    request: bc.FilterRequest, statistic: Statistic
+    request: bc.FilterRequest,
+    statistic: Statistic,
+    total_y_axis: bool
 ) -> ImageResult:
     replays = await get_advanced_replays(request)
     if not replays:
@@ -45,6 +47,6 @@ async def calculate_trend(
         statistic=statistic
     )
 
-    path = generate_image(player_statistic_value_maps, statistic)
+    path = generate_image(player_statistic_value_maps, statistic, total_y_axis)
     trend_result.image_path = path
     return trend_result

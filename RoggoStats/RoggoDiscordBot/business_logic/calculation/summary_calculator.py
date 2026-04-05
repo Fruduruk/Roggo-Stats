@@ -12,7 +12,9 @@ from models.image_result import ImagesResult
 
 
 async def calculate_summary(
-    request: bc.FilterRequest, statistics: list[Statistic]
+    request: bc.FilterRequest,
+    statistics: list[Statistic],
+    total_y_axis: bool
 ) -> ImagesResult:
     replays = await get_advanced_replays(request)
     if not replays:
@@ -47,7 +49,11 @@ async def calculate_summary(
             statistic=statistic
         )
 
-        path = generate_image(player_statistic_value_maps, statistic)
+        path = generate_image(
+            player_statistic_value_maps,
+            statistic,
+            total_y_axis
+        )
         statistics_and_paths.append((str(statistic), path))
 
     result.statistics_and_paths = statistics_and_paths

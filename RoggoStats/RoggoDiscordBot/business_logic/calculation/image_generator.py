@@ -5,7 +5,7 @@ from models.time_series_player_stats import TimeSeriesPlayerStats
 from datetime import datetime
 
 
-def generate_image(maps: list[TimeSeriesPlayerStats], statistic: Statistic) -> str:
+def generate_image(maps: list[TimeSeriesPlayerStats], statistic: Statistic, total_y_axis: bool) -> str:
     fig = plt.figure(figsize=(10, 6))
     fig.patch.set_facecolor("#1e1e1e")
     ax = plt.gca()
@@ -54,7 +54,8 @@ def generate_image(maps: list[TimeSeriesPlayerStats], statistic: Statistic) -> s
                         linestyle="-", color=color)
 
     ax.set_xticks(list(tick_indices))
-    # ax.set_ylim(bottom=0)
+    if total_y_axis:
+        ax.set_ylim(bottom=0)
     ax.set_xticklabels(tick_labels, rotation=45)
     ax.set_title(str(statistic).upper(), fontweight="bold", color="#d4d4d4")
     ax.set_xlabel("Time", color="#d4d4d4")
