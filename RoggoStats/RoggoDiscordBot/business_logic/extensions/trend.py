@@ -20,6 +20,7 @@ from models.statistic import Statistic
 
 print("loading trend extension...")
 
+
 class Trend(Extension):
     @slash_command(
         name="trend", description="Erhalte einen statistik trend für gegebene Spieler"
@@ -65,6 +66,12 @@ class Trend(Extension):
         opt_type=OptionType.INTEGER,
         choices=GROUP_TYPE_CHOICES,
     )
+    @slash_option(
+        name="total_y_axis",
+        description="Wähle, ob die Y-Achse bei 0 anfangen soll",
+        required=False,
+        opt_type=OptionType.BOOLEAN
+    )
     async def trend(
         self,
         ctx: SlashContext,
@@ -74,13 +81,14 @@ class Trend(Extension):
         playlist: int = None,
         match_type: int = None,
         group_type: int = 0,
+        total_y_axis: bool = False
     ):
         identities, unknown_identities = parse_names(names)
 
         if unknown_identities:
             await ctx.send(f"Users not registered: {unknown_identities}", ephemeral=True)
             return
-        
+
         print(
             f"calculating trend for {time_range},{names},{playlist},{match_type},{statistic}..."
         )
@@ -95,6 +103,7 @@ class Trend(Extension):
                     timeRange=time_range if time_range else bc.TimeRange.EVERY_TIME,
                 ),
                 statistic=Statistic(statistic),
+                total_y_axis=total_y_axis
             )
             await message.edit(
                 content="",
