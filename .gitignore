@@ -22,4 +22,4 @@
 /RoggoStats/**/.env
 **/__pycache__/**
 
-/RoggoStats/RoggoDiscordBot/data/state.db
+**/state.db
