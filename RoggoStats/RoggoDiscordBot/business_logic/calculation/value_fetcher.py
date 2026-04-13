@@ -1,5 +1,3 @@
-from typing import Optional
-
 import ballchasing_pb2 as bc
 from models.statistic import Statistic
 
@@ -11,7 +9,7 @@ def calculate_boost_collected_small_to_big_ratio(advanced_player: bc.AdvancedPla
             advanced_player.stats.boost.generalBoost.countCollectedBig)
 
 
-def get_value(advanced_player: bc.AdvancedPlayer, statistic: Statistic) -> float:
+def get_statistic(advanced_player: bc.AdvancedPlayer, statistic: Statistic) -> float:
     match statistic:
         case Statistic.BOOST_USED_PER_MINUTE:
             return advanced_player.stats.boost.generalBoost.bpm

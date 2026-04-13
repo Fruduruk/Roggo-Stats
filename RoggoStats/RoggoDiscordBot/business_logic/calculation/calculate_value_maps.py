@@ -2,7 +2,7 @@ from datetime import datetime
 
 import ballchasing_pb2 as bc
 from business_logic.calculation.calc_utils import find_advanced_player_in_advanced_replay
-from business_logic.calculation.value_fetcher import get_value
+from business_logic.calculation.value_fetcher import get_statistic
 from business_logic.grpc.grpc_helper_functions import find_name_of_identity_in_advanced_replays
 from models.statistic import Statistic
 from models.time_series_player_stats import TimeSeriesPlayerStats
@@ -17,7 +17,7 @@ async def calculate_value_maps(
         value_tuple_list: list[tuple[datetime, float]] = [
             (
                 datetime.fromisoformat(replay.date.replace("Z", "+00:00")),
-                get_value(
+                get_statistic(
                     find_advanced_player_in_advanced_replay(
                         replay, identity), statistic
                 ),
