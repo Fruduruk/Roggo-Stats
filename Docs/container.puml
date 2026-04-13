@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Container>
+
+title Container Diagram for Roggo-Stats
+LAYOUT_LEFT_RIGHT()
+
+Person(player, "Player", "Requests statistics and summaries")
+
+System_Ext(discord, "Discord", "Chat platform")
+System_Ext(ballchasing, "ballchasing.com", "Replay service")
+
+System_Boundary(roggo, "Roggo-Stats") {
+    Container(bot, "Discord Bot", "Python", "Receives slash commands and returns formatted responses")
+    Container(api, "Stats Backend", "C# / gRPC", "Loads, caches, and processes replay data")
+    ContainerDb(db, "Replay Cache", "MongoDB", "Stores replay data")
+}
+
+Rel(player, discord, "Uses")
+Rel(discord, bot, "Forwards commands to", "Discord API")
+Rel(bot, api, "Requests statistics from", "gRPC")
+Rel(api, db, "Reads from and writes to", "MongoDB protocol")
+Rel(api, ballchasing, "Downloads replay data from", "HTTPS")
+Rel(player, ballchasing, "Uploads Replays","via BakkesMod")
+
+SHOW_LEGEND()
+@enduml

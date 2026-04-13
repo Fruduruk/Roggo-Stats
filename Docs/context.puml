@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Context>
+
+title System Context Diagram for Roggo-Stats
+LAYOUT_LEFT_RIGHT()
+
+Person(player, "Player", "Uses the system to view Rocket League session summaries and trends")
+
+System(system, "Roggo-Stats", "Analyzes Rocket League replays and provides player statistics")
+
+System_Ext(discord, "Discord", "Platform for slash commands and bot responses")
+System_Ext(ballchasing, "ballchasing.com", "External source for replay metadata and replay files")
+
+Rel(player, discord, "Uses")
+Rel(player, system, "Wants session summaries and long-term trends from")
+Rel(system, discord, "Sends responses via", "Discord API")
+Rel(system, ballchasing, "Downloads replay metadata and replay files from", "HTTPS")
+
+SHOW_LEGEND()
+@enduml

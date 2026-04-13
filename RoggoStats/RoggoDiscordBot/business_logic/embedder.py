@@ -34,7 +34,7 @@ def create_basic_embed(result: Result, inline: bool = False) -> discord.Embed:
 
 
 def create_winrate_embed(result: WinrateResult) -> discord.Embed:
-    embed = create_basic_embed(result)
+    embed = create_basic_embed(result, inline=True)
     embed.title = "Winrate of " + ", ".join(result.names)
     embed.add_field("Winrate", str(result.winrate * 100) + "%")
     return embed
