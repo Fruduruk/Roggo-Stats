@@ -3,7 +3,6 @@ from typing import List
 
 import ballchasing_pb2 as bc
 import matplotlib.pyplot as plt
-import numpy as np
 import calendar
 from business_logic.calculation.calc_utils import won
 from business_logic.grpc.grpc_client import get_simple_replays
