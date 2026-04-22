@@ -2,7 +2,7 @@
 !include <C4/C4_Container>
 
 title Container Diagram for Roggo-Stats
-LAYOUT_LEFT_RIGHT()
+' LAYOUT_LEFT_RIGHT()
 
 Person(player, "Player", "Requests statistics and summaries")
 
@@ -11,7 +11,7 @@ System_Ext(ballchasing, "ballchasing.com", "Replay service")
 
 System_Boundary(roggo, "Roggo-Stats") {
     Container(bot, "Discord Bot", "Python", "Receives slash commands and returns formatted responses")
-    Container(api, "Stats Backend", "C# / gRPC", "Loads, caches, and processes replay data")
+    Container(api, "Stats Service", "C# / gRPC", "Loads, caches, and processes replay data")
     ContainerDb(db, "Replay Cache", "MongoDB", "Stores replay data")
 }
 
