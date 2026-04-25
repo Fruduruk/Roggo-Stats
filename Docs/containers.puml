@@ -1,8 +1,9 @@
 @startuml
-!include <C4/C4_Container>
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
 
 title Container Diagram for Roggo-Stats
-' LAYOUT_LEFT_RIGHT()
+LAYOUT_LEFT_RIGHT()
 
 Person(player, "Player", "Requests statistics and summaries")
 
