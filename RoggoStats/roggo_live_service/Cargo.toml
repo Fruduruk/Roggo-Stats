@@ -1,0 +1,9 @@
+[package]
+name = "roggo_live_service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.34.1"
+wasm-bindgen-futures = "0.4"
+web-sys = "0.3"
