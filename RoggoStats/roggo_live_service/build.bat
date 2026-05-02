@@ -1,0 +1,1 @@
+docker build --build-arg APP_VERSION=dev -t roggo-live-service:dev .
