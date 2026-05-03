@@ -1,13 +1,16 @@
 use std::error::Error;
 
+use crate::core::aggregator::Aggregator;
+use crate::core::packet_collector::PacketCollector;
 use futures_util::{SinkExt, StreamExt};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 use tokio::io::AsyncReadExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, watch};
 use tokio_tungstenite::tungstenite::Message;
-
-use crate::core::aggregator::Aggregator;
-use crate::core::packet_collector::PacketCollector;
 
 pub struct RoggoAgent {
     shutdown_rx: watch::Receiver<bool>,
@@ -26,10 +29,19 @@ impl RoggoAgent {
 
         let (live_tx, _) = broadcast::channel::<String>(256);
 
-        let receiver_task = tokio::spawn(read_rocket_league_api(
-            live_tx.clone(),
-            self.shutdown_rx.clone(),
-        ));
+        let import_path = std::env::var("import_path");
+
+        let receiver_task = if let Ok(path) = import_path {
+            tokio::spawn(read_test_files(
+                path,
+                live_tx.clone(),
+            ))
+        } else {
+            tokio::spawn(read_rocket_league_api(
+                live_tx.clone(),
+                self.shutdown_rx.clone(),
+            ))
+        };
 
         let web_socket_sender_task = tokio::spawn(run_websocket_server(
             live_tx.clone(),
@@ -58,6 +70,26 @@ impl RoggoAgent {
 
         Ok(())
     }
+}
+
+async fn read_test_files(
+    dir: impl AsRef<Path>,
+    live_tx: broadcast::Sender<String>,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let mut files: Vec<PathBuf> = fs::read_dir(dir)?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "txt"))
+        .collect();
+
+    files.sort();
+    for file in files {
+        println!("{}", file.to_str().unwrap());
+        let raw = fs::read_to_string(file)?;
+        let _ = live_tx.send(raw);
+    }
+
+    Ok(())
 }
 
 async fn read_rocket_league_api(

@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug roggo-agent",
+      "cargo": {
+        "args": [
+            "build",
+            "--bin",
+            "roggo-agent-console"
+        ]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "import_path": "captures/online_freeplay"
+      }
+    }
+  ]
+}
