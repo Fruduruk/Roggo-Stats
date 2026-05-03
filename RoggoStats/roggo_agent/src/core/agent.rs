@@ -6,6 +6,8 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, watch};
 use tokio_tungstenite::tungstenite::Message;
 
+use crate::core::aggregator;
+
 pub struct RoggoAgent {
     shutdown_rx: watch::Receiver<bool>,
 }
@@ -23,22 +25,28 @@ impl RoggoAgent {
 
         let (live_tx, _) = broadcast::channel::<String>(256);
 
-        let rl_task = tokio::spawn(read_rocket_league(
+        let receiver_task = tokio::spawn(read_rocket_league_api(
             live_tx.clone(),
             self.shutdown_rx.clone(),
         ));
 
-        let ws_task = tokio::spawn(run_websocket_server(
-            live_tx,
+        let web_socket_sender_task = tokio::spawn(run_websocket_server(
+            live_tx.clone(),
             self.shutdown_rx.clone(),
         ));
 
+        let aggregator_task = tokio::spawn(run_aggregator(live_tx, self.shutdown_rx.clone()));
+
         tokio::select! {
-            result = rl_task => {
+            result = receiver_task => {
                 result??;
             }
 
-            result = ws_task => {
+            result = web_socket_sender_task => {
+                result??;
+            }
+
+            result = aggregator_task => {
                 result??;
             }
 
@@ -51,7 +59,7 @@ impl RoggoAgent {
     }
 }
 
-async fn read_rocket_league(
+async fn read_rocket_league_api(
     live_tx: broadcast::Sender<String>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -81,8 +89,6 @@ async fn read_rocket_league(
                 }
 
                 let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
-
-                println!("{raw}");
 
                 let _ = live_tx.send(raw);
             }
@@ -139,4 +145,43 @@ async fn handle_websocket_client(
 
         ws_write.send(Message::Text(raw.into())).await?;
     }
+}
+
+async fn run_aggregator(
+    live_tx: broadcast::Sender<String>,
+    mut shutdown_rx: watch::Receiver<bool>,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    println!("Aggregator is running.");
+
+    let mut live_rx = live_tx.subscribe();
+
+    loop {
+        tokio::select! {
+            _ = shutdown_rx.changed() => {
+                if *shutdown_rx.borrow() {
+                    println!("Aggregator closed.");
+                    break;
+                }
+            }
+
+            result = live_rx.recv() => {
+                match result {
+                    Ok(raw) => {
+                        aggregator::aggregate(raw);
+                    }
+
+                    Err(broadcast::error::RecvError::Lagged(count)) => {
+                        eprintln!("Aggregator lagged and missed {count} messages.");
+                    }
+
+                    Err(broadcast::error::RecvError::Closed) => {
+                        println!("Broadcast channel closed.");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
 }

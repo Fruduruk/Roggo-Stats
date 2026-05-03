@@ -14,12 +14,12 @@ pub fn run() {
         tokio::select! {
             result = agent.run() => {
                 if let Err(err) = result {
-                    eprintln!("Agent Fehler: {err}");
+                    eprintln!("Agent error: {err}");
                 }
             }
 
             _ = tokio::signal::ctrl_c() => {
-                println!("Ctrl+C empfangen. Beende Agent.");
+                println!("Ctrl+C received. Shutting down agent.");
                 let _ = shutdown_tx.send(true);
             }
         }
