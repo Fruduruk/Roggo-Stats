@@ -1,9 +1,4 @@
-#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
-use futures_util::{SinkExt, StreamExt};
-use tokio::io::AsyncReadExt;
-use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::watch;
-use tokio_tungstenite::tungstenite::Message;
 
 use tray_icon::{
     Icon, TrayIcon, TrayIconBuilder,
