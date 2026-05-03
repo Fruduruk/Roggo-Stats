@@ -3,6 +3,8 @@ use futures_util::StreamExt;
 use gloo_net::websocket::{Message, futures::WebSocket};
 use std::sync::{Arc, Mutex};
 
+const LOCAL_WS_ADDR: &str = "ws://127.0.0.1:49124";
+
 struct App {
     latest_event: Arc<Mutex<String>>,
     latest_json: Arc<Mutex<String>>,
@@ -50,7 +52,7 @@ fn start_websocket_reader(
     ctx: egui::Context,
 ) {
     wasm_bindgen_futures::spawn_local(async move {
-        let mut ws = match WebSocket::open("ws://127.0.0.1:9001") {
+        let mut ws = match WebSocket::open(LOCAL_WS_ADDR) {
             Ok(ws) => ws,
             Err(err) => {
                 *latest_event.lock().unwrap() = "WebSocket Fehler".to_owned();
