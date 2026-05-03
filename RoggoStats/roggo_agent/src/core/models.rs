@@ -1,16 +1,18 @@
+use std::error::Error;
+
 use uuid::Uuid;
 
 #[derive(Debug, serde::Deserialize)]
-pub struct Packet {
+pub struct RawPacket {
     #[serde(rename = "Event")]
-    pub event: Event,
+    pub event: RawEvent,
 
     #[serde(rename = "Data")]
     pub data: String,
 }
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy, serde::Deserialize)]
-pub enum Event {
+pub enum RawEvent {
     UpdateState,         // UpdateState:441
     BallHit,             // BallHit:217
     ClockUpdatedSeconds, // ClockUpdatedSeconds:301
@@ -30,6 +32,55 @@ pub enum Event {
     ReplayCreated,
     RoundStarted,  // RoundStarted:9
     StatfeedEvent, // StatfeedEvent:38
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Event {
+    UpdateState,
+    BallHit(BallHit),
+    ClockUpdatedSeconds,
+    CountdownBegin,
+    CrossbarHit,
+    GoalReplayEnd,
+    GoalReplayStart,
+    GoalReplayWillEnd,
+    GoalScored,
+    MatchCreated,
+    MatchInitialized,
+    MatchDestroyed,
+    MatchEnded,
+    MatchPaused,
+    MatchUnpaused,
+    PodiumStart,
+    ReplayCreated,
+    RoundStarted,
+    StatfeedEvent,
+}
+
+impl Event {
+    pub fn new(raw_packet: RawPacket) -> Result<Event, Box<dyn Error>> {
+        Ok(match raw_packet.event {
+            RawEvent::UpdateState => Event::UpdateState,
+            RawEvent::BallHit => Event::BallHit(serde_json::from_str(&raw_packet.data)?),
+            RawEvent::ClockUpdatedSeconds => Event::ClockUpdatedSeconds,
+            RawEvent::CountdownBegin => Event::CountdownBegin,
+            RawEvent::CrossbarHit => Event::CrossbarHit,
+            RawEvent::GoalReplayEnd => Event::GoalReplayEnd,
+            RawEvent::GoalReplayStart => Event::GoalReplayStart,
+            RawEvent::GoalReplayWillEnd => Event::GoalReplayWillEnd,
+            RawEvent::GoalScored => Event::GoalScored,
+            RawEvent::MatchCreated => Event::MatchCreated,
+            RawEvent::MatchInitialized => Event::MatchInitialized,
+            RawEvent::MatchDestroyed => Event::MatchDestroyed,
+            RawEvent::MatchEnded => Event::MatchEnded,
+            RawEvent::MatchPaused => Event::MatchPaused,
+            RawEvent::MatchUnpaused => Event::MatchUnpaused,
+            RawEvent::PodiumStart => Event::PodiumStart,
+            RawEvent::ReplayCreated => Event::ReplayCreated,
+            RawEvent::RoundStarted => Event::RoundStarted,
+            RawEvent::StatfeedEvent => Event::StatfeedEvent,
+        })
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
