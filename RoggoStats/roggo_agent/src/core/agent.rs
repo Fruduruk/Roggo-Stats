@@ -6,7 +6,8 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, watch};
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::core::aggregator;
+use crate::core::aggregator::Aggregator;
+use crate::core::packet_collector::PacketCollector;
 
 pub struct RoggoAgent {
     shutdown_rx: watch::Receiver<bool>,
@@ -155,6 +156,9 @@ async fn run_aggregator(
 
     let mut live_rx = live_tx.subscribe();
 
+    let mut aggregator = Aggregator::new();
+    // let mut packet_collector = PacketCollector::new("captures/none")?;
+
     loop {
         tokio::select! {
             _ = shutdown_rx.changed() => {
@@ -167,7 +171,8 @@ async fn run_aggregator(
             result = live_rx.recv() => {
                 match result {
                     Ok(raw) => {
-                        aggregator::aggregate(raw);
+                        // packet_collector.next(&raw);
+                        aggregator.next(raw);
                     }
 
                     Err(broadcast::error::RecvError::Lagged(count)) => {

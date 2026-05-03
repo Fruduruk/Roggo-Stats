@@ -11,3 +11,4 @@ futures-util = { version = "0.3.32", features = ["sink"] }
 tray-icon = "0.23.1"
 winit = "0.30.13"
 open = "5.3.4"
+serde_json = "1.0.149"
