@@ -1,7 +1,7 @@
-use std::error::Error;
+use std::{error::Error, time::Duration};
 
 use crate::core::aggregator::Aggregator;
-use crate::core::packet_collector::PacketCollector;
+// use crate::core::packet_collector::PacketCollector;
 use futures_util::{SinkExt, StreamExt};
 use std::{
     fs,
@@ -32,10 +32,12 @@ impl RoggoAgent {
         let import_path = std::env::var("import_path");
 
         let receiver_task = if let Ok(path) = import_path {
-            tokio::spawn(read_test_files(
-                path,
-                live_tx.clone(),
-            ))
+            println!("Starting import in...");
+            for i in (0..=1).rev() {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                println!("{i}s");
+            }
+            tokio::spawn(read_test_files(path, live_tx.clone()))
         } else {
             tokio::spawn(read_rocket_league_api(
                 live_tx.clone(),
@@ -84,7 +86,8 @@ async fn read_test_files(
 
     files.sort();
     for file in files {
-        println!("{}", file.to_str().unwrap());
+        tokio::time::sleep(std::time::Duration::from_millis(7)).await; // 130 inputs per second
+        // println!("{}", file.to_str().unwrap());
         let raw = fs::read_to_string(file)?;
         let _ = live_tx.send(raw);
     }
@@ -96,39 +99,49 @@ async fn read_rocket_league_api(
     live_tx: broadcast::Sender<String>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
-    println!("Connecting to Rocket League API...");
-
-    let mut rl_stream = TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await?;
-
-    println!("Connected with Rocket League API.");
-
-    let mut buffer = [0u8; 8192];
-
     loop {
-        tokio::select! {
-            _ = shutdown_rx.changed() => {
-                if *shutdown_rx.borrow() {
-                    println!("Rocket-League-Reader closed.");
-                    break;
+        println!("Connecting to Rocket League API...");
+
+        let mut rl_stream = match TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await {
+            Ok(stream) => stream,
+            Err(_) => {
+                println!("Waiting for Rocket League to start...");
+                for i in (1..=10).rev() {
+                    println!("Retrying in {i}s");
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
+                continue;
             }
+        };
 
-            result = rl_stream.read(&mut buffer) => {
-                let n = result?;
+        println!("Connected with Rocket League API.");
 
-                if n == 0 {
-                    println!("Rocket League API connection closed.");
-                    break;
+        let mut buffer = [0u8; 8192];
+
+        loop {
+            tokio::select! {
+                _ = shutdown_rx.changed() => {
+                    if *shutdown_rx.borrow() {
+                        println!("Rocket-League-Reader closed.");
+                        return Ok(());
+                    }
                 }
 
-                let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
+                result = rl_stream.read(&mut buffer) => {
+                    let n = result.unwrap_or(0);
 
-                let _ = live_tx.send(raw);
+                    if n == 0 {
+                        println!("Rocket League API connection closed.");
+                        break;
+                    }
+
+                    let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
+
+                    let _ = live_tx.send(raw);
+                }
             }
         }
     }
-
-    Ok(())
 }
 
 async fn run_websocket_server(
