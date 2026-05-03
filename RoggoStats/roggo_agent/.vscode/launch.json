@@ -15,7 +15,7 @@
       "args": [],
       "cwd": "${workspaceFolder}",
       "env": {
-        "import_path": "captures/online_freeplay"
+        "import_path": "captures/solo_1v1"
       }
     }
   ]
