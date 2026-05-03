@@ -1,0 +1,13 @@
+[package]
+name = "roggo_api_proxy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.28"
+futures-util = { version = "0.3", features = ["sink"] }
+
+tray-icon = "0.23"
+winit = "0.30"
+open = "5"
