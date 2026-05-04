@@ -20,8 +20,9 @@ impl Aggregator {
 
             if finished {
                 if let Some(collector) = self.collector.take() {
+                    println!("Game {} finished.", collector.get_match_guid());
                     let stats = collector.export();
-                    println!("Stats: {stats:#?}");
+                    println!("Stats: {:#?}", stats);
                 }
             }
         }
