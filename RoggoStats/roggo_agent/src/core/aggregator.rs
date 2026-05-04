@@ -1,13 +1,21 @@
+use std::collections::HashSet;
+
+use uuid::Uuid;
+
 use crate::core::{
     deserializer::deserialize, game_stat_collector::GameStatCollector, models::api_models::Event,
 };
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
+    collected_matches: HashSet<Uuid>,
 }
 
 impl Aggregator {
     pub fn new() -> Self {
-        Self { collector: None }
+        Self {
+            collector: None,
+            collected_matches: HashSet::new(),
+        }
     }
 
     pub fn insert(&mut self, raw: String) {
@@ -20,6 +28,7 @@ impl Aggregator {
 
             if finished {
                 if let Some(collector) = self.collector.take() {
+                    self.collected_matches.insert(collector.get_match_guid());
                     println!("Game {} finished.", collector.get_match_guid());
                     let stats = collector.export();
                     println!("Stats: {:#?}", stats);
@@ -35,7 +44,14 @@ impl Aggregator {
                 .get_or_insert_with(|| GameStatCollector::new(match_guid));
 
             if collector.get_match_guid() == match_guid {
-                collector.insert(event);
+                if !self.collected_matches.contains(&match_guid) {
+                    collector.insert(event);
+                } else {
+                    println!(
+                        "Discarding event, because the agent is done collecting for game: {}",
+                        match_guid
+                    );
+                }
             } else {
                 println!(
                     "Discarding event, because the agent is still collecting for a different game: {}, new event match guid: {}",
