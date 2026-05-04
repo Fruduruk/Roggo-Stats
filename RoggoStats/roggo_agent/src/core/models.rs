@@ -1,8 +1,21 @@
+use serde::de::Error as SerdeError;
+use serde::{Deserialize, Deserializer};
 use std::error::Error;
-
 use uuid::Uuid;
 
-#[derive(Debug, serde::Deserialize)]
+fn empty_string_as_none_uuid<'de, D>(deserializer: D) -> Result<Option<Uuid>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<String>::deserialize(deserializer)?;
+
+    match value.as_deref() {
+        None | Some("") => Ok(None),
+        Some(s) => Uuid::parse_str(s).map(Some).map_err(D::Error::custom),
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Debug, Clone, serde::Deserialize)]
 pub struct RawPacket {
     #[serde(rename = "Event")]
     pub event: RawEvent,
@@ -21,6 +34,7 @@ pub enum RawEvent {
     GoalReplayEnd,
     GoalReplayStart,
     GoalReplayWillEnd,
+    ReplayWillEnd,
     GoalScored,       // GoalScored:16
     MatchCreated,     // MatchCreated:1
     MatchInitialized, // MatchInitialized:1
@@ -44,6 +58,7 @@ pub enum Event {
     GoalReplayEnd(MatchIdentfier),
     GoalReplayStart(MatchIdentfier),
     GoalReplayWillEnd(MatchIdentfier),
+    ReplayWillEnd(MatchIdentfier),
     GoalScored(GoalScored),
     MatchCreated(MatchIdentfier),
     MatchInitialized(MatchIdentfier),
@@ -99,14 +114,20 @@ impl Event {
             RawEvent::StatfeedEvent => {
                 Event::StatfeedEvent(serde_json::from_str(&raw_packet.data)?)
             }
+            RawEvent::ReplayWillEnd => Event::ReplayWillEnd(serde_json::from_str(&raw_packet.data)?)
+
         })
     }
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct UpdateState {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "Players")]
     pub players: Vec<Player>,
     #[serde(rename = "Game")]
@@ -186,7 +207,7 @@ pub struct Game {
     #[serde(rename = "Frame")]
     pub frame: Option<u64>,
     #[serde(rename = "Elapsed")]
-    pub elapsed:  Option<f64>
+    pub elapsed: Option<f64>,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
@@ -243,8 +264,12 @@ pub struct GamePlayer {
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct BallHit {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "Players")]
     pub players: Vec<GamePlayer>,
     #[serde(rename = "Ball")]
@@ -253,8 +278,12 @@ pub struct BallHit {
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, serde::Deserialize)]
 pub struct ClockUpdatedSeconds {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "TimeSeconds")]
     pub time_seconds: u16,
     #[serde(rename = "bOvertime")]
@@ -263,8 +292,12 @@ pub struct ClockUpdatedSeconds {
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy, serde::Deserialize)]
 pub struct MatchIdentfier {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
@@ -277,8 +310,12 @@ pub struct BallLastTouch {
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct CrossbarHit {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "BallLocation")]
     pub ball_location: Location,
     #[serde(rename = "BallSpeed")]
@@ -291,8 +328,12 @@ pub struct CrossbarHit {
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct GoalScored {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "GoalSpeed")]
     pub goal_speed: f64,
     #[serde(rename = "GoalTime")]
@@ -309,16 +350,24 @@ pub struct GoalScored {
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct MatchEnded {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "WinnerTeamNum")]
     pub winner_team_num: u8,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct StatfeedEvent {
-    #[serde(rename = "MatchGuid")]
-    pub match_guid: Uuid,
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
     #[serde(rename = "EventName")]
     pub event_name: String,
     #[serde(rename = "Type")]
