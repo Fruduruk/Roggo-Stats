@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::core::models::{
     api_models::{BallHit, Event, UpdateState},
-    game_stats::{GameStats, TeamStats, TimeState},
+    game_stats::{GameStats, PlayerStats, TeamStats, TimeState},
 };
 
 struct GameState {
@@ -114,8 +114,29 @@ impl GameStatCollector {
                     team.color_primary,
                     team.color_secondary,
                 ));
-
             team_stats.score = team.score;
+        }
+
+        for player in update_state.players {
+            let team = self
+                .stats
+                .teams
+                .get_mut(&player.team_num)
+                .unwrap_or_else(|| panic!("Team doesn't exist for player {}", player.name));
+
+            let player_stats = team
+                .players
+                .entry(player.primary_id.clone())
+                .or_insert(PlayerStats::new(player.name, player.primary_id));
+
+            player_stats.score = player.score;
+            player_stats.goals = player.goals;
+            player_stats.shots = player.shots;
+            player_stats.assists = player.assists;
+            player_stats.saves = player.saves;
+            player_stats.touches = player.touches;
+            player_stats.car_touches = player.car_touches;
+            player_stats.demos = player.demos;
         }
     }
 }
