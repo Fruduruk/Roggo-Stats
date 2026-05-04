@@ -73,7 +73,7 @@ pub enum Event {
 }
 
 impl Event {
-    pub fn new(raw_packet: RawPacket) -> Result<Event, Box<dyn Error>> {
+    pub fn new(raw_packet: &RawPacket) -> Result<Event, Box<dyn Error>> {
         Ok(match raw_packet.event {
             RawEvent::UpdateState => Event::UpdateState(serde_json::from_str(&raw_packet.data)?),
             RawEvent::BallHit => Event::BallHit(serde_json::from_str(&raw_packet.data)?),
@@ -114,8 +114,9 @@ impl Event {
             RawEvent::StatfeedEvent => {
                 Event::StatfeedEvent(serde_json::from_str(&raw_packet.data)?)
             }
-            RawEvent::ReplayWillEnd => Event::ReplayWillEnd(serde_json::from_str(&raw_packet.data)?)
-
+            RawEvent::ReplayWillEnd => {
+                Event::ReplayWillEnd(serde_json::from_str(&raw_packet.data)?)
+            }
         })
     }
 }
