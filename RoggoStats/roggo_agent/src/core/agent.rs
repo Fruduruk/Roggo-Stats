@@ -217,7 +217,7 @@ async fn run_aggregator(
                 match result {
                     Ok(raw) => {
                         // packet_collector.next(&raw);
-                        aggregator.next(raw);
+                        aggregator.insert(raw);
                     }
 
                     Err(broadcast::error::RecvError::Lagged(count)) => {
