@@ -1,7 +1,9 @@
-use std::{error::Error, time::Duration};
+use std::{
+    error::Error,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use crate::core::aggregator::Aggregator;
-// use crate::core::packet_collector::PacketCollector;
 use futures_util::{SinkExt, StreamExt};
 use std::{
     fs,
@@ -27,7 +29,7 @@ impl RoggoAgent {
     pub async fn run(&mut self) -> Result<(), Box<dyn Error + Send + Sync>> {
         println!("Roggo agent is running.");
 
-        let (live_tx, _) = broadcast::channel::<String>(256);
+        let (live_tx, _) = broadcast::channel::<(u128, String)>(256);
 
         let import_path = std::env::var("import_path");
 
@@ -76,27 +78,36 @@ impl RoggoAgent {
 
 async fn read_test_files(
     dir: impl AsRef<Path>,
-    live_tx: broadcast::Sender<String>,
+    live_tx: broadcast::Sender<(u128, String)>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let mut files: Vec<PathBuf> = fs::read_dir(dir)?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "txt"))
+        .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
         .collect();
 
     files.sort();
     for file in files {
         tokio::time::sleep(std::time::Duration::from_millis(7)).await; // 130 inputs per second
         // println!("{}", file.to_str().unwrap());
-        let raw = fs::read_to_string(file)?;
-        let _ = live_tx.send(raw);
+        let raw = fs::read_to_string(&file)?;
+
+        let file_name_timestamp = file
+            .file_stem()
+            .expect("No file name")
+            .to_str()
+            .expect("This is not a string?")
+            .parse()
+            .expect("Not a valid u128");
+
+        let _ = live_tx.send((file_name_timestamp, raw));
     }
 
     Ok(())
 }
 
 async fn read_rocket_league_api(
-    live_tx: broadcast::Sender<String>,
+    live_tx: broadcast::Sender<(u128, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     loop {
@@ -128,6 +139,7 @@ async fn read_rocket_league_api(
                 }
 
                 result = rl_stream.read(&mut buffer) => {
+                    let timestamp_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("system time is before UNIX_EPOCH").as_millis();
                     let n = result.unwrap_or(0);
 
                     if n == 0 {
@@ -137,7 +149,7 @@ async fn read_rocket_league_api(
 
                     let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
 
-                    let _ = live_tx.send(raw);
+                    let _ = live_tx.send((timestamp_ms,raw));
                 }
             }
         }
@@ -145,7 +157,7 @@ async fn read_rocket_league_api(
 }
 
 async fn run_websocket_server(
-    live_tx: broadcast::Sender<String>,
+    live_tx: broadcast::Sender<(u128, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let listener = TcpListener::bind(LOCAL_WS_ADDR).await?;
@@ -179,7 +191,7 @@ async fn run_websocket_server(
 
 async fn handle_websocket_client(
     client_stream: TcpStream,
-    mut live_rx: broadcast::Receiver<String>,
+    mut live_rx: broadcast::Receiver<(u128, String)>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("WebSocket client connected.");
 
@@ -187,14 +199,14 @@ async fn handle_websocket_client(
     let (mut ws_write, _) = ws_stream.split();
 
     loop {
-        let raw = live_rx.recv().await?;
+        let (_timestamp, raw) = live_rx.recv().await?;
 
         ws_write.send(Message::Text(raw.into())).await?;
     }
 }
 
 async fn run_aggregator(
-    live_tx: broadcast::Sender<String>,
+    live_tx: broadcast::Sender<(u128, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("Aggregator is running.");
@@ -202,7 +214,7 @@ async fn run_aggregator(
     let mut live_rx = live_tx.subscribe();
 
     let mut aggregator = Aggregator::new();
-    // let mut packet_collector = PacketCollector::new("captures/none")?;
+    // let mut packet_collector = PacketCollector::new("captures/new")?;
 
     loop {
         tokio::select! {
@@ -215,9 +227,9 @@ async fn run_aggregator(
 
             result = live_rx.recv() => {
                 match result {
-                    Ok(raw) => {
-                        // packet_collector.next(&raw);
-                        aggregator.insert(raw);
+                    Ok((timestamp,raw)) => {
+                        // packet_collector.next(timestamp,&raw);
+                        aggregator.insert(timestamp,raw);
                     }
 
                     Err(broadcast::error::RecvError::Lagged(count)) => {

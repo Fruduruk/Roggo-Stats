@@ -27,6 +27,7 @@ impl GameStats {
 pub struct TimeState {
     pub ball_speed: f64,
     pub seconds_left: i32,
+    pub timestamp: u128,
 }
 
 #[derive(Debug)]

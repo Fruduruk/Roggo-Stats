@@ -9,6 +9,7 @@ struct GameState {
     in_replay: bool,
     finished: bool,
     in_overtime: bool,
+    timestamp: u128,
 }
 
 impl Default for GameState {
@@ -17,6 +18,7 @@ impl Default for GameState {
             in_replay: false,
             finished: false,
             in_overtime: false,
+            timestamp: 0
         }
     }
 }
@@ -46,7 +48,9 @@ impl GameStatCollector {
         self.state.finished
     }
 
-    pub fn insert(&mut self, event: Event) {
+    pub fn insert(&mut self, timestamp: u128, event: Event) {
+        self.state.timestamp = timestamp;
+        
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
             Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
@@ -100,6 +104,7 @@ impl GameStatCollector {
             .then_some(update_state.game.winner);
 
         self.stats.states.push(TimeState {
+            timestamp: self.state.timestamp,
             seconds_left: update_state.game.time_seconds,
             ball_speed: update_state.game.ball_state.speed,
         });

@@ -18,9 +18,9 @@ impl Aggregator {
         }
     }
 
-    pub fn insert(&mut self, raw: String) {
+    pub fn insert(&mut self, timestamp: u128, raw: String) {
         for event in deserialize(&raw) {
-            self.handle_event(event);
+            self.handle_event(timestamp, event);
             let finished = self
                 .collector
                 .as_ref()
@@ -37,7 +37,7 @@ impl Aggregator {
         }
     }
 
-    fn handle_event(&mut self, event: Event) {
+    fn handle_event(&mut self, timestamp: u128, event: Event) {
         if let Some(match_guid) = event.get_match_guid() {
             let collector = self
                 .collector
@@ -45,7 +45,7 @@ impl Aggregator {
 
             if collector.get_match_guid() == match_guid {
                 if !self.collected_matches.contains(&match_guid) {
-                    collector.insert(event);
+                    collector.insert(timestamp, event);
                 } else {
                     println!(
                         "Discarding event, because the agent is done collecting for game: {}",

@@ -11,7 +11,7 @@
       "environment": [
         {
           "name": "import_path",
-          "value": "captures/solo_1v1"
+          "value": "captures/normal_3v3"
         }
       ],
       "preLaunchTask": "build console",
