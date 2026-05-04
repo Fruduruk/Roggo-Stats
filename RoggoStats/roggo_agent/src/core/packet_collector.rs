@@ -5,7 +5,6 @@ use std::{
 };
 pub struct PacketCollector {
     dir: PathBuf,
-    count: u64,
 }
 
 impl PacketCollector {
@@ -13,14 +12,13 @@ impl PacketCollector {
         let dir = dir.into();
         fs::create_dir_all(&dir)?;
 
-        Ok(Self { dir, count: 0 })
+        Ok(Self { dir })
     }
 
-    pub fn next(&mut self, raw: &str) {
-        self.count += 1;
-        let file_name = format!("{:06}.txt", self.count);
+    pub fn next(&mut self, timestamp: u128, raw: &str) {
+        let file_name = format!("{}.json", timestamp);
         let path = self.dir.join(file_name);
-        
+
         let mut file = File::create(path).unwrap();
         file.write_all(raw.as_bytes()).unwrap();
     }
