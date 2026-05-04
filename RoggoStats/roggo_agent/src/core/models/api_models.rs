@@ -119,6 +119,31 @@ impl Event {
             }
         })
     }
+
+    pub fn get_match_guid(&self) -> Option<Uuid>{
+        match self{
+            Event::UpdateState(update_state) => update_state.match_guid,
+            Event::BallHit(ball_hit) => ball_hit.match_guid,
+            Event::ClockUpdatedSeconds(clock_updated_seconds) => clock_updated_seconds.match_guid,
+            Event::CountdownBegin(match_identfier) => match_identfier.match_guid,
+            Event::CrossbarHit(crossbar_hit) => crossbar_hit.match_guid,
+            Event::GoalReplayEnd(match_identfier) => match_identfier.match_guid,
+            Event::GoalReplayStart(match_identfier) => match_identfier.match_guid,
+            Event::GoalReplayWillEnd(match_identfier) => match_identfier.match_guid,
+            Event::ReplayWillEnd(match_identfier) => match_identfier.match_guid,
+            Event::GoalScored(goal_scored) => goal_scored.match_guid,
+            Event::MatchCreated(match_identfier) => match_identfier.match_guid,
+            Event::MatchInitialized(match_identfier) => match_identfier.match_guid,
+            Event::MatchDestroyed(match_identfier) => match_identfier.match_guid,
+            Event::MatchEnded(match_ended) => match_ended.match_guid,
+            Event::MatchPaused(match_identfier) => match_identfier.match_guid,
+            Event::MatchUnpaused(match_identfier) => match_identfier.match_guid,
+            Event::PodiumStart(match_identfier) => match_identfier.match_guid,
+            Event::ReplayCreated(match_identfier) => match_identfier.match_guid,
+            Event::RoundStarted(match_identfier) => match_identfier.match_guid,
+            Event::StatfeedEvent(statfeed_event) => statfeed_event.match_guid,
+        }
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
