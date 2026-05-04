@@ -1,50 +1,54 @@
 use uuid::Uuid;
 
-use crate::core::models::{api_models::Event, game_stats::GameStats};
+use crate::core::models::{api_models::{BallHit, Event}, game_stats::GameStats};
 
 pub struct GameStatCollector {
-    uuid: Option<Uuid>,
-    pub finished: bool,
-    pub game_stats: GameStats,
+    match_guid: Uuid,
+    finished: bool,
+    game_stats: GameStats,
 }
 
-impl Default for GameStatCollector {
-    fn default() -> Self {
+impl GameStatCollector {
+    pub fn new(match_guid: Uuid) -> Self {
         Self {
-            uuid: None,
+            match_guid,
             finished: false,
             game_stats: GameStats::default(),
         }
     }
-}
 
-impl GameStatCollector {
-    pub fn insert(&self, event: Event) {
-        match event {
-            Event::UpdateState(update_state) => todo!(),
-            Event::BallHit(ball_hit) => todo!(),
-            Event::ClockUpdatedSeconds(clock_updated_seconds) => todo!(),
-            Event::CountdownBegin(match_identfier) => todo!(),
-            Event::CrossbarHit(crossbar_hit) => todo!(),
-            Event::GoalReplayEnd(match_identfier) => todo!(),
-            Event::GoalReplayStart(match_identfier) => todo!(),
-            Event::GoalReplayWillEnd(match_identfier) => todo!(),
-            Event::ReplayWillEnd(match_identfier) => todo!(),
-            Event::GoalScored(goal_scored) => todo!(),
-            Event::MatchCreated(match_identfier) => todo!(),
-            Event::MatchInitialized(match_identfier) => todo!(),
-            Event::MatchDestroyed(match_identfier) => todo!(),
-            Event::MatchEnded(match_ended) => todo!(),
-            Event::MatchPaused(match_identfier) => todo!(),
-            Event::MatchUnpaused(match_identfier) => todo!(),
-            Event::PodiumStart(match_identfier) => todo!(),
-            Event::RoundStarted(match_identfier) => todo!(),
-            Event::StatfeedEvent(statfeed_event) => todo!(),
-            _ => return,
-        }
+    pub fn get_match_guid(&self) -> Uuid {
+        self.match_guid
     }
 
     pub fn export(self) -> GameStats {
         self.game_stats
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.finished
+    }
+
+    pub fn insert(&mut self, event: Event) {
+        match event {
+            // Event::UpdateState(update_state) => todo!(),
+            Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
+            // Event::ClockUpdatedSeconds(clock_updated_seconds) => todo!(),
+            // Event::CountdownBegin(_) => todo!(),
+            // Event::CrossbarHit(crossbar_hit) => todo!(),
+            // Event::GoalScored(goal_scored) => todo!(),
+            // Event::MatchCreated(_) => todo!(),
+            // Event::MatchInitialized(_) => todo!(),
+            Event::MatchDestroyed(_) => self.finished = true,
+            Event::MatchEnded(_match_ended) => self.finished = true,
+            Event::PodiumStart(_) => self.finished = true,
+            // Event::RoundStarted(_) => todo!(),
+            // Event::StatfeedEvent(statfeed_event) => todo!(),
+            _ => return,
+        }
+    }
+    
+    fn insert_ball_hit(&mut self, ball_hit: BallHit) {
+        self.game_stats.ball_hits.push(ball_hit);
     }
 }
