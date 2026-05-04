@@ -2,21 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "name": "Debug roggo-agent",
-      "cargo": {
-        "args": [
-            "build",
-            "--bin",
-            "roggo-agent-console"
-        ]
-      },
+      "program": "${workspaceRoot}/target/debug/roggo-agent-console.exe",
       "args": [],
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "import_path": "captures/solo_1v1"
-      }
+      "cwd": "${workspaceRoot}",
+      "environment": [
+        {
+          "name": "import_path",
+          "value": "captures/solo_1v1"
+        }
+      ],
+      "preLaunchTask": "build console",
+      "console": "integratedTerminal"
     }
   ]
 }
