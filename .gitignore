@@ -1,7 +1,7 @@
 #Visual Studio solution cache
 **/.[Vv]s/*
 # .NET base output directory
-**/[Bb]in/*
+/RoggoStats/BallchasingWrapper/bin/
 # .NET intermediate build output directory
 **/[Oo]bj/*
 # .Idea stuff
@@ -25,3 +25,4 @@
 **/state.db
 **/dist/*
 /RoggoStats/roggo_agent/captures/*
+
