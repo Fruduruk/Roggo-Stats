@@ -47,10 +47,10 @@ impl Aggregator {
                 if !self.collected_matches.contains(&match_guid) {
                     collector.insert(timestamp, event);
                 } else {
-                    println!(
-                        "Discarding event, because the agent is done collecting for game: {}",
-                        match_guid
-                    );
+                    // println!(
+                    //     "Discarding event, because the agent is done collecting for game: {}",
+                    //     match_guid
+                    // );
                 }
             } else {
                 println!(

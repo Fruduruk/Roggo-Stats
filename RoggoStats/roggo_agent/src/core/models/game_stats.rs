@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use uuid::Uuid;
 
@@ -25,9 +25,8 @@ impl GameStats {
 
 #[derive(Debug)]
 pub struct TimeState {
-    pub ball_speed: f64,
-    pub seconds_left: i32,
     pub timestamp: u128,
+    pub ball_speed: f64,
 }
 
 #[derive(Debug)]
@@ -63,6 +62,13 @@ pub struct PlayerStats {
     pub touches: u32,
     pub car_touches: u32,
     pub demos: u16,
+
+    pub time_boosting: Option<u128>,
+    pub time_demolished: Option<u128>,
+    pub time_on_ground: Option<u128>,
+    pub time_on_wall: Option<u128>,
+    pub time_powersliding: Option<u128>,
+    pub time_supersonic: Option<u128>,
 }
 
 impl PlayerStats {
@@ -78,6 +84,12 @@ impl PlayerStats {
             touches: 0,
             car_touches: 0,
             demos: 0,
+            time_boosting: None,
+            time_demolished: None,
+            time_on_ground: None,
+            time_on_wall: None,
+            time_powersliding: None,
+            time_supersonic: None,
         }
     }
 }
