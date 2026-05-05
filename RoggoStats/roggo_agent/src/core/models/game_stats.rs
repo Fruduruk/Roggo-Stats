@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
+use crate::core::models::api_models::Ball;
+
 #[derive(Debug)]
 pub struct GameStats {
     pub match_guid: Uuid,
@@ -69,6 +71,8 @@ pub struct PlayerStats {
     pub time_on_wall: Option<u128>,
     pub time_powersliding: Option<u128>,
     pub time_supersonic: Option<u128>,
+
+    pub ball_hits: Vec<Ball>
 }
 
 impl PlayerStats {
@@ -90,6 +94,7 @@ impl PlayerStats {
             time_on_wall: None,
             time_powersliding: None,
             time_supersonic: None,
+            ball_hits: vec![]
         }
     }
 }
