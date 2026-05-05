@@ -1,15 +1,18 @@
 use uuid::Uuid;
 
 use crate::core::models::{
-    api_models::{BallHit, Event, UpdateState},
+    api_models::{BallHit, Event, Player, UpdateState},
     game_stats::{GameStats, PlayerStats, TeamStats, TimeState},
 };
 
+#[derive(Debug)]
 struct GameState {
     in_replay: bool,
     finished: bool,
     in_overtime: bool,
-    timestamp: u128,
+    timestamp: Option<u128>,
+    last_state_update_timestamp: Option<u128>,
+    state_update_timestamp: Option<u128>,
 }
 
 impl Default for GameState {
@@ -18,7 +21,9 @@ impl Default for GameState {
             in_replay: false,
             finished: false,
             in_overtime: false,
-            timestamp: 0
+            timestamp: None,
+            last_state_update_timestamp: None,
+            state_update_timestamp: None,
         }
     }
 }
@@ -49,8 +54,8 @@ impl GameStatCollector {
     }
 
     pub fn insert(&mut self, timestamp: u128, event: Event) {
-        self.state.timestamp = timestamp;
-        
+        self.state.timestamp = Some(timestamp);
+
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
             Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
@@ -78,7 +83,7 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_ball_hit(&mut self, ball_hit: BallHit) {
+    fn insert_ball_hit(&mut self, _ball_hit: BallHit) {
         if !self.state.in_replay {}
     }
 
@@ -87,7 +92,17 @@ impl GameStatCollector {
         self.update_game_stats(update_state);
     }
 
+    #[inline]
+    fn state_update_time_delta(&self) -> Option<u128> {
+        Some(self.state.state_update_timestamp? - self.state.last_state_update_timestamp?)
+    }
+
     fn update_game_state(&mut self, update_state: &UpdateState) {
+        if self.state.state_update_timestamp != self.state.timestamp {
+            self.state.last_state_update_timestamp = self.state.state_update_timestamp;
+        }
+        self.state.state_update_timestamp = self.state.timestamp;
+
         self.state.in_replay = update_state.game.b_replay;
         self.state.in_overtime = update_state.game.b_overtime;
     }
@@ -96,18 +111,18 @@ impl GameStatCollector {
         if update_state.game.b_replay {
             return;
         }
+        if self.time_state_update_reasonable(&update_state) {
+            self.update_time_state(&update_state);
+        }
 
         self.stats.arena_name.get_or_insert(update_state.game.arena);
-        self.stats.winner = update_state
-            .game
-            .b_has_winner
-            .then_some(update_state.game.winner);
 
-        self.stats.states.push(TimeState {
-            timestamp: self.state.timestamp,
-            seconds_left: update_state.game.time_seconds,
-            ball_speed: update_state.game.ball_state.speed,
-        });
+        if self.stats.winner.is_none() {
+            self.stats.winner = update_state
+                .game
+                .b_has_winner
+                .then_some(update_state.game.winner);
+        }
 
         for team in update_state.game.teams {
             let team_stats = self
@@ -123,16 +138,21 @@ impl GameStatCollector {
         }
 
         for player in update_state.players {
+            let delta = self.state_update_time_delta();
+
             let team = self
                 .stats
                 .teams
                 .get_mut(&player.team_num)
-                .unwrap_or_else(|| panic!("Team doesn't exist for player {}", player.name));
+                .unwrap_or_else(|| panic!("Team doesn't exist for player {}", player.name.clone()));
 
-            let player_stats = team
-                .players
-                .entry(player.primary_id.clone())
-                .or_insert(PlayerStats::new(player.name, player.primary_id));
+            let player_stats =
+                team.players
+                    .entry(player.primary_id.clone())
+                    .or_insert(PlayerStats::new(
+                        player.name.clone(),
+                        player.primary_id.clone(),
+                    ));
 
             player_stats.score = player.score;
             player_stats.goals = player.goals;
@@ -142,6 +162,41 @@ impl GameStatCollector {
             player_stats.touches = player.touches;
             player_stats.car_touches = player.car_touches;
             player_stats.demos = player.demos;
+            if let Some(delta) = delta {
+                increment_counters(player_stats, &player, delta);
+            }
         }
+    }
+
+    fn time_state_update_reasonable(&self, _update_state: &UpdateState) -> bool {
+        true
+    }
+
+    fn update_time_state(&mut self, update_state: &UpdateState) {
+        // self.stats.states.push(TimeState {
+        //     timestamp: self.state.current_timestamp,
+        //     ball_speed: update_state.game.ball_state.speed,
+        // });
+    }
+}
+
+fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: u128) {
+    if player.b_boosting == Some(true) {
+        *player_stats.time_boosting.get_or_insert(0) += time_delta;
+    }
+    if player.b_demolished == Some(true) {
+        *player_stats.time_demolished.get_or_insert(0) += time_delta;
+    }
+    if player.b_on_ground == Some(true) {
+        *player_stats.time_on_ground.get_or_insert(0) += time_delta;
+    }
+    if player.b_on_wall == Some(true) {
+        *player_stats.time_on_wall.get_or_insert(0) += time_delta;
+    }
+    if player.b_powersliding == Some(true) {
+        *player_stats.time_powersliding.get_or_insert(0) += time_delta;
+    }
+    if player.b_supersonic == Some(true) {
+        *player_stats.time_supersonic.get_or_insert(0) += time_delta;
     }
 }
