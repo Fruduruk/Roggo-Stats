@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::core::models::{
-    api_models::{BallHit, Event, Player, UpdateState},
+    api_models::{BallHit, Event, GamePlayer, Player, Team, UpdateState},
     game_stats::{GameStats, PlayerStats, TeamStats, TimeState},
 };
 
@@ -55,7 +55,7 @@ impl GameStatCollector {
 
     pub fn insert(&mut self, timestamp: u128, event: Event) {
         self.state.timestamp = Some(timestamp);
-
+        println!("{:#?}",self.state);
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
             Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
@@ -83,8 +83,21 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_ball_hit(&mut self, _ball_hit: BallHit) {
-        if !self.state.in_replay {}
+    fn insert_ball_hit(&mut self, ball_hit: BallHit) {
+        if self.state.in_replay {
+            return;
+        }
+
+        for player in ball_hit.players {
+            if let Some(player_stats) = self.get_player_stats(&player) {
+                player_stats.ball_hits.push(ball_hit.ball);
+            }
+        }
+    }
+
+    fn get_player_stats(&mut self, player: &GamePlayer) -> Option<&mut PlayerStats> {
+        self.stats.teams.get_mut(&player.team_num)?
+        .players.get_mut(&player.name)
     }
 
     fn insert_update_state(&mut self, update_state: UpdateState) {
@@ -125,47 +138,41 @@ impl GameStatCollector {
         }
 
         for team in update_state.game.teams {
-            let team_stats = self
-                .stats
-                .teams
-                .entry(team.team_num)
-                .or_insert(TeamStats::new(
-                    team.name,
-                    team.color_primary,
-                    team.color_secondary,
-                ));
-            team_stats.score = team.score;
+            let score = team.score;
+            self.get_or_create_team_stats_mut(team).score = score;
         }
 
         for player in update_state.players {
             let delta = self.state_update_time_delta();
 
-            let team = self
-                .stats
-                .teams
-                .get_mut(&player.team_num)
-                .unwrap_or_else(|| panic!("Team doesn't exist for player {}", player.name.clone()));
+            let player_stats = self.get_or_create_player_stats_mut(player.clone());
 
-            let player_stats =
-                team.players
-                    .entry(player.primary_id.clone())
-                    .or_insert(PlayerStats::new(
-                        player.name.clone(),
-                        player.primary_id.clone(),
-                    ));
-
-            player_stats.score = player.score;
-            player_stats.goals = player.goals;
-            player_stats.shots = player.shots;
-            player_stats.assists = player.assists;
-            player_stats.saves = player.saves;
-            player_stats.touches = player.touches;
-            player_stats.car_touches = player.car_touches;
-            player_stats.demos = player.demos;
+            update_core_player_stats(&player, player_stats);
             if let Some(delta) = delta {
                 increment_counters(player_stats, &player, delta);
             }
         }
+    }
+
+    fn get_or_create_team_stats_mut(&mut self, team: Team) -> &mut TeamStats {
+        self.stats
+            .teams
+            .entry(team.team_num)
+            .or_insert(TeamStats::new(
+                team.name,
+                team.color_primary,
+                team.color_secondary,
+            ))
+    }
+
+    fn get_or_create_player_stats_mut(&mut self, player: Player) -> &mut PlayerStats {
+        self.stats
+            .teams
+            .get_mut(&player.team_num)
+            .unwrap_or_else(|| panic!("Team doesn't exist for player {}", &player.name))
+            .players
+            .entry(player.name.clone())
+            .or_insert(PlayerStats::new(player.name, player.primary_id))
     }
 
     fn time_state_update_reasonable(&self, _update_state: &UpdateState) -> bool {
@@ -178,6 +185,17 @@ impl GameStatCollector {
         //     ball_speed: update_state.game.ball_state.speed,
         // });
     }
+}
+
+fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
+    player_stats.score = player.score;
+    player_stats.goals = player.goals;
+    player_stats.shots = player.shots;
+    player_stats.assists = player.assists;
+    player_stats.saves = player.saves;
+    player_stats.touches = player.touches;
+    player_stats.car_touches = player.car_touches;
+    player_stats.demos = player.demos;
 }
 
 fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: u128) {
