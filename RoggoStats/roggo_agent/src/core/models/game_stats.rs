@@ -8,16 +8,22 @@ use crate::core::models::api_models::{Ball, Location};
 pub struct GameStats {
     pub match_guid: Uuid,
     pub arena_name: Option<String>,
+    pub created_at_timestamp: i64,
+    pub ended_at_timestamp: i64,
+    pub had_overtime: bool,
     pub winner: Option<String>,
     pub states: Vec<TimeState>,
     pub teams: HashMap<u8, TeamStats>,
 }
 
 impl GameStats {
-    pub fn new(match_guid: Uuid) -> Self {
+    pub fn new(match_guid: Uuid, timestamp: i64) -> Self {
         Self {
             match_guid,
             arena_name: None,
+            created_at_timestamp: timestamp,
+            ended_at_timestamp: timestamp,
+            had_overtime: false,
             winner: None,
             states: vec![],
             teams: HashMap::new(),
@@ -27,7 +33,7 @@ impl GameStats {
 
 #[derive(Debug)]
 pub struct TimeState {
-    pub timestamp: u128,
+    pub timestamp: i64,
     pub ball_speed: f64,
 }
 
@@ -77,12 +83,12 @@ pub struct PlayerStats {
     pub car_touches: u32,
     pub demos: u16,
 
-    pub time_boosting: Option<u128>,
-    pub time_demolished: Option<u128>,
-    pub time_on_ground: Option<u128>,
-    pub time_on_wall: Option<u128>,
-    pub time_powersliding: Option<u128>,
-    pub time_supersonic: Option<u128>,
+    pub time_boosting: Option<i64>,
+    pub time_demolished: Option<i64>,
+    pub time_on_ground: Option<i64>,
+    pub time_on_wall: Option<i64>,
+    pub time_powersliding: Option<i64>,
+    pub time_supersonic: Option<i64>,
 
     pub ball_hits: Vec<Ball>,
     pub crossbar_hits: Vec<CrossbarHitStatistic>,

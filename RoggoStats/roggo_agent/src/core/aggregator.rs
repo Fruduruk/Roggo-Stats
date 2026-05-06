@@ -2,12 +2,13 @@ use std::collections::HashSet;
 
 use uuid::Uuid;
 
-use crate::core::{
+use crate::{core::{
     deserializer::deserialize, game_stat_collector::GameStatCollector, models::api_models::Event,
-};
+}, db::repository::Repository};
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
+    repository: Repository
 }
 
 impl Aggregator {
@@ -15,10 +16,11 @@ impl Aggregator {
         Self {
             collector: None,
             collected_matches: HashSet::new(),
+            repository: Repository::new("test.db").expect("Database connection failed")
         }
     }
 
-    pub fn insert(&mut self, timestamp: u128, raw: String) {
+    pub fn insert(&mut self, timestamp: i64, raw: String) {
         for event in deserialize(&raw) {
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event);
@@ -37,7 +39,9 @@ impl Aggregator {
                 self.collected_matches.insert(collector.get_match_guid());
                 println!("Game {} finished.", collector.get_match_guid());
                 let stats = collector.export();
-                println!("Stats: {:#?}", stats);
+                if let Err(error) = self.repository.insert_match(stats){
+                    println!("Could not save game stats. {error}");
+                }
             }
         }
     }
@@ -52,20 +56,20 @@ impl Aggregator {
         }
     }
 
-    fn handle_event(&mut self, timestamp: u128, event: Event) {
+    fn handle_event(&mut self, timestamp: i64, event: Event) {
         let Some(match_guid) = event.get_match_guid() else {
-            println!("Discarding event, because it has no match_guid");
+            // println!("Discarding event, because it has no match_guid");
             return;
         };
 
         if self.collected_matches.contains(&match_guid) {
-            println!("Discarding event, because collection finished for match {match_guid}");
+            // println!("Discarding event, because collection finished for match {match_guid}");
             return;
         }
 
         let collector = self
             .collector
-            .get_or_insert_with(|| GameStatCollector::new(match_guid));
+            .get_or_insert_with(|| GameStatCollector::new(match_guid, timestamp));
 
         collector.insert(timestamp, event);
     }
