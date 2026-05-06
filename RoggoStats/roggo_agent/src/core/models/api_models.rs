@@ -329,9 +329,9 @@ pub struct MatchIdentfier {
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct BallLastTouch {
     #[serde(rename = "Player")]
-    player: GamePlayer,
+    pub player: GamePlayer,
     #[serde(rename = "Speed")]
-    speed: f64,
+    pub speed: f64,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]

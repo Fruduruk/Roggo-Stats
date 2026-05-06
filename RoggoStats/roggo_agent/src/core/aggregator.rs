@@ -20,9 +20,9 @@ impl Aggregator {
 
     pub fn insert(&mut self, timestamp: u128, raw: String) {
         for event in deserialize(&raw) {
-            self.export_collector_if_finished();
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event);
+            self.export_collector_if_finished();
         }
     }
 
