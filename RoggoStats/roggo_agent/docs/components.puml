@@ -2,26 +2,36 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 title Component Diagram for the Roggo Agent
+
 System_Ext(rl_api, "Rocket League Game API")
 System_Ext(wasm_app, "WASM App")
-ComponentDb(sqlite, "Sqlite DB")
 
-System_Boundary(roggo_agent, "Roggo Agent"){
-    Component(agent, "Agent", "", "Head of the agent")
-    Component(aggregator, "Aggregator", "", "Chops API stream into game sections")
-    Component(game_stat_collector, "Game Stat Collector", "", "Collects stats for one game")
-    Component(roggo_api, "Roggo API", "http", "Provides game stats")
-    Rel(rl_api, agent, "sends TCP Strings")
-    Rel(agent, aggregator, "forwards raw packet strings")
-    Rel(agent, wasm_app, "forwards raw event strings")
+System_Boundary(roggo_agent, "Roggo Agent") {
+    Component(agent, "Agent Runtime", "", "Starts and coordinates the agent components")
+
+    Component(live_stream, "Live Event Stream", "", "Distributes raw Rocket League events to internal consumers")
+    Component(aggregator, "Aggregator", "", "Detects match boundaries and manages game collectors")
+    Component(game_stat_collector, "Game Stat Collector", "", "Collects stats for one active game")
+
+    Component(roggo_api, "Roggo API", "HTTP", "Provides live and historical game stats")
+    Component(repository, "Stats Repository", "Rust / rusqlite", "Persists and loads game stats")
+
+    ComponentDb(sqlite, "SQLite DB", "", "Stores collected game stats")
+
+    Rel(rl_api, agent, "sends TCP strings")
+    Rel(agent, live_stream, "publishes raw event strings")
+
+    Rel(live_stream, aggregator, "forwards raw event strings")
     Rel(aggregator, game_stat_collector, "forwards deserialized events")
-    Rel(game_stat_collector,aggregator, "returns game stats")
-    Rel(aggregator, sqlite, "saves game stats")
-    Rel(agent, roggo_api, "starts")
-    Rel(wasm_app, roggo_api, "fetches historical stats")
-    Rel(roggo_api, sqlite, "loads historical stats")
-}
+    Rel(aggregator, repository, "saves completed game stats")
 
+    Rel(roggo_api, repository, "loads historical stats")
+    Rel(repository, sqlite, "reads and writes")
+
+    Rel(agent, roggo_api, "starts HTTP server")
+
+    Rel(wasm_app, roggo_api, "fetches live and historical stats")
+}
 
 SHOW_LEGEND()
 @enduml

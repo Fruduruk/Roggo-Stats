@@ -29,7 +29,7 @@ impl RoggoAgent {
     pub async fn run(&mut self) -> Result<(), Box<dyn Error + Send + Sync>> {
         println!("Roggo agent is running.");
 
-        let (live_tx, _) = broadcast::channel::<(u128, String)>(256);
+        let (live_tx, _) = broadcast::channel::<(i64, String)>(256);
 
         let import_path = std::env::var("import_path");
 
@@ -78,7 +78,7 @@ impl RoggoAgent {
 
 async fn read_test_files(
     dir: impl AsRef<Path>,
-    live_tx: broadcast::Sender<(u128, String)>,
+    live_tx: broadcast::Sender<(i64, String)>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let mut files: Vec<PathBuf> = fs::read_dir(dir)?
         .filter_map(|entry| entry.ok())
@@ -98,7 +98,7 @@ async fn read_test_files(
             .to_str()
             .expect("This is not a string?")
             .parse()
-            .expect("Not a valid u128");
+            .expect("Not a valid i64");
 
         let _ = live_tx.send((file_name_timestamp, raw));
     }
@@ -107,7 +107,7 @@ async fn read_test_files(
 }
 
 async fn read_rocket_league_api(
-    live_tx: broadcast::Sender<(u128, String)>,
+    live_tx: broadcast::Sender<(i64, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     loop {
@@ -139,7 +139,12 @@ async fn read_rocket_league_api(
                 }
 
                 result = rl_stream.read(&mut buffer) => {
-                    let timestamp_ms = SystemTime::now().duration_since(UNIX_EPOCH).expect("system time is before UNIX_EPOCH").as_millis();
+                    let timestamp_ms = i64::try_from(
+                        SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .expect("system time is before UNIX_EPOCH")
+                        .as_millis()
+                    ).expect("What year are you in?");
                     let n = result.unwrap_or(0);
 
                     if n == 0 {
@@ -157,7 +162,7 @@ async fn read_rocket_league_api(
 }
 
 async fn run_websocket_server(
-    live_tx: broadcast::Sender<(u128, String)>,
+    live_tx: broadcast::Sender<(i64, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let listener = TcpListener::bind(LOCAL_WS_ADDR).await?;
@@ -191,7 +196,7 @@ async fn run_websocket_server(
 
 async fn handle_websocket_client(
     client_stream: TcpStream,
-    mut live_rx: broadcast::Receiver<(u128, String)>,
+    mut live_rx: broadcast::Receiver<(i64, String)>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("WebSocket client connected.");
 
@@ -206,7 +211,7 @@ async fn handle_websocket_client(
 }
 
 async fn run_aggregator(
-    live_tx: broadcast::Sender<(u128, String)>,
+    live_tx: broadcast::Sender<(i64, String)>,
     mut shutdown_rx: watch::Receiver<bool>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("Aggregator is running.");

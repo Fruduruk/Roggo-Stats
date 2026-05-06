@@ -10,9 +10,9 @@ struct GameState {
     in_replay: bool,
     finished: bool,
     in_overtime: bool,
-    timestamp: Option<u128>,
-    last_state_update_timestamp: Option<u128>,
-    state_update_timestamp: Option<u128>,
+    timestamp: Option<i64>,
+    last_state_update_timestamp: Option<i64>,
+    state_update_timestamp: Option<i64>,
     count_down: bool,
 }
 
@@ -36,9 +36,9 @@ pub struct GameStatCollector {
 }
 
 impl GameStatCollector {
-    pub fn new(match_guid: Uuid) -> Self {
+    pub fn new(match_guid: Uuid, timestamp: i64) -> Self {
         Self {
-            stats: GameStats::new(match_guid),
+            stats: GameStats::new(match_guid, timestamp),
             state: GameState::default(),
         }
     }
@@ -55,7 +55,7 @@ impl GameStatCollector {
         self.state.finished
     }
 
-    pub fn insert(&mut self, timestamp: u128, event: Event) {
+    pub fn insert(&mut self, timestamp: i64, event: Event) {
         self.state.timestamp = Some(timestamp);
         // println!("{:#?}", self.state);
         match event {
@@ -72,14 +72,17 @@ impl GameStatCollector {
             // Event::MatchInitialized(_) => todo!(),
             Event::MatchDestroyed(_) => {
                 println!("Game finished, because match is destroyed");
+                self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             Event::MatchEnded(_match_ended) => {
                 println!("Game finished, because match ended");
+                self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             Event::PodiumStart(_) => {
                 println!("Game finished, because podium started");
+                self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             // Event::RoundStarted(_) => todo!(),
@@ -114,7 +117,7 @@ impl GameStatCollector {
     }
 
     #[inline]
-    fn state_update_time_delta(&self) -> Option<u128> {
+    fn state_update_time_delta(&self) -> Option<i64> {
         Some(self.state.state_update_timestamp? - self.state.last_state_update_timestamp?)
     }
 
@@ -152,6 +155,9 @@ impl GameStatCollector {
         }
         if self.state.count_down {
             return;
+        }
+        if self.state.in_overtime {
+            self.stats.had_overtime = true;
         }
 
         if self.time_state_update_reasonable(&update_state) {
@@ -247,7 +253,7 @@ fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
     player_stats.demos = player.demos;
 }
 
-fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: u128) {
+fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: i64) {
     if player.b_boosting == Some(true) {
         *player_stats.time_boosting.get_or_insert(0) += time_delta;
     }
