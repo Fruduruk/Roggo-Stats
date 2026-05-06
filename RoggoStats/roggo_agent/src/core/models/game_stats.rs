@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::models::api_models::Ball;
+use crate::core::models::api_models::{Ball, Location};
 
 #[derive(Debug)]
 pub struct GameStats {
@@ -51,6 +51,18 @@ impl TeamStats {
         }
     }
 }
+#[derive(Debug)]
+pub struct CrossbarHitStatistic {
+    pub hit_speed: f64,
+    pub last_touch_speed: f64,
+    pub location: Location,
+    pub impact_force: f64,
+}
+
+#[derive(Debug)]
+pub struct Goal {
+
+}
 
 #[derive(Debug)]
 pub struct PlayerStats {
@@ -72,7 +84,9 @@ pub struct PlayerStats {
     pub time_powersliding: Option<u128>,
     pub time_supersonic: Option<u128>,
 
-    pub ball_hits: Vec<Ball>
+    pub ball_hits: Vec<Ball>,
+    pub crossbar_hits: Vec<CrossbarHitStatistic>,
+    pub goal_stats: Vec<Goal>,
 }
 
 impl PlayerStats {
@@ -94,7 +108,9 @@ impl PlayerStats {
             time_on_wall: None,
             time_powersliding: None,
             time_supersonic: None,
-            ball_hits: vec![]
+            ball_hits: vec![],
+            crossbar_hits: vec![],
+            goal_stats: vec![],
         }
     }
 }

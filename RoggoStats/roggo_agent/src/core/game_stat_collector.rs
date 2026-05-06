@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
 use crate::core::models::{
-    api_models::{BallHit, Event, GamePlayer, Player, Team, UpdateState},
-    game_stats::{GameStats, PlayerStats, TeamStats, TimeState},
+    api_models::{BallHit, CrossbarHit, Event, GamePlayer, GoalScored, Player, Team, UpdateState},
+    game_stats::{CrossbarHitStatistic, GameStats, Goal, PlayerStats, TeamStats, TimeState},
 };
 
 #[derive(Debug)]
@@ -66,8 +66,8 @@ impl GameStatCollector {
                 self.state.last_state_update_timestamp = None;
                 self.state.count_down = true;
             }
-            // Event::CrossbarHit(crossbar_hit) => todo!(),
-            // Event::GoalScored(goal_scored) => todo!(),
+            Event::CrossbarHit(crossbar_hit) => self.insert_crossbar_hit(crossbar_hit),
+            Event::GoalScored(goal_scored) => self.insert_goal_scored(goal_scored),
             // Event::MatchCreated(_) => todo!(),
             // Event::MatchInitialized(_) => todo!(),
             Event::MatchDestroyed(_) => {
@@ -133,18 +133,19 @@ impl GameStatCollector {
         }
         self.state.state_update_timestamp = self.state.timestamp;
     }
-    
+
     fn update_countdown(&mut self, update_state: &UpdateState) {
-        let anyone_moving_while_countdown_is_set = self.state.count_down && update_state
-            .players
-            .iter()
-            .any(|player| player.speed.is_some_and(|speed| speed > 0f64));
-    
+        let anyone_moving_while_countdown_is_set = self.state.count_down
+            && update_state
+                .players
+                .iter()
+                .any(|player| player.speed.is_some_and(|speed| speed > 0f64));
+
         if anyone_moving_while_countdown_is_set {
             self.state.count_down = false;
         }
     }
-    
+
     fn update_game_stats(&mut self, update_state: UpdateState) {
         if update_state.game.b_replay {
             return;
@@ -213,6 +214,25 @@ impl GameStatCollector {
         //     timestamp: self.state.current_timestamp,
         //     ball_speed: update_state.game.ball_state.speed,
         // });
+    }
+
+    fn insert_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {
+        if let Some(player_stats) = self.get_player_stats(&crossbar_hit.ball_last_touch.player) {
+            player_stats.crossbar_hits.push(CrossbarHitStatistic {
+                hit_speed : crossbar_hit.ball_speed,
+                last_touch_speed: crossbar_hit.ball_last_touch.speed,
+                location: crossbar_hit.ball_location,
+                impact_force: crossbar_hit.impact_force
+            });
+        }
+    }
+    
+    fn insert_goal_scored(&mut self, goal_scored: GoalScored) {
+        if let Some(player_stats) = self.get_player_stats(&goal_scored.scorer){
+            player_stats.goal_stats.push(
+                Goal{}
+            );
+        }
     }
 }
 
