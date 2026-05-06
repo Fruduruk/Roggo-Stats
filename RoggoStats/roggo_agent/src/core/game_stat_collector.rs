@@ -251,6 +251,7 @@ fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
     player_stats.touches = player.touches;
     player_stats.car_touches = player.car_touches;
     player_stats.demos = player.demos;
+    player_stats.shortcut = player.shortcut;
 }
 
 fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: i64) {

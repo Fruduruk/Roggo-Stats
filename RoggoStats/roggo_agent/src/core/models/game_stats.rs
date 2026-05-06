@@ -74,6 +74,7 @@ pub struct Goal {
 pub struct PlayerStats {
     pub name: String,
     pub primary_id: String,
+    pub shortcut: u8,
     pub score: u16,
     pub goals: u16,
     pub shots: u16,
@@ -100,6 +101,7 @@ impl PlayerStats {
         Self {
             name,
             primary_id,
+            shortcut: 0,
             score: 0,
             goals: 0,
             shots: 0,
