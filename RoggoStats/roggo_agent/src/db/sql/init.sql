@@ -3,9 +3,9 @@ create table if not exists matches (
     arena text,
     created_at_ms integer not null,
     ended_at_ms integer not null,
-    had_overtime boolean not null
+    had_overtime boolean not null,
+    deleted boolean not null
 );
-
 create table if not exists teams (
     match_guid uuid not null,
     team_num integer not null,
@@ -14,21 +14,20 @@ create table if not exists teams (
     color_primary text not null,
     color_secondary text not null,
     primary key (match_guid, team_num),
-    foreign key (match_guid) references matches(match_guid) on delete cascade
+    foreign key (match_guid) references matches(match_guid)
 );
-
-create table if not exists players (
-    primary_id text not null primary key,
+create table if not exists global_players (
+    id integer not null primary key autoincrement,
+    primary_id text not null unique,
     username text not null
 );
-
-create table if not exists player_stats (
+create table if not exists players (
+    id integer not null primary key autoincrement,
     match_guid uuid not null,
     team_num integer not null,
-    player_id text not null,
-
+    player_id integer not null,
+    display_name text not null,
     shortcut integer not null,
-
     score integer not null,
     goals integer not null,
     shots integer not null,
@@ -37,16 +36,87 @@ create table if not exists player_stats (
     touches integer not null,
     car_touches integer not null,
     demos integer not null,
-
     time_boosting integer,
     time_demolished integer,
     time_on_ground integer,
     time_on_wall integer,
     time_powersliding integer,
     time_supersonic integer,
+    unique(match_guid, player_id),
+    unique(match_guid, shortcut),
+    foreign key (match_guid) references matches(match_guid),
+    foreign key (match_guid, team_num) references teams(match_guid, team_num),
+    foreign key (player_id) references global_players(id)
+);
+create table if not exists goal_details (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
+    goal_time real not null,
+    impact_x real not null,
+    impact_y real not null,
+    impact_z real not null,
+    goal_speed real not null,
+    scorer_player_id integer not null,
+    assister_player_id integer,
+    last_touch_player_id integer not null,
+    last_touch_speed real,
+    foreign key (match_guid) references matches(match_guid),
+    foreign key (scorer_player_id) references players(id),
+    foreign key (assister_player_id) references players(id),
+    foreign key (last_touch_player_id) references players(id)
+);
+create table if not exists ball_hits (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
+    pre_hit_speed real not null,
+    post_hit_speed real not null,
+    x real not null,
+    y real not null,
+    z real not null,
+    foreign key (match_guid) references matches(match_guid)
+);
+create table if not exists ball_hit_players (
+    ball_hit_id integer not null,
+    player_id integer not null,
+    primary key (ball_hit_id, player_id),
+    foreign key (ball_hit_id) references ball_hits(id),
+    foreign key (player_id) references players(id)
+);
+create table if not exists crossbar_hits (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
+    ball_speed real not null,
+    impact_force real not null,
+    x real not null,
+    y real not null,
+    z real not null,
+    last_touch_player_id integer not null,
+    foreign key (match_guid) references matches(match_guid),
+    foreign key (last_touch_player_id) references players(id)
+);
+create table if not exists clock_samples (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
+    time_seconds integer not null,
+    is_overtime boolean not null,
+    foreign key (match_guid) references matches(match_guid)
+);
+create table if not exists statfeed_events (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
 
-    primary key (match_guid, team_num, player_id),
-    foreign key (match_guid) references matches(match_guid) on delete cascade,
-    foreign key (match_guid, team_num) references teams(match_guid, team_num) on delete cascade,
-    foreign key (player_id) references players(primary_id) on delete cascade
+    event_name text not null,
+    event_type text not null,
+
+    main_target_player_id integer not null,
+    secondary_target_player_id integer,
+
+    foreign key (match_guid) references matches(match_guid),
+    foreign key (main_target_player_id) references players(id),
+    foreign key (secondary_target_player_id) references players(id)
 );
