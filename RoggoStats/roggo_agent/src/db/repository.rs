@@ -2,7 +2,7 @@ use std::path::Path;
 
 use rusqlite::{Connection, Result, params};
 
-use crate::core::models::game_stats::GameStats;
+use crate::core::models::game_stats::{GameStats, PlayerStats};
 
 pub struct Repository {
     connection: Connection,
@@ -49,6 +49,52 @@ impl Repository {
                 stats.had_overtime
             ],
         )?;
+
+        for (team_num, team) in stats.teams {
+            tx.execute(
+                include_str!("sql/insert_team.sql"),
+                params![
+                    match_guid,
+                    team.name.clone(),
+                    team_num,
+                    team.score,
+                    team.color_primary,
+                    team.color_secondary
+                ],
+            )?;
+
+            for (player_name, player) in team.players {
+                tx.execute(
+                    include_str!("sql/upsert_player.sql"),
+                    params![player.primary_id, player_name],
+                )?;
+
+                tx.execute(
+                    include_str!("sql/insert_player_stats.sql"),
+                    params![
+                        match_guid,
+                        team_num,
+                        player.primary_id,
+                        player.shortcut,
+                        player.score,
+                        player.goals,
+                        player.shots,
+                        player.assists,
+                        player.saves,
+                        player.touches,
+                        player.car_touches,
+                        player.demos,
+                        player.time_boosting,
+                        player.time_demolished,
+                        player.time_on_ground,
+                        player.time_on_wall,
+                        player.time_powersliding,
+                        player.time_supersonic
+                    ],
+                )?;
+            }
+        }
+
         tx.commit()?;
         Ok(())
     }

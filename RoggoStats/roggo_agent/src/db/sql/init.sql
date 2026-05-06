@@ -8,8 +8,8 @@ create table if not exists matches (
 
 create table if not exists teams (
     match_guid uuid not null,
-    name text not null,
     team_num integer not null,
+    name text not null,
     score integer not null,
     color_primary text not null,
     color_secondary text not null,
@@ -24,11 +24,10 @@ create table if not exists players (
 
 create table if not exists player_stats (
     match_guid uuid not null,
-    team_name text not null,
+    team_num integer not null,
     player_id text not null,
 
     shortcut integer not null,
-    team_num integer not null,
 
     score integer not null,
     goals integer not null,
@@ -46,7 +45,7 @@ create table if not exists player_stats (
     time_powersliding integer,
     time_supersonic integer,
 
-    primary key (match_guid, team_name, player_id),
+    primary key (match_guid, team_num, player_id),
     foreign key (match_guid) references matches(match_guid) on delete cascade,
     foreign key (match_guid, team_num) references teams(match_guid, team_num) on delete cascade,
     foreign key (player_id) references players(primary_id) on delete cascade
