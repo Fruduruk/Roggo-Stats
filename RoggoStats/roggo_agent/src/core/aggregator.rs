@@ -37,7 +37,7 @@ impl Aggregator {
                 self.collected_matches.insert(collector.get_match_guid());
                 println!("Game {} finished.", collector.get_match_guid());
                 let stats = collector.export();
-                // println!("Stats: {:#?}", stats);
+                println!("Stats: {:#?}", stats);
             }
         }
     }

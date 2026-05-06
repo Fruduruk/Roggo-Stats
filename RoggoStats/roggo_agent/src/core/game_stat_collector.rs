@@ -13,6 +13,7 @@ struct GameState {
     timestamp: Option<u128>,
     last_state_update_timestamp: Option<u128>,
     state_update_timestamp: Option<u128>,
+    count_down: bool,
 }
 
 impl Default for GameState {
@@ -24,6 +25,7 @@ impl Default for GameState {
             timestamp: None,
             last_state_update_timestamp: None,
             state_update_timestamp: None,
+            count_down: false,
         }
     }
 }
@@ -55,12 +57,15 @@ impl GameStatCollector {
 
     pub fn insert(&mut self, timestamp: u128, event: Event) {
         self.state.timestamp = Some(timestamp);
-        println!("{:#?}",self.state);
+        // println!("{:#?}", self.state);
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
-            Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
+            // Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
             // Event::ClockUpdatedSeconds(clock_updated_seconds) => todo!(),
-            // Event::CountdownBegin(_) => todo!(),
+            Event::CountdownBegin(_) => {
+                self.state.last_state_update_timestamp = None;
+                self.state.count_down = true;
+            }
             // Event::CrossbarHit(crossbar_hit) => todo!(),
             // Event::GoalScored(goal_scored) => todo!(),
             // Event::MatchCreated(_) => todo!(),
@@ -96,8 +101,11 @@ impl GameStatCollector {
     }
 
     fn get_player_stats(&mut self, player: &GamePlayer) -> Option<&mut PlayerStats> {
-        self.stats.teams.get_mut(&player.team_num)?
-        .players.get_mut(&player.name)
+        self.stats
+            .teams
+            .get_mut(&player.team_num)?
+            .players
+            .get_mut(&player.name)
     }
 
     fn insert_update_state(&mut self, update_state: UpdateState) {
@@ -111,19 +119,40 @@ impl GameStatCollector {
     }
 
     fn update_game_state(&mut self, update_state: &UpdateState) {
+        self.update_timestamps();
+
+        self.state.in_replay = update_state.game.b_replay;
+        self.state.in_overtime = update_state.game.b_overtime;
+
+        self.update_countdown(update_state);
+    }
+
+    fn update_timestamps(&mut self) {
         if self.state.state_update_timestamp != self.state.timestamp {
             self.state.last_state_update_timestamp = self.state.state_update_timestamp;
         }
         self.state.state_update_timestamp = self.state.timestamp;
-
-        self.state.in_replay = update_state.game.b_replay;
-        self.state.in_overtime = update_state.game.b_overtime;
     }
-
+    
+    fn update_countdown(&mut self, update_state: &UpdateState) {
+        let anyone_moving_while_countdown_is_set = self.state.count_down && update_state
+            .players
+            .iter()
+            .any(|player| player.speed.is_some_and(|speed| speed > 0f64));
+    
+        if anyone_moving_while_countdown_is_set {
+            self.state.count_down = false;
+        }
+    }
+    
     fn update_game_stats(&mut self, update_state: UpdateState) {
         if update_state.game.b_replay {
             return;
         }
+        if self.state.count_down {
+            return;
+        }
+
         if self.time_state_update_reasonable(&update_state) {
             self.update_time_state(&update_state);
         }
