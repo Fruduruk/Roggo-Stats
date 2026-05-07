@@ -4,3 +4,6 @@ pub mod packet_collector;
 pub mod models;
 pub mod game_stat_collector;
 pub mod deserializer;
+pub mod db;
+pub mod rocket_league_api;
+pub mod test_file_reader;

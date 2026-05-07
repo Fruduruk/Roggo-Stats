@@ -2,13 +2,14 @@ use std::collections::HashSet;
 
 use uuid::Uuid;
 
-use crate::{core::{
-    deserializer::deserialize, game_stat_collector::GameStatCollector, models::api_models::Event,
-}, db::repository::Repository};
+use crate::core::{
+    db::repository::Repository, deserializer::deserialize, game_stat_collector::GameStatCollector,
+    models::api_models::Event,
+};
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
-    repository: Repository
+    repository: Repository,
 }
 
 impl Aggregator {
@@ -16,7 +17,7 @@ impl Aggregator {
         Self {
             collector: None,
             collected_matches: HashSet::new(),
-            repository: Repository::new("test.db").expect("Database connection failed")
+            repository: Repository::new("test.db").expect("Database connection failed"),
         }
     }
 
@@ -39,7 +40,7 @@ impl Aggregator {
                 self.collected_matches.insert(collector.get_match_guid());
                 println!("Game {} finished.", collector.get_match_guid());
                 let stats = collector.export();
-                if let Err(error) = self.repository.insert_match(stats){
+                if let Err(error) = self.repository.insert_match(stats) {
                     println!("Could not save game stats. {error}");
                 }
             }
