@@ -1,0 +1,30 @@
+  INSERT INTO players (
+      match_guid,
+      team_num,
+      global_player_id,
+      display_name,
+      shortcut,
+      score,
+      goals,
+      shots,
+      assists,
+      saves,
+      touches,
+      car_touches,
+      demos
+    )
+  VALUES (
+     ?1,
+     ?2,
+     ?3,
+     ?4,
+     ?5,
+     ?6,
+     ?7,
+     ?8,
+     ?9,
+     ?10,
+     ?11,
+     ?12,
+     ?13
+    );

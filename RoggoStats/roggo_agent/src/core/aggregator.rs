@@ -63,7 +63,7 @@ impl Aggregator {
                 //     }
                 // }
 
-                if let Err(error) = self.repository.insert_match(stats) {
+                if let Err(error) = self.repository.insert_game_stats(stats) {
                     println!("Could not save game stats. {error}");
                 }
             }
