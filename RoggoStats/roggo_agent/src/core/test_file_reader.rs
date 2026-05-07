@@ -40,6 +40,7 @@ pub async fn read_test_files(
         // println!("Sending {}", file.to_str().unwrap());
         if let Err(err) = tx.send((file_name_timestamp, raw)).await {
             println!("Failed to send {}", err);
+            break;
         }
     }
     Ok(())

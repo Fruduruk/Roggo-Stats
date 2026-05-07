@@ -44,12 +44,13 @@ async fn receive_packets(
     mut rx: mpsc::Receiver<(i64, String)>,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     println!("Aggregator is running.");
-
+    // let mut packet_collector = crate::core::packet_collector::PacketCollector::new("captures/new")?;
     let mut aggregator = Aggregator::new();
     let mut count: u128 = 0;
 
     while let Some((timestamp, raw)) = rx.recv().await {
         // println!("Receiving {}", timestamp);
+        // packet_collector.next(timestamp, &raw);
         aggregator.insert(timestamp, raw);
         count += 1;
     }

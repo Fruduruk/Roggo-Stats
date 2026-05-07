@@ -15,7 +15,7 @@ impl PacketCollector {
         Ok(Self { dir })
     }
 
-    pub fn next(&mut self, timestamp: u128, raw: &str) {
+    pub fn next(&mut self, timestamp: i64, raw: &str) {
         let file_name = format!("{}.json", timestamp);
         let path = self.dir.join(file_name);
 
