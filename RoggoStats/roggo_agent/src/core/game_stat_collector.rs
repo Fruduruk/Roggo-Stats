@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::core::models::{
     api_models::{BallHit, CrossbarHit, Event, GamePlayer, GoalScored, Player, Team, UpdateState},
-    game_stats::{CrossbarHitStatistic, GameStats, Goal, PlayerStats, TeamStats, TimeState},
+    database_models::{CrossbarHitStatistic, GameStats, Goal, PlayerStats, TeamStats, TimeState},
 };
 
 #[derive(Debug)]
