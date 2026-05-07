@@ -39,10 +39,9 @@ create table if not exists players (
     demos integer not null,
     
     unique(match_guid, global_player_id),
-    unique(match_guid, shortcut),
     foreign key (match_guid) references matches(match_guid),
     foreign key (match_guid, team_num) references teams(match_guid, team_num),
-    foreign key (global_player_id) references global_players(id)
+    foreign key (global_player_id) references global_players(primary_id)
 );
 create table if not exists player_stats (
     player_id integer not null primary key,

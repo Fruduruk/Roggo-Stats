@@ -1,6 +1,7 @@
 INSERT INTO matches (
         match_guid,
         arena,
+        duration,
         created_at_ms,
         ended_at_ms,
         had_overtime,
@@ -12,5 +13,6 @@ VALUES (
         ?3,
         ?4,
         ?5,
-        ?6
+        ?6,
+        ?7
     );

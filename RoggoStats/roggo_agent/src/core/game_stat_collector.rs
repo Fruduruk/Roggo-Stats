@@ -148,17 +148,17 @@ impl GameStatCollector {
         self.state.state_update_timestamp = self.state.timestamp;
     }
 
-    fn update_countdown(&mut self, update_state: &UpdateState) {
-        let anyone_moving_while_countdown_is_set = self.state.count_down
-            && update_state
-                .players
-                .iter()
-                .any(|player| player.speed.is_some_and(|speed| speed > 1f64));
+    // fn update_countdown(&mut self, update_state: &UpdateState) {
+    //     let anyone_moving_while_countdown_is_set = self.state.count_down
+    //         && update_state
+    //             .players
+    //             .iter()
+    //             .any(|player| player.speed.is_some_and(|speed| speed > 1f64));
 
-        if anyone_moving_while_countdown_is_set {
-            self.state.count_down = false;
-        }
-    }
+    //     if anyone_moving_while_countdown_is_set {
+    //         self.state.count_down = false;
+    //     }
+    // }
 
     fn update_game_stats(&mut self, update_state: UpdateState) {
         if update_state.game.b_replay {
