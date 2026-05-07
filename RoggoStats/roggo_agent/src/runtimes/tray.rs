@@ -5,7 +5,6 @@ use tray_icon::{
     menu::{Menu, MenuEvent, MenuItem},
 };
 
-use crate::core::agent::RoggoAgent;
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -13,23 +12,22 @@ use winit::{
     window::WindowId,
 };
 
+use crate::core::agent::run_agent;
+
 const WEB_UI_URL: &str = "https://frudd.dev";
 
 pub fn run() {
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
-    run_agent_thread(shutdown_rx);
+    run_agent_thread(shutdown_tx.clone(), shutdown_rx);
     run_tray(shutdown_tx);
 }
 
-fn run_agent_thread(shutdown_rx: watch::Receiver<bool>) {
+fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiver<bool>) {
     std::thread::spawn(move || {
-        let runtime =
-            tokio::runtime::Runtime::new().expect("Could not create tokio runtime.");
+        let runtime = tokio::runtime::Runtime::new().expect("Could not create tokio runtime.");
 
         runtime.block_on(async {
-            let mut agent = RoggoAgent::new(shutdown_rx);
-
-            if let Err(err) = agent.run().await {
+            if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx))).await {
                 eprintln!("Agent Fehler: {err}");
             }
         });
@@ -48,7 +46,6 @@ struct TrayApp {
 }
 
 fn run_tray(shutdown_tx: watch::Sender<bool>) {
-
     let event_loop = EventLoop::<UserEvent>::with_user_event()
         .build()
         .expect("Could not create event loop");
@@ -79,8 +76,10 @@ impl ApplicationHandler<UserEvent> for TrayApp {
         let exit_item = MenuItem::new("Exit", true, None);
 
         let menu = Menu::new();
-        menu.append(&open_item).expect("Could not append open web ui menu item");
-        menu.append(&exit_item).expect("Could not append exit menu item");
+        menu.append(&open_item)
+            .expect("Could not append open web ui menu item");
+        menu.append(&exit_item)
+            .expect("Could not append exit menu item");
 
         let tray_icon = TrayIconBuilder::new()
             .with_tooltip("Roggo Agent")
