@@ -1,2 +1,2 @@
 pub mod api_models;
-pub mod game_stats;
+pub mod database_models;

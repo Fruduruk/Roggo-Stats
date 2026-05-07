@@ -2,7 +2,7 @@ use std::path::Path;
 
 use rusqlite::{Connection, Result, params};
 
-use crate::core::models::game_stats::{GameStats, PlayerStats};
+use crate::core::models::database_models::{GameStats, PlayerStats};
 
 pub struct Repository {
     connection: Connection,
