@@ -3,7 +3,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use tokio::net::{TcpStream};
+use tokio::net::TcpStream;
 use tokio::sync::watch;
 use tokio::{io::AsyncReadExt, sync::mpsc};
 
@@ -53,7 +53,9 @@ pub async fn read_rocket_league_api(
 
                 let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
 
-                let _ = tx.send((timestamp_ms, raw));
+                if let Err(err) = tx.send((timestamp_ms, raw)).await {
+                    println!("Failed to send {}", err);
+                }
             }
         }
     }

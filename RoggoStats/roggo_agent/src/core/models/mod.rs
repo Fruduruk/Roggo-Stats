@@ -1,2 +1,2 @@
 pub mod api_models;
-pub mod database_models;
+pub mod intermediate_models;

@@ -40,6 +40,29 @@ impl Aggregator {
                 self.collected_matches.insert(collector.get_match_guid());
                 println!("Game {} finished.", collector.get_match_guid());
                 let stats = collector.export();
+
+                println!(
+                    "Start: {} End: {} Duration: {} Had Overtime: {}",
+                    chrono::DateTime::from_timestamp_millis(stats.created_at_timestamp)
+                        .unwrap()
+                        .format("%d.%m.%Y %H:%M:%S"),
+                    chrono::DateTime::from_timestamp_millis(stats.ended_at_timestamp)
+                        .unwrap()
+                        .format("%d.%m.%Y %H:%M:%S"),
+                    chrono::DateTime::from_timestamp_millis(stats.duration)
+                        .unwrap()
+                        .format("%M:%S"),
+                    stats.had_overtime
+                );
+
+                // for (_, team) in &stats.teams {
+                //     for (_, player) in &team.players {
+                //         if let Some(advanced_stats) = &player.advanced_stats {
+                //             println!("{}: {:#?}", player.name, advanced_stats);
+                //         }
+                //     }
+                // }
+
                 if let Err(error) = self.repository.insert_match(stats) {
                     println!("Could not save game stats. {error}");
                 }

@@ -1,6 +1,7 @@
 create table if not exists matches (
     match_guid uuid not null primary key,
     arena text,
+    duration integer not null,
     created_at_ms integer not null,
     ended_at_ms integer not null,
     had_overtime boolean not null,
@@ -25,7 +26,7 @@ create table if not exists players (
     id integer not null primary key autoincrement,
     match_guid uuid not null,
     team_num integer not null,
-    player_id integer not null,
+    global_player_id integer not null,
     display_name text not null,
     shortcut integer not null,
     score integer not null,
@@ -36,17 +37,22 @@ create table if not exists players (
     touches integer not null,
     car_touches integer not null,
     demos integer not null,
-    time_boosting integer,
-    time_demolished integer,
-    time_on_ground integer,
-    time_on_wall integer,
-    time_powersliding integer,
-    time_supersonic integer,
-    unique(match_guid, player_id),
+    
+    unique(match_guid, global_player_id),
     unique(match_guid, shortcut),
     foreign key (match_guid) references matches(match_guid),
     foreign key (match_guid, team_num) references teams(match_guid, team_num),
-    foreign key (player_id) references global_players(id)
+    foreign key (global_player_id) references global_players(id)
+);
+create table if not exists player_stats (
+    player_id integer not null primary key,
+    time_boosting integer not null,
+    time_demolished integer not null,
+    time_on_ground integer not null,
+    time_on_wall integer not null,
+    time_powersliding integer not null,
+    time_supersonic integer not null,
+    foreign key (player_id) references players(id)
 );
 create table if not exists goal_details (
     id integer not null primary key autoincrement,
