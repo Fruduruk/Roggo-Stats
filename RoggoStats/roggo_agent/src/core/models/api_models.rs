@@ -268,6 +268,12 @@ pub struct Location {
     pub z: f64,
 }
 
+impl Default for Location {
+    fn default() -> Self {
+        Self { x: Default::default(), y: Default::default(), z: Default::default() }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
 pub struct Ball {
     #[serde(rename = "PreHitSpeed")]

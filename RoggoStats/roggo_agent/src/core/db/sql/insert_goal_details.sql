@@ -6,10 +6,10 @@ INSERT INTO goal_details (
     impact_y,
     impact_z,
     goal_speed,
+    last_touch_speed,
     scorer_player_id,
     assister_player_id,
-    last_touch_player_id,
-    last_touch_speed
+    last_touch_player_id
   )
 VALUES (
     ?1,

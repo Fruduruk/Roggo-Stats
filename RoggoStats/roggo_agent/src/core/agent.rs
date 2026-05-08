@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use crate::core::test_file_reader::read_test_files_from_7z;
 use crate::core::{
     aggregator::Aggregator, rocket_league_api::read_rocket_league_api,
     test_file_reader::read_test_files,
@@ -27,7 +28,7 @@ pub async fn run_agent(
     });
 
     let sender_task = if let Ok(path) = std::env::var("import_path") {
-        tokio::spawn(read_test_files(path, tx, shutdown_rx.clone()))
+        tokio::spawn(read_test_files_from_7z(path, tx, shutdown_rx.clone()))
     } else {
         tokio::spawn(read_rocket_league_api(tx, shutdown_rx.clone()))
     };

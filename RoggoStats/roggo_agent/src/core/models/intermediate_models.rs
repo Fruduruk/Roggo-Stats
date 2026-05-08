@@ -15,6 +15,9 @@ pub struct GameStats {
     pub teams: HashMap<u8, TeamStats>,
     pub clock_samples: Vec<ClockSample>,
     pub crossbar_hits: Vec<CrossbarHitStatistic>,
+    pub goal_details: Vec<GoalDetails>,
+    pub ball_hits: Vec<BallHitStatistic>,
+    pub statfeed_events: Vec<StatfeedEventStatistic>,
 
     pub states: Vec<TimeState>,
 }
@@ -31,6 +34,9 @@ impl GameStats {
             teams: HashMap::new(),
             clock_samples: vec![],
             crossbar_hits: vec![],
+            goal_details: vec![],
+            ball_hits: vec![],
+            statfeed_events: vec![],
 
             states: vec![],
         }
@@ -80,7 +86,33 @@ pub struct CrossbarHitStatistic {
 }
 
 #[derive(Debug)]
-pub struct Goal {}
+pub struct BallHitStatistic {
+    pub timestamp: i64,
+    pub pre_hit_speed: f64,
+    pub post_hit_speed: f64,
+    pub location: Location,
+    pub player_primary_id: String,
+}
+
+#[derive(Debug)]
+pub struct GoalDetails {
+    pub timestamp: i64,
+    pub goal_time: f64,
+    pub impact_location: Location,
+    pub goal_speed: f64,
+    pub last_touch_speed: f64,
+    pub scorer_primary_id: String,
+    pub assister_primary_id: Option<String>,
+    pub last_touch_primary_id: String,
+}
+#[derive(Debug)]
+pub struct StatfeedEventStatistic {
+    pub timestamp: i64,
+    pub event_name: String,
+    pub event_type: String,
+    pub main_target_primary_id: String,
+    pub secondary_target_primary_id: Option<String>,
+}
 
 #[derive(Debug)]
 pub struct PlayerStats {
@@ -98,9 +130,7 @@ pub struct PlayerStats {
 
     pub advanced_stats: Option<AdvancedPlayerStats>,
 
-    pub ball_hits: Vec<Ball>,
     pub crossbar_hits: Vec<CrossbarHitStatistic>,
-    pub goal_stats: Vec<Goal>,
 }
 
 #[derive(Debug)]
@@ -141,9 +171,7 @@ impl PlayerStats {
             car_touches: 0,
             demos: 0,
             advanced_stats: None,
-            ball_hits: vec![],
             crossbar_hits: vec![],
-            goal_stats: vec![],
         }
     }
 }
