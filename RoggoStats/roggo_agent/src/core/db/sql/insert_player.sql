@@ -1,6 +1,6 @@
   INSERT INTO players (
       match_guid,
-      team_num,
+      team_id,
       global_player_id,
       display_name,
       shortcut,

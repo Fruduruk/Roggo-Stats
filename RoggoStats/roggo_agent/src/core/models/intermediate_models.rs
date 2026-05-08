@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::models::api_models::{Ball, Location};
+use crate::core::models::api_models::{Ball, BallState, Location};
 
 #[derive(Debug)]
 pub struct GameStats {
@@ -19,7 +19,7 @@ pub struct GameStats {
     pub ball_hits: Vec<BallHitStatistic>,
     pub statfeed_events: Vec<StatfeedEventStatistic>,
 
-    pub states: Vec<TimeState>,
+    pub timeline: Vec<TimelineInstant>,
 }
 
 impl GameStats {
@@ -38,7 +38,7 @@ impl GameStats {
             ball_hits: vec![],
             statfeed_events: vec![],
 
-            states: vec![],
+            timeline: vec![],
         }
     }
 }
@@ -51,9 +51,9 @@ pub struct ClockSample {
 }
 
 #[derive(Debug)]
-pub struct TimeState {
+pub struct TimelineInstant {
     pub timestamp: i64,
-    pub ball_speed: f64,
+    pub ball_state: BallState,
 }
 
 #[derive(Debug)]

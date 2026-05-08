@@ -40,12 +40,20 @@ impl Repository {
     pub fn insert_game_stats(&mut self, stats: intermediate_models::GameStats) -> Result<()> {
         let match_guid = stats.match_guid;
         let mut player_ids = HashMap::new();
+        let mut team_ids = HashMap::new();
 
         let tx = self.connection.transaction()?;
         insert_match(&stats, match_guid, &tx)?;
 
         for (team_num, team) in stats.teams {
-            insert_team(match_guid, &tx, team_num, &team)?;
+            let team_id = insert_team(match_guid, &tx, team_num, &team)?;
+            if team_ids.insert(team_num, team_id).is_some() {
+                println!(
+                    "Cancel insert. Double team num detected in one game: {}",
+                    team_num
+                );
+                return Ok(());
+            }
             for (player_name, player) in &team.players {
                 if player.primary_id.contains("Unknown") {
                     // Ignore Bots
@@ -53,7 +61,7 @@ impl Repository {
                 }
 
                 upsert_global_player(&tx, player_name, &player)?;
-                let player_id = insert_player(match_guid, &tx, team_num, player)?;
+                let player_id = insert_player(match_guid, &tx, team_id, player)?;
                 if player_ids
                     .insert(player.primary_id.clone(), player_id)
                     .is_some()
@@ -100,32 +108,59 @@ impl Repository {
 
         println!("Inserting stat feed events...");
         for statfeed_event in &stats.statfeed_events {
-            if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
-                let secondary_target = match &statfeed_event.secondary_target_primary_id {
-                    Some(id) => Some(
-                        player_ids
-                            .get(id)
-                            .expect("Secondary target not inserted for this statfeed event."),
-                    ),
-                    None => None,
-                };
-
-                tx.execute(
-                    include_str!("sql/insert_statfeed_events.sql"),
-                    params![
-                        match_guid,
-                        statfeed_event.timestamp,
-                        statfeed_event.event_name,
-                        statfeed_event.event_type,
-                        player_id,
-                        secondary_target
-                    ],
-                )?;
-            }
+            insert_statfeed_event(match_guid, &player_ids, &tx, statfeed_event)?;
         }
+
+        println!("Inserting timeline...");
+        for timeline_instant in &stats.timeline {
+            let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
+
+            tx.execute(
+                include_str!("sql/insert_timeline_instant.sql"),
+                params![
+                    match_guid,
+                    timeline_instant.timestamp,
+                    team_id,
+                    timeline_instant.ball_state.speed
+                ],
+            )?;
+        }
+
         tx.commit()?;
         Ok(())
     }
+}
+
+fn insert_statfeed_event(
+    match_guid: uuid::Uuid,
+    player_ids: &HashMap<String, i64>,
+    tx: &rusqlite::Transaction<'_>,
+    statfeed_event: &intermediate_models::StatfeedEventStatistic,
+) -> Result<(), rusqlite::Error> {
+    Ok(
+        if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
+            let secondary_target = match &statfeed_event.secondary_target_primary_id {
+                Some(id) => Some(
+                    player_ids
+                        .get(id)
+                        .expect("Secondary target not inserted for this statfeed event."),
+                ),
+                None => None,
+            };
+
+            tx.execute(
+                include_str!("sql/insert_statfeed_events.sql"),
+                params![
+                    match_guid,
+                    statfeed_event.timestamp,
+                    statfeed_event.event_name,
+                    statfeed_event.event_type,
+                    player_id,
+                    secondary_target
+                ],
+            )?;
+        },
+    )
 }
 
 fn insert_ball_hit(
@@ -252,7 +287,7 @@ fn insert_player_stats(
 fn insert_player(
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
-    team_num: u8,
+    team_id: i64,
     player: &intermediate_models::PlayerStats,
 ) -> Result<i64, rusqlite::Error> {
     println!("Inserting player...");
@@ -260,7 +295,7 @@ fn insert_player(
         include_str!("sql/insert_player.sql"),
         params![
             match_guid,
-            team_num,
+            team_id,
             player.primary_id,
             player.name,
             player.shortcut,
@@ -296,7 +331,7 @@ fn insert_team(
     tx: &rusqlite::Transaction<'_>,
     team_num: u8,
     team: &crate::core::models::intermediate_models::TeamStats,
-) -> Result<(), rusqlite::Error> {
+) -> Result<i64, rusqlite::Error> {
     println!("Inserting team...");
 
     tx.execute(
@@ -310,7 +345,7 @@ fn insert_team(
             team.color_secondary
         ],
     )?;
-    Ok(())
+    Ok(tx.last_insert_rowid())
 }
 
 fn insert_match(
