@@ -1,9 +1,12 @@
 use uuid::Uuid;
 
 use crate::core::models::{
-    api_models::{BallHit, CrossbarHit, Event, GamePlayer, GoalScored, Player, Team, UpdateState},
+    api_models::{
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GamePlayer, GoalScored, Player, Team,
+        UpdateState,
+    },
     intermediate_models::{
-        CrossbarHitStatistic, GameStats, Goal, PlayerStats, TeamStats, TimeState,
+        ClockSample, CrossbarHitStatistic, GameStats, Goal, PlayerStats, TeamStats, TimeState,
     },
 };
 
@@ -65,7 +68,9 @@ impl GameStatCollector {
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
             Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
-            // Event::ClockUpdatedSeconds(clock_updated_seconds) => todo!(),
+            Event::ClockUpdatedSeconds(clock_updated_seconds) => {
+                self.insert_clock_samples(clock_updated_seconds)
+            }
             Event::CountdownBegin(_) => {
                 self.state.count_down = true;
                 self.state.goal_scored = false;
@@ -181,13 +186,6 @@ impl GameStatCollector {
 
         self.stats.arena_name.get_or_insert(update_state.game.arena);
 
-        if self.stats.winner.is_none() {
-            self.stats.winner = update_state
-                .game
-                .b_has_winner
-                .then_some(update_state.game.winner);
-        }
-
         for team in update_state.game.teams {
             let score = team.score;
             self.get_or_create_team_stats_mut(team).score = score;
@@ -238,13 +236,17 @@ impl GameStatCollector {
     }
 
     fn insert_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {
-        if let Some(player_stats) = self.get_player_stats(&crossbar_hit.ball_last_touch.player) {
-            player_stats.crossbar_hits.push(CrossbarHitStatistic {
-                hit_speed: crossbar_hit.ball_speed,
-                last_touch_speed: crossbar_hit.ball_last_touch.speed,
-                location: crossbar_hit.ball_location,
-                impact_force: crossbar_hit.impact_force,
-            });
+        if let Some(timestamp) = self.state.timestamp {
+            if let Some(player_stats) = self.get_player_stats(&crossbar_hit.ball_last_touch.player)
+            {
+                player_stats.crossbar_hits.push(CrossbarHitStatistic {
+                    timestamp,
+                    ball_speed: crossbar_hit.ball_speed,
+                    impact_force: crossbar_hit.impact_force,
+                    location: crossbar_hit.ball_location,
+                    last_touch_speed: crossbar_hit.ball_last_touch.speed,
+                });
+            }
         }
     }
 
@@ -252,6 +254,16 @@ impl GameStatCollector {
         self.state.goal_scored = true;
         if let Some(player_stats) = self.get_player_stats(&goal_scored.scorer) {
             player_stats.goal_stats.push(Goal {});
+        }
+    }
+
+    fn insert_clock_samples(&mut self, clock_updated_seconds: ClockUpdatedSeconds) {
+        if let Some(timestamp) = self.state.timestamp {
+            self.stats.clock_samples.push(ClockSample {
+                timestamp,
+                time_seconds: clock_updated_seconds.time_seconds,
+                is_overtime: clock_updated_seconds.b_overtime,
+            });
         }
     }
 }
@@ -270,21 +282,39 @@ fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
 
 fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: i64) {
     if player.b_boosting == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_boosting += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_boosting += time_delta;
     }
     if player.b_demolished == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_demolished += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_demolished += time_delta;
     }
     if player.b_on_ground == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_on_ground += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_on_ground += time_delta;
     }
     if player.b_on_wall == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_on_wall += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_on_wall += time_delta;
     }
     if player.b_powersliding == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_powersliding += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_powersliding += time_delta;
     }
     if player.b_supersonic == Some(true) {
-        player_stats.advanced_stats.get_or_insert_default().time_supersonic += time_delta;
+        player_stats
+            .advanced_stats
+            .get_or_insert_default()
+            .time_supersonic += time_delta;
     }
 }

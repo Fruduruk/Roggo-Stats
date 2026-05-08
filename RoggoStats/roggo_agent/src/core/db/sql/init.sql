@@ -98,6 +98,7 @@ create table if not exists crossbar_hits (
     x real not null,
     y real not null,
     z real not null,
+    last_touch_speed real not null,
     last_touch_player_id integer not null,
     foreign key (match_guid) references matches(match_guid),
     foreign key (last_touch_player_id) references players(id)
