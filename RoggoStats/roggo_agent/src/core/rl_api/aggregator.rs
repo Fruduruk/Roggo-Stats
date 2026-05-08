@@ -3,9 +3,11 @@ use std::collections::HashSet;
 use uuid::Uuid;
 
 use crate::core::{
-    db::repository::Repository, deserializer::deserialize, game_stat_collector::GameStatCollector,
-    models::api_models::Event,
+    bl::game_stat_collector::GameStatCollector,
+    db::repository::Repository,
+    rl_api::{deserializer::deserialize, models::Event},
 };
+
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
@@ -55,7 +57,10 @@ impl Aggregator {
                     stats.had_overtime
                 );
 
-                println!("Excluded timeline instants: {}",stats.excluded_timeline_instants);
+                println!(
+                    "Excluded timeline instants: {}",
+                    stats.excluded_timeline_instants
+                );
                 // for (_, team) in &stats.teams {
                 //     for (_, player) in &team.players {
                 //         if let Some(advanced_stats) = &player.advanced_stats {

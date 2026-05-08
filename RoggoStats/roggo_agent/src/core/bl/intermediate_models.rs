@@ -2,7 +2,35 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::models::api_models::{Ball, BallState, Location};
+use crate::core::rl_api::models::{BallState, Location};
+
+#[derive(Debug)]
+pub struct GameState {
+    pub in_replay: bool,
+    pub finished: bool,
+    pub in_overtime: bool,
+    pub timestamp: Option<i64>,
+    pub last_state_update_timestamp: Option<i64>,
+    pub state_update_timestamp: Option<i64>,
+    pub count_down: bool,
+    pub goal_scored: bool,
+}
+
+impl Default for GameState {
+    fn default() -> GameState {
+        Self {
+            in_replay: false,
+            finished: false,
+            in_overtime: false,
+            timestamp: None,
+            last_state_update_timestamp: None,
+            state_update_timestamp: None,
+            count_down: false,
+            goal_scored: false,
+        }
+    }
+}
+
 
 #[derive(Debug)]
 pub struct GameStats {

@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 
 use rusqlite::{Connection, Result, params};
 
-use crate::core::models::intermediate_models;
+use crate::core::bl::intermediate_models;
 
 pub struct Repository {
     connection: Connection,
@@ -100,7 +100,7 @@ impl Repository {
             if let Some(player_id) = player_ids.get(&ball_hit.player_primary_id) {
                 let ball_hit_id = insert_ball_hit(match_guid, &tx, ball_hit)?;
                 tx.execute(
-                    include_str!("sql/insert_ball_hit_players.sql"),
+                    include_str!("sql/insert/ball_hit_players.sql"),
                     params![ball_hit_id, player_id],
                 )?;
             }
@@ -116,7 +116,7 @@ impl Repository {
             let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
 
             tx.execute(
-                include_str!("sql/insert_timeline_instant.sql"),
+                include_str!("sql/insert/timeline_instant.sql"),
                 params![
                     match_guid,
                     timeline_instant.timestamp,
@@ -149,7 +149,7 @@ fn insert_statfeed_event(
             };
 
             tx.execute(
-                include_str!("sql/insert_statfeed_events.sql"),
+                include_str!("sql/insert/statfeed_events.sql"),
                 params![
                     match_guid,
                     statfeed_event.timestamp,
@@ -169,7 +169,7 @@ fn insert_ball_hit(
     ball_hit: &intermediate_models::BallHitStatistic,
 ) -> Result<i64, rusqlite::Error> {
     tx.execute(
-        include_str!("sql/insert_ball_hits.sql"),
+        include_str!("sql/insert/ball_hits.sql"),
         params![
             match_guid,
             ball_hit.timestamp,
@@ -204,7 +204,7 @@ fn insert_goal_details(
         .get(&goal_details.last_touch_primary_id)
         .expect("Last touch player not inserted for this goal.");
     tx.execute(
-        include_str!("sql/insert_goal_details.sql"),
+        include_str!("sql/insert/goal_details.sql"),
         params![
             match_guid,
             goal_details.timestamp,
@@ -229,7 +229,7 @@ fn insert_crossbar_hit(
     crossbar_hit: &intermediate_models::CrossbarHitStatistic,
 ) -> Result<(), rusqlite::Error> {
     tx.execute(
-        include_str!("sql/insert_crossbar_hits.sql"),
+        include_str!("sql/insert/crossbar_hits.sql"),
         params![
             match_guid,
             crossbar_hit.timestamp,
@@ -251,7 +251,7 @@ fn insert_clock_sample(
     clock_sample: intermediate_models::ClockSample,
 ) -> Result<(), rusqlite::Error> {
     tx.execute(
-        include_str!("sql/insert_clock_samples.sql"),
+        include_str!("sql/insert/clock_samples.sql"),
         params![
             match_guid,
             clock_sample.timestamp,
@@ -270,7 +270,7 @@ fn insert_player_stats(
     println!("Inserting player stats...");
 
     tx.execute(
-        include_str!("sql/insert_player_stats.sql"),
+        include_str!("sql/insert/player_stats.sql"),
         params![
             player_id,
             advanced_player_stats.time_boosting,
@@ -292,7 +292,7 @@ fn insert_player(
 ) -> Result<i64, rusqlite::Error> {
     println!("Inserting player...");
     tx.execute(
-        include_str!("sql/insert_player.sql"),
+        include_str!("sql/insert/player.sql"),
         params![
             match_guid,
             team_id,
@@ -320,7 +320,7 @@ fn upsert_global_player(
     println!("Upserting global player...");
 
     tx.execute(
-        include_str!("sql/upsert_global_player.sql"),
+        include_str!("sql/insert/upsert_global_player.sql"),
         params![player.primary_id, player_name],
     )?;
     Ok(())
@@ -330,12 +330,12 @@ fn insert_team(
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
     team_num: u8,
-    team: &crate::core::models::intermediate_models::TeamStats,
+    team: &intermediate_models::TeamStats,
 ) -> Result<i64, rusqlite::Error> {
     println!("Inserting team...");
 
     tx.execute(
-        include_str!("sql/insert_team.sql"),
+        include_str!("sql/insert/team.sql"),
         params![
             match_guid,
             team.name.clone(),
@@ -356,7 +356,7 @@ fn insert_match(
     println!("Inserting match...");
 
     tx.execute(
-        include_str!("sql/insert_match.sql"),
+        include_str!("sql/insert/match.sql"),
         params![
             match_guid,
             stats.arena_name,
