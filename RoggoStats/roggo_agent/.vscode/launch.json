@@ -11,7 +11,7 @@
       "environment": [
         {
           "name": "import_path",
-          "value": "captures/normal_3v3_full"
+          "value": "captures/normal_3v3_full.7z"
         }
       ],
       "preLaunchTask": "build console",
