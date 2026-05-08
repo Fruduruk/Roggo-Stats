@@ -4,7 +4,7 @@ use crate::core::models::{
     api_models,
     intermediate_models::{
         BallHitStatistic, ClockSample, CrossbarHitStatistic, GameStats, GoalDetails, PlayerStats,
-        StatfeedEventStatistic, TeamStats, TimeState,
+        StatfeedEventStatistic, TeamStats, TimelineInstant,
     },
 };
 
@@ -208,8 +208,8 @@ impl GameStatCollector {
             self.stats.duration += delta;
         }
 
-        if self.time_state_update_reasonable(&update_state) {
-            self.update_time_state(&update_state);
+        if self.timeline_update_reasonable(&update_state) {
+            self.update_timeline(&update_state);
         }
 
         self.stats.arena_name.get_or_insert(update_state.game.arena);
@@ -252,15 +252,17 @@ impl GameStatCollector {
             .or_insert(PlayerStats::new(player.name, player.primary_id))
     }
 
-    fn time_state_update_reasonable(&self, _update_state: &api_models::UpdateState) -> bool {
+    fn timeline_update_reasonable(&self, _update_state: &api_models::UpdateState) -> bool {
         true
     }
 
-    fn update_time_state(&mut self, update_state: &api_models::UpdateState) {
-        // self.stats.states.push(TimeState {
-        //     timestamp: self.state.current_timestamp,
-        //     ball_speed: update_state.game.ball_state.speed,
-        // });
+    fn update_timeline(&mut self, update_state: &api_models::UpdateState) {
+        if let Some(timestamp) = self.state.timestamp {
+            self.stats.timeline.push(TimelineInstant {
+                timestamp,
+                ball_state: update_state.game.ball_state.clone(),
+            });
+        }
     }
 
     fn insert_crossbar_hit(&mut self, crossbar_hit: api_models::CrossbarHit) {

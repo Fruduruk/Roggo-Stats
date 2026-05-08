@@ -8,13 +8,13 @@ create table if not exists matches (
     deleted boolean not null
 );
 create table if not exists teams (
+    id integer not null primary key autoincrement,
     match_guid uuid not null,
     team_num integer not null,
     name text not null,
     score integer not null,
     color_primary text not null,
     color_secondary text not null,
-    primary key (match_guid, team_num),
     foreign key (match_guid) references matches(match_guid)
 );
 create table if not exists global_players (
@@ -25,7 +25,7 @@ create table if not exists global_players (
 create table if not exists players (
     id integer not null primary key autoincrement,
     match_guid uuid not null,
-    team_num integer not null,
+    team_id integer not null,
     global_player_id integer not null,
     display_name text not null,
     shortcut integer not null,
@@ -40,7 +40,7 @@ create table if not exists players (
     
     unique(match_guid, global_player_id),
     foreign key (match_guid) references matches(match_guid),
-    foreign key (match_guid, team_num) references teams(match_guid, team_num),
+    foreign key (team_id) references teams(id),
     foreign key (global_player_id) references global_players(primary_id)
 );
 create table if not exists player_stats (
@@ -125,4 +125,15 @@ create table if not exists statfeed_events (
     foreign key (match_guid) references matches(match_guid),
     foreign key (main_target_player_id) references players(id),
     foreign key (secondary_target_player_id) references players(id)
+);
+
+create table if not exists timeline (
+    id integer not null primary key autoincrement,
+    match_guid uuid not null,
+    timestamp_ms integer not null,
+    last_touch_team_id integer,
+    ball_speed real not null,
+    
+    foreign key (last_touch_team_id) references teams(id),
+    foreign key (match_guid) references matches(match_guid)
 );
