@@ -1,29 +1,25 @@
 use eframe::egui;
-use futures_util::StreamExt;
-use gloo_net::websocket::{Message, futures::WebSocket};
+use gloo_net::http::Request;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
+use uuid::Uuid;
 
-const LOCAL_WS_ADDR: &str = "ws://127.0.0.1:49124";
+#[derive(Debug, Serialize, Deserialize)]
+struct MatchDto {
+    match_guid: Uuid,
+    arena: String,
+    duration_seconds: i64,
+}
 
+const LOCAL_HTTP_ADDR: &str = "http://127.0.0.1:3000";
 struct App {
-    latest_event: Arc<Mutex<String>>,
-    latest_json: Arc<Mutex<String>>,
+    response_text: Arc<Mutex<String>>,
 }
 
 impl App {
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        let latest_event = Arc::new(Mutex::new("Noch keine Daten".to_owned()));
-        let latest_json = Arc::new(Mutex::new(String::new()));
-
-        start_websocket_reader(
-            latest_event.clone(),
-            latest_json.clone(),
-            cc.egui_ctx.clone(),
-        );
-
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self {
-            latest_event,
-            latest_json,
+            response_text: Arc::new(Mutex::new("Noch keine Antwort.".to_string())),
         }
     }
 }
@@ -33,89 +29,31 @@ impl eframe::App for App {
         egui::CentralPanel::default().show_inside(ui, |ui| {
             ui.heading("Rocket League API Monitor");
 
-            let event = self.latest_event.lock().unwrap().clone();
-            let json = self.latest_json.lock().unwrap().clone();
+            if ui.button("GET /match").clicked() {
+                let response_text = self.response_text.clone();
+                let ctx = ui.ctx().clone();
 
-            ui.label(format!("Event: {event}"));
+                wasm_bindgen_futures::spawn_local(async move {
+                    let result = Request::get(&format!("{LOCAL_HTTP_ADDR}/match"))
+                        .send()
+                        .await;
+
+                    if let Ok(response) = result {
+                        if let Ok(dto) = response.json::<MatchDto>().await {
+                            *response_text.lock().unwrap() = format!("{dto:#?}");
+                        }
+                    }
+
+                    ctx.request_repaint();
+                });
+            }
 
             ui.separator();
 
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                ui.monospace(json);
-            });
+            let text = self.response_text.lock().unwrap();
+            ui.label(text.as_str());
         });
     }
-}
-fn start_websocket_reader(
-    latest_event: Arc<Mutex<String>>,
-    latest_json: Arc<Mutex<String>>,
-    ctx: egui::Context,
-) {
-    wasm_bindgen_futures::spawn_local(async move {
-        let mut ws = match WebSocket::open(LOCAL_WS_ADDR) {
-            Ok(ws) => ws,
-            Err(err) => {
-                *latest_event.lock().unwrap() = "WebSocket Fehler".to_owned();
-                *latest_json.lock().unwrap() = format!("{err:?}");
-                ctx.request_repaint();
-                return;
-            }
-        };
-
-        while let Some(message) = ws.next().await {
-            let message = match message {
-                Ok(Message::Text(text)) => text,
-                Ok(Message::Bytes(bytes)) => String::from_utf8_lossy(&bytes).to_string(),
-                Err(err) => {
-                    *latest_event.lock().unwrap() = "WebSocket Lesefehler".to_owned();
-                    *latest_json.lock().unwrap() = format!("{err:?}");
-                    ctx.request_repaint();
-                    continue;
-                }
-            };
-
-            let outer: serde_json::Value = match serde_json::from_str(&message) {
-                Ok(value) => value,
-                Err(err) => {
-                    *latest_event.lock().unwrap() = "Ungültiges äußeres JSON".to_owned();
-                    *latest_json.lock().unwrap() = format!("{err}\n\n{message}");
-                    ctx.request_repaint();
-                    continue;
-                }
-            };
-
-            let event = outer
-                .get("Event")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("Unknown")
-                .to_owned();
-
-            if event == "UpdateState" {
-                if let Some(data_raw) = outer.get("Data").and_then(serde_json::Value::as_str) {
-                    match serde_json::from_str::<serde_json::Value>(data_raw) {
-                        Ok(data) => {
-                            *latest_event.lock().unwrap() = event;
-                            *latest_json.lock().unwrap() =
-                                serde_json::to_string_pretty(&data).unwrap();
-                        }
-                        Err(err) => {
-                            *latest_event.lock().unwrap() = "Data-JSON Parsefehler".to_owned();
-                            *latest_json.lock().unwrap() =
-                                format!("{err}\n\nData raw:\n{data_raw}");
-                        }
-                    }
-                }
-            } else {
-                *latest_event.lock().unwrap() = event;
-                *latest_json.lock().unwrap() = serde_json::to_string_pretty(&outer).unwrap();
-            }
-
-            ctx.request_repaint();
-        }
-
-        *latest_event.lock().unwrap() = "WebSocket geschlossen".to_owned();
-        ctx.request_repaint();
-    });
 }
 
 #[cfg(target_arch = "wasm32")]
