@@ -19,7 +19,7 @@ pub async fn run_agent(
 
     let (tx, rx) = mpsc::channel::<(i64, String)>(1_000_000);
 
-    let cancel_task = tokio::spawn(async move {
+    let _cancel_task = tokio::spawn(async move {
         if tokio::signal::ctrl_c().await.is_ok() {
             println!("CTRL+C Received.");
             let _ = shutdown_tx.send(true);
@@ -49,7 +49,7 @@ async fn receive_packets(
     let mut count: u128 = 0;
 
     while let Some((timestamp, raw)) = rx.recv().await {
-        // println!("Receiving {}", timestamp);
+        print!("\rReceiving packet number {}", count);
         // packet_collector.next(timestamp, &raw);
         aggregator.insert(timestamp, raw);
         count += 1;

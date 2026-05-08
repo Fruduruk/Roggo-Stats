@@ -213,7 +213,7 @@ pub struct Game {
     #[serde(rename = "Teams")]
     pub teams: Vec<Team>,
     #[serde(rename = "TimeSeconds")]
-    pub time_seconds: i32,
+    pub time_seconds: u16,
     #[serde(rename = "bOvertime")]
     pub b_overtime: bool,
     #[serde(rename = "Ball")]

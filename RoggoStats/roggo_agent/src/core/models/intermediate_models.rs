@@ -12,9 +12,11 @@ pub struct GameStats {
     pub created_at_timestamp: i64,
     pub ended_at_timestamp: i64,
     pub had_overtime: bool,
-    pub winner: Option<String>,
-    pub states: Vec<TimeState>,
     pub teams: HashMap<u8, TeamStats>,
+    pub clock_samples: Vec<ClockSample>,
+    pub crossbar_hits: Vec<CrossbarHitStatistic>,
+
+    pub states: Vec<TimeState>,
 }
 
 impl GameStats {
@@ -26,11 +28,20 @@ impl GameStats {
             created_at_timestamp: timestamp,
             ended_at_timestamp: timestamp,
             had_overtime: false,
-            winner: None,
-            states: vec![],
             teams: HashMap::new(),
+            clock_samples: vec![],
+            crossbar_hits: vec![],
+
+            states: vec![],
         }
     }
+}
+
+#[derive(Debug)]
+pub struct ClockSample {
+    pub timestamp: i64,
+    pub time_seconds: u16,
+    pub is_overtime: bool,
 }
 
 #[derive(Debug)]
@@ -61,10 +72,11 @@ impl TeamStats {
 }
 #[derive(Debug)]
 pub struct CrossbarHitStatistic {
-    pub hit_speed: f64,
-    pub last_touch_speed: f64,
-    pub location: Location,
+    pub timestamp: i64,
+    pub ball_speed: f64,
     pub impact_force: f64,
+    pub location: Location,
+    pub last_touch_speed: f64,
 }
 
 #[derive(Debug)]

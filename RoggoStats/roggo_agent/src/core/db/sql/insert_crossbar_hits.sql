@@ -6,6 +6,7 @@ INSERT INTO crossbar_hits (
     x,
     y,
     z,
+    last_touch_speed,
     last_touch_player_id
   )
 VALUES (
@@ -16,5 +17,6 @@ VALUES (
    ?5,
    ?6,
    ?7,
-   ?8
+   ?8,
+   ?9
   );
