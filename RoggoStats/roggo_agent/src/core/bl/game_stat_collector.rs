@@ -1,39 +1,15 @@
-use uuid::{Uuid, timestamp};
+use uuid::Uuid;
 
-use crate::core::models::{
-    api_models,
-    intermediate_models::{
-        BallHitStatistic, ClockSample, CrossbarHitStatistic, GameStats, GoalDetails, PlayerStats,
-        StatfeedEventStatistic, TeamStats, TimelineInstant,
+use crate::core::{
+    bl::intermediate_models::{
+        BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
+        PlayerStats, StatfeedEventStatistic, TeamStats, TimelineInstant,
+    },
+    rl_api::models::{
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GamePlayer, GoalScored, Player,
+        StatfeedEvent, Team, UpdateState,
     },
 };
-
-#[derive(Debug)]
-struct GameState {
-    in_replay: bool,
-    finished: bool,
-    in_overtime: bool,
-    timestamp: Option<i64>,
-    last_state_update_timestamp: Option<i64>,
-    state_update_timestamp: Option<i64>,
-    count_down: bool,
-    goal_scored: bool,
-}
-
-impl Default for GameState {
-    fn default() -> GameState {
-        Self {
-            in_replay: false,
-            finished: false,
-            in_overtime: false,
-            timestamp: None,
-            last_state_update_timestamp: None,
-            state_update_timestamp: None,
-            count_down: false,
-            goal_scored: false,
-        }
-    }
-}
 
 pub struct GameStatCollector {
     stats: GameStats,
@@ -60,47 +36,45 @@ impl GameStatCollector {
         self.state.finished
     }
 
-    pub fn insert(&mut self, timestamp: i64, event: api_models::Event) {
+    pub fn insert(&mut self, timestamp: i64, event: Event) {
         self.state.timestamp = Some(timestamp);
         // println!("{:#?}", self.state);
         match event {
-            api_models::Event::UpdateState(update_state) => self.insert_update_state(update_state),
-            api_models::Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
-            api_models::Event::ClockUpdatedSeconds(clock_updated_seconds) => {
+            Event::UpdateState(update_state) => self.insert_update_state(update_state),
+            Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
+            Event::ClockUpdatedSeconds(clock_updated_seconds) => {
                 self.insert_clock_samples(clock_updated_seconds)
             }
-            api_models::Event::CountdownBegin(_) => {
+            Event::CountdownBegin(_) => {
                 self.state.count_down = true;
                 self.state.goal_scored = false;
             }
-            api_models::Event::CrossbarHit(crossbar_hit) => self.insert_crossbar_hit(crossbar_hit),
-            api_models::Event::GoalScored(goal_scored) => self.insert_goal_scored(goal_scored),
+            Event::CrossbarHit(crossbar_hit) => self.insert_crossbar_hit(crossbar_hit),
+            Event::GoalScored(goal_scored) => self.insert_goal_scored(goal_scored),
             // Event::MatchCreated(_) => todo!(),
             // Event::MatchInitialized(_) => todo!(),
-            api_models::Event::MatchDestroyed(_) => {
+            Event::MatchDestroyed(_) => {
                 println!("Game finished, because match is destroyed");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
-            api_models::Event::MatchEnded(_match_ended) => {
+            Event::MatchEnded(_match_ended) => {
                 println!("Game finished, because match ended");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
-            api_models::Event::PodiumStart(_) => {
+            Event::PodiumStart(_) => {
                 println!("Game finished, because podium started");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             // Event::RoundStarted(_) => todo!(),
-            api_models::Event::StatfeedEvent(statfeed_event) => {
-                self.insert_stat_feed_event(statfeed_event)
-            }
+            Event::StatfeedEvent(statfeed_event) => self.insert_stat_feed_event(statfeed_event),
             _ => return,
         }
     }
 
-    fn insert_ball_hit(&mut self, ball_hit: api_models::BallHit) {
+    fn insert_ball_hit(&mut self, ball_hit: BallHit) {
         if self.state.in_replay {
             return;
         }
@@ -120,7 +94,7 @@ impl GameStatCollector {
         }
     }
 
-    fn get_player_primary_id(&mut self, player: &api_models::GamePlayer) -> String {
+    fn get_player_primary_id(&mut self, player: &GamePlayer) -> String {
         let player_primary_id = self
             .get_player_stats(&player)
             .expect("Cannot find primary id for player")
@@ -130,10 +104,7 @@ impl GameStatCollector {
     }
 
     #[inline]
-    fn get_player_stats_mut(
-        &mut self,
-        player: &api_models::GamePlayer,
-    ) -> Option<&mut PlayerStats> {
+    fn get_player_stats_mut(&mut self, player: &GamePlayer) -> Option<&mut PlayerStats> {
         self.stats
             .teams
             .get_mut(&player.team_num)?
@@ -142,7 +113,7 @@ impl GameStatCollector {
     }
 
     #[inline]
-    fn get_player_stats(&mut self, player: &api_models::GamePlayer) -> Option<&PlayerStats> {
+    fn get_player_stats(&mut self, player: &GamePlayer) -> Option<&PlayerStats> {
         self.stats
             .teams
             .get(&player.team_num)?
@@ -150,7 +121,7 @@ impl GameStatCollector {
             .get(&player.name)
     }
 
-    fn insert_update_state(&mut self, update_state: api_models::UpdateState) {
+    fn insert_update_state(&mut self, update_state: UpdateState) {
         self.update_game_state(&update_state);
         self.update_game_stats(update_state);
     }
@@ -160,7 +131,7 @@ impl GameStatCollector {
         Some(self.state.state_update_timestamp? - self.state.last_state_update_timestamp?)
     }
 
-    fn update_game_state(&mut self, update_state: &api_models::UpdateState) {
+    fn update_game_state(&mut self, update_state: &UpdateState) {
         self.state.in_replay = update_state.game.b_replay;
         self.state.in_overtime = update_state.game.b_overtime;
         if self.state.in_replay {
@@ -193,7 +164,7 @@ impl GameStatCollector {
     //     }
     // }
 
-    fn update_game_stats(&mut self, update_state: api_models::UpdateState) {
+    fn update_game_stats(&mut self, update_state: UpdateState) {
         if update_state.game.b_replay {
             return;
         }
@@ -233,7 +204,7 @@ impl GameStatCollector {
         }
     }
 
-    fn get_or_create_team_stats_mut(&mut self, team: api_models::Team) -> &mut TeamStats {
+    fn get_or_create_team_stats_mut(&mut self, team: Team) -> &mut TeamStats {
         self.stats
             .teams
             .entry(team.team_num)
@@ -244,7 +215,7 @@ impl GameStatCollector {
             ))
     }
 
-    fn get_or_create_player_stats_mut(&mut self, player: api_models::Player) -> &mut PlayerStats {
+    fn get_or_create_player_stats_mut(&mut self, player: Player) -> &mut PlayerStats {
         self.stats
             .teams
             .get_mut(&player.team_num)
@@ -254,9 +225,9 @@ impl GameStatCollector {
             .or_insert(PlayerStats::new(player.name, player.primary_id))
     }
 
-    fn timeline_update_reasonable(&self, update_state: &api_models::UpdateState) -> bool {
+    fn timeline_update_reasonable(&self, update_state: &UpdateState) -> bool {
         const MIN_DELTA: f64 = 0.5;
-        const RELATIVE_DELTA: f64 = 0.1;
+        // const RELATIVE_DELTA: f64 = 0.1;
 
         if let Some(last_timeline_instant) = self.stats.timeline.last() {
             let last_speed = last_timeline_instant.ball_state.speed;
@@ -268,7 +239,7 @@ impl GameStatCollector {
         }
     }
 
-    fn update_timeline(&mut self, update_state: &api_models::UpdateState) {
+    fn update_timeline(&mut self, update_state: &UpdateState) {
         if let Some(timestamp) = self.state.timestamp {
             self.stats.timeline.push(TimelineInstant {
                 timestamp,
@@ -277,7 +248,7 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_crossbar_hit(&mut self, crossbar_hit: api_models::CrossbarHit) {
+    fn insert_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {
         if let Some(timestamp) = self.state.timestamp {
             if let Some(player_stats) =
                 self.get_player_stats_mut(&crossbar_hit.ball_last_touch.player)
@@ -293,7 +264,7 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_goal_scored(&mut self, goal_scored: api_models::GoalScored) {
+    fn insert_goal_scored(&mut self, goal_scored: GoalScored) {
         if self.state.in_replay {
             return;
         }
@@ -320,7 +291,7 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_clock_samples(&mut self, clock_updated_seconds: api_models::ClockUpdatedSeconds) {
+    fn insert_clock_samples(&mut self, clock_updated_seconds: ClockUpdatedSeconds) {
         if let Some(timestamp) = self.state.timestamp {
             self.stats.clock_samples.push(ClockSample {
                 timestamp,
@@ -330,7 +301,7 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_stat_feed_event(&mut self, statfeed_event: api_models::StatfeedEvent) {
+    fn insert_stat_feed_event(&mut self, statfeed_event: StatfeedEvent) {
         if self.state.in_replay {
             return;
         }
@@ -352,7 +323,7 @@ impl GameStatCollector {
     }
 }
 
-fn update_core_player_stats(player: &api_models::Player, player_stats: &mut PlayerStats) {
+fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
     player_stats.score = player.score;
     player_stats.goals = player.goals;
     player_stats.shots = player.shots;
@@ -364,11 +335,7 @@ fn update_core_player_stats(player: &api_models::Player, player_stats: &mut Play
     player_stats.shortcut = player.shortcut;
 }
 
-fn increment_counters(
-    player_stats: &mut PlayerStats,
-    player: &api_models::Player,
-    time_delta: i64,
-) {
+fn increment_counters(player_stats: &mut PlayerStats, player: &Player, time_delta: i64) {
     if player.b_boosting == Some(true) {
         player_stats
             .advanced_stats

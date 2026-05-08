@@ -26,26 +26,26 @@ pub struct RawPacket {
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy, serde::Deserialize)]
 pub enum RawEvent {
-    UpdateState,         // UpdateState:441
-    BallHit,             // BallHit:217
-    ClockUpdatedSeconds, // ClockUpdatedSeconds:301
-    CountdownBegin,      // CountdownBegin:9
-    CrossbarHit,         // CrossbarHit:2
+    UpdateState,     
+    BallHit,         
+    ClockUpdatedSeconds,
+    CountdownBegin,      
+    CrossbarHit,         
     GoalReplayEnd,
     GoalReplayStart,
     GoalReplayWillEnd,
     ReplayWillEnd,
-    GoalScored,       // GoalScored:16
-    MatchCreated,     // MatchCreated:1
-    MatchInitialized, // MatchInitialized:1
-    MatchDestroyed,   // MatchDestroyed:1
-    MatchEnded,       // MatchEnded:1
+    GoalScored,       
+    MatchCreated,     
+    MatchInitialized, 
+    MatchDestroyed,   
+    MatchEnded,       
     MatchPaused,
     MatchUnpaused,
-    PodiumStart, // PodiumStart:1
+    PodiumStart, 
     ReplayCreated,
-    RoundStarted,  // RoundStarted:9
-    StatfeedEvent, // StatfeedEvent:38
+    RoundStarted,
+    StatfeedEvent,
 }
 
 #[derive(PartialEq, Debug, Clone)]

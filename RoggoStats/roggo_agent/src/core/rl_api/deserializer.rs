@@ -1,4 +1,5 @@
-use crate::core::models::api_models::{Event, RawPacket};
+use crate::core::rl_api::models::{Event, RawPacket};
+
 
 pub fn deserialize(raw: &String) -> Vec<Event> {
     let mut events = vec![];
