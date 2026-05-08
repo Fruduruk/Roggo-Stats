@@ -20,6 +20,8 @@ pub struct GameStats {
     pub statfeed_events: Vec<StatfeedEventStatistic>,
 
     pub timeline: Vec<TimelineInstant>,
+
+    pub excluded_timeline_instants: u128,
 }
 
 impl GameStats {
@@ -39,6 +41,7 @@ impl GameStats {
             statfeed_events: vec![],
 
             timeline: vec![],
+            excluded_timeline_instants: 0,
         }
     }
 }

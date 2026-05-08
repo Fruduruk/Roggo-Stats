@@ -55,6 +55,7 @@ impl Aggregator {
                     stats.had_overtime
                 );
 
+                println!("Excluded timeline instants: {}",stats.excluded_timeline_instants);
                 // for (_, team) in &stats.teams {
                 //     for (_, player) in &team.players {
                 //         if let Some(advanced_stats) = &player.advanced_stats {
