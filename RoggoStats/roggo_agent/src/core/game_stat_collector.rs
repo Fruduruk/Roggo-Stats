@@ -210,6 +210,8 @@ impl GameStatCollector {
 
         if self.timeline_update_reasonable(&update_state) {
             self.update_timeline(&update_state);
+        } else {
+            self.stats.excluded_timeline_instants += 1;
         }
 
         self.stats.arena_name.get_or_insert(update_state.game.arena);
@@ -252,8 +254,18 @@ impl GameStatCollector {
             .or_insert(PlayerStats::new(player.name, player.primary_id))
     }
 
-    fn timeline_update_reasonable(&self, _update_state: &api_models::UpdateState) -> bool {
-        true
+    fn timeline_update_reasonable(&self, update_state: &api_models::UpdateState) -> bool {
+        const MIN_DELTA: f64 = 0.5;
+        const RELATIVE_DELTA: f64 = 0.1;
+
+        if let Some(last_timeline_instant) = self.stats.timeline.last() {
+            let last_speed = last_timeline_instant.ball_state.speed;
+            let speed = update_state.game.ball_state.speed;
+
+            (speed - last_speed).abs() >= MIN_DELTA
+        } else {
+            true
+        }
     }
 
     fn update_timeline(&mut self, update_state: &api_models::UpdateState) {
