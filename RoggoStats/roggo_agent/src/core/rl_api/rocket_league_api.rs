@@ -1,5 +1,6 @@
+use anyhow::{Context, Result};
+
 use std::{
-    error::Error,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
@@ -12,7 +13,7 @@ const ROCKET_LEAGUE_TCP_ADDR: &str = "127.0.0.1:49123";
 pub async fn read_rocket_league_api(
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+) -> Result<()> {
     loop {
         println!("Connecting to Rocket League API...");
 
@@ -23,6 +24,9 @@ pub async fn read_rocket_league_api(
                 for i in (1..=10).rev() {
                     println!("Retrying in {i}s");
                     tokio::time::sleep(Duration::from_secs(1)).await;
+                    if *shutdown_rx.borrow() {
+                        return Ok(());
+                    }
                 }
                 continue;
             }
@@ -34,7 +38,8 @@ pub async fn read_rocket_league_api(
 
         loop {
             if *shutdown_rx.borrow() {
-                break;
+                println!("Shutting down rocket league api connection...");
+                return Ok(());
             }
 
             if let Ok(n) = rl_stream.read(&mut buffer).await {
