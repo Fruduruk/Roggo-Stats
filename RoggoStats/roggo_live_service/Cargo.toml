@@ -10,3 +10,5 @@ wasm-bindgen-futures = "0.4"
 futures-util = "0.3"
 gloo-net = "0.6"
 web-sys = "0.3"
+serde = { version = "1.0.228", features = ["derive"] }
+uuid = { version = "1", features = ["serde"] }
