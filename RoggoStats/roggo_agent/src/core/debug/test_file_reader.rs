@@ -1,12 +1,11 @@
-use std::error::Error;
-
+use anyhow::{Context,Result};
 use std::ffi::OsStr;
+use std::fs::File;
 use std::{
     fs,
     path::{Path, PathBuf},
 };
 use tokio::sync::{mpsc, watch};
-use std::fs::File;
 
 use sevenz_rust::{Password, SevenZReader};
 
@@ -14,8 +13,8 @@ pub async fn read_test_files(
     dir: impl AsRef<Path>,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let mut files: Vec<PathBuf> = fs::read_dir(dir)?
+) -> Result<()> {
+    let mut files: Vec<PathBuf> = fs::read_dir(dir).context("Reading directory failed.")?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
@@ -53,7 +52,7 @@ pub async fn read_test_files_from_7z(
     path: impl AsRef<OsStr>,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+) -> Result<()> {
     let archive_path = Path::new(&path);
 
     let file = File::open(archive_path)?;
@@ -84,8 +83,6 @@ pub async fn read_test_files_from_7z(
             break;
         }
 
-        // tokio::time::sleep(std::time::Duration::from_millis(7)).await; // 130 inputs per second
-
         let raw = String::from_utf8_lossy(&content).into_owned();
 
         let file_name_timestamp = Path::new(&filename)
@@ -96,7 +93,6 @@ pub async fn read_test_files_from_7z(
             .parse()
             .expect("Not a valid i64");
 
-        // println!("Sending {}", file.to_str().unwrap());
         if let Err(err) = tx.send((file_name_timestamp, raw)).await {
             println!("Failed to send {}", err);
             break;
