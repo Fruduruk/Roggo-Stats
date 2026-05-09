@@ -1,4 +1,3 @@
-use anyhow::{Context,Result};
 use std::ffi::OsStr;
 use std::fs::File;
 use std::{
@@ -13,8 +12,9 @@ pub async fn read_test_files(
     dir: impl AsRef<Path>,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
-) -> Result<()> {
-    let mut files: Vec<PathBuf> = fs::read_dir(dir).context("Reading directory failed.")?
+) {
+    let mut files: Vec<PathBuf> = fs::read_dir(dir)
+        .expect("Could not read directory")
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
@@ -29,7 +29,7 @@ pub async fn read_test_files(
 
         // tokio::time::sleep(std::time::Duration::from_millis(7)).await; // 130 inputs per second
 
-        let raw = fs::read_to_string(&file)?;
+        let raw = fs::read_to_string(&file).expect("Failed to read string");
 
         let file_name_timestamp = file
             .file_stem()
@@ -45,35 +45,37 @@ pub async fn read_test_files(
             break;
         }
     }
-    Ok(())
 }
 
 pub async fn read_test_files_from_7z(
     path: impl AsRef<OsStr>,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
-) -> Result<()> {
+) {
     let archive_path = Path::new(&path);
 
-    let file = File::open(archive_path)?;
-    let len = file.metadata()?.len();
+    let file = File::open(archive_path).expect("Failed to open file");
+    let len = file.metadata().expect("Failed to fetch metadata").len();
 
-    let mut reader = SevenZReader::new(file, len, Password::empty())?;
+    let mut reader =
+        SevenZReader::new(file, len, Password::empty()).expect("Failed to open 7z file");
 
     let mut files: Vec<(String, Vec<u8>)> = Vec::new();
 
-    reader.for_each_entries(|entry, reader| {
-        if entry.is_directory() {
-            return Ok(true);
-        }
+    reader
+        .for_each_entries(|entry, reader| {
+            if entry.is_directory() {
+                return Ok(true);
+            }
 
-        let mut content = Vec::new();
-        reader.read_to_end(&mut content)?;
+            let mut content = Vec::new();
+            reader.read_to_end(&mut content)?;
 
-        files.push((entry.name().to_string(), content));
+            files.push((entry.name().to_string(), content));
 
-        Ok(true)
-    })?;
+            Ok(true)
+        })
+        .expect("Failed to read entries");
 
     files.sort_by(|a, b| a.0.cmp(&b.0));
 
@@ -94,9 +96,8 @@ pub async fn read_test_files_from_7z(
             .expect("Not a valid i64");
 
         if let Err(err) = tx.send((file_name_timestamp, raw)).await {
-            println!("Failed to send {}", err);
+            tracing::error!(error = %err, "Failed to send packet");
             break;
         }
     }
-    Ok(())
 }

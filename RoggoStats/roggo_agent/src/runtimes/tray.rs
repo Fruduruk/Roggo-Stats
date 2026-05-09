@@ -12,11 +12,13 @@ use winit::{
     window::WindowId,
 };
 
-use crate::core::agent::run_agent;
+use crate::core::{agent::run_agent, logging::init_logging};
 
 const WEB_UI_URL: &str = "https://frudd.dev";
 
 pub fn run() {
+    let _log_guard = init_logging();
+
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
     run_agent_thread(shutdown_tx.clone(), shutdown_rx);
     run_tray(shutdown_tx);
@@ -24,11 +26,17 @@ pub fn run() {
 
 fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiver<bool>) {
     std::thread::spawn(move || {
-        let runtime = tokio::runtime::Runtime::new().expect("Could not create tokio runtime.");
+        let runtime = match tokio::runtime::Runtime::new() {
+            Ok(runtime) => runtime,
+            Err(err) => {
+                tracing::error!(error = %err, "Failed to create Tokio runtime");
+                return;
+            }
+        };
 
         runtime.block_on(async {
             if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx))).await {
-                eprintln!("Agent Fehler: {err}");
+                tracing::error!(error = %err, "Roggo agent failed");
             }
         });
     });
