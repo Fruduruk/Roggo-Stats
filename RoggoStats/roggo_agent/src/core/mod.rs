@@ -1,3 +1,4 @@
+
 pub mod agent;
 pub mod api;
 pub mod bl;
@@ -14,8 +15,8 @@ pub enum Error {
     #[error("Web API error: {0}")]
     WebAPIError(#[from] crate::core::api::Error),
 
-    #[error("Agent tasks failed: {0:?}")]
-    Multiple(Vec<Error>),
+    #[error("Shutdown error: {0}")]
+    ShutdownError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
