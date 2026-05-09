@@ -6,12 +6,7 @@ use serde::{Deserialize, Serialize};
 use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct MatchDto {
-    match_guid: Uuid,
-    arena: String,
-    duration_seconds: i64,
-}
+
 
 #[tokio::main]
 async fn main() {

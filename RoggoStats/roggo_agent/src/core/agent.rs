@@ -1,7 +1,7 @@
 use tokio::sync::mpsc;
 use tokio::sync::watch;
 
-use crate::core::api::web_api::WebApi;
+use crate::core::api::web_api;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
 
@@ -55,8 +55,7 @@ pub async fn run_agent(
 
 async fn start_web_api(shutdown_rx: watch::Receiver<bool>) -> Result<()> {
     tracing::info!("Web API is running");
-    let mut web_api = WebApi::new(shutdown_rx)?;
-    web_api.run().await?;
+    web_api::run(shutdown_rx).await?;
     Ok(())
 }
 
@@ -99,7 +98,7 @@ async fn receive_packets(
         count += 1;
     }
 
-    tracing::info!("Packet channel closed");
+    tracing::info!("Shutting down aggregator...");
 
     Ok(())
 }
