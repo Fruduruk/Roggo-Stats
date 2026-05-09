@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::Path};
 use rusqlite::{Connection, params};
 
 use crate::core::bl::intermediate_models;
-use crate::core::db::error::Result;
+use crate::core::db::Result;
 
 pub struct Repository {
     connection: Connection,
@@ -15,7 +15,6 @@ impl Repository {
             connection: Connection::open(path)?,
         };
         repo.init()?;
-
         Ok(repo)
     }
 
