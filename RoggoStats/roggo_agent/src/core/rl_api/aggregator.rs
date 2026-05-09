@@ -5,9 +5,8 @@ use uuid::Uuid;
 use crate::core::{
     bl::game_stat_collector::GameStatCollector,
     db::repository::Repository,
-    rl_api::{deserializer::deserialize, models::Event},
+    rl_api::{deserializer::deserialize, error::Result, models::Event},
 };
-
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
@@ -15,23 +14,26 @@ pub struct Aggregator {
 }
 
 impl Aggregator {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> Result<Self> {
+        let repository = Repository::new("test.db")?;
+
+        Ok(Self {
             collector: None,
             collected_matches: HashSet::new(),
-            repository: Repository::new("test.db").expect("Database connection failed"),
-        }
+            repository,
+        })
     }
 
-    pub fn insert(&mut self, timestamp: i64, raw: String) {
+    pub fn insert(&mut self, timestamp: i64, raw: String) -> Result<()> {
         for event in deserialize(&raw) {
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event);
-            self.export_collector_if_finished();
+            self.export_collector_if_finished()?;
         }
+        Ok(())
     }
 
-    fn export_collector_if_finished(&mut self) {
+    fn export_collector_if_finished(&mut self) -> Result<()> {
         let finished = self
             .collector
             .as_ref()
@@ -40,10 +42,10 @@ impl Aggregator {
         if finished {
             if let Some(collector) = self.collector.take() {
                 self.collected_matches.insert(collector.get_match_guid());
-                println!("Game {} finished.", collector.get_match_guid());
+                tracing::debug!("Game {} finished.", collector.get_match_guid());
                 let stats = collector.export();
 
-                println!(
+                tracing::debug!(
                     "Start: {} End: {} Duration: {} Had Overtime: {}",
                     chrono::DateTime::from_timestamp_millis(stats.created_at_timestamp)
                         .unwrap()
@@ -57,23 +59,17 @@ impl Aggregator {
                     stats.had_overtime
                 );
 
-                println!(
+                tracing::debug!(
                     "Excluded timeline instants: {}",
                     stats.excluded_timeline_instants
                 );
-                // for (_, team) in &stats.teams {
-                //     for (_, player) in &team.players {
-                //         if let Some(advanced_stats) = &player.advanced_stats {
-                //             println!("{}: {:#?}", player.name, advanced_stats);
-                //         }
-                //     }
-                // }
 
-                if let Err(error) = self.repository.insert_game_stats(stats) {
-                    println!("Could not save game stats. {error}");
+                if let Err(err) = self.repository.insert_game_stats(stats) {
+                    tracing::error!(error= %err, "failed to save match stats");
                 }
             }
         }
+        Ok(())
     }
 
     fn cancel_if_outdated(&mut self, match_guid: Option<Uuid>) {

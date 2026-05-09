@@ -1,8 +1,9 @@
 use std::{collections::HashMap, path::Path};
 
-use rusqlite::{Connection, Result, params};
+use rusqlite::{Connection, params};
 
 use crate::core::bl::intermediate_models;
+use crate::core::db::error::Result;
 
 pub struct Repository {
     connection: Connection,
@@ -48,7 +49,7 @@ impl Repository {
         for (team_num, team) in stats.teams {
             let team_id = insert_team(match_guid, &tx, team_num, &team)?;
             if team_ids.insert(team_num, team_id).is_some() {
-                println!(
+                tracing::warn!(
                     "Cancel insert. Double team num detected in one game: {}",
                     team_num
                 );
@@ -66,7 +67,7 @@ impl Repository {
                     .insert(player.primary_id.clone(), player_id)
                     .is_some()
                 {
-                    println!(
+                    tracing::warn!(
                         "Cancel insert. Double primary id detected in one game: {}",
                         player.primary_id
                     );
@@ -77,25 +78,25 @@ impl Repository {
                     insert_player_stats(&tx, player_id, advanced_player_stats)?;
                 }
 
-                println!("Inserting crossbar hits...");
+                tracing::debug!("Inserting crossbar hits...");
                 for crossbar_hit in &player.crossbar_hits {
                     insert_crossbar_hit(match_guid, &tx, player_id, crossbar_hit)?;
                 }
             }
         }
 
-        println!("Inserting clock samples...");
+        tracing::debug!("Inserting clock samples...");
 
         for clock_sample in stats.clock_samples {
             insert_clock_sample(match_guid, &tx, clock_sample)?;
         }
 
-        println!("Inserting goal details...");
+        tracing::debug!("Inserting goal details...");
         for goal_details in stats.goal_details {
             insert_goal_details(match_guid, &player_ids, &tx, goal_details)?;
         }
 
-        println!("Inserting ball hits...");
+        tracing::debug!("Inserting ball hits...");
         for ball_hit in &stats.ball_hits {
             if let Some(player_id) = player_ids.get(&ball_hit.player_primary_id) {
                 let ball_hit_id = insert_ball_hit(match_guid, &tx, ball_hit)?;
@@ -106,12 +107,12 @@ impl Repository {
             }
         }
 
-        println!("Inserting stat feed events...");
+        tracing::debug!("Inserting stat feed events...");
         for statfeed_event in &stats.statfeed_events {
             insert_statfeed_event(match_guid, &player_ids, &tx, statfeed_event)?;
         }
 
-        println!("Inserting timeline...");
+        tracing::debug!("Inserting timeline...");
         for timeline_instant in &stats.timeline {
             let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
 
@@ -136,7 +137,7 @@ fn insert_statfeed_event(
     player_ids: &HashMap<String, i64>,
     tx: &rusqlite::Transaction<'_>,
     statfeed_event: &intermediate_models::StatfeedEventStatistic,
-) -> Result<(), rusqlite::Error> {
+) -> Result<()> {
     Ok(
         if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
             let secondary_target = match &statfeed_event.secondary_target_primary_id {
@@ -167,7 +168,7 @@ fn insert_ball_hit(
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
     ball_hit: &intermediate_models::BallHitStatistic,
-) -> Result<i64, rusqlite::Error> {
+) -> Result<i64> {
     tx.execute(
         include_str!("sql/insert/ball_hits.sql"),
         params![
@@ -188,7 +189,7 @@ fn insert_goal_details(
     player_ids: &HashMap<String, i64>,
     tx: &rusqlite::Transaction<'_>,
     goal_details: intermediate_models::GoalDetails,
-) -> Result<(), rusqlite::Error> {
+) -> Result<()> {
     let scorer_id = player_ids
         .get(&goal_details.scorer_primary_id)
         .expect("Scorer not inserted for this goal.");
@@ -227,7 +228,7 @@ fn insert_crossbar_hit(
     tx: &rusqlite::Transaction<'_>,
     player_id: i64,
     crossbar_hit: &intermediate_models::CrossbarHitStatistic,
-) -> Result<(), rusqlite::Error> {
+) -> Result<()> {
     tx.execute(
         include_str!("sql/insert/crossbar_hits.sql"),
         params![
@@ -249,7 +250,7 @@ fn insert_clock_sample(
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
     clock_sample: intermediate_models::ClockSample,
-) -> Result<(), rusqlite::Error> {
+) -> Result<()> {
     tx.execute(
         include_str!("sql/insert/clock_samples.sql"),
         params![
@@ -266,8 +267,8 @@ fn insert_player_stats(
     tx: &rusqlite::Transaction<'_>,
     player_id: i64,
     advanced_player_stats: &intermediate_models::AdvancedPlayerStats,
-) -> Result<(), rusqlite::Error> {
-    println!("Inserting player stats...");
+) -> Result<()> {
+    tracing::debug!("Inserting player stats...");
 
     tx.execute(
         include_str!("sql/insert/player_stats.sql"),
@@ -289,8 +290,8 @@ fn insert_player(
     tx: &rusqlite::Transaction<'_>,
     team_id: i64,
     player: &intermediate_models::PlayerStats,
-) -> Result<i64, rusqlite::Error> {
-    println!("Inserting player...");
+) -> Result<i64> {
+    tracing::debug!("Inserting player...");
     tx.execute(
         include_str!("sql/insert/player.sql"),
         params![
@@ -316,8 +317,8 @@ fn upsert_global_player(
     tx: &rusqlite::Transaction<'_>,
     player_name: &str,
     player: &intermediate_models::PlayerStats,
-) -> Result<(), rusqlite::Error> {
-    println!("Upserting global player...");
+) -> Result<()> {
+    tracing::debug!("Upserting global player...");
 
     tx.execute(
         include_str!("sql/insert/upsert_global_player.sql"),
@@ -331,8 +332,8 @@ fn insert_team(
     tx: &rusqlite::Transaction<'_>,
     team_num: u8,
     team: &intermediate_models::TeamStats,
-) -> Result<i64, rusqlite::Error> {
-    println!("Inserting team...");
+) -> Result<i64> {
+    tracing::debug!("Inserting team...");
 
     tx.execute(
         include_str!("sql/insert/team.sql"),
@@ -352,8 +353,8 @@ fn insert_match(
     stats: &intermediate_models::GameStats,
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
-) -> Result<(), rusqlite::Error> {
-    println!("Inserting match...");
+) -> Result<()> {
+    tracing::debug!("Inserting match...");
 
     tx.execute(
         include_str!("sql/insert/match.sql"),

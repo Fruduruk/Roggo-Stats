@@ -1,5 +1,3 @@
-use roggo_agent::runtimes::console;
-fn main() -> anyhow::Result<()> {
-    console::run()?;
-    Ok(())
+fn main() {
+    roggo_agent::runtimes::console::run();
 }

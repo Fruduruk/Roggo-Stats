@@ -54,17 +54,17 @@ impl GameStatCollector {
             // Event::MatchCreated(_) => todo!(),
             // Event::MatchInitialized(_) => todo!(),
             Event::MatchDestroyed(_) => {
-                println!("Game finished, because match is destroyed");
+                tracing::debug!("Game finished, because match is destroyed");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             Event::MatchEnded(_match_ended) => {
-                println!("Game finished, because match ended");
+                tracing::debug!("Game finished, because match ended");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
             Event::PodiumStart(_) => {
-                println!("Game finished, because podium started");
+                tracing::debug!("Game finished, because podium started");
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }

@@ -1,9 +1,6 @@
-use anyhow::{Context, Result};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use std::{
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
-
+use crate::core::rl_api::error::Result;
 use tokio::net::TcpStream;
 use tokio::sync::watch;
 use tokio::{io::AsyncReadExt, sync::mpsc};
@@ -15,14 +12,14 @@ pub async fn read_rocket_league_api(
     shutdown_rx: watch::Receiver<bool>,
 ) -> Result<()> {
     loop {
-        println!("Connecting to Rocket League API...");
+        tracing::debug!("Connecting to Rocket League API...");
 
         let mut rl_stream = match TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await {
             Ok(stream) => stream,
             Err(_) => {
-                println!("Waiting for Rocket League to start...");
+                tracing::debug!("Waiting for Rocket League to start...");
                 for i in (1..=10).rev() {
-                    println!("Retrying in {i}s");
+                    tracing::debug!("Retrying in {i}s");
                     tokio::time::sleep(Duration::from_secs(1)).await;
                     if *shutdown_rx.borrow() {
                         return Ok(());
@@ -32,13 +29,13 @@ pub async fn read_rocket_league_api(
             }
         };
 
-        println!("Connected with Rocket League API.");
+        tracing::info!("Connected with Rocket League API.");
 
         let mut buffer = [0u8; 8192];
 
         loop {
             if *shutdown_rx.borrow() {
-                println!("Shutting down rocket league api connection...");
+                tracing::info!("Shutting down rocket league api connection...");
                 return Ok(());
             }
 
@@ -52,14 +49,14 @@ pub async fn read_rocket_league_api(
                 .expect("What year are you in?");
 
                 if n == 0 {
-                    println!("Rocket League API connection closed.");
+                    tracing::warn!("Rocket League API connection closed.");
                     break;
                 }
 
                 let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
 
                 if let Err(err) = tx.send((timestamp_ms, raw)).await {
-                    println!("Failed to send {}", err);
+                    tracing::error!(error = %err, "Failed to send packet");
                 }
             }
         }

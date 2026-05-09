@@ -26,3 +26,4 @@
 **/dist/*
 /RoggoStats/roggo_agent/captures/*
 
+/RoggoStats/roggo_agent/logs/
