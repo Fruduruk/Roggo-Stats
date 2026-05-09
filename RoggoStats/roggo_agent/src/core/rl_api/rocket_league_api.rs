@@ -22,6 +22,7 @@ pub async fn read_rocket_league_api(
                     tracing::debug!("Retrying in {i}s");
                     tokio::time::sleep(Duration::from_secs(1)).await;
                     if *shutdown_rx.borrow() {
+                        tracing::info!("Shutting down rocket league api listener...");
                         return Ok(());
                     }
                 }
@@ -35,7 +36,7 @@ pub async fn read_rocket_league_api(
 
         loop {
             if *shutdown_rx.borrow() {
-                tracing::info!("Shutting down rocket league api connection...");
+                tracing::info!("Shutting down rocket league api listener...");
                 return Ok(());
             }
 

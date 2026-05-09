@@ -8,13 +8,13 @@ pub mod logging;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("rocket league api error: {0}")]
+    #[error("Rocket League api error: {0}")]
     RocketLeagueAPIError(#[from] crate::core::rl_api::Error),
 
-    #[error("web api error: {0}")]
+    #[error("Web API error: {0}")]
     WebAPIError(#[from] crate::core::api::Error),
 
-    #[error("multiple agent tasks failed: {0:?}")]
+    #[error("Agent tasks failed: {0:?}")]
     Multiple(Vec<Error>),
 }
 
