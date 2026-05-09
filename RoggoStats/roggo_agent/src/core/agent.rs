@@ -5,7 +5,7 @@ use crate::core::api::web_api::WebApi;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
 
-use crate::core::error::{Error, Result};
+use crate::core::{Error, Result};
 
 pub async fn run_agent(
     shutdown_otpion: Option<(watch::Sender<bool>, watch::Receiver<bool>)>,
@@ -32,16 +32,31 @@ pub async fn run_agent(
         start_web_api(shutdown_rx)
     );
 
-    send_result?;
-    receive_result?;
-    web_result?;
+    let mut errors = Vec::new();
+
+    if let Err(err) = send_result {
+        errors.push(err);
+    }
+
+    if let Err(err) = receive_result {
+        errors.push(err);
+    }
+
+    if let Err(err) = web_result {
+        errors.push(err);
+    }
+
+    if !errors.is_empty() {
+        return Err(Error::Multiple(errors));
+    }
 
     Ok(())
 }
 
 async fn start_web_api(shutdown_rx: watch::Receiver<bool>) -> Result<()> {
     tracing::info!("Web API is running");
-    WebApi::run(shutdown_rx).await?;
+    let mut web_api = WebApi::new(shutdown_rx)?;
+    web_api.run().await?;
     Ok(())
 }
 
@@ -50,19 +65,16 @@ async fn send_packets(
     tx: mpsc::Sender<(i64, String)>,
 ) -> Result<()> {
     if let Ok(path) = std::env::var("import_path") {
-        Result::Ok(
-            crate::core::debug::test_file_reader::read_test_files_from_7z(
-                path,
-                tx,
-                shutdown_rx.clone(),
-            )
-            .await,
+        crate::core::debug::test_file_reader::read_test_files_from_7z(
+            path,
+            tx,
+            shutdown_rx.clone(),
         )
+        .await;
     } else {
-        read_rocket_league_api(tx, shutdown_rx.clone())
-            .await
-            .map_err(|source| Error::RocketLeagueApiReadingFailed { source })
+        read_rocket_league_api(tx, shutdown_rx.clone()).await?;
     }
+    Ok(())
 }
 
 async fn receive_packets(
@@ -71,8 +83,7 @@ async fn receive_packets(
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
     // let mut packet_collector = crate::core::packet_collector::PacketCollector::new("captures/new")?;
-    let mut aggregator =
-        Aggregator::new().map_err(|source| Error::AggregatorCreationFailed { source })?;
+    let mut aggregator = Aggregator::new()?;
     let mut count: u128 = 0;
 
     while let Some((timestamp, raw)) = rx.recv().await {
