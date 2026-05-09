@@ -22,8 +22,11 @@ tower-http = { version = "0.6", features = ["cors"] }
 anyhow = "1.0.102"
 
 sevenz-rust = "0.6"
-
-
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-time"] }
+tracing-appender = "0.2"
+tracing-log = "0.2"
+thiserror = "2.0.18"
 
 [profile.dev]
 opt-level = 0
