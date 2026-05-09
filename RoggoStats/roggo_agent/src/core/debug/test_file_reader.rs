@@ -100,4 +100,10 @@ pub async fn read_test_files_from_7z(
             break;
         }
     }
+
+    loop {
+        if *shutdown_rx.borrow() {
+            break;
+        }
+    }
 }
