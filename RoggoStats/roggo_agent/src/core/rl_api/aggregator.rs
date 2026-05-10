@@ -1,40 +1,39 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, path::{PathBuf}};
 
 use uuid::Uuid;
 
 use crate::core::{
     bl::{game_stat_collector::GameStatCollector, intermediate_models},
     db::repository::Repository,
-    rl_api::{Error, Result, deserializer::deserialize, models::Event},
+    rl_api::{Result, deserializer::deserialize, models::Event},
 };
+
+#[derive(Debug)]
 pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
-    repository: Repository,
+    db_file_path: PathBuf,
 }
 
 impl Aggregator {
-    pub fn new() -> Result<Self> {
-        let repository = Repository::new("test.db")
-            .map_err(|source| Error::AggregatorCreationFailed { source })?;
-
-        Ok(Self {
+    pub fn new(db_file_path: PathBuf) -> Self {
+        Self {
             collector: None,
             collected_matches: HashSet::new(),
-            repository,
-        })
+            db_file_path,
+        }
     }
 
     pub fn insert(&mut self, timestamp: i64, raw: String) -> Result<()> {
         for event in deserialize(&raw) {
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event)?;
-            self.export_collector_if_finished();
+            self.export_collector_if_finished()?;
         }
         Ok(())
     }
 
-    fn export_collector_if_finished(&mut self) {
+    fn export_collector_if_finished(&mut self) -> Result<()> {
         let finished = self
             .collector
             .as_ref()
@@ -48,11 +47,14 @@ impl Aggregator {
 
                 log_stats(&stats);
 
-                if let Err(err) = self.repository.insert_game_stats(stats) {
+                let mut repository = Repository::connect(&self.db_file_path)?;
+
+                if let Err(err) = repository.insert_game_stats(stats) {
                     tracing::error!(error= %err, "failed to save match stats");
                 }
             }
         }
+        Ok(())
     }
 
     fn cancel_if_outdated(&mut self, match_guid: Option<Uuid>) {

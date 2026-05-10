@@ -1,4 +1,5 @@
-use std::{collections::HashMap, path::Path};
+use std::path::{Path};
+use std::{collections::HashMap};
 
 use rusqlite::{Connection, params};
 
@@ -10,12 +11,16 @@ pub struct Repository {
 }
 
 impl Repository {
-    pub fn new(path: impl AsRef<Path>) -> Result<Self> {
-        let repo = Self {
-            connection: Connection::open(path)?,
-        };
+    pub fn new(path: &Path) -> Result<Self> {
+        let repo = Self::connect(path)?;
         repo.init()?;
         Ok(repo)
+    }
+
+    pub fn connect(path: &Path) -> Result<Self> {
+        Ok(Self {
+            connection: Connection::open(path)?,
+        })
     }
 
     pub fn new_in_memory() -> Result<Self> {

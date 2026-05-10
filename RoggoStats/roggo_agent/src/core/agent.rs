@@ -1,8 +1,11 @@
+use std::path::PathBuf;
+
 use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::task::JoinError;
 
 use crate::core::api::web_api;
+use crate::core::db::repository::Repository;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
 
@@ -16,8 +19,12 @@ enum FinishedTask {
 
 pub async fn run_agent(
     shutdown_otpion: Option<(watch::Sender<bool>, watch::Receiver<bool>)>,
+    db_file_path: PathBuf,
 ) -> Result<()> {
     tracing::info!("Roggo agent is running");
+
+    tracing::info!("Creating database if needed");
+    Repository::new(&db_file_path)?;
 
     let (shutdown_tx, shutdown_rx) = match shutdown_otpion {
         Some(watch) => watch,
@@ -36,8 +43,12 @@ pub async fn run_agent(
     });
 
     let mut send_handle = tokio::spawn(send_packets(shutdown_rx.clone(), tx));
-    let mut receive_handle = tokio::spawn(receive_packets(shutdown_rx.clone(), rx));
-    let mut web_handle = tokio::spawn(start_web_api(shutdown_rx.clone()));
+    let mut receive_handle = tokio::spawn(receive_packets(
+        shutdown_rx.clone(),
+        rx,
+        db_file_path.clone(),
+    ));
+    let mut web_handle = tokio::spawn(start_web_api(shutdown_rx.clone(), db_file_path));
 
     let finished_task = tokio::select! {
         result = &mut send_handle => {
@@ -62,26 +73,25 @@ pub async fn run_agent(
             _ = web_handle.await;
             _ = receive_handle.await;
             result
-        },
+        }
         FinishedTask::Receiver(result) => {
             _ = web_handle.await;
             _ = send_handle.await;
             result
-        },
+        }
         FinishedTask::Web(result) => {
             _ = send_handle.await;
             _ = receive_handle.await;
             result
-        },
+        }
     };
 
-    
     finished_first_result.map_err(|err| Error::ShutdownError(err.to_string()))?
 }
 
-async fn start_web_api(shutdown_rx: watch::Receiver<bool>) -> Result<()> {
+async fn start_web_api(shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) -> Result<()> {
     tracing::info!("Web API is running");
-    web_api::run(shutdown_rx).await?;
+    web_api::run(shutdown_rx, db_file_path).await?;
     Ok(())
 }
 
@@ -105,10 +115,11 @@ async fn send_packets(
 async fn receive_packets(
     shutdown_rx: watch::Receiver<bool>,
     mut rx: mpsc::Receiver<(i64, String)>,
+    db_file_path: PathBuf,
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
     // let mut packet_collector = crate::core::packet_collector::PacketCollector::new("captures/new")?;
-    let mut aggregator = Aggregator::new()?;
+    let mut aggregator = Aggregator::new(db_file_path);
     let mut count: u128 = 0;
 
     while let Some((timestamp, raw)) = rx.recv().await {
