@@ -2,13 +2,16 @@ use axum::{Json, http, response::IntoResponse};
 
 pub mod dto;
 pub mod web_api;
+pub mod mappers;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Repository Error {0}")]
-    RepositoryError(#[from] crate::core::db::Error),
     #[error("Axum Error {0}")]
-    AxumError(#[from] std::io::Error),
+    InternalError(#[from] crate::core::bl::Error),
+    #[error("Axum Error")]
+    AxumError{
+        source: std::io::Error
+    },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -18,12 +21,12 @@ impl IntoResponse for Error {
         tracing::error!("failed to process web api request: {:#?}", &self);
 
         let status = match self {
-            Error::RepositoryError(_) => http::StatusCode::INTERNAL_SERVER_ERROR,
-            Error::AxumError(_) => http::StatusCode::INTERNAL_SERVER_ERROR,
+            Error::InternalError(_) => http::StatusCode::INTERNAL_SERVER_ERROR,
+            Error::AxumError{source: _} => http::StatusCode::INTERNAL_SERVER_ERROR,
         };
 
         let body = Json(serde_json::json!({
-            "error": "Something went wrong."//self.to_string()
+            "error": self.to_string() //"Something went wrong."
         }));
 
         (status, body).into_response()

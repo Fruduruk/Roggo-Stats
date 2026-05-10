@@ -7,11 +7,9 @@ use axum::{
 };
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
-use uuid::Uuid;
 
 use crate::core::{
-    api::{Result,Error, dto::MatchDto},
-    db::repository::{Repository},
+    api::{Error, Result, dto::MatchDto}, bl::feature, db::repository::Repository
 };
 
 #[derive(Clone)]
@@ -50,16 +48,15 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
             }
             tracing::info!("Shutting down web api...");
         })
-        .await?;
+        .await.map_err(|err| Error::AxumError{source: err})?;
     Ok(())
 }
 
-async fn get_match(State(state): State<AppState>) -> Result<Json<MatchDto>> {
-    let repository = Repository::connect(&state.db_file_path)?;
+async fn get_match(State(state): State<AppState>) -> Result<Json<Vec<MatchDto>>> {
+    let matches = feature::get_all_matches(&state.db_file_path)?;
+    
 
-    let m = repository.get_match()?;
-
-    Ok(Json(m))
+    Ok(Json(matches))
 }
 
 async fn post_match(Json(dto): Json<MatchDto>) -> Result<Json<MatchDto>> {
