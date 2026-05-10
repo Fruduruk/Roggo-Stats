@@ -2,10 +2,15 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::rl_api::models::{BallState, Location};
+use crate::core::rl_api::{
+    self,
+    models::{BallState, Location},
+};
 
 #[derive(Debug)]
 pub struct GameState {
+    pub round_started_once: bool,
+    pub match_started: bool,
     pub in_replay: bool,
     pub finished: bool,
     pub in_overtime: bool,
@@ -16,9 +21,18 @@ pub struct GameState {
     pub goal_scored: bool,
 }
 
+impl GameState {
+    #[inline]
+    pub fn state_update_time_delta(&self) -> Option<i64> {
+        Some(self.state_update_timestamp? - self.last_state_update_timestamp?)
+    }
+}
+
 impl Default for GameState {
     fn default() -> GameState {
         Self {
+            round_started_once: false,
+            match_started: false,
             in_replay: false,
             finished: false,
             in_overtime: false,
@@ -30,7 +44,6 @@ impl Default for GameState {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct GameStats {
@@ -71,6 +84,36 @@ impl GameStats {
             timeline: vec![],
             excluded_timeline_instants: 0,
         }
+    }
+
+    #[inline]
+    pub fn get_player_primary_id(&self, player: &rl_api::models::GamePlayer) -> Option<String> {
+        Some(self.get_player_stats(&player)?.primary_id.clone())
+    }
+
+    #[inline]
+    pub fn get_player_stats_mut(
+        &mut self,
+        player: &rl_api::models::GamePlayer,
+    ) -> Option<&mut PlayerStats> {
+        self.teams
+            .get_mut(&player.team_num)?
+            .players
+            .get_mut(&player.name)
+    }
+
+    #[inline]
+    pub fn get_player_stats(&self, player: &rl_api::models::GamePlayer) -> Option<&PlayerStats> {
+        self.teams.get(&player.team_num)?.players.get(&player.name)
+    }
+
+    #[inline]
+    pub fn get_or_create_team_stats_mut(&mut self, team: rl_api::models::Team) -> &mut TeamStats {
+        self.teams.entry(team.team_num).or_insert(TeamStats::new(
+            team.name,
+            team.color_primary,
+            team.color_secondary,
+        ))
     }
 }
 
