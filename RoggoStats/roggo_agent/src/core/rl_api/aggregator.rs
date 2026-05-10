@@ -1,4 +1,4 @@
-use std::{collections::HashSet, path::{PathBuf}};
+use std::{collections::HashSet, path::PathBuf};
 
 use uuid::Uuid;
 
@@ -43,11 +43,12 @@ impl Aggregator {
             if let Some(collector) = self.collector.take() {
                 self.collected_matches.insert(collector.get_match_guid());
                 tracing::info!("Game {} finished.", collector.get_match_guid());
-                let stats = collector.export();
+                let (stats, errors) = collector.export();
 
                 log_stats(&stats);
-
+                log_errors(&errors);
                 let mut repository = Repository::connect(&self.db_file_path)?;
+                // let mut repository = Repository::new_in_memory()?;
 
                 if let Err(err) = repository.insert_game_stats(stats) {
                     tracing::error!(error= %err, "failed to save match stats");
@@ -84,6 +85,12 @@ impl Aggregator {
 
         collector.insert(timestamp, event);
         Ok(())
+    }
+}
+
+fn log_errors(errors: &[crate::core::bl::Error]) {
+    for error in errors {
+        tracing::warn!(err= %error, "Export partially failed.");
     }
 }
 

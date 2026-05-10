@@ -12,6 +12,19 @@
       ],
       "problemMatcher": ["$rustc"],
       "group": "build"
+    },
+    {
+      "label": "build console release",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "build",
+        "--release",
+        "--bin",
+        "roggo-agent-console"
+      ],
+      "problemMatcher": ["$rustc"],
+      "group": "build"
     }
   ]
 }

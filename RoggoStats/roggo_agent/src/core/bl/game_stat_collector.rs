@@ -1,9 +1,12 @@
 use uuid::Uuid;
 
 use crate::core::{
-    bl::intermediate_models::{
-        BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
-        PlayerStats, StatfeedEventStatistic, TeamStats, TimelineInstant,
+    bl::{
+        Error, Result,
+        intermediate_models::{
+            BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
+            PlayerStats, StatfeedEventStatistic, TeamStats, TimelineInstant,
+        },
     },
     rl_api::models::{
         BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GamePlayer, GoalScored, Player,
@@ -13,15 +16,25 @@ use crate::core::{
 
 #[derive(Debug)]
 pub struct GameStatCollector {
+    insert_count: u64,
     stats: GameStats,
     state: GameState,
+    ball_hit_buffer: Vec<(i64, BallHit)>,
+    crossbar_hit_buffer: Vec<(i64, CrossbarHit)>,
+    statfeed_event_buffer: Vec<(i64, StatfeedEvent)>,
+    goal_scored_buffer: Vec<(i64, GoalScored)>,
 }
 
 impl GameStatCollector {
     pub fn new(match_guid: Uuid, timestamp: i64) -> Self {
         Self {
+            insert_count: 0,
             stats: GameStats::new(match_guid, timestamp),
             state: GameState::default(),
+            ball_hit_buffer: vec![],
+            crossbar_hit_buffer: vec![],
+            statfeed_event_buffer: vec![],
+            goal_scored_buffer: vec![],
         }
     }
 
@@ -29,8 +42,41 @@ impl GameStatCollector {
         self.stats.match_guid
     }
 
-    pub fn export(self) -> GameStats {
-        self.stats
+    pub fn export(self) -> (GameStats, Vec<Error>) {
+        let Self {
+            insert_count: _,
+            mut stats,
+            state: _,
+            ball_hit_buffer,
+            crossbar_hit_buffer,
+            statfeed_event_buffer,
+            goal_scored_buffer,
+        } = self;
+
+        let mut errors = vec![];
+
+        for (timestamp, ball_hit) in ball_hit_buffer {
+            if let Err(error) = insert_ball_hit(&mut stats, timestamp, ball_hit) {
+                errors.push(error);
+            }
+        }
+        for (timestamp, crossbar_hit) in crossbar_hit_buffer {
+            if let Err(error) = insert_crossbar_hit(&mut stats, timestamp, crossbar_hit) {
+                errors.push(error);
+            }
+        }
+        for (timestamp, statfeed_event) in statfeed_event_buffer {
+            if let Err(error) = insert_stat_feed_event(&mut stats, timestamp, statfeed_event) {
+                errors.push(error);
+            }
+        }
+        for (timestamp, goal_scored) in goal_scored_buffer {
+            if let Err(error) = insert_goal_scored(&mut stats, timestamp, goal_scored) {
+                errors.push(error);
+            }
+        }
+
+        (stats, errors)
     }
 
     pub fn is_finished(&self) -> bool {
@@ -38,11 +84,12 @@ impl GameStatCollector {
     }
 
     pub fn insert(&mut self, timestamp: i64, event: Event) {
+        self.insert_count += 1;
         self.state.timestamp = Some(timestamp);
         // println!("{:#?}", self.state);
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
-            Event::BallHit(ball_hit) => self.insert_ball_hit(ball_hit),
+            Event::BallHit(ball_hit) => self.push_ball_hit(ball_hit),
             Event::ClockUpdatedSeconds(clock_updated_seconds) => {
                 self.insert_clock_samples(clock_updated_seconds)
             }
@@ -50,86 +97,39 @@ impl GameStatCollector {
                 self.state.count_down = true;
                 self.state.goal_scored = false;
             }
-            Event::CrossbarHit(crossbar_hit) => self.insert_crossbar_hit(crossbar_hit),
-            Event::GoalScored(goal_scored) => self.insert_goal_scored(goal_scored),
-            // Event::MatchCreated(_) => todo!(),
-            // Event::MatchInitialized(_) => todo!(),
-            Event::MatchDestroyed(_) => {
-                tracing::debug!("Game finished, because match is destroyed");
+            Event::CrossbarHit(crossbar_hit) => self.push_crossbar_hit(crossbar_hit),
+            Event::GoalScored(goal_scored) => self.push_goal_scored(goal_scored),
+            // Event::MatchCreated(_) => tracing::debug!("Match Created {}", self.insert_count),
+            // Event::MatchInitialized(_) => {
+            //     tracing::debug!("Match Initialized {}", self.insert_count)
+            // }
+            Event::MatchDestroyed(_) | Event::PodiumStart(_) | Event::MatchEnded(_) => {
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;
             }
-            Event::MatchEnded(_match_ended) => {
-                tracing::debug!("Game finished, because match ended");
-                self.stats.ended_at_timestamp = timestamp;
-                self.state.finished = true;
-            }
-            Event::PodiumStart(_) => {
-                tracing::debug!("Game finished, because podium started");
-                self.stats.ended_at_timestamp = timestamp;
-                self.state.finished = true;
-            }
-            // Event::RoundStarted(_) => todo!(),
-            Event::StatfeedEvent(statfeed_event) => self.insert_stat_feed_event(statfeed_event),
+            Event::RoundStarted(_) => self.state.round_started_once = true,
+            Event::StatfeedEvent(statfeed_event) => self.push_stat_feed_event(statfeed_event),
             _ => return,
         }
     }
 
-    fn insert_ball_hit(&mut self, ball_hit: BallHit) {
+    fn push_ball_hit(&mut self, ball_hit: BallHit) {
         if self.state.in_replay {
             return;
         }
-        self.state.count_down = false;
-        if let Some(timestamp) = self.state.timestamp {
-            for player in ball_hit.players {
-                let player_primary_id = self.get_player_primary_id(&player);
 
-                self.stats.ball_hits.push(BallHitStatistic {
-                    timestamp,
-                    pre_hit_speed: ball_hit.ball.pre_hit_speed,
-                    post_hit_speed: ball_hit.ball.post_hit_speed,
-                    location: ball_hit.ball.location,
-                    player_primary_id,
-                })
-            }
+        self.state.match_started = true;
+        self.state.count_down = false;
+
+        if let Some(timestamp) = self.state.timestamp {
+            self.ball_hit_buffer.push((timestamp, ball_hit));
         }
     }
 
-    fn get_player_primary_id(&mut self, player: &GamePlayer) -> String {
-        let player_primary_id = self
-            .get_player_stats(&player)
-            .expect("Cannot find primary id for player")
-            .primary_id
-            .clone();
-        player_primary_id
-    }
-
     #[inline]
-    fn get_player_stats_mut(&mut self, player: &GamePlayer) -> Option<&mut PlayerStats> {
-        self.stats
-            .teams
-            .get_mut(&player.team_num)?
-            .players
-            .get_mut(&player.name)
-    }
-
-    #[inline]
-    fn get_player_stats(&mut self, player: &GamePlayer) -> Option<&PlayerStats> {
-        self.stats
-            .teams
-            .get(&player.team_num)?
-            .players
-            .get(&player.name)
-    }
-
     fn insert_update_state(&mut self, update_state: UpdateState) {
         self.update_game_state(&update_state);
         self.update_game_stats(update_state);
-    }
-
-    #[inline]
-    fn state_update_time_delta(&self) -> Option<i64> {
-        Some(self.state.state_update_timestamp? - self.state.last_state_update_timestamp?)
     }
 
     fn update_game_state(&mut self, update_state: &UpdateState) {
@@ -139,12 +139,10 @@ impl GameStatCollector {
             self.state.goal_scored = false;
         }
         self.update_non_replay_timestamps();
-        // self.update_countdown(update_state);
     }
 
     fn update_non_replay_timestamps(&mut self) {
-        if self.state.in_replay || self.state.count_down || self.state.goal_scored {
-            // self.state.last_state_update_timestamp = None;
+        if self.state.in_replay || self.state.goal_scored || !self.state.round_started_once {
             self.state.state_update_timestamp = None;
             return;
         }
@@ -153,30 +151,25 @@ impl GameStatCollector {
         self.state.state_update_timestamp = self.state.timestamp;
     }
 
-    // fn update_countdown(&mut self, update_state: &UpdateState) {
-    //     let anyone_moving_while_countdown_is_set = self.state.count_down
-    //         && update_state
-    //             .players
-    //             .iter()
-    //             .any(|player| player.speed.is_some_and(|speed| speed > 1f64));
-
-    //     if anyone_moving_while_countdown_is_set {
-    //         self.state.count_down = false;
-    //     }
-    // }
-
     fn update_game_stats(&mut self, update_state: UpdateState) {
-        if update_state.game.b_replay {
-            return;
+        let round_started_once = self.state.round_started_once;
+        if round_started_once {
+            if update_state.game.b_replay {
+                return;
+            }
+            if self.state.count_down {
+                return;
+            }
+            if !self.state.match_started {
+                return;
+            }
         }
-        if self.state.count_down {
-            return;
-        }
+
         if self.state.in_overtime {
             self.stats.had_overtime = true;
         }
 
-        if let Some(delta) = self.state_update_time_delta() {
+        if let Some(delta) = self.state.state_update_time_delta() {
             self.stats.duration += delta;
         }
 
@@ -190,30 +183,22 @@ impl GameStatCollector {
 
         for team in update_state.game.teams {
             let score = team.score;
-            self.get_or_create_team_stats_mut(team).score = score;
+            self.stats.get_or_create_team_stats_mut(team).score = score;
         }
 
         for player in update_state.players {
-            let delta = self.state_update_time_delta();
+            let delta = self.state.state_update_time_delta();
 
             let player_stats = self.get_or_create_player_stats_mut(player.clone());
 
             update_core_player_stats(&player, player_stats);
             if let Some(delta) = delta {
-                increment_counters(player_stats, &player, delta);
+                if round_started_once {
+                    // Don't count, if round never started once.
+                    increment_counters(player_stats, &player, delta);
+                }
             }
         }
-    }
-
-    fn get_or_create_team_stats_mut(&mut self, team: Team) -> &mut TeamStats {
-        self.stats
-            .teams
-            .entry(team.team_num)
-            .or_insert(TeamStats::new(
-                team.name,
-                team.color_primary,
-                team.color_secondary,
-            ))
     }
 
     fn get_or_create_player_stats_mut(&mut self, player: Player) -> &mut PlayerStats {
@@ -249,46 +234,20 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {
+    fn push_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {
         if let Some(timestamp) = self.state.timestamp {
-            if let Some(player_stats) =
-                self.get_player_stats_mut(&crossbar_hit.ball_last_touch.player)
-            {
-                player_stats.crossbar_hits.push(CrossbarHitStatistic {
-                    timestamp,
-                    ball_speed: crossbar_hit.ball_speed,
-                    impact_force: crossbar_hit.impact_force,
-                    location: crossbar_hit.ball_location,
-                    last_touch_speed: crossbar_hit.ball_last_touch.speed,
-                });
-            }
+            self.crossbar_hit_buffer.push((timestamp, crossbar_hit));
         }
     }
 
-    fn insert_goal_scored(&mut self, goal_scored: GoalScored) {
+    fn push_goal_scored(&mut self, goal_scored: GoalScored) {
         if self.state.in_replay {
             return;
         }
         self.state.goal_scored = true;
 
         if let Some(timestamp) = self.state.timestamp {
-            let scorer_primary_id = self.get_player_primary_id(&goal_scored.scorer);
-            let assister_primary_id = goal_scored
-                .assister
-                .and_then(|assister| Some(self.get_player_primary_id(&assister)));
-            let last_touch_primary_id =
-                self.get_player_primary_id(&goal_scored.ball_last_touch.player);
-
-            self.stats.goal_details.push(GoalDetails {
-                timestamp,
-                goal_time: goal_scored.goal_time,
-                impact_location: goal_scored.impact_location,
-                goal_speed: goal_scored.goal_speed,
-                last_touch_speed: goal_scored.ball_last_touch.speed,
-                scorer_primary_id,
-                assister_primary_id,
-                last_touch_primary_id,
-            });
+            self.goal_scored_buffer.push((timestamp, goal_scored));
         }
     }
 
@@ -302,26 +261,139 @@ impl GameStatCollector {
         }
     }
 
-    fn insert_stat_feed_event(&mut self, statfeed_event: StatfeedEvent) {
+    fn push_stat_feed_event(&mut self, statfeed_event: StatfeedEvent) {
         if self.state.in_replay {
             return;
         }
 
-        let main_target_primary_id = self.get_player_primary_id(&statfeed_event.main_target);
-        let secondary_target_primary_id = statfeed_event
-            .secondary_target
-            .and_then(|target| Some(self.get_player_primary_id(&target)));
-
         if let Some(timestamp) = self.state.timestamp {
-            self.stats.statfeed_events.push(StatfeedEventStatistic {
-                timestamp,
-                event_name: statfeed_event.event_name,
-                event_type: statfeed_event.event_type,
-                main_target_primary_id,
-                secondary_target_primary_id,
-            });
+            self.statfeed_event_buffer.push((timestamp, statfeed_event));
         }
     }
+}
+
+fn insert_goal_scored(
+    stats: &mut GameStats,
+    timestamp: i64,
+    goal_scored: GoalScored,
+) -> Result<()> {
+    let scorer_primary_id = stats
+        .get_player_primary_id(&goal_scored.scorer)
+        .ok_or_else(|| {
+            Error::InsertionFailed(format!(
+                "GoalScored: cannot find primary id for scorer {}",
+                &goal_scored.scorer.name
+            ))
+        })?;
+
+    let assister_primary_id = if let Some(assister) = goal_scored.assister.clone() {
+        if let Some(id) = stats.get_player_primary_id(&assister) {
+            Some(id)
+        } else {
+            return Err(Error::InsertionFailed(format!(
+                "GoalScored: cannot find primary id for assister {:#?}",
+                &goal_scored.assister
+            )));
+        }
+    } else {
+        None
+    };
+
+    let last_touch_primary_id = stats
+        .get_player_primary_id(&goal_scored.ball_last_touch.player)
+        .ok_or_else(|| {
+            Error::InsertionFailed(format!(
+                "GoalScored: cannot find primary id for last touch player {}",
+                &goal_scored.ball_last_touch.player.name
+            ))
+        })?;
+
+    stats.goal_details.push(GoalDetails {
+        timestamp,
+        goal_time: goal_scored.goal_time,
+        impact_location: goal_scored.impact_location,
+        goal_speed: goal_scored.goal_speed,
+        last_touch_speed: goal_scored.ball_last_touch.speed,
+        scorer_primary_id,
+        assister_primary_id,
+        last_touch_primary_id,
+    });
+    Ok(())
+}
+
+fn insert_stat_feed_event(
+    stats: &mut GameStats,
+    timestamp: i64,
+    statfeed_event: StatfeedEvent,
+) -> Result<()> {
+    let main_target_primary_id = stats
+        .get_player_primary_id(&statfeed_event.main_target)
+        .ok_or_else(|| {
+            Error::InsertionFailed(format!(
+                "StatfeedEvent: cannot find primary id for main target {}",
+                &statfeed_event.main_target.name
+            ))
+        })?;
+
+    let secondary_target_primary_id =
+        if let Some(secondary_target) = statfeed_event.secondary_target {
+            if let Some(id) = stats.get_player_primary_id(&secondary_target) {
+                Some(id)
+            } else {
+                return Err(Error::InsertionFailed(format!(
+                    "StatfeedEvent: cannot find primary id for secondary target {}",
+                    &secondary_target.name
+                )));
+            }
+        } else {
+            None
+        };
+
+    stats.statfeed_events.push(StatfeedEventStatistic {
+        timestamp,
+        event_name: statfeed_event.event_name,
+        event_type: statfeed_event.event_type,
+        main_target_primary_id,
+        secondary_target_primary_id,
+    });
+    Ok(())
+}
+
+fn insert_crossbar_hit(
+    stats: &mut GameStats,
+    timestamp: i64,
+    crossbar_hit: CrossbarHit,
+) -> Result<()> {
+    stats
+        .get_player_stats_mut(&crossbar_hit.ball_last_touch.player)
+        .ok_or_else(|| Error::InsertionFailed("CrossbarHit".into()))?
+        .crossbar_hits
+        .push(CrossbarHitStatistic {
+            timestamp,
+            ball_speed: crossbar_hit.ball_speed,
+            impact_force: crossbar_hit.impact_force,
+            location: crossbar_hit.ball_location,
+            last_touch_speed: crossbar_hit.ball_last_touch.speed,
+        });
+    Ok(())
+}
+
+fn insert_ball_hit(stats: &mut GameStats, timestamp: i64, ball_hit: BallHit) -> Result<()> {
+    for player in ball_hit.players {
+        let player_primary_id = stats
+            .get_player_primary_id(&player)
+            .ok_or_else(|| Error::InsertionFailed("BallHit".into()))?;
+
+        stats.ball_hits.push(BallHitStatistic {
+            timestamp,
+            pre_hit_speed: ball_hit.ball.pre_hit_speed,
+            post_hit_speed: ball_hit.ball.post_hit_speed,
+            location: ball_hit.ball.location,
+            player_primary_id,
+        })
+    }
+
+    Ok(())
 }
 
 fn update_core_player_stats(player: &Player, player_stats: &mut PlayerStats) {
