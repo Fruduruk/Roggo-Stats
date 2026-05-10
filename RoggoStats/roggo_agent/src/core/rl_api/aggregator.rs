@@ -109,8 +109,8 @@ fn log_stats(stats: &intermediate_models::GameStats) {
         stats.had_overtime
     );
 
-    tracing::debug!(
-        "Excluded timeline instants: {}",
-        stats.excluded_timeline_instants
-    );
+    // tracing::debug!(
+    //     "Excluded timeline instants: {}",
+    //     stats.excluded_timeline_instants
+    // );
 }

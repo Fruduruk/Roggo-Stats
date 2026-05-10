@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use axum::{
     Json, Router,
+    extract::State,
     routing::{get, post},
 };
 use tokio::sync::watch;
@@ -9,11 +10,14 @@ use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
 
 use crate::core::{
-    api::{Result, dto::MatchDto},
-    db::repository::Repository,
+    api::{Result,Error, dto::MatchDto},
+    db::repository::{Repository},
 };
 
-struct State(PathBuf);
+#[derive(Clone)]
+struct AppState {
+    db_file_path: PathBuf,
+}
 
 pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) -> Result<()> {
     let cors = CorsLayer::new()
@@ -21,10 +25,13 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
         .allow_methods(Any)
         .allow_headers(Any);
 
+    let state = AppState { db_file_path };
+
     let app = Router::new()
         .route("/match", get(get_match))
         .route("/match", post(post_match))
-        .layer(cors);
+        .layer(cors)
+        .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
@@ -47,16 +54,16 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
     Ok(())
 }
 
-async fn get_match() -> Json<MatchDto> {
-    Json(MatchDto {
-        match_guid: Uuid::new_v4(),
-        arena: "DFH Stadium".to_string(),
-        duration_seconds: 300,
-    })
+async fn get_match(State(state): State<AppState>) -> Result<Json<MatchDto>> {
+    let repository = Repository::connect(&state.db_file_path)?;
+
+    let m = repository.get_match()?;
+
+    Ok(Json(m))
 }
 
-async fn post_match(Json(dto): Json<MatchDto>) -> Json<MatchDto> {
+async fn post_match(Json(dto): Json<MatchDto>) -> Result<Json<MatchDto>> {
     println!("Received DTO: {dto:#?}");
 
-    Json(dto)
+    Ok(Json(dto))
 }
