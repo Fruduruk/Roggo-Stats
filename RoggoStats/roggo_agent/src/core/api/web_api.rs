@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use axum::{
     Json, Router,
     routing::{get, post},
@@ -11,21 +13,9 @@ use crate::core::{
     db::repository::Repository,
 };
 
-// pub struct WebApi {
-//     repository: Repository,
-//     shutdown_rx: watch::Receiver<bool>,
-// }
+struct State(PathBuf);
 
-// impl WebApi {
-//     pub fn new() -> Result<Self> {
-//         Ok(Self {
-//             repository: Repository::new("test.db")?,
-//             shutdown_rx,
-//         })
-//     }
-// }
-
-pub async fn run(mut shutdown_rx: watch::Receiver<bool>) -> Result<()> {
+pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) -> Result<()> {
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)

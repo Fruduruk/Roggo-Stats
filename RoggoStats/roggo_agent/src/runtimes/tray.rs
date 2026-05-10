@@ -15,6 +15,7 @@ use winit::{
 use crate::core::{agent::run_agent, logging::init_logging};
 
 const WEB_UI_URL: &str = "https://frudd.dev";
+const DB_FILE_PATH: &str = "roggo-agent.db";
 
 pub fn run() {
     let _log_guard = init_logging();
@@ -35,7 +36,7 @@ fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiv
         };
 
         runtime.block_on(async {
-            if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx))).await {
+            if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx)), DB_FILE_PATH.into()).await {
                 tracing::error!(error = %err, "Roggo agent failed");
             }
         });

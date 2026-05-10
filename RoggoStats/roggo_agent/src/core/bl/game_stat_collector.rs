@@ -11,6 +11,7 @@ use crate::core::{
     },
 };
 
+#[derive(Debug)]
 pub struct GameStatCollector {
     stats: GameStats,
     state: GameState,

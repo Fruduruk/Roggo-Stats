@@ -15,6 +15,9 @@ pub enum Error {
     #[error("Web API error: {0}")]
     WebAPIError(#[from] crate::core::api::Error),
 
+    #[error("Repository Error {0}")]
+    RepositoryError(#[from] crate::core::db::Error),
+
     #[error("Shutdown error: {0}")]
     ShutdownError(String),
 }
