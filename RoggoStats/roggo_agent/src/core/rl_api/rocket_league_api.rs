@@ -12,14 +12,14 @@ pub async fn read_rocket_league_api(
     shutdown_rx: watch::Receiver<bool>,
 ) -> Result<()> {
     loop {
-        tracing::debug!("Connecting to Rocket League API...");
+        // tracing::debug!("Connecting to Rocket League API...");
 
         let mut rl_stream = match TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await {
             Ok(stream) => stream,
             Err(_) => {
-                tracing::debug!("Waiting for Rocket League to start...");
-                for i in (1..=10).rev() {
-                    tracing::debug!("Retrying in {i}s");
+                // tracing::debug!("Waiting for Rocket League to start...");
+                for _i in (1..=10).rev() {
+                    // tracing::debug!("Retrying in {i}s");
                     tokio::time::sleep(Duration::from_secs(1)).await;
                     if *shutdown_rx.borrow() {
                         tracing::info!("Shutting down rocket league api listener...");

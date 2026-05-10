@@ -1,8 +1,9 @@
-use std::path::{Path};
-use std::{collections::HashMap};
+use std::collections::HashMap;
+use std::path::Path;
 
 use rusqlite::{Connection, params};
 
+use crate::core::api::dto::MatchDto;
 use crate::core::bl::intermediate_models;
 use crate::core::db::Result;
 
@@ -82,25 +83,20 @@ impl Repository {
                     insert_player_stats(&tx, player_id, advanced_player_stats)?;
                 }
 
-                tracing::debug!("Inserting crossbar hits...");
                 for crossbar_hit in &player.crossbar_hits {
                     insert_crossbar_hit(match_guid, &tx, player_id, crossbar_hit)?;
                 }
             }
         }
 
-        tracing::debug!("Inserting clock samples...");
-
         for clock_sample in stats.clock_samples {
             insert_clock_sample(match_guid, &tx, clock_sample)?;
         }
 
-        tracing::debug!("Inserting goal details...");
         for goal_details in stats.goal_details {
             insert_goal_details(match_guid, &player_ids, &tx, goal_details)?;
         }
 
-        tracing::debug!("Inserting ball hits...");
         for ball_hit in &stats.ball_hits {
             if let Some(player_id) = player_ids.get(&ball_hit.player_primary_id) {
                 let ball_hit_id = insert_ball_hit(match_guid, &tx, ball_hit)?;
@@ -111,12 +107,10 @@ impl Repository {
             }
         }
 
-        tracing::debug!("Inserting stat feed events...");
         for statfeed_event in &stats.statfeed_events {
             insert_statfeed_event(match_guid, &player_ids, &tx, statfeed_event)?;
         }
 
-        tracing::debug!("Inserting timeline...");
         for timeline_instant in &stats.timeline {
             let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
 
@@ -132,7 +126,25 @@ impl Repository {
         }
 
         tx.commit()?;
+
+        tracing::info!("Saved {} in database", match_guid);
         Ok(())
+    }
+
+    pub fn get_match(&self) -> Result<MatchDto> {
+        Ok(self
+            .connection
+            .query_one("select * from matches limit 1", [], |row| {
+                Ok(MatchDto {
+                    match_guid: row.get("match_guid")?,
+                    arena: row.get("arena")?,
+                    duration: row.get("duration")?,
+                    created_at: row.get("created_at_ms")?,
+                    ended_at: row.get("ended_at_ms")?,
+                    had_overtime: row.get("had_overtime")?,
+                    deleted: row.get("deleted")?,
+                })
+            })?)
     }
 }
 
@@ -272,8 +284,6 @@ fn insert_player_stats(
     player_id: i64,
     advanced_player_stats: &intermediate_models::AdvancedPlayerStats,
 ) -> Result<()> {
-    tracing::debug!("Inserting player stats...");
-
     tx.execute(
         include_str!("sql/insert/player_stats.sql"),
         params![
@@ -295,7 +305,6 @@ fn insert_player(
     team_id: i64,
     player: &intermediate_models::PlayerStats,
 ) -> Result<i64> {
-    tracing::debug!("Inserting player...");
     tx.execute(
         include_str!("sql/insert/player.sql"),
         params![
@@ -322,8 +331,6 @@ fn upsert_global_player(
     player_name: &str,
     player: &intermediate_models::PlayerStats,
 ) -> Result<()> {
-    tracing::debug!("Upserting global player...");
-
     tx.execute(
         include_str!("sql/insert/upsert_global_player.sql"),
         params![player.primary_id, player_name],
@@ -337,8 +344,6 @@ fn insert_team(
     team_num: u8,
     team: &intermediate_models::TeamStats,
 ) -> Result<i64> {
-    tracing::debug!("Inserting team...");
-
     tx.execute(
         include_str!("sql/insert/team.sql"),
         params![
@@ -358,8 +363,6 @@ fn insert_match(
     match_guid: uuid::Uuid,
     tx: &rusqlite::Transaction<'_>,
 ) -> Result<()> {
-    tracing::debug!("Inserting match...");
-
     tx.execute(
         include_str!("sql/insert/match.sql"),
         params![

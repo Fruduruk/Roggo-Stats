@@ -5,12 +5,12 @@ use crate::core::{
         Error, Result,
         intermediate_models::{
             BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
-            PlayerStats, StatfeedEventStatistic, TeamStats, TimelineInstant,
+            PlayerStats, StatfeedEventStatistic, TimelineInstant,
         },
     },
     rl_api::models::{
-        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GamePlayer, GoalScored, Player,
-        StatfeedEvent, Team, UpdateState,
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player, StatfeedEvent,
+        UpdateState,
     },
 };
 
