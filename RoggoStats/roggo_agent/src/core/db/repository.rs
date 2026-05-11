@@ -52,12 +52,11 @@ impl Repository {
         stats: intermediate_models::GameStats,
         errors: Vec<bl::Error>,
     ) -> Result<()> {
-        let match_guid = stats.match_guid;
         let mut player_ids = HashMap::new();
         let mut team_ids = HashMap::new();
 
         let tx = self.connection.transaction()?;
-        let match_id = insert_match(&stats, match_guid, &tx)?;
+        let match_id = insert_match(&stats, stats.match_guid, &tx)?;
         insert_metadata(match_id, &tx)?;
 
         for error in errors {
@@ -65,13 +64,13 @@ impl Repository {
         }
 
         for (team_num, team) in stats.teams {
-            let team_id = insert_team(match_guid, &tx, team_num, &team)?;
+            let team_id = insert_team(match_id, &tx, team_num, &team)?;
             if team_ids.insert(team_num, team_id).is_some() {
-                tracing::warn!(
+                let message = format!(
                     "Cancel insert. Double team num detected in one game: {}",
                     team_num
                 );
-                return Ok(());
+                return Err(Error::GeneralError(message));
             }
             for (player_name, player) in &team.players {
                 if player.primary_id.contains("Unknown") {
@@ -79,17 +78,17 @@ impl Repository {
                     continue;
                 }
 
-                upsert_global_player(&tx, player_name, &player)?;
-                let player_id = insert_player(match_guid, &tx, team_id, player)?;
+                let global_player_id = upsert_global_player(&tx, player_name, &player)?;
+                let player_id = insert_player(&tx, match_id, team_id, global_player_id, player)?;
                 if player_ids
                     .insert(player.primary_id.clone(), player_id)
                     .is_some()
                 {
-                    tracing::warn!(
+                    let message = format!(
                         "Cancel insert. Double primary id detected in one game: {}",
                         player.primary_id
                     );
-                    return Ok(());
+                    return Err(Error::GeneralError(message));
                 }
 
                 if let Some(advanced_player_stats) = &player.advanced_stats {
@@ -97,40 +96,54 @@ impl Repository {
                 }
 
                 for crossbar_hit in &player.crossbar_hits {
-                    insert_crossbar_hit(match_guid, &tx, player_id, crossbar_hit)?;
+                    insert_crossbar_hit(&tx, match_id, player_id, crossbar_hit)?;
                 }
             }
         }
 
         for clock_sample in stats.clock_samples {
-            insert_clock_sample(match_guid, &tx, clock_sample)?;
+            insert_clock_sample(match_id, &tx, clock_sample)?;
         }
 
         for goal_details in stats.goal_details {
-            insert_goal_details(match_guid, &player_ids, &tx, goal_details)?;
+            insert_goal_details(match_id, &player_ids, &tx, goal_details)?;
         }
 
         for ball_hit in &stats.ball_hits {
             if let Some(player_id) = player_ids.get(&ball_hit.player_primary_id) {
-                let ball_hit_id = insert_ball_hit(match_guid, &tx, ball_hit)?;
+                let ball_hit_id = insert_ball_hit(match_id, &tx, ball_hit)?;
                 tx.execute(
-                    include_str!("sql/insert/ball_hit_players.sql"),
+                    "
+                        insert into ball_hit_players (
+                            ball_hit_id,
+                            player_id
+                        )
+                        values (?1,?2);
+                    ",
                     params![ball_hit_id, player_id],
                 )?;
             }
         }
 
         for statfeed_event in &stats.statfeed_events {
-            insert_statfeed_event(match_guid, &player_ids, &tx, statfeed_event)?;
+            insert_statfeed_event(match_id, &player_ids, &tx, statfeed_event)?;
         }
 
         for timeline_instant in &stats.timeline {
             let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
 
             tx.execute(
-                include_str!("sql/insert/timeline_instant.sql"),
+                "
+                    insert into timeline (
+                        match_id,
+                        timestamp_ms,
+                        last_touch_team_id,
+                        ball_speed
+                    )
+                    values (?1,?2,?3,?4);
+                ",
                 params![
-                    match_guid,
+                    match_id,
                     timeline_instant.timestamp,
                     team_id,
                     timeline_instant.ball_state.speed
@@ -140,7 +153,7 @@ impl Repository {
 
         tx.commit()?;
 
-        tracing::info!("Saved {} in database", match_guid);
+        tracing::info!("Saved {} in database", stats.match_guid);
         Ok(())
     }
 
@@ -175,7 +188,7 @@ impl Repository {
 }
 
 fn insert_statfeed_event(
-    match_guid: uuid::Uuid,
+    match_id: i64,
     player_ids: &HashMap<String, i64>,
     tx: &Transaction<'_>,
     statfeed_event: &intermediate_models::StatfeedEventStatistic,
@@ -192,9 +205,19 @@ fn insert_statfeed_event(
             };
 
             tx.execute(
-                include_str!("sql/insert/statfeed_events.sql"),
+                "
+                    insert into statfeed_events (
+                        match_id,
+                        timestamp_ms,
+                        event_name,
+                        event_type,
+                        main_target_player_id,
+                        secondary_target_player_id
+                    )
+                    values(?1,?2,?3,?4,?5,?6);
+                ",
                 params![
-                    match_guid,
+                    match_id,
                     statfeed_event.timestamp,
                     statfeed_event.event_name,
                     statfeed_event.event_type,
@@ -207,14 +230,25 @@ fn insert_statfeed_event(
 }
 
 fn insert_ball_hit(
-    match_guid: uuid::Uuid,
+    match_id: i64,
     tx: &Transaction<'_>,
     ball_hit: &intermediate_models::BallHitStatistic,
 ) -> Result<i64> {
     tx.execute(
-        include_str!("sql/insert/ball_hits.sql"),
+        "
+            insert into ball_hits (
+                match_id,
+                timestamp_ms,
+                pre_hit_speed,
+                post_hit_speed,
+                x,
+                y,
+                z
+            )
+            values(?1,?2,?3,?4,?5,?6,?7);
+        ",
         params![
-            match_guid,
+            match_id,
             ball_hit.timestamp,
             ball_hit.pre_hit_speed,
             ball_hit.post_hit_speed,
@@ -227,7 +261,7 @@ fn insert_ball_hit(
 }
 
 fn insert_goal_details(
-    match_guid: uuid::Uuid,
+    match_id: i64,
     player_ids: &HashMap<String, i64>,
     tx: &Transaction<'_>,
     goal_details: intermediate_models::GoalDetails,
@@ -247,56 +281,92 @@ fn insert_goal_details(
         .get(&goal_details.last_touch_primary_id)
         .expect("Last touch player not inserted for this goal.");
     tx.execute(
-        include_str!("sql/insert/goal_details.sql"),
+        "
+            insert into goal_details (
+                match_id,
+                timestamp_ms,
+                goal_time,
+                impact_x,
+                impact_y,
+                impact_z,
+                goal_speed,
+                scorer_player_id,
+                assister_player_id,
+                last_touch_player_id,
+                last_touch_speed
+            )
+            values(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11);
+        ",
         params![
-            match_guid,
+            match_id,
             goal_details.timestamp,
             goal_details.goal_time,
             goal_details.impact_location.x,
             goal_details.impact_location.y,
             goal_details.impact_location.z,
             goal_details.goal_speed,
-            goal_details.last_touch_speed,
             scorer_id,
             assister_id,
             last_touch_player_id,
+            goal_details.last_touch_speed,
         ],
     )?;
     Ok(())
 }
 
 fn insert_crossbar_hit(
-    match_guid: uuid::Uuid,
     tx: &Transaction<'_>,
-    player_id: i64,
+    match_id: i64,
+    last_touch_player_id: i64,
     crossbar_hit: &intermediate_models::CrossbarHitStatistic,
 ) -> Result<()> {
     tx.execute(
-        include_str!("sql/insert/crossbar_hits.sql"),
+        "
+            insert into crossbar_hits (
+                match_id,
+                timestamp_ms,
+                ball_speed,
+                impact_force,
+                x,
+                y,
+                z,
+                last_touch_speed,
+                last_touch_player_id
+            )
+            values(?1,?2,?3,?4,?5,?6,?7,?8,?9);
+        ",
         params![
-            match_guid,
+            match_id,
             crossbar_hit.timestamp,
             crossbar_hit.ball_speed,
             crossbar_hit.impact_force,
-            crossbar_hit.last_touch_speed,
             crossbar_hit.location.x,
             crossbar_hit.location.y,
             crossbar_hit.location.z,
-            player_id,
+            crossbar_hit.last_touch_speed,
+            last_touch_player_id,
         ],
     )?;
     Ok(())
 }
 
 fn insert_clock_sample(
-    match_guid: uuid::Uuid,
+    match_id: i64,
     tx: &Transaction<'_>,
     clock_sample: intermediate_models::ClockSample,
 ) -> Result<()> {
     tx.execute(
-        include_str!("sql/insert/clock_samples.sql"),
+        "
+            insert into clock_samples (
+                match_id,
+                timestamp_ms,
+                time_seconds,
+                is_overtime
+            )
+            values(?1,?2,?3,?4);
+        ",
         params![
-            match_guid,
+            match_id,
             clock_sample.timestamp,
             clock_sample.time_seconds,
             clock_sample.is_overtime,
@@ -311,7 +381,18 @@ fn insert_player_stats(
     advanced_player_stats: &intermediate_models::AdvancedPlayerStats,
 ) -> Result<()> {
     tx.execute(
-        include_str!("sql/insert/player_stats.sql"),
+        "
+            insert into player_stats (
+                player_id,
+                time_boosting,
+                time_demolished,
+                time_on_ground,
+                time_on_wall,
+                time_powersliding,
+                time_supersonic
+            )
+            values(?1,?2,?3,?4,?5,?6,?7);
+        ",
         params![
             player_id,
             advanced_player_stats.time_boosting,
@@ -326,17 +407,35 @@ fn insert_player_stats(
 }
 
 fn insert_player(
-    match_guid: uuid::Uuid,
     tx: &Transaction<'_>,
+    match_id: i64,
     team_id: i64,
+    global_player_id: i64,
     player: &intermediate_models::PlayerStats,
 ) -> Result<i64> {
     tx.execute(
-        include_str!("sql/insert/player.sql"),
+        "
+            insert into players (
+                match_id,
+                team_id,
+                global_player_id,
+                display_name,
+                shortcut,
+                score,
+                goals,
+                shots,
+                assists,
+                saves,
+                touches,
+                car_touches,
+                demos
+            )
+            values(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13);
+        ",
         params![
-            match_guid,
+            match_id,
             team_id,
-            player.primary_id,
+            global_player_id,
             player.name,
             player.shortcut,
             player.score,
@@ -354,28 +453,43 @@ fn insert_player(
 
 fn upsert_global_player(
     tx: &Transaction<'_>,
-    player_name: &str,
+    username: &str,
     player: &intermediate_models::PlayerStats,
-) -> Result<()> {
+) -> Result<i64> {
     tx.execute(
-        include_str!("sql/insert/upsert_global_player.sql"),
-        params![player.primary_id, player_name],
+        "
+            insert into global_players (primary_id, last_username)
+            values (?1,?2)
+            on conflict(primary_id) do
+            update set last_username = excluded.last_username;
+        ",
+        params![player.primary_id, username],
     )?;
-    Ok(())
+    Ok(tx.last_insert_rowid())
 }
 
 fn insert_team(
-    match_guid: uuid::Uuid,
+    match_id: i64,
     tx: &Transaction<'_>,
     team_num: u8,
     team: &intermediate_models::TeamStats,
 ) -> Result<i64> {
     tx.execute(
-        include_str!("sql/insert/team.sql"),
-        params![
-            match_guid,
-            team.name.clone(),
+        "
+        insert into teams (
+            match_id,
             team_num,
+            name,
+            score,
+            color_primary,
+            color_secondary
+        )
+        values (?1,?2,?3,?4,?5,?6);
+        ",
+        params![
+            match_id,
+            team_num,
+            team.name.clone(),
             team.score,
             team.color_primary,
             team.color_secondary
