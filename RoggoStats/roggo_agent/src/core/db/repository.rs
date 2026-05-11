@@ -456,16 +456,19 @@ fn upsert_global_player(
     username: &str,
     player: &intermediate_models::PlayerStats,
 ) -> Result<i64> {
-    tx.execute(
+    let id = tx.query_row(
         "
-            insert into global_players (primary_id, last_username)
-            values (?1,?2)
-            on conflict(primary_id) do
-            update set last_username = excluded.last_username;
+        insert into global_players (primary_id, last_username)
+        values (?1, ?2)
+        on conflict(primary_id) do update
+        set last_username = excluded.last_username
+        returning id;
         ",
         params![player.primary_id, username],
+        |row| row.get(0),
     )?;
-    Ok(tx.last_insert_rowid())
+
+    Ok(id)
 }
 
 fn insert_team(

@@ -59,6 +59,7 @@ pub struct GameStats {
     pub goal_details: Vec<GoalDetails>,
     pub ball_hits: Vec<BallHitStatistic>,
     pub statfeed_events: Vec<StatfeedEventStatistic>,
+    
 
     pub timeline: Vec<TimelineInstant>,
 
@@ -207,7 +208,7 @@ pub struct PlayerStats {
     pub crossbar_hits: Vec<CrossbarHitStatistic>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AdvancedPlayerStats {
     pub time_boosting: i64,
     pub time_demolished: i64,
@@ -215,19 +216,6 @@ pub struct AdvancedPlayerStats {
     pub time_on_wall: i64,
     pub time_powersliding: i64,
     pub time_supersonic: i64,
-}
-
-impl Default for AdvancedPlayerStats {
-    fn default() -> Self {
-        Self {
-            time_boosting: Default::default(),
-            time_demolished: Default::default(),
-            time_on_ground: Default::default(),
-            time_on_wall: Default::default(),
-            time_powersliding: Default::default(),
-            time_supersonic: Default::default(),
-        }
-    }
 }
 
 impl PlayerStats {
@@ -248,4 +236,10 @@ impl PlayerStats {
             crossbar_hits: vec![],
         }
     }
+}
+
+#[derive(Debug, Default)]
+pub struct StatSnapshot {
+    pub speed: f64,
+    pub boost: f64,
 }

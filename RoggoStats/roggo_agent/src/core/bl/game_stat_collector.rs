@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use uuid::Uuid;
 
 use crate::core::{
@@ -5,12 +7,12 @@ use crate::core::{
         Error, Result,
         intermediate_models::{
             BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
-            PlayerStats, StatfeedEventStatistic, TimelineInstant,
+            PlayerStats, StatSnapshot, StatfeedEventStatistic, TimelineInstant,
         },
     },
     rl_api::models::{
-        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player, StatfeedEvent,
-        UpdateState,
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GamePlayer, GoalScored, Player,
+        StatfeedEvent, UpdateState,
     },
 };
 
@@ -23,6 +25,7 @@ pub struct GameStatCollector {
     crossbar_hit_buffer: Vec<(i64, CrossbarHit)>,
     statfeed_event_buffer: Vec<(i64, StatfeedEvent)>,
     goal_scored_buffer: Vec<(i64, GoalScored)>,
+    player_stats_buffer: HashMap<String, Vec<(i64, StatSnapshot)>>,
 }
 
 impl GameStatCollector {
@@ -35,6 +38,7 @@ impl GameStatCollector {
             crossbar_hit_buffer: vec![],
             statfeed_event_buffer: vec![],
             goal_scored_buffer: vec![],
+            player_stats_buffer: HashMap::new(),
         }
     }
 
@@ -51,6 +55,7 @@ impl GameStatCollector {
             crossbar_hit_buffer,
             statfeed_event_buffer,
             goal_scored_buffer,
+            player_stats_buffer,
         } = self;
 
         let mut errors = vec![];
@@ -74,6 +79,26 @@ impl GameStatCollector {
             if let Err(error) = insert_goal_scored(&mut stats, timestamp, goal_scored) {
                 errors.push(error);
             }
+        }
+
+        for (player_id, snapshots) in player_stats_buffer {
+            let count = snapshots.len() as f64;
+            let average_speed = snapshots
+                .iter()
+                .map(|(_, snapshot)| snapshot.speed)
+                .sum::<f64>()
+                / count;
+            let average_boost = snapshots
+                .iter()
+                .map(|(_, snapshot)| snapshot.boost)
+                .sum::<f64>()
+                / count;
+            tracing::debug!(
+                "average stats for {}: speed {}, boost {}",
+                player_id,
+                average_speed,
+                average_boost
+            );
         }
 
         (stats, errors)
@@ -196,6 +221,15 @@ impl GameStatCollector {
                 if round_started_once {
                     // Don't count, if round never started once.
                     increment_counters(player_stats, &player, delta);
+                    if let Some(timestamp) = self.state.timestamp {
+                        if let (Some(boost), Some(speed)) = (player.boost, player.speed) {
+                            let buffer = self
+                                .player_stats_buffer
+                                .entry(player.primary_id)
+                                .or_default();
+                            buffer.push((timestamp, StatSnapshot { speed, boost }));
+                        }
+                    }
                 }
             }
         }
