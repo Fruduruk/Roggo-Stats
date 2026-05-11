@@ -50,8 +50,8 @@ impl Aggregator {
                 let mut repository = Repository::connect(&self.db_file_path)?;
                 // let mut repository = Repository::new_in_memory()?;
 
-                if let Err(err) = repository.insert_game_stats(stats) {
-                    tracing::error!(error= %err, "failed to save match stats");
+                if let Err(err) = repository.insert_game_stats(stats,errors) {
+                    tracing::error!(error= %err, "Failed to save match stats");
                 }
             }
         }

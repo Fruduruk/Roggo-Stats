@@ -1,12 +1,15 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, Transaction, params};
 
 use crate::core::api::dto::MatchDto;
-use crate::core::bl::intermediate_models;
 use crate::core::bl::query_models::MatchRow;
-use crate::core::db::Result;
+use crate::core::bl::{self, intermediate_models};
+use crate::core::db::{Error, Result};
+
+const SCHEMA_VERSION: i64 = 1;
+const AGENT_VERSION: &str = "0.1.0";
 
 pub struct Repository {
     connection: Connection,
@@ -44,13 +47,22 @@ impl Repository {
         Ok(())
     }
 
-    pub fn insert_game_stats(&mut self, stats: intermediate_models::GameStats) -> Result<()> {
+    pub fn insert_game_stats(
+        &mut self,
+        stats: intermediate_models::GameStats,
+        errors: Vec<bl::Error>,
+    ) -> Result<()> {
         let match_guid = stats.match_guid;
         let mut player_ids = HashMap::new();
         let mut team_ids = HashMap::new();
 
         let tx = self.connection.transaction()?;
-        insert_match(&stats, match_guid, &tx)?;
+        let match_id = insert_match(&stats, match_guid, &tx)?;
+        insert_metadata(match_id, &tx)?;
+
+        for error in errors {
+            insert_error(match_id, error, &tx)?;
+        }
 
         for (team_num, team) in stats.teams {
             let team_id = insert_team(match_guid, &tx, team_num, &team)?;
@@ -165,7 +177,7 @@ impl Repository {
 fn insert_statfeed_event(
     match_guid: uuid::Uuid,
     player_ids: &HashMap<String, i64>,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     statfeed_event: &intermediate_models::StatfeedEventStatistic,
 ) -> Result<()> {
     Ok(
@@ -196,7 +208,7 @@ fn insert_statfeed_event(
 
 fn insert_ball_hit(
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     ball_hit: &intermediate_models::BallHitStatistic,
 ) -> Result<i64> {
     tx.execute(
@@ -217,7 +229,7 @@ fn insert_ball_hit(
 fn insert_goal_details(
     match_guid: uuid::Uuid,
     player_ids: &HashMap<String, i64>,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     goal_details: intermediate_models::GoalDetails,
 ) -> Result<()> {
     let scorer_id = player_ids
@@ -255,7 +267,7 @@ fn insert_goal_details(
 
 fn insert_crossbar_hit(
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     player_id: i64,
     crossbar_hit: &intermediate_models::CrossbarHitStatistic,
 ) -> Result<()> {
@@ -266,10 +278,10 @@ fn insert_crossbar_hit(
             crossbar_hit.timestamp,
             crossbar_hit.ball_speed,
             crossbar_hit.impact_force,
+            crossbar_hit.last_touch_speed,
             crossbar_hit.location.x,
             crossbar_hit.location.y,
             crossbar_hit.location.z,
-            crossbar_hit.last_touch_speed,
             player_id,
         ],
     )?;
@@ -278,7 +290,7 @@ fn insert_crossbar_hit(
 
 fn insert_clock_sample(
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     clock_sample: intermediate_models::ClockSample,
 ) -> Result<()> {
     tx.execute(
@@ -294,7 +306,7 @@ fn insert_clock_sample(
 }
 
 fn insert_player_stats(
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     player_id: i64,
     advanced_player_stats: &intermediate_models::AdvancedPlayerStats,
 ) -> Result<()> {
@@ -315,7 +327,7 @@ fn insert_player_stats(
 
 fn insert_player(
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     team_id: i64,
     player: &intermediate_models::PlayerStats,
 ) -> Result<i64> {
@@ -341,7 +353,7 @@ fn insert_player(
 }
 
 fn upsert_global_player(
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     player_name: &str,
     player: &intermediate_models::PlayerStats,
 ) -> Result<()> {
@@ -354,7 +366,7 @@ fn upsert_global_player(
 
 fn insert_team(
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
+    tx: &Transaction<'_>,
     team_num: u8,
     team: &intermediate_models::TeamStats,
 ) -> Result<i64> {
@@ -375,10 +387,21 @@ fn insert_team(
 fn insert_match(
     stats: &intermediate_models::GameStats,
     match_guid: uuid::Uuid,
-    tx: &rusqlite::Transaction<'_>,
-) -> Result<()> {
+    tx: &Transaction<'_>,
+) -> Result<i64> {
     tx.execute(
-        include_str!("sql/insert/match.sql"),
+        "
+        insert into matches (
+            match_guid,
+            arena,
+            duration,
+            created_at_ms,
+            ended_at_ms,
+            had_overtime,
+            deleted
+        )
+        values (?1,?2,?3,?4,?5,?6,?7);
+        ",
         params![
             match_guid,
             stats.arena_name,
@@ -388,6 +411,44 @@ fn insert_match(
             stats.had_overtime,
             false
         ],
+    )?;
+    Ok(tx.last_insert_rowid())
+}
+
+fn insert_metadata(match_id: i64, tx: &Transaction<'_>) -> Result<()> {
+    let timestamp_ms = i64::try_from(
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
+            .as_millis(),
+    )
+    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))?;
+
+    tx.execute(
+        "
+        insert into match_metadata (
+            match_id,
+            schema_version,
+            agent_version,
+            saved_at_ms
+        )
+        values (?1,?2,?3,?4);
+        ",
+        params![match_id, SCHEMA_VERSION, AGENT_VERSION, timestamp_ms],
+    )?;
+    Ok(())
+}
+
+fn insert_error(match_id: i64, error: bl::Error, tx: &Transaction<'_>) -> Result<()> {
+    tx.execute(
+        "
+        insert into errors (
+            match_id,
+            error
+        )
+        values (?1,?2);
+    ",
+        params![match_id, error.to_string()],
     )?;
     Ok(())
 }
