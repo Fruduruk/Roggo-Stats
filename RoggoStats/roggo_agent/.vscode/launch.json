@@ -8,6 +8,12 @@
       "program": "${workspaceRoot}/target/debug/roggo-agent-console.exe",
       "args": [],
       "cwd": "${workspaceRoot}",
+      "environment": [
+        {
+          "name": "import_path",
+          "value": "captures/normal_3v3_full.7z"
+        }
+      ],
       "preLaunchTask": "build console",
       "console": "integratedTerminal"
     },
