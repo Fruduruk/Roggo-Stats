@@ -10,6 +10,21 @@ create table if not exists matches (
     unique(match_guid)
 );
 
+create table if not exists match_metadata (
+    match_id integer primary key,
+    schema_version integer not null,
+    agent_version text not null,
+    saved_at_ms integer not null,
+    foreign key (match_id) references matches(id)
+);
+
+create table if not exists errors (
+    id integer primary key,
+    match_id integer not null,
+    error text not null,
+    foreign key (match_id) references matches(id)
+);
+
 create table if not exists teams (
     id integer primary key,
     match_id integer not null,
