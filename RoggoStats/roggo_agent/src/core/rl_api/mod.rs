@@ -12,6 +12,10 @@ pub enum Error {
         #[source]
         source: crate::core::db::Error,
     },
+    #[error("Rocket League API connection closed")]
+    APIConnectionClosed,
+    #[error("Error: {0}")]
+    GeneralError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
