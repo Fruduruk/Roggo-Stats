@@ -9,8 +9,11 @@ use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::core::{
-    api::{Error, Result, dto::MatchDto}, bl::feature, db::repository::Repository
+    api::{Error, Result, dto::MatchDto},
+    bl::feature,
 };
+
+const WEB_SOCKET_ADDR: &str = "127.0.0.1:49124";
 
 #[derive(Clone)]
 struct AppState {
@@ -31,7 +34,7 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
         .layer(cors)
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    let listener = tokio::net::TcpListener::bind(WEB_SOCKET_ADDR)
         .await
         .unwrap();
 
@@ -48,13 +51,13 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
             }
             tracing::info!("Shutting down web api...");
         })
-        .await.map_err(|err| Error::AxumError{source: err})?;
+        .await
+        .map_err(|err| Error::AxumError { source: err })?;
     Ok(())
 }
 
 async fn get_match(State(state): State<AppState>) -> Result<Json<Vec<MatchDto>>> {
     let matches = feature::get_all_matches(&state.db_file_path)?;
-    
 
     Ok(Json(matches))
 }
