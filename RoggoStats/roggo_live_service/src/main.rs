@@ -1,17 +1,15 @@
+pub mod core;
+
+use chrono::{DateTime, Local};
 use eframe::egui;
 use gloo_net::http::Request;
-use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct MatchDto {
-    match_guid: Uuid,
-    arena: String,
-    duration_seconds: i64,
-}
+use crate::core::dto::MatchDto;
 
-const LOCAL_HTTP_ADDR: &str = "http://127.0.0.1:3000";
+const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49124";
+
 struct App {
     response_text: Arc<Mutex<String>>,
 }
@@ -34,13 +32,24 @@ impl eframe::App for App {
                 let ctx = ui.ctx().clone();
 
                 wasm_bindgen_futures::spawn_local(async move {
-                    let result = Request::get(&format!("{LOCAL_HTTP_ADDR}/match"))
+                    let result = Request::get(&format!("{WEB_SOCKET_ADDR}/match"))
                         .send()
                         .await;
 
                     if let Ok(response) = result {
-                        if let Ok(dto) = response.json::<MatchDto>().await {
-                            *response_text.lock().unwrap() = format!("{dto:#?}");
+                        if let Ok(dtos) = response.json::<Vec<MatchDto>>().await {
+                            let mut text = String::new();
+
+                            for dto in dtos {
+                                let date: DateTime<Local> =
+                                    DateTime::from_timestamp_millis(dto.created_at)
+                                        .unwrap()
+                                        .with_timezone(&Local);
+
+                                text.push_str(&format!("{}\n", date.format("%d.%m.%Y %H:%M:%S")));
+                            }
+
+                            *response_text.lock().unwrap() = text;
                         }
                     }
 
