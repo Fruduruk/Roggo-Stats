@@ -15,17 +15,14 @@ pub async fn read_rocket_league_api(
         let mut rl_stream = match TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await {
             Ok(stream) => stream,
             Err(_) => {
-                for _ in 1..=10 {
-                    tokio::select! {
-                        _ = wait_for_shutdown(shutdown_rx.clone()) => {
-                            tracing::info!("Shutting down rocket league api listener...");
-                            return Ok(());
-                        }
-
-                        _ = tokio::time::sleep(Duration::from_secs(1)) => {}
+                tokio::select! {
+                    _ = wait_for_shutdown(shutdown_rx.clone()) => {
+                        tracing::info!("Shutting down rocket league api listener...");
+                        return Ok(());
                     }
-                }
 
+                    _ = tokio::time::sleep(Duration::from_secs(10)) => {}
+                }
                 continue;
             }
         };
