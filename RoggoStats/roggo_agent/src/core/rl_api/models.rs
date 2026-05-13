@@ -1,7 +1,7 @@
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer};
 use uuid::Uuid;
-use crate::core::rl_api::{Error, Result};
+use crate::core::rl_api::{Result};
 
 
 fn empty_string_as_none_uuid<'de, D>(deserializer: D) -> std::result::Result<Option<Uuid>, D::Error>

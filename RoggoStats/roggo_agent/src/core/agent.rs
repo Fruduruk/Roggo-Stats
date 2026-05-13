@@ -5,7 +5,7 @@ use tokio::sync::watch;
 use tokio::task::JoinError;
 
 use crate::core::api::web_api;
-use crate::core::db::repository::Repository;
+use crate::core::db::Repository;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
 

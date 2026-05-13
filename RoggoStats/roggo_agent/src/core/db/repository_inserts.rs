@@ -1,52 +1,13 @@
 use std::collections::HashMap;
-use std::path::Path;
 
-use rusqlite::{Connection, Transaction, params};
+use rusqlite::{Transaction, params};
 
-use crate::core::api::dto::MatchDto;
-use crate::core::bl::query_models::MatchRow;
 use crate::core::bl::{self, intermediate_models};
-use crate::core::db::{Error, Result};
+use crate::core::db::{Error, Repository, Result};
 
-const SCHEMA_VERSION: i64 = 1;
-const AGENT_VERSION: &str = "0.1.0";
 
-pub struct Repository {
-    connection: Connection,
-}
 
 impl Repository {
-    pub fn new(path: &Path) -> Result<Self> {
-        let repo = Self::connect(path)?;
-        repo.init()?;
-        Ok(repo)
-    }
-
-    pub fn connect(path: &Path) -> Result<Self> {
-        Ok(Self {
-            connection: Connection::open(path)?,
-        })
-    }
-
-    pub fn new_in_memory() -> Result<Self> {
-        let repo = Self {
-            connection: Connection::open_in_memory()?,
-        };
-        repo.init()?;
-
-        Ok(repo)
-    }
-
-    fn init(&self) -> Result<()> {
-        self.connection.pragma_update(None, "journal_mode", "WAL")?;
-        self.connection.pragma_update(None, "busy_timeout", 5000)?;
-        self.connection.pragma_update(None, "foreign_keys", "ON")?;
-
-        self.connection
-            .execute_batch(include_str!("sql/init.sql"))?;
-        Ok(())
-    }
-
     pub fn insert_game_stats(
         &mut self,
         stats: intermediate_models::GameStats,
@@ -157,34 +118,7 @@ impl Repository {
         Ok(())
     }
 
-    pub fn get_match(&self) -> Result<Vec<MatchRow>> {
-        let mut stmt = self.connection.prepare(
-            "
-            select * from matches
-            order by created_at_ms desc
-            ",
-        )?;
-
-        let rows = stmt.query_map([], |row| {
-            Ok(MatchRow {
-                match_guid: row.get("match_guid")?,
-                arena: row.get("arena")?,
-                duration: row.get("duration")?,
-                created_at: row.get("created_at_ms")?,
-                ended_at: row.get("ended_at_ms")?,
-                had_overtime: row.get("had_overtime")?,
-                deleted: row.get("deleted")?,
-            })
-        })?;
-
-        let mut matches = vec![];
-
-        for row in rows {
-            matches.push(row?);
-        }
-
-        Ok(matches)
-    }
+   
 }
 
 fn insert_statfeed_event(
@@ -551,7 +485,7 @@ fn insert_metadata(match_id: i64, tx: &Transaction<'_>) -> Result<()> {
         )
         values (?1,?2,?3,?4);
         ",
-        params![match_id, SCHEMA_VERSION, AGENT_VERSION, timestamp_ms],
+        params![match_id, super::SCHEMA_VERSION, super::AGENT_VERSION, timestamp_ms],
     )?;
     Ok(())
 }
