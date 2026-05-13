@@ -38,6 +38,8 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
         .await
         .unwrap();
 
+    tracing::info!("Web socket running on http://{}/match",WEB_SOCKET_ADDR);
+
     axum::serve(listener, app)
         .with_graceful_shutdown(async move {
             loop {

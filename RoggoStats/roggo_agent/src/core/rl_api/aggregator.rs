@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::{
     bl::{game_stat_collector::GameStatCollector, intermediate_models},
-    db::repository::Repository,
+    db::Repository,
     rl_api::{Result, deserializer::deserialize, models::Event},
 };
 
@@ -50,7 +50,7 @@ impl Aggregator {
                 let mut repository = Repository::connect(&self.db_file_path)?;
                 // let mut repository = Repository::new_in_memory()?;
 
-                if let Err(err) = repository.insert_game_stats(stats,errors) {
+                if let Err(err) = repository.insert_game_stats(stats, errors) {
                     tracing::error!(error= %err, "Failed to save match stats");
                 }
             }
