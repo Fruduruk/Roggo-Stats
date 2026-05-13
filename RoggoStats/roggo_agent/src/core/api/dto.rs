@@ -12,3 +12,8 @@ pub struct MatchDto {
     pub had_overtime: bool,
     pub deleted: bool,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PlayerNameDto {
+    pub name: String
+}
