@@ -11,7 +11,7 @@
       "environment": [
         {
           "name": "import_path",
-          "value": "captures/normal_3v3_full.7z"
+          "value": "captures/ranked_2v2_full.7z"
         }
       ],
       "preLaunchTask": "build console",
@@ -27,7 +27,7 @@
       "environment": [
         {
           "name": "import_path",
-          "value": "captures/normal_3v3_full.7z"
+          "value": "captures/ranked_2v2_full.7z"
         }
       ],
       "preLaunchTask": "build console release",
