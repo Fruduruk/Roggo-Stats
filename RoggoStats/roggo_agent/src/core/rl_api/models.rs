@@ -1,9 +1,10 @@
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer};
-use std::error::Error;
 use uuid::Uuid;
+use crate::core::rl_api::{Error, Result};
 
-fn empty_string_as_none_uuid<'de, D>(deserializer: D) -> Result<Option<Uuid>, D::Error>
+
+fn empty_string_as_none_uuid<'de, D>(deserializer: D) -> std::result::Result<Option<Uuid>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -26,26 +27,28 @@ pub struct RawPacket {
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy, serde::Deserialize)]
 pub enum RawEvent {
-    UpdateState,     
-    BallHit,         
+    UpdateState,
+    BallHit,
     ClockUpdatedSeconds,
-    CountdownBegin,      
-    CrossbarHit,         
+    CountdownBegin,
+    CrossbarHit,
     GoalReplayEnd,
     GoalReplayStart,
     GoalReplayWillEnd,
     ReplayWillEnd,
-    GoalScored,       
-    MatchCreated,     
-    MatchInitialized, 
-    MatchDestroyed,   
-    MatchEnded,       
+    GoalScored,
+    MatchCreated,
+    MatchInitialized,
+    MatchDestroyed,
+    MatchEnded,
     MatchPaused,
     MatchUnpaused,
-    PodiumStart, 
+    PodiumStart,
     ReplayCreated,
     RoundStarted,
     StatfeedEvent,
+    ReplayPlaybackStart,
+    ReplayPlaybackEnd,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -70,10 +73,12 @@ pub enum Event {
     ReplayCreated(MatchIdentfier),
     RoundStarted(MatchIdentfier),
     StatfeedEvent(StatfeedEvent),
+    ReplayPlaybackStart(MatchIdentfier),
+    ReplayPlaybackEnd(MatchIdentfier)
 }
 
 impl Event {
-    pub fn new(raw_packet: &RawPacket) -> Result<Event, Box<dyn Error>> {
+    pub fn new(raw_packet: &RawPacket) -> Result<Event> {
         Ok(match raw_packet.event {
             RawEvent::UpdateState => Event::UpdateState(serde_json::from_str(&raw_packet.data)?),
             RawEvent::BallHit => Event::BallHit(serde_json::from_str(&raw_packet.data)?),
@@ -117,11 +122,13 @@ impl Event {
             RawEvent::ReplayWillEnd => {
                 Event::ReplayWillEnd(serde_json::from_str(&raw_packet.data)?)
             }
+            RawEvent::ReplayPlaybackStart => Event::ReplayPlaybackStart(serde_json::from_str(&raw_packet.data)?),
+            RawEvent::ReplayPlaybackEnd => Event::ReplayPlaybackEnd(serde_json::from_str(&raw_packet.data)?),
         })
     }
 
-    pub fn get_match_guid(&self) -> Option<Uuid>{
-        match self{
+    pub fn get_match_guid(&self) -> Option<Uuid> {
+        match self {
             Event::UpdateState(update_state) => update_state.match_guid,
             Event::BallHit(ball_hit) => ball_hit.match_guid,
             Event::ClockUpdatedSeconds(clock_updated_seconds) => clock_updated_seconds.match_guid,
@@ -142,6 +149,8 @@ impl Event {
             Event::ReplayCreated(match_identfier) => match_identfier.match_guid,
             Event::RoundStarted(match_identfier) => match_identfier.match_guid,
             Event::StatfeedEvent(statfeed_event) => statfeed_event.match_guid,
+            Event::ReplayPlaybackStart(match_identifier) => match_identifier.match_guid,
+            Event::ReplayPlaybackEnd(match_identfier) => match_identfier.match_guid,
         }
     }
 }
@@ -270,7 +279,11 @@ pub struct Location {
 
 impl Default for Location {
     fn default() -> Self {
-        Self { x: Default::default(), y: Default::default(), z: Default::default() }
+        Self {
+            x: Default::default(),
+            y: Default::default(),
+            z: Default::default(),
+        }
     }
 }
 

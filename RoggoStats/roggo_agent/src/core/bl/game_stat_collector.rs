@@ -124,10 +124,6 @@ impl GameStatCollector {
             }
             Event::CrossbarHit(crossbar_hit) => self.push_crossbar_hit(crossbar_hit),
             Event::GoalScored(goal_scored) => self.push_goal_scored(goal_scored),
-            // Event::MatchCreated(_) => tracing::debug!("Match Created {}", self.insert_count),
-            // Event::MatchInitialized(_) => {
-            //     tracing::debug!("Match Initialized {}", self.insert_count)
-            // }
             Event::MatchDestroyed(_) | Event::PodiumStart(_) | Event::MatchEnded(_) => {
                 self.stats.ended_at_timestamp = timestamp;
                 self.state.finished = true;

@@ -118,7 +118,8 @@ async fn receive_packets(
     db_file_path: PathBuf,
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
-    // let mut packet_collector = crate::core::packet_collector::PacketCollector::new("captures/new")?;
+    // let mut packet_collector =
+    //     crate::core::debug::packet_collector::PacketCollector::new("captures/new").unwrap();
     let mut aggregator = Aggregator::new(db_file_path);
     let mut count: u128 = 0;
 

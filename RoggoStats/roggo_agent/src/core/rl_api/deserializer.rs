@@ -13,7 +13,7 @@ pub fn deserialize(raw: &String) -> Vec<Event> {
                 }
             }
             Err(err) => {
-                println!("Error while parsing next tcp packet {err}");
+                tracing::warn!("Error while parsing next tcp packet {err}");
             }
         }
     }
@@ -28,8 +28,8 @@ pub fn deserialize_single_event(packet: &RawPacket) -> Option<Event> {
             Some(event)
         }
         Err(err) => {
-            println!("Error while parsing raw event, returning unknown: {}", err);
-            println!("Could not parse this packet: {packet:#?}");
+            tracing::warn!("Error while parsing raw event, returning unknown: {}", err);
+            tracing::warn!("Could not parse this packet: {packet:#?}");
             None
         }
     }
