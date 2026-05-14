@@ -34,7 +34,7 @@ impl RoggoApp {
 
 impl eframe::App for RoggoApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        ui.ctx().request_repaint_after(Duration::from_secs(2));
+        ui.ctx().request_repaint_after(Duration::from_secs(1));
 
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
@@ -42,6 +42,7 @@ impl eframe::App for RoggoApp {
                 if content.player_name.is_none() {
                     tasks::load_main_character(self.content.clone());
                 }
+                self.match_overview_ui.reload();
             }
             self.last_reload = now;
         }
@@ -57,7 +58,7 @@ impl eframe::App for RoggoApp {
                         }
                     }
 
-                    egui::widgets::global_theme_preference_switch(ui);
+                    // egui::widgets::global_theme_preference_switch(ui);
                 });
             })
         });

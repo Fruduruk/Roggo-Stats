@@ -12,6 +12,8 @@ pub enum Error {
     #[error("Failed to insert event {0}")]
     InsertionFailed(String),
     #[error("No player found")]
-    NoPlayerFound,
+    NoPlayerFound{
+        source: crate::core::db::Error
+    },
 }
 pub type Result<T> = std::result::Result<T, Error>;
