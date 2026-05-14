@@ -1,8 +1,8 @@
 use axum::{Json, http, response::IntoResponse};
 
-use crate::core::api::dto::{AgentErrorCode, AgentErrorDto};
+use crate::core::api::contract::{AgentErrorCode, AgentErrorDto};
 
-pub mod dto;
+pub mod contract;
 pub mod mappers;
 pub mod web_api;
 

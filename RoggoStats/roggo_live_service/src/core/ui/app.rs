@@ -6,7 +6,7 @@ use std::{
 use eframe::egui;
 
 use crate::core::{
-    dto::AgentErrorDto,
+    contract::AgentErrorDto,
     ui::{match_overview_ui::MatchOverviewUi, tasks},
 };
 

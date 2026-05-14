@@ -1,6 +1,6 @@
 use gloo_net::http::Request;
 
-use crate::core::dto::{AgentErrorDto, MainCharacterDto, PersonalMatchDto};
+use crate::core::contract::{AgentErrorDto, MainCharacterDto, SimpleMatchDto};
 use crate::core::{Error, Result};
 
 const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49124";
@@ -27,10 +27,10 @@ async fn parse_error<T>(response: gloo_net::http::Response) -> Result<T> {
     Err(Error::AgentError(error_dto))
 }
 
-pub async fn get_matches() -> Result<Vec<PersonalMatchDto>> {
+pub async fn get_matches() -> Result<Vec<SimpleMatchDto>> {
     let response = request("matches").send().await?;
     if response.ok() {
-        let dto = response.json::<Vec<PersonalMatchDto>>().await?;
+        let dto = response.json::<Vec<SimpleMatchDto>>().await?;
         Ok(dto)
     } else {
         parse_error(response).await
