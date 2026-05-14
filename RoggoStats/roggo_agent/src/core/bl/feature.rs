@@ -1,15 +1,26 @@
 use std::path::Path;
 
-use crate::core::api::contract::{MainCharacterDto, SimpleMatchDto};
+use uuid::Uuid;
+
+use crate::core::api::contract::{
+    DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto, MainCharacterDto,
+    SimpleMatchDto,
+};
+use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
+
+fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
+    let global_player = repo
+        .get_player_with_most_replays()
+        .map_err(|err| Error::NoPlayerFound { source: err })?;
+    Ok(global_player)
+}
 
 pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
     let repo = Repository::connect(path)?;
 
-    let global_player = repo
-        .get_player_with_most_replays()
-        .map_err(|err| Error::NoPlayerFound { source: err })?;
+    let main_character = get_most_played_player(&repo)?;
 
     let mut dtos = vec![];
 
@@ -30,13 +41,10 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
         ) = Default::default();
 
         for (team, players) in teams_players {
-            let mut own_team = false;
-
-            for player in &players {
-                if player.global_player_id == global_player.id {
-                    own_team = true;
-                }
-            }
+            let own_team = is_main_character_team(
+                &main_character,
+                players.iter().map(|p| p.global_player_id).collect(),
+            );
 
             if own_team {
                 own_team_score = team.score;
@@ -65,14 +73,127 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
     Ok(dtos)
 }
 
+#[inline]
+fn is_main_character_team(main_character: &GlobalPlayerRow, player_ids: Vec<i64>) -> bool {
+    for id in player_ids {
+        if id == main_character.id {
+            return true;
+        }
+    }
+    false
+}
+
 pub fn get_main_character(path: &Path) -> Result<MainCharacterDto> {
     let repo = Repository::connect(path)?;
-    let global_player = repo
-        .get_player_with_most_replays()
-        .map_err(|err| Error::NoPlayerFound { source: err })?;
+    let main_character = get_most_played_player(&repo)?;
 
     Ok(MainCharacterDto {
-        username: global_player.last_username,
-        primary_id: global_player.primary_id,
+        username: main_character.last_username,
+        primary_id: main_character.primary_id,
     })
+}
+
+pub fn get_detailed_match_by_id(path: &Path, match_guid: Uuid) -> Result<DetailedMatchDto> {
+    let repo = Repository::connect(path)?;
+    let main_character = get_most_played_player(&repo)?;
+
+    let match_row = repo.f3_get_match_by_match_guid(match_guid)?;
+    let teams = repo.f3_get_teams_by_match_id(match_row.id)?;
+
+    let mut own_team = None;
+    let mut own_players = None;
+    let mut enemy_team = None;
+    let mut enemy_players = None;
+
+    for team in teams {
+        let players = repo.f3_get_players_by_team_id(team.id)?;
+
+        if is_main_character_team(
+            &main_character,
+            players
+                .iter()
+                .map(|p| p.global_player_id)
+                .collect::<Vec<_>>(),
+        ) {
+            own_team = Some(team);
+            own_players = Some(players);
+        } else {
+            enemy_team = Some(team);
+            enemy_players = Some(players);
+        }
+    }
+
+    let own_team = own_team.ok_or(Error::CalculationError("own team not found".into()))?;
+    let own_players = own_players.ok_or(Error::CalculationError("own players not found".into()))?;
+
+    let enemy_team = enemy_team.ok_or(Error::CalculationError("enemy team not found".into()))?;
+    let enemy_players =
+        enemy_players.ok_or(Error::CalculationError("enemy players not found".into()))?;
+
+    let duration = match_row.duration as f64;
+
+    let own_team = convert_to_detailed_team(&repo, own_team, own_players, duration)?;
+    let enemy_team = convert_to_detailed_team(&repo, enemy_team, enemy_players, duration)?;
+
+    Ok(DetailedMatchDto {
+        match_guid: match_guid,
+        arena: match_row.arena,
+        duration: match_row.duration,
+        created_at: match_row.created_at,
+        ended_at: match_row.ended_at,
+        had_overtime: match_row.had_overtime,
+        own_team,
+        enemy_team,
+    })
+}
+
+fn convert_to_detailed_team(
+    repo: &Repository,
+    team: F3TeamRow,
+    players: Vec<F3PlayerRow>,
+    duration: f64,
+) -> Result<DetailedTeamDto> {
+    let players: Vec<DetailedPlayerDto> = players
+        .into_iter()
+        .map(|p| {
+            let username = repo
+                .get_global_player_by_id(p.global_player_id)?
+                .last_username;
+
+            let stats = match p.stats {
+                Some(stats) => Some(DetailedPlayerStatsDto {
+                    percent_boosting: stats.time_boosting as f64 / duration,
+                    percent_demolished: stats.time_demolished as f64 / duration,
+                    percent_on_ground: stats.time_on_ground as f64 / duration,
+                    percent_on_wall: stats.time_on_wall as f64 / duration,
+                    percent_powersliding: stats.time_powersliding as f64 / duration,
+                    percent_supersonic: stats.time_supersonic as f64 / duration,
+                }),
+                None => None,
+            };
+
+            Ok(DetailedPlayerDto {
+                username,
+                display_name: p.display_name,
+                score: p.score,
+                goals: p.goals,
+                shots: p.shots,
+                assists: p.assists,
+                saves: p.saves,
+                touches: p.touches,
+                car_touches: p.car_touches,
+                demos: p.demos,
+                stats,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let team = DetailedTeamDto {
+        name: team.name,
+        score: team.score,
+        color_primary: team.color_primary,
+        color_secondary: team.color_secondary,
+        players,
+    };
+    Ok(team)
 }
