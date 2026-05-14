@@ -1,15 +1,14 @@
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
-use axum::{
-    Json, Router,
-    extract::State,
-    routing::{get},
-};
+use axum::{Json, Router, extract::State, routing::get};
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::core::{
-    api::{Error, Result, dto::{MainCharacterDto, MatchDto}},
+    api::{
+        Error, Result,
+        dto::{MainCharacterDto, PersonalMatchDto},
+    },
     bl::feature,
 };
 
@@ -28,17 +27,13 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
 
     let state = AppState { db_file_path };
 
-    let app = Router::new()
-        .route("/match", get(get_match))
-        .route("/main_character", get(get_main_character))
-        .layer(cors)
-        .with_state(state);
+    let app = add_routes(Router::new()).layer(cors).with_state(state);
 
     let listener = tokio::net::TcpListener::bind(WEB_SOCKET_ADDR)
         .await
         .unwrap();
 
-    tracing::info!("Web socket running on http://{}/match",WEB_SOCKET_ADDR);
+    tracing::info!("Web socket running on http://{}/matches", WEB_SOCKET_ADDR);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(async move {
@@ -58,8 +53,14 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
     Ok(())
 }
 
-async fn get_match(State(state): State<AppState>) -> Result<Json<Vec<MatchDto>>> {
+fn add_routes(app: Router<AppState>) -> Router<AppState> {
+    app.route("/matches", get(get_matches))
+        .route("/main_character", get(get_main_character))
+}
+
+async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<PersonalMatchDto>>> {
     let matches = feature::get_all_matches(&state.db_file_path)?;
+    tracing::debug!("Requested matches");
 
     Ok(Json(matches))
 }

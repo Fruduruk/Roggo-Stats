@@ -2,14 +2,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct MatchDto {
+pub struct PersonalMatchDto {
     pub match_guid: Uuid,
-    pub arena: String,
     pub duration: i64,
-    pub created_at: i64,
     pub ended_at: i64,
-    pub had_overtime: bool,
-    pub deleted: bool,
+    pub own_team_score: i64,
+    pub enemy_team_score: i64,
+    pub own_player_count: i64,
+    pub enemy_player_count: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

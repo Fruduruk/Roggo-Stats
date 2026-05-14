@@ -3,6 +3,7 @@ use crate::core::dto::{AgentErrorDto};
 pub mod api;
 pub mod ui;
 pub mod dto;
+pub mod time;
 
 #[derive(thiserror::Error,Debug)]
 pub enum Error {

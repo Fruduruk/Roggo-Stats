@@ -55,6 +55,6 @@ fn get_error_code(error: &super::bl::Error) -> AgentErrorCode {
         super::bl::Error::RepositoryError(_)
         | super::bl::Error::CalculationError(_)
         | super::bl::Error::InsertionFailed(_) => AgentErrorCode::InternalError,
-        super::bl::Error::NoPlayerFound => AgentErrorCode::NoEntries,
+        super::bl::Error::NoPlayerFound { source: _ } => AgentErrorCode::NoEntries,
     }
 }
