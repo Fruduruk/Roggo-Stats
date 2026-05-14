@@ -11,3 +11,10 @@ pub struct MatchRow {
     pub had_overtime: bool,
     pub deleted: bool
 }
+
+#[derive(Debug)]
+pub struct PlayerPlayCountRow {
+    pub last_username: String,
+    pub primary_id: String,
+    pub play_count: u32,
+}

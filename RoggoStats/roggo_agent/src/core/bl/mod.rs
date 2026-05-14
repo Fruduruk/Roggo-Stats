@@ -11,5 +11,7 @@ pub enum Error {
     CalculationError(String),
     #[error("Failed to insert event {0}")]
     InsertionFailed(String),
+    #[error("No player found")]
+    NoPlayerFound,
 }
 pub type Result<T> = std::result::Result<T, Error>;

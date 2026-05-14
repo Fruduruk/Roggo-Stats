@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MatchDto {
     pub match_guid: Uuid,
@@ -14,6 +13,20 @@ pub struct MatchDto {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PlayerNameDto {
-    pub name: String
+pub struct MainCharacterDto {
+    pub username: String,
+    pub primary_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum AgentErrorCode {
+    NoEntries,
+    InternalError,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AgentErrorDto {
+    pub error: AgentErrorCode,
+    pub message: String,
+    pub details: Vec<String>,
 }
