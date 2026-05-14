@@ -64,7 +64,7 @@ impl eframe::App for RoggoApp {
         });
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            self.match_overview_ui.update(ui);
+            self.match_overview_ui.ui(ui);
 
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 if let Ok(content) = self.content.lock() {
