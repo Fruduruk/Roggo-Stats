@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use eframe::egui;
+use eframe::egui::{self, Context};
 
 use crate::core::{
     contract::SimpleMatchDto,
@@ -38,7 +38,7 @@ impl MatchOverviewUi {
                             if let Some(matches) = &content.matches {
                                 for match_dto in matches {
                                     if nav_button(ui, match_dto).clicked() {
-                                        self.match_ui.reload(match_dto.match_guid);
+                                        self.match_ui.reload(ui.ctx().clone(),match_dto.match_guid);
                                     }
                                 }
                             }
@@ -51,8 +51,8 @@ impl MatchOverviewUi {
         });
     }
 
-    pub fn reload(&self) {
-        tasks::load_matches(self.content.clone());
+    pub fn reload(&self, context: Context) {
+        tasks::load_matches(context,self.content.clone());
     }
 }
 
