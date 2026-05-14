@@ -62,8 +62,6 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
     let matches = feature::get_all_matches(&state.db_file_path)?;
-    tracing::debug!("Requested matches");
-
     Ok(Json(matches))
 }
 
@@ -75,9 +73,10 @@ async fn get_main_character(State(state): State<AppState>) -> Result<Json<MainCh
 
 async fn get_match_by_id(
     State(state): State<AppState>,
-    Path(id): Path<Uuid>,
+    Path(match_guid): Path<Uuid>,
 ) -> Result<Json<DetailedMatchDto>> {
-    tracing::debug!("Requested match with id {}",id);
+    let dto = feature::get_detailed_match_by_id(&state.db_file_path, match_guid)?;
+    tracing::debug!("Requested match with guid {}",match_guid);
 
-    Ok(Json(DetailedMatchDto {  }))
+    Ok(Json(dto))
 }
