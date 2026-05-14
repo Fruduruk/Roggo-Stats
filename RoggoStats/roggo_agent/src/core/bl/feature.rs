@@ -15,10 +15,6 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<PersonalMatchDto>> {
 
     for match_row in repo.f2_get_matches()? {
         let teams = repo.f2_get_teams_by_match_id(match_row.id)?;
-        if teams.len() != 2 {
-            tracing::warn!("Match with more or less than 2 teams skipped.");
-            continue;
-        }
 
         let mut teams_players = vec![];
         for team in teams {
@@ -49,6 +45,10 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<PersonalMatchDto>> {
                 enemy_team_score = team.score;
                 enemy_player_count = players.len() as i64;
             }
+        }
+
+        if own_player_count != enemy_player_count {
+            continue;
         }
 
         dtos.push(PersonalMatchDto {
