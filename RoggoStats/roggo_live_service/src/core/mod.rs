@@ -1,8 +1,8 @@
-use crate::core::dto::{AgentErrorDto};
+use crate::core::contract::{AgentErrorDto};
 
 pub mod api;
 pub mod ui;
-pub mod dto;
+pub mod contract;
 pub mod time;
 
 #[derive(thiserror::Error,Debug)]

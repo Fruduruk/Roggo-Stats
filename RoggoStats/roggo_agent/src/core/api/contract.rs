@@ -2,7 +2,13 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PersonalMatchDto {
+pub struct DetailedMatchDto {
+
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SimpleMatchDto {
     pub match_guid: Uuid,
     pub duration: i64,
     pub ended_at: i64,

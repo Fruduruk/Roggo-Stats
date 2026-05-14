@@ -1,10 +1,10 @@
 use std::path::Path;
 
-use crate::core::api::dto::{MainCharacterDto, PersonalMatchDto};
+use crate::core::api::contract::{MainCharacterDto, SimpleMatchDto};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
 
-pub fn get_all_matches(path: &Path) -> Result<Vec<PersonalMatchDto>> {
+pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
     let repo = Repository::connect(path)?;
 
     let global_player = repo
@@ -51,7 +51,7 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<PersonalMatchDto>> {
             continue;
         }
 
-        dtos.push(PersonalMatchDto {
+        dtos.push(SimpleMatchDto {
             match_guid: match_row.match_guid,
             duration: match_row.duration,
             ended_at: match_row.ended_at,

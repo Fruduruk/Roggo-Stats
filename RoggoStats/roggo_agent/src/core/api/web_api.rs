@@ -1,13 +1,14 @@
 use std::path::PathBuf;
 
-use axum::{Json, Router, extract::State, routing::get};
+use axum::{Json, Router, extract::{Path, State}, routing::get};
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
+use uuid::Uuid;
 
 use crate::core::{
     api::{
         Error, Result,
-        dto::{MainCharacterDto, PersonalMatchDto},
+        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto},
     },
     bl::feature,
 };
@@ -54,11 +55,12 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
 }
 
 fn add_routes(app: Router<AppState>) -> Router<AppState> {
-    app.route("/matches", get(get_matches))
-        .route("/main_character", get(get_main_character))
+    app.route("/main_character", get(get_main_character))
+        .route("/matches", get(get_matches))
+        .route("/matches/{id}", get(get_match_by_id))
 }
 
-async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<PersonalMatchDto>>> {
+async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
     let matches = feature::get_all_matches(&state.db_file_path)?;
     tracing::debug!("Requested matches");
 
@@ -69,4 +71,13 @@ async fn get_main_character(State(state): State<AppState>) -> Result<Json<MainCh
     let main_character = feature::get_main_character(&state.db_file_path)?;
     tracing::debug!("Requested main character");
     Ok(Json(main_character))
+}
+
+async fn get_match_by_id(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<DetailedMatchDto>> {
+    tracing::debug!("Requested match with id {}",id);
+
+    Ok(Json(DetailedMatchDto {  }))
 }
