@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use eframe::egui::Context;
 use uuid::Uuid;
 
 use crate::core::ui::{app, match_overview_ui, match_ui};
@@ -6,7 +7,7 @@ use crate::core::{Error, Result};
 
 use crate::core::{api};
 
-pub fn load_main_character(content: Arc<Mutex<app::Content>>) {
+pub fn load_main_character(context: Context, content: Arc<Mutex<app::Content>>) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_main_character().await;
 
@@ -23,10 +24,11 @@ pub fn load_main_character(content: Arc<Mutex<app::Content>>) {
                 }
             }
         }
+        context.request_repaint();
     });
 }
 
-pub fn load_matches(content: Arc<Mutex<match_overview_ui::Content>>) {
+pub fn load_matches(context: Context,content: Arc<Mutex<match_overview_ui::Content>>) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_matches().await;
 
@@ -36,10 +38,12 @@ pub fn load_matches(content: Arc<Mutex<match_overview_ui::Content>>) {
                 content.matches = Some(matches);
             }
         }
+        context.request_repaint();
+
     });
 }
 
-pub fn load_detailed_match_by_id(content: Arc<Mutex<match_ui::Content>>, match_guid: Uuid) {
+pub fn load_detailed_match_by_id(context: Context,content: Arc<Mutex<match_ui::Content>>, match_guid: Uuid) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_match_by_match_guid(match_guid).await;
 
@@ -48,5 +52,6 @@ pub fn load_detailed_match_by_id(content: Arc<Mutex<match_ui::Content>>, match_g
                 content.detailed_match = Some(detailed_match_dto);
             }
         }
+        context.request_repaint();
     });
 }

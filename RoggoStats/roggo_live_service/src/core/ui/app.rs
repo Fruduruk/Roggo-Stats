@@ -27,7 +27,7 @@ impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_pixels_per_point(2.0);
         let app = Self::default();
-        tasks::load_main_character(app.content.clone());
+        tasks::load_main_character(cc.egui_ctx.clone(),app.content.clone());
         app
     }
 }
@@ -40,9 +40,9 @@ impl eframe::App for RoggoApp {
         if self.last_reload + 1.0 < now {
             if let Ok(content) = self.content.lock() {
                 if content.player_name.is_none() {
-                    tasks::load_main_character(self.content.clone());
+                    tasks::load_main_character(ui.ctx().clone(),self.content.clone());
                 }
-                self.match_overview_ui.reload();
+                self.match_overview_ui.reload(ui.ctx().clone());
             }
             self.last_reload = now;
         }
