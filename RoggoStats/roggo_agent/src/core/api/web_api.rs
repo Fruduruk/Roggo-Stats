@@ -1,15 +1,15 @@
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use axum::{
     Json, Router,
     extract::State,
-    routing::{get, post},
+    routing::{get},
 };
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::core::{
-    api::{Error, Result, dto::MatchDto},
+    api::{Error, Result, dto::{MainCharacterDto, MatchDto}},
     bl::feature,
 };
 
@@ -30,7 +30,7 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
 
     let app = Router::new()
         .route("/match", get(get_match))
-        .route("/match", post(post_match))
+        .route("/main_character", get(get_main_character))
         .layer(cors)
         .with_state(state);
 
@@ -64,8 +64,8 @@ async fn get_match(State(state): State<AppState>) -> Result<Json<Vec<MatchDto>>>
     Ok(Json(matches))
 }
 
-async fn post_match(Json(dto): Json<MatchDto>) -> Result<Json<MatchDto>> {
-    println!("Received DTO: {dto:#?}");
-
-    Ok(Json(dto))
+async fn get_main_character(State(state): State<AppState>) -> Result<Json<MainCharacterDto>> {
+    let main_character = feature::get_main_character(&state.db_file_path)?;
+    tracing::debug!("Requested main character");
+    Ok(Json(main_character))
 }

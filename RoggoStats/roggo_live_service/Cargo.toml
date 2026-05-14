@@ -13,3 +13,4 @@ web-sys = "0.3"
 serde = { version = "1.0.228", features = ["derive"] }
 uuid = { version = "1", features = ["serde"] }
 chrono = "0.4"
+thiserror = "2.0.18"

@@ -1,12 +1,19 @@
-use std::{sync::{Arc, Mutex}, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use eframe::egui;
 
-use crate::core::ui::{match_overview_ui::MatchOverviewUi, tasks};
+use crate::core::{
+    dto::AgentErrorDto,
+    ui::{match_overview_ui::MatchOverviewUi, tasks},
+};
 
 #[derive(Default)]
 pub struct Content {
     pub player_name: Option<String>,
+    pub current_error: Option<AgentErrorDto>,
 }
 
 #[derive(Default)]
@@ -16,12 +23,11 @@ pub struct RoggoApp {
     content: Arc<Mutex<Content>>,
 }
 
-
 impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_pixels_per_point(2.0);
         let app = Self::default();
-        tasks::load_player_name(app.content.clone(), cc.egui_ctx.clone());
+        tasks::load_main_character(app.content.clone());
         app
     }
 }
@@ -32,7 +38,11 @@ impl eframe::App for RoggoApp {
 
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
-            tasks::load_player_name(self.content.clone(), ui.ctx().clone());
+            if let Ok(content) = self.content.lock() {
+                if content.player_name.is_none() {
+                    tasks::load_main_character(self.content.clone());
+                }
+            }
             self.last_reload = now;
         }
 
@@ -54,6 +64,15 @@ impl eframe::App for RoggoApp {
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
             self.match_overview_ui.update(ui);
+
+            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                if let Ok(content) = self.content.lock() {
+                    if let Some(error) = &content.current_error {
+                        // web_sys::console::log_1(&"Hallo aus WASM".into());
+                        ui.label(&error.message);
+                    }
+                }
+            });
         });
     }
 }
