@@ -5,7 +5,7 @@ use eframe::egui;
 use crate::core::{
     contract::SimpleMatchDto,
     time::{format_ms_date, format_ms_min_seconds, format_ms_time},
-    ui::tasks,
+    ui::{match_ui::MatchUi, tasks},
 };
 
 #[derive(Default)]
@@ -15,6 +15,7 @@ pub struct Content {
 
 #[derive(Default)]
 pub struct MatchOverviewUi {
+    match_ui: MatchUi,
     content: Arc<Mutex<Content>>,
 }
 
@@ -25,24 +26,28 @@ enum NavBarMatchType {
 }
 
 impl MatchOverviewUi {
-    pub fn update(&self, ui: &mut eframe::egui::Ui) {
+    pub fn ui(&self, ui: &mut eframe::egui::Ui) {
         egui::Panel::left("match_list")
-        .resizable(false)
-        .default_size(150.)
-        .show_inside(ui, |ui| {
-            egui::ScrollArea::vertical()
-                .auto_shrink([false, false])
-                .show(ui, |ui| {
-                    if let Ok(content) = self.content.lock() {
-                        if let Some(matches) = &content.matches {
-                            for match_dto in matches {
-                                if nav_button(ui, match_dto).clicked() {
-
+            .resizable(false)
+            .default_size(150.)
+            .show_inside(ui, |ui| {
+                egui::ScrollArea::vertical()
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        if let Ok(content) = self.content.lock() {
+                            if let Some(matches) = &content.matches {
+                                for match_dto in matches {
+                                    if nav_button(ui, match_dto).clicked() {
+                                        self.match_ui.reload(match_dto.match_guid);
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+            });
+
+        egui::CentralPanel::default().show_inside(ui, |ui| {
+            self.match_ui.ui(ui);
         });
     }
 
@@ -125,7 +130,7 @@ fn nav_button(ui: &mut egui::Ui, match_dto: &SimpleMatchDto) -> egui::Response {
             egui::Align2::LEFT_TOP,
             ended_at_date,
             egui::FontId::proportional(13.0),
-            weak_text_color
+            weak_text_color,
         );
 
         ui.painter().text(
