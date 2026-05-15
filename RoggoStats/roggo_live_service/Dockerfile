@@ -1,4 +1,4 @@
-FROM egui-wasm-builder:1.95-trunk AS build
+FROM egui-wasm-builder:latest AS build
 
 WORKDIR /app
 COPY . .
