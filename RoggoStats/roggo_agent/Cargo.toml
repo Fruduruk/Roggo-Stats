@@ -3,6 +3,10 @@ name = "roggo_agent"
 version = "0.1.0"
 edition = "2024"
 
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
 [dependencies]
 tokio = { version = "1.52.1", features = ["full"] }
 tokio-tungstenite = "0.29.0"
@@ -25,6 +29,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-
 tracing-appender = "0.2"
 tracing-log = "0.2"
 thiserror = "2.0.18"
+
+image = { version = "0.25", default-features = false, features = ["ico", "png"] }
+
 
 [profile.dev]
 opt-level = 0
