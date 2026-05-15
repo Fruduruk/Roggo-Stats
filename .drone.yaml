@@ -137,5 +137,6 @@ steps:
       port: 22
       script:
         - cd /home/whale/docker/roggo/
+        - echo "ROGGO_WEB_VERSION=${DRONE_TAG##roggo-web-v}" > .env
         - docker compose pull
         - docker compose up -d
