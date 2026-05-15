@@ -133,22 +133,14 @@ impl ApplicationHandler<UserEvent> for TrayApp {
 }
 
 fn create_icon() -> Icon {
-    let width = 32;
-    let height = 32;
+    let bytes = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/icon.ico"));
 
-    let mut rgba = Vec::with_capacity(width * height * 4);
+    let image = image::load_from_memory_with_format(bytes, image::ImageFormat::Ico)
+        .expect("Could not load tray icon")
+        .into_rgba8();
 
-    for y in 0..height {
-        for x in 0..width {
-            let inside = x > 4 && x < 27 && y > 4 && y < 27;
+    let (width, height) = image.dimensions();
+    let rgba = image.into_raw();
 
-            if inside {
-                rgba.extend_from_slice(&[0, 102, 255, 200]);
-            } else {
-                rgba.extend_from_slice(&[51, 51, 51, 255]);
-            }
-        }
-    }
-
-    Icon::from_rgba(rgba, width as u32, height as u32).unwrap()
+    Icon::from_rgba(rgba, width, height).expect("Could not create tray icon")
 }
