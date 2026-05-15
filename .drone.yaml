@@ -5,6 +5,8 @@ name: release
 trigger:
   event:
     - tag
+  ref:
+    - refs/tags/roggo-stats-v*
 
 steps:
   - name: build and push ballchasing-wrapper
@@ -14,9 +16,9 @@ steps:
       repo: registry.local.frudd.dev/ballchasing-wrapper
       tags:
         - latest
-        - ${DRONE_TAG##v}
+        - ${DRONE_TAG##roggo-stats-v}
       build_args:
-        - APP_VERSION=${DRONE_TAG##v}
+        - APP_VERSION=${DRONE_TAG##roggo-stats-v}
       dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
       context: ./RoggoStats/BallchasingWrapper/.
 
