@@ -29,9 +29,9 @@ steps:
       repo: registry.local.frudd.dev/roggo-discord-bot
       tags:
         - latest
-        - ${DRONE_TAG##v}
+        - ${DRONE_TAG##roggo-stats-v}
       build_args:
-        - APP_VERSION=${DRONE_TAG##v}
+        - APP_VERSION=${DRONE_TAG##roggo-stats-v}
       dockerfile: ./RoggoStats/RoggoDiscordBot/Dockerfile
       context: ./RoggoStats/RoggoDiscordBot/.
 
