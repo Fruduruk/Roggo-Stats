@@ -4,8 +4,7 @@ use eframe::egui::{self, Context};
 use uuid::Uuid;
 
 use crate::core::{
-    contract::{DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto},
-    ui::tasks,
+    contract::{DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto}, time::format_ms_min_seconds, ui::tasks
 };
 
 #[derive(Clone, Copy)]
@@ -87,9 +86,9 @@ fn render_match_header(ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
         ));
 
         ui.label(format!(
-            "{} | {}s{}",
+            "{} | {} {}",
             detailed_match.arena,
-            detailed_match.duration,
+            format_ms_min_seconds(detailed_match.duration),
             if detailed_match.had_overtime {
                 " | Overtime"
             } else {
@@ -98,6 +97,7 @@ fn render_match_header(ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
         ));
     });
 }
+
 fn collect_players<'a>(detailed_match: &'a DetailedMatchDto) -> Vec<LeaderboardPlayer<'a>> {
     detailed_match
         .own_team
@@ -220,9 +220,10 @@ fn render_percent_leaderboard<F>(
                         ui.label(&entry.player.display_name);
                         ui.label(&entry.team.name);
 
+                        let width = ui.available_width();
                         ui.add(
                             egui::ProgressBar::new(value as f32)
-                                .desired_width(160.0)
+                                .desired_width(width)
                                 .text(format!("{percent:.1}%")),
                         );
 
