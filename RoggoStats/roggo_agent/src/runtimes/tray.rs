@@ -14,7 +14,7 @@ use winit::{
 
 use crate::core::{agent::run_agent, logging::init_logging};
 
-const WEB_UI_URL: &str = "https://frudd.dev";
+const WEB_UI_URL: &str = "https://roggo.frudd.dev";
 const DB_FILE_PATH: &str = "roggo-agent.db";
 
 pub fn run() {
@@ -143,7 +143,7 @@ fn create_icon() -> Icon {
             let inside = x > 4 && x < 27 && y > 4 && y < 27;
 
             if inside {
-                rgba.extend_from_slice(&[215, 116, 255, 200]);
+                rgba.extend_from_slice(&[0, 102, 255, 200]);
             } else {
                 rgba.extend_from_slice(&[51, 51, 51, 255]);
             }
