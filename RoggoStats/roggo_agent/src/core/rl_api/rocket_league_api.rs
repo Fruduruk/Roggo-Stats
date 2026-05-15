@@ -89,10 +89,7 @@ async fn read_tcp_packet(
     buffer: &mut [u8; 8192],
     tx: &mpsc::Sender<(i64, String)>,
 ) -> Result<()> {
-    let n = rl_stream
-        .read(buffer)
-        .await
-        .map_err(|err| Error::GeneralError(err.to_string()))?;
+    let n = rl_stream.read(buffer).await.unwrap_or(0);
 
     let timestamp_ms = i64::try_from(
         SystemTime::now()
