@@ -51,6 +51,7 @@ steps:
         - docker compose pull
         - docker compose up -d
 
+---
 kind: pipeline
 type: docker
 name: release-egui-wasm-builder
@@ -73,8 +74,7 @@ steps:
       dockerfile: ./RoggoStats/roggo_live_service/trunk_builder/Dockerfile
       context: ./RoggoStats/roggo_live_service/trunk_builder/.
 
-
-
+---
 kind: pipeline
 type: docker
 name: release-roggo-web
@@ -89,8 +89,8 @@ steps:
   - name: build and push roggo-web
     image: plugins/docker
     settings:
-      registry: registry.local.frudd.dev
-      repo: registry.local.frudd.dev/roggo-web
+      registry: registry.public.frudd.dev:10443
+      repo: registry.public.frudd.dev:10443/roggo-web
       tags:
         - latest
         - ${DRONE_TAG##roggo-web-v}
@@ -99,8 +99,7 @@ steps:
       dockerfile: ./RoggoStats/roggo_live_service/Dockerfile
       context: ./RoggoStats/roggo_live_service/.
 
-
-  - name: deploy
+  - name: deploy staging
     image: appleboy/drone-ssh
     depends_on:
       - build and push roggo-web
@@ -112,5 +111,31 @@ steps:
       port: 22
       script:
         - cd /home/fish/docker/roggo-web/
+        - echo "ROGGO_WEB_VERSION=${DRONE_TAG##roggo-web-v}" > .env
+        - docker compose pull
+        - docker compose up -d
+
+---
+kind: pipeline
+type: docker
+name: promote-roggo-web-prod
+
+trigger:
+  event:
+    - promote
+  target:
+    - production
+
+steps:
+  - name: deploy production
+    image: appleboy/drone-ssh
+    settings:
+      host: registry.public.frudd.dev
+      username: whale
+      password:
+        from_secret: public_docker_ssh_password
+      port: 22
+      script:
+        - cd /home/whale/docker/roggo/
         - docker compose pull
         - docker compose up -d
