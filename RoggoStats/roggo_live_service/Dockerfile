@@ -1,4 +1,4 @@
-FROM egui-wasm-builder:latest AS build
+FROM registry.local.frudd.dev/egui-wasm-builder:latest AS build
 
 WORKDIR /app
 COPY . .
