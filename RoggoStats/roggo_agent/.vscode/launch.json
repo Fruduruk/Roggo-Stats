@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Debug roggo-agent",
+      "program": "${workspaceRoot}/target/debug/roggo-agent-console.exe",
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "environment": [
+        {
+          "name": "import_path",
+          "value": "captures/ranked_2v2_full.7z"
+        }
+      ],
+      "preLaunchTask": "build console",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Release roggo-agent",
+      "program": "${workspaceRoot}/target/release/roggo-agent-console.exe",
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "environment": [
+        {
+          "name": "import_path",
+          "value": "captures/ranked_2v2_full.7z"
+        }
+      ],
+      "preLaunchTask": "build console release",
+      "console": "integratedTerminal"
+    }
+  ]
+}

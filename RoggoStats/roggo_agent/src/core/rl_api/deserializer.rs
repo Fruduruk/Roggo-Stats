@@ -1,0 +1,36 @@
+use crate::core::rl_api::models::{Event, RawPacket};
+
+
+pub fn deserialize(raw: &String) -> Vec<Event> {
+    let mut events = vec![];
+    let stream = serde_json::Deserializer::from_str(&raw).into_iter::<RawPacket>();
+
+    for json in stream {
+        match json {
+            Ok(raw) => {
+                if let Some(event) = deserialize_single_event(&raw) {
+                    events.push(event);
+                }
+            }
+            Err(err) => {
+                tracing::warn!("Error while parsing next tcp packet {err}");
+            }
+        }
+    }
+
+    events
+}
+
+pub fn deserialize_single_event(packet: &RawPacket) -> Option<Event> {
+    match Event::new(&packet) {
+        Ok(event) => {
+            // println!("Parsed Event: {event:#?}");
+            Some(event)
+        }
+        Err(err) => {
+            tracing::warn!("Error while parsing raw event, returning unknown: {}", err);
+            tracing::warn!("Could not parse this packet: {packet:#?}");
+            None
+        }
+    }
+}
