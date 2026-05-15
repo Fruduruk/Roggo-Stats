@@ -134,7 +134,7 @@ steps:
       username: whale
       password:
         from_secret: public_docker_ssh_password
-      port: 22
+      port: 21622
       script:
         - cd /home/whale/docker/roggo/
         - echo "ROGGO_WEB_VERSION=${DRONE_TAG##roggo-web-v}" > .env
