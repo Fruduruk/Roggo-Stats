@@ -17,7 +17,5 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG##egui-wasm-builder-v}
-      build_args:
-        - APP_VERSION=${DRONE_TAG##egui-wasm-builder-v}
       dockerfile: ./RoggoStats/roggo_live_service/trunk_builder/Dockerfile
       context: ./RoggoStats/roggo_live_service/trunk_builder/.
