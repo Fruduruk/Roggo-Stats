@@ -1,0 +1,23 @@
+kind: pipeline
+type: docker
+name: release-egui-wasm-builder
+
+trigger:
+  event:
+    - tag
+  ref:
+    - refs/tags/egui-wasm-builder-v*
+
+steps:
+  - name: build and push egui-wasm-builder
+    image: plugins/docker
+    settings:
+      registry: registry.local.frudd.dev
+      repo: registry.local.frudd.dev/egui-wasm-builder
+      tags:
+        - latest
+        - ${DRONE_TAG##egui-wasm-builder-v}
+      build_args:
+        - APP_VERSION=${DRONE_TAG##egui-wasm-builder-v}
+      dockerfile: ./RoggoStats/roggo_live_service/builder_builder/Dockerfile
+      context: ./RoggoStats/roggo_live_service/builder_builder/.
