@@ -1,0 +1,31 @@
+[package]
+name = "roggo_agent"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.52.1", features = ["full"] }
+tokio-tungstenite = "0.29.0"
+futures-util = { version = "0.3.32", features = ["sink"] }
+
+chrono = "0.4.44"
+tray-icon = "0.23.1"
+winit = "0.30.13"
+open = "5.3.4"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+uuid = { version = "1", features = ["serde", "v4"] }
+rusqlite = { version = "0.39.0", features = ["bundled", "uuid"] }
+axum = "0.8"
+tower-http = { version = "0.6", features = ["cors"] }
+
+sevenz-rust = "0.6"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "local-time"] }
+tracing-appender = "0.2"
+tracing-log = "0.2"
+thiserror = "2.0.18"
+
+[profile.dev]
+opt-level = 0
+debug = true

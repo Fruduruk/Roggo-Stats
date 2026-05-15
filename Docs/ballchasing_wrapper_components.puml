@@ -1,0 +1,45 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram for the BallchasingWrapper
+System_Ext(discord_bot, "Discord Bot")
+System_Ext(ballchasing_com, "ballchasing.com")
+ComponentDb(mongo_db, "Mongo DB")
+
+System_Boundary(ballchasing_wrapper, "Ballchasing Wrapper"){
+    Component(ballchasing_api, "Ballchasing API")
+
+    Component(ballchasing_service, "Ballchasing Service", "class", "handles gRPC requests")
+    ' Component(session_collector, "Session Collector")
+
+    Component(replay_collector, "ReplayCollector")
+    
+    Component(simple_replay_downloader, "Simple Replay Downloader")
+    Component(advanced_replay_downloader, "Advanced Replay Downloader")
+
+    Component(api_request_builder, "API Request Builder")
+    Component(api_url_creator, "API URL Creator")
+
+
+    Rel(replay_collector, simple_replay_downloader, "uses")
+    Rel(replay_collector, advanced_replay_downloader, "uses")
+
+    Rel(discord_bot, ballchasing_service, "sends requests", "gRPC")
+    Rel(ballchasing_api, ballchasing_com, "sends requests", "https")
+
+    Rel(api_url_creator, api_request_builder, "uses")
+    Rel(advanced_replay_downloader, api_request_builder, "uses")
+
+    Rel(replay_collector, api_url_creator, "uses")
+    Rel(ballchasing_service, api_url_creator, "uses")
+
+    Rel(ballchasing_service, replay_collector, "uses")
+    Rel(ballchasing_service, advanced_replay_downloader, "uses")
+
+    Rel(simple_replay_downloader, ballchasing_api, "uses")
+    Rel(advanced_replay_downloader, ballchasing_api, "uses")
+}
+
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Component>
+
+title Component Diagram for Discord-Bot
+
+Component(backend, "Backend")
+
+Component(extensions, "Extensions")
+Component(grpc, "gRPC")
+
+@enduml

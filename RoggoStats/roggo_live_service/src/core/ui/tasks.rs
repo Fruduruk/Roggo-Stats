@@ -1,0 +1,57 @@
+use std::sync::{Arc, Mutex};
+use eframe::egui::Context;
+use uuid::Uuid;
+
+use crate::core::ui::{app, match_overview_ui, match_ui};
+use crate::core::{Error, Result};
+
+use crate::core::{api};
+
+pub fn load_main_character(context: Context, content: Arc<Mutex<app::Content>>) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_main_character().await;
+
+        if let Ok(mut content) = content.lock() {
+             match result {
+                Ok(name) => {
+                    content.player_name = Some(name);
+                }
+                Err(err) => {
+                    match err {
+                        Error::HTTPError(_) => {},
+                        Error::AgentError(agent_error_dto) => content.current_error = Some(agent_error_dto),
+                    }
+                }
+            }
+        }
+        context.request_repaint();
+    });
+}
+
+pub fn load_matches(context: Context,content: Arc<Mutex<match_overview_ui::Content>>) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_matches().await;
+
+        if let Ok(mut content) = content.lock() {
+            if let Ok(mut matches) = result {
+                matches.sort_by_key(|m| -m.ended_at);
+                content.matches = Some(matches);
+            }
+        }
+        context.request_repaint();
+
+    });
+}
+
+pub fn load_detailed_match_by_id(context: Context,content: Arc<Mutex<match_ui::Content>>, match_guid: Uuid) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_match_by_match_guid(match_guid).await;
+
+        if let Ok(mut content) = content.lock() {
+            if let Ok(detailed_match_dto) = result {
+                content.detailed_match = Some(detailed_match_dto);
+            }
+        }
+        context.request_repaint();
+    });
+}
