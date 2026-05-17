@@ -119,7 +119,7 @@ async fn receive_packets(
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
     // let mut packet_collector =
-    //     crate::core::debug::packet_collector::PacketCollector::new("captures/new").unwrap();
+    //     crate::core::debug::packet_collector::PacketCollector::new("captures/new.7z").unwrap();
     let mut aggregator = Aggregator::new(db_file_path);
     let mut count: u128 = 0;
 
@@ -129,14 +129,15 @@ async fn receive_packets(
         }
 
         print!("\rReceiving packet number {}", count);
-        // packet_collector.next(timestamp, &raw);
+        // packet_collector.next(timestamp, &raw).map_err(|err| Error::ShutdownError(err.to_string()))?;
         if let Err(err) = aggregator.insert(timestamp, raw) {
             tracing::warn!(error=%err,"failed to insert packet");
         }
         count += 1;
     }
 
-    tracing::info!("Shutting down aggregator...");
+    // packet_collector.finish().map_err(|err| Error::ShutdownError(err.to_string()))?;
 
+    tracing::info!("Shutting down aggregator...");
     Ok(())
 }
