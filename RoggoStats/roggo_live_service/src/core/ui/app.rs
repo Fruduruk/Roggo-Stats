@@ -10,10 +10,13 @@ use crate::core::{
     ui::{match_overview_ui::MatchOverviewUi, tasks},
 };
 
+const COMPATIBLE_AGENT_VERSION: &str = "0.2.0";
+
 #[derive(Default)]
 pub struct Content {
     pub player_name: Option<String>,
     pub current_error: Option<AgentErrorDto>,
+    pub agent_version: Option<String>,
 }
 
 #[derive(Default)]
@@ -27,7 +30,7 @@ impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_pixels_per_point(2.0);
         let app = Self::default();
-        tasks::load_main_character(cc.egui_ctx.clone(),app.content.clone());
+        tasks::load_main_character(cc.egui_ctx.clone(), app.content.clone());
         app
     }
 }
@@ -39,8 +42,9 @@ impl eframe::App for RoggoApp {
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
             if let Ok(content) = self.content.lock() {
+                tasks::load_version(ui.ctx().clone(), self.content.clone());
                 if content.player_name.is_none() {
-                    tasks::load_main_character(ui.ctx().clone(),self.content.clone());
+                    tasks::load_main_character(ui.ctx().clone(), self.content.clone());
                 }
                 self.match_overview_ui.reload(ui.ctx().clone());
             }
@@ -75,5 +79,25 @@ impl eframe::App for RoggoApp {
                 }
             });
         });
+
+        if let Ok(content) = self.content.lock() {
+            let version = content.agent_version.as_deref().unwrap_or("0".into());
+
+            if version != COMPATIBLE_AGENT_VERSION {
+                egui::Area::new("center_message".into())
+                    .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
+                    .order(egui::Order::Foreground)
+                    .show(ui.ctx(), |ui| {
+                        egui::Frame::popup(ui.style()).show(ui, |ui| {
+                            ui.label(format!(
+                                "Please download and run roggo agent with version {}",
+                                COMPATIBLE_AGENT_VERSION
+                            ));
+
+                            ui.hyperlink_to("download here", "https://github.com/Fruduruk/Roggo-Stats/releases/download/untagged-604945b51adc062c7002/Roggo-Agent.exe");
+                        });
+                    });
+            }
+        }
     }
 }

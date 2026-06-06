@@ -7,6 +7,19 @@ use crate::core::{Error, Result};
 
 use crate::core::{api};
 
+pub fn load_version(context: Context, content: Arc<Mutex<app::Content>>) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_version().await;
+
+        if let Ok(mut content) = content.lock() {
+            if let Ok(version) = result {
+                content.agent_version = Some(version);
+            }
+        }
+        context.request_repaint();
+    });
+}
+
 pub fn load_main_character(context: Context, content: Arc<Mutex<app::Content>>) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_main_character().await;

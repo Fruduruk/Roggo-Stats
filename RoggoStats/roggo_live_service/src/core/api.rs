@@ -1,13 +1,23 @@
 use gloo_net::http::Request;
 use uuid::Uuid;
 
-use crate::core::contract::{AgentErrorDto, DetailedMatchDto, MainCharacterDto, SimpleMatchDto};
+use crate::core::contract::{AgentErrorDto, DetailedMatchDto, MainCharacterDto, SimpleMatchDto, VersionDto};
 use crate::core::{Error, Result};
 
 const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49124";
 
 pub fn request(route: &str) -> gloo_net::http::RequestBuilder {
     Request::get(&format!("{WEB_SOCKET_ADDR}/{route}"))
+}
+
+pub async fn get_version() -> Result<String> {
+    let response = request("version").send().await?;
+
+    if response.ok() {
+        Ok(response.json::<VersionDto>().await?.version)
+    } else {
+        parse_error(response).await
+    }
 }
 
 pub async fn get_main_character() -> Result<String> {

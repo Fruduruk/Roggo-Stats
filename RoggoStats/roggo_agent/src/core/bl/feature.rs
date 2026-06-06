@@ -4,11 +4,20 @@ use uuid::Uuid;
 
 use crate::core::api::contract::{
     DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto, MainCharacterDto,
-    SimpleMatchDto,
+    SimpleMatchDto, VersionDto,
 };
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
+
+const AGENT_VERSION: &str = "0.2.0";
+
+
+pub fn get_version() -> VersionDto {
+    VersionDto {
+        version: AGENT_VERSION.into()
+    }
+}
 
 fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
     let global_player = repo
