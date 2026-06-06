@@ -1,6 +1,20 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SimpleSessionDto {
+    pub match_count: i64,
+    pub matches_won: i64,
+    pub started_at: i64,
+    pub ended_at: i64,
+    pub own_player_count: i64,
+    pub enemy_player_count: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VersionDto {
+    pub version: String,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedPlayerStatsDto {
@@ -24,7 +38,7 @@ pub struct DetailedPlayerDto {
     pub touches: i64,
     pub car_touches: i64,
     pub demos: i64,
-    pub stats: Option<DetailedPlayerStatsDto>
+    pub stats: Option<DetailedPlayerStatsDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,9 +47,8 @@ pub struct DetailedTeamDto {
     pub score: i64,
     pub color_primary: String,
     pub color_secondary: String,
-    pub players: Vec<DetailedPlayerDto>
+    pub players: Vec<DetailedPlayerDto>,
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedMatchDto {
@@ -48,7 +61,6 @@ pub struct DetailedMatchDto {
     pub own_team: DetailedTeamDto,
     pub enemy_team: DetailedTeamDto,
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SimpleMatchDto {

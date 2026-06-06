@@ -59,8 +59,6 @@ fn render_match_leaderboards(ui: &mut egui::Ui, detailed_match: &DetailedMatchDt
         render_number_leaderboard(ui, "Shots", &players, |p| p.shots);
         render_number_leaderboard(ui, "Assists", &players, |p| p.assists);
         render_number_leaderboard(ui, "Saves", &players, |p| p.saves);
-        render_number_leaderboard(ui, "Touches", &players, |p| p.touches);
-        render_number_leaderboard(ui, "Car Touches", &players, |p| p.car_touches);
         render_number_leaderboard(ui, "Demos", &players, |p| p.demos);
 
         ui.add_space(16.0);

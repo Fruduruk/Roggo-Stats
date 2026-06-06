@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::core::{
     api::{
         Error, Result,
-        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto},
+        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto, VersionDto},
     },
     bl::feature,
 };
@@ -58,6 +58,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
     app.route("/main_character", get(get_main_character))
         .route("/matches", get(get_matches))
         .route("/matches/{id}", get(get_match_by_id))
+        .route("/version", get(get_version))
 }
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
@@ -77,6 +78,14 @@ async fn get_match_by_id(
 ) -> Result<Json<DetailedMatchDto>> {
     let dto = feature::get_detailed_match_by_id(&state.db_file_path, match_guid)?;
     tracing::debug!("Requested match with guid {}",match_guid);
+
+    Ok(Json(dto))
+}
+
+async fn get_version(
+    State(_state): State<AppState>
+) -> Result<Json<VersionDto>> {
+    let dto = feature::get_version();
 
     Ok(Json(dto))
 }

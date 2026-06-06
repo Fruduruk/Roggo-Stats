@@ -39,6 +39,7 @@ impl Repository {
             "
             select * from matches
             where deleted = false
+            and duration != 0
             ",
         )?;
 
