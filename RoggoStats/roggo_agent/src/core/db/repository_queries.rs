@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::core::bl::query_models::{
     F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow,
-    GlobalPlayerRow,
+    F4MatchRow, GlobalPlayerRow,
 };
 use crate::core::db::{Repository, Result};
 
@@ -209,11 +209,10 @@ impl Repository {
             "
             select * from global_players
             where id = ?1
-            "
+            ",
         )?;
 
-
-         let row = stmt.query_row(params![id], |row| {
+        let row = stmt.query_row(params![id], |row| {
             Ok(GlobalPlayerRow {
                 id: row.get("id")?,
                 primary_id: row.get("primary_id")?,
@@ -222,5 +221,34 @@ impl Repository {
         })?;
 
         Ok(row)
+    }
+
+    pub fn f4_get_matches(&self) -> Result<Vec<F4MatchRow>> {
+        let mut stmt = self.connection.prepare(
+            "
+            select
+                id,
+                match_guid,
+                duration,
+                ended_at_ms,
+                created_at_ms
+            from matches
+            where deleted = false
+            and duration != 0
+            order by ended_at_ms asc
+            ",
+        )?;
+
+        let rows = stmt.query_map([], |row| {
+            Ok(F4MatchRow {
+                id: row.get("id")?,
+                match_guid: row.get("match_guid")?,
+                duration: row.get("duration")?,
+                ended_at: row.get("ended_at_ms")?,
+                created_at: row.get("created_at_ms")?,
+            })
+        })?;
+
+        Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
     }
 }
