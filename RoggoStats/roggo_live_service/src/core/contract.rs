@@ -2,6 +2,16 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct DetailedSessionDto {
+    pub match_guids: Vec<Uuid>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SessionRequest {
+    pub match_guids: Vec<Uuid>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SimpleSessionDto {
     pub match_guids: Vec<Uuid>,
     pub match_count: i64,

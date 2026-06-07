@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use axum::{Json, Router, extract::{Path, State}, routing::get};
+use axum::{Json, Router, extract::{Path, State}, routing::{get, post}};
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::core::{
     api::{
         Error, Result,
-        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto},
+        contract::{DetailedMatchDto, MainCharacterDto, DetailedSessionDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto},
     },
     bl::feature,
 };
@@ -60,6 +60,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/matches/{id}", get(get_match_by_id))
         .route("/version", get(get_version))
         .route("/sessions/{pause_ms}", get(get_all_sessions))
+        .route("/session", post(get_session))
 }
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
@@ -95,4 +96,13 @@ async fn get_all_sessions(
     let dtos = feature::get_all_sessions(&state.db_file_path, pause_ms)?;
 
     Ok(Json(dtos))
+}
+
+async fn get_session(
+    State(state): State<AppState>,
+    Json(request): Json<SessionRequest>
+) -> Result<Json<DetailedSessionDto>> {
+    let dto = feature::get_detailed_session(&state.db_file_path, request.match_guids)?;
+
+    Ok(Json(dto))
 }

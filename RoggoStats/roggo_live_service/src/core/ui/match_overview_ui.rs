@@ -5,7 +5,7 @@ use eframe::egui::{self, Context};
 use crate::core::{
     contract::{SimpleMatchDto, SimpleSessionDto},
     time::{format_ms_date, format_ms_min_seconds, format_ms_time},
-    ui::{match_ui::MatchUi, tasks},
+    ui::{match_ui::MatchUi, session_ui::SessionUi, tasks},
 };
 
 const RED: egui::Color32 = egui::Color32::from_rgb(150, 65, 65);
@@ -22,7 +22,16 @@ pub struct Content {
 #[derive(Default)]
 pub struct MatchOverviewUi {
     match_ui: MatchUi,
+    session_ui: SessionUi,
+    view_mode: ViewMode,
     content: Arc<Mutex<Content>>,
+}
+
+#[derive(Default)]
+enum ViewMode {
+    #[default]
+    SingleMatch,
+    Session,
 }
 
 enum NavBarMatchType {
@@ -32,7 +41,7 @@ enum NavBarMatchType {
 }
 
 impl MatchOverviewUi {
-    pub fn ui(&self, ui: &mut eframe::egui::Ui) {
+    pub fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         egui::Panel::left("match_list")
             .resizable(false)
             .default_size(150.)
@@ -46,6 +55,7 @@ impl MatchOverviewUi {
                             if let Some(matches) = &content.matches {
                                 for match_dto in matches {
                                     if match_button(ui, match_dto).clicked() {
+                                        self.view_mode = ViewMode::SingleMatch;
                                         self.match_ui
                                             .reload(ui.ctx().clone(), match_dto.match_guid);
                                     }
@@ -67,16 +77,29 @@ impl MatchOverviewUi {
                         if let Ok(content) = self.content.lock() {
                             if let Some(sessions) = &content.sessions {
                                 for session in sessions {
-                                    if session_button(ui, session).clicked() {}
+                                    if session_button(ui, session).clicked() {
+                                        self.view_mode = ViewMode::Session;
+                                        self.session_ui
+                                            .reload(ui.ctx().clone(), session.match_guids.clone());
+                                    }
                                 }
                             }
                         }
                     });
             });
 
-        egui::CentralPanel::default().show_inside(ui, |ui| {
-            self.match_ui.ui(ui);
-        });
+        match self.view_mode {
+            ViewMode::SingleMatch => {
+                egui::CentralPanel::default().show_inside(ui, |ui| {
+                    self.match_ui.ui(ui);
+                });
+            }
+            ViewMode::Session => {
+                egui::CentralPanel::default().show_inside(ui, |ui| {
+                    self.session_ui.ui(ui);
+                });
+            },
+        }
     }
 
     pub fn reload(&self, context: Context) {
@@ -138,7 +161,6 @@ fn session_button(ui: &mut egui::Ui, session: &SimpleSessionDto) -> egui::Respon
     } else {
         session.matches_won as f32 / session.match_count as f32
     };
-
 
     let fill = if win_rate < 0.5 {
         RED
