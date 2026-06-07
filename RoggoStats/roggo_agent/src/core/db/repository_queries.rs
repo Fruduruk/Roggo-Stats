@@ -2,8 +2,7 @@ use rusqlite::params;
 use uuid::Uuid;
 
 use crate::core::bl::query_models::{
-    F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow,
-    F4MatchRow, GlobalPlayerRow,
+    F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow, F4MatchRow, F5AverageCoreStatsRow, GlobalPlayerRow
 };
 use crate::core::db::{Repository, Result};
 
@@ -152,8 +151,6 @@ impl Repository {
                 p.shots,
                 p.assists,
                 p.saves,
-                p.touches,
-                p.car_touches,
                 p.demos,
 
                 ps.player_id as stats_player_id,
@@ -194,8 +191,6 @@ impl Repository {
                 shots: row.get("shots")?,
                 assists: row.get("assists")?,
                 saves: row.get("saves")?,
-                touches: row.get("touches")?,
-                car_touches: row.get("car_touches")?,
                 demos: row.get("demos")?,
                 stats,
             })
@@ -246,6 +241,27 @@ impl Repository {
                 duration: row.get("duration")?,
                 ended_at: row.get("ended_at_ms")?,
                 created_at: row.get("created_at_ms")?,
+            })
+        })?;
+
+        Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
+    }
+
+    pub fn f5_get_own_team_player_averages(&self, match_guids: Vec<Uuid>) -> Result<Vec<F5AverageCoreStatsRow>> {
+        let mut stmt = self.connection.prepare(
+            "
+
+            ",
+        )?;
+
+        let rows = stmt.query_map([], |row| {
+            Ok(F5AverageCoreStatsRow {
+                average_score: todo!(),
+                average_goals: todo!(),
+                average_shots: todo!(),
+                average_assists: todo!(),
+                average_saves: todo!(),
+                average_demos: todo!(),
             })
         })?;
 

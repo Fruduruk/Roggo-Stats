@@ -30,7 +30,15 @@ pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<Detai
 
     let main_character = get_most_played_player(&repo)?;
 
-    let mut dto = DetailedSessionDto { match_guids };
+
+    // let own_team_player_averages = repo.f5_get_own_team_player_averages(match_guids.clone())?;
+    
+
+
+    let mut dto = DetailedSessionDto {
+        match_guids,
+        ..Default::default()
+    };
 
     Ok(dto)
 }
@@ -275,8 +283,6 @@ fn convert_to_detailed_team(
                 shots: p.shots,
                 assists: p.assists,
                 saves: p.saves,
-                touches: p.touches,
-                car_touches: p.car_touches,
                 demos: p.demos,
                 stats,
             })

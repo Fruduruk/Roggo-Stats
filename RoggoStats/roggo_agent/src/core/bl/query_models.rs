@@ -1,5 +1,14 @@
 use uuid::Uuid;
 
+pub struct F5AverageCoreStatsRow {
+    pub average_score: f64,
+    pub average_goals: f64,
+    pub average_shots: f64,
+    pub average_assists: f64,
+    pub average_saves: f64,
+    pub average_demos: f64,
+}
+
 pub struct F3PlayerStatsRow {
     pub time_boosting: i64,
     pub time_demolished: i64,
@@ -18,8 +27,6 @@ pub struct F3PlayerRow {
     pub shots: i64,
     pub assists: i64,
     pub saves: i64,
-    pub touches: i64,
-    pub car_touches: i64,
     pub demos: i64,
     pub stats: Option<F3PlayerStatsRow>
 }
