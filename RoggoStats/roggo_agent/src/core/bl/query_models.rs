@@ -1,12 +1,22 @@
 use uuid::Uuid;
 
 pub struct F5AverageCoreStatsRow {
+    pub global_player_id: i64,
+    pub last_username: String,
+
     pub average_score: f64,
     pub average_goals: f64,
     pub average_shots: f64,
     pub average_assists: f64,
     pub average_saves: f64,
     pub average_demos: f64,
+
+    pub average_percent_boosting: f64,
+    pub average_percent_demolished: f64,
+    pub average_percent_on_ground: f64,
+    pub average_percent_on_wall: f64,
+    pub average_percent_powersliding: f64,
+    pub average_percent_supersonic: f64,
 }
 
 pub struct F3PlayerStatsRow {

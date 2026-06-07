@@ -40,7 +40,11 @@ impl SessionUi {
         };
 
         ui.centered_and_justified(|ui| {
-            ui.label(format!("{:#?}", detailed_session.match_guids));
+            egui::ScrollArea::vertical()
+                .auto_shrink([false, false])
+                .show(ui, |ui| {
+                    ui.label(format!("{:#?}", detailed_session));
+                });
         });
     }
 }
