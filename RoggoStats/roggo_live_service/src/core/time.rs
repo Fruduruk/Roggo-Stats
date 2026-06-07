@@ -3,7 +3,17 @@ use chrono::{DateTime, Local};
 pub fn format_ms_date(timestamp_ms: i64) -> String {
     DateTime::from_timestamp_millis(timestamp_ms)
         .map(|dt| dt.with_timezone(&Local))
-        .map(|dt| dt.format("%d.%m.%Y").to_string())
+        .map(|dt| {
+            let date = dt.date_naive();
+            let today = Local::now().date_naive();
+            if date == today {
+                "Today".into()
+            } else if date == today.pred_opt().unwrap_or(today) {
+                "Yesterday".into()
+            } else {
+                dt.format("%d.%m.%Y").to_string()
+            }
+        })
         .unwrap_or_else(|| "Invalid date".to_string())
 }
 
