@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::api::contract::{
     DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto, MainCharacterDto,
-    SimpleMatchDto, VersionDto,
+    SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
@@ -12,10 +12,9 @@ use crate::core::db::Repository;
 
 const AGENT_VERSION: &str = "0.2.0";
 
-
 pub fn get_version() -> VersionDto {
     VersionDto {
-        version: AGENT_VERSION.into()
+        version: AGENT_VERSION.into(),
     }
 }
 
@@ -24,6 +23,83 @@ fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
         .get_player_with_most_replays()
         .map_err(|err| Error::NoPlayerFound { source: err })?;
     Ok(global_player)
+}
+
+pub fn get_all_sessions(path: &Path, pause_ms: i64) -> Result<Vec<SimpleSessionDto>> {
+    let repo = Repository::connect(path)?;
+
+    let main_character = get_most_played_player(&repo)?;
+
+    let mut dtos: Vec<SimpleSessionDto> = vec![];
+
+    for match_row in repo.f4_get_matches()? {
+        let teams = repo.f2_get_teams_by_match_id(match_row.id)?;
+        let mut own_teams_players = None;
+        let mut enemy_teams_players = None;
+
+        for team in teams {
+            let players = repo.f2_get_players_by_team_id(team.id)?;
+            let own_team = is_main_character_team(
+                &main_character,
+                players.iter().map(|p| p.global_player_id).collect(),
+            );
+
+            if own_team {
+                own_teams_players = Some((team, players));
+            } else {
+                enemy_teams_players = Some((team, players));
+            }
+        }
+
+        if let (Some((own_team, own_players)), Some((enemy_team, enemy_players))) =
+            (&own_teams_players, &enemy_teams_players)
+        {
+            if own_team.score == enemy_team.score || own_players.len() != enemy_players.len() {
+                continue;
+            }
+            let won = own_team.score > enemy_team.score;
+
+            let mut added = false;
+
+            for session in &mut dtos {
+                if session.ended_at + pause_ms < match_row.ended_at {
+                    continue;
+                }
+                if session.own_player_count != own_players.len() as i64
+                    || session.enemy_player_count != enemy_players.len() as i64
+                {
+                    continue;
+                }
+
+                session.ended_at = match_row.ended_at;
+                session.match_count += 1;
+                if won {
+                    session.matches_won += 1;
+                }
+                session.match_guids.push(match_row.match_guid);
+
+                added = true;
+                break;
+            }
+
+            if !added {
+                let dto = SimpleSessionDto {
+                    created_at: match_row.created_at,
+                    ended_at: match_row.ended_at,
+                    match_count: 1,
+                    matches_won: if won { 1 } else { 0 },
+                    match_guids: vec![match_row.match_guid],
+                    own_player_count: own_players.len() as i64,
+                    enemy_player_count: enemy_players.len() as i64,
+                };
+                dtos.push(dto);
+            }
+        } else {
+            continue;
+        }
+    }
+
+    Ok(dtos)
 }
 
 pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
@@ -64,7 +140,7 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
             }
         }
 
-        if own_player_count != enemy_player_count {
+        if own_player_count != enemy_player_count || own_team_score == enemy_team_score {
             continue;
         }
 

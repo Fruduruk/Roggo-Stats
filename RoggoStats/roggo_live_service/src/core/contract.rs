@@ -3,9 +3,10 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SimpleSessionDto {
+    pub match_guids: Vec<Uuid>,
     pub match_count: i64,
     pub matches_won: i64,
-    pub started_at: i64,
+    pub created_at: i64,
     pub ended_at: i64,
     pub own_player_count: i64,
     pub enemy_player_count: i64,

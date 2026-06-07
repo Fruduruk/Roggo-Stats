@@ -57,6 +57,14 @@ pub struct F2MatchRow {
     pub ended_at: i64,
 }
 
+pub struct F4MatchRow {
+    pub id: i64,
+    pub match_guid: Uuid,
+    pub duration: i64,
+    pub created_at: i64,
+    pub ended_at: i64,
+}
+
 pub struct GlobalPlayerRow {
     pub id: i64,
     pub primary_id: String,

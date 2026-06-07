@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::core::{
     api::{
         Error, Result,
-        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto, VersionDto},
+        contract::{DetailedMatchDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto},
     },
     bl::feature,
 };
@@ -59,6 +59,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/matches", get(get_matches))
         .route("/matches/{id}", get(get_match_by_id))
         .route("/version", get(get_version))
+        .route("/sessions/{pause_ms}", get(get_all_sessions))
 }
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
@@ -68,7 +69,6 @@ async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMat
 
 async fn get_main_character(State(state): State<AppState>) -> Result<Json<MainCharacterDto>> {
     let main_character = feature::get_main_character(&state.db_file_path)?;
-    tracing::debug!("Requested main character");
     Ok(Json(main_character))
 }
 
@@ -77,8 +77,6 @@ async fn get_match_by_id(
     Path(match_guid): Path<Uuid>,
 ) -> Result<Json<DetailedMatchDto>> {
     let dto = feature::get_detailed_match_by_id(&state.db_file_path, match_guid)?;
-    tracing::debug!("Requested match with guid {}",match_guid);
-
     Ok(Json(dto))
 }
 
@@ -88,4 +86,13 @@ async fn get_version(
     let dto = feature::get_version();
 
     Ok(Json(dto))
+}
+
+async fn get_all_sessions(
+    State(state): State<AppState>,
+    Path(pause_ms): Path<i64>
+) -> Result<Json<Vec<SimpleSessionDto>>> {
+    let dtos = feature::get_all_sessions(&state.db_file_path, pause_ms)?;
+
+    Ok(Json(dtos))
 }
