@@ -2,7 +2,7 @@ use eframe::egui::Context;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
-use crate::core::ui::{app, match_overview_ui, match_ui};
+use crate::core::ui::{app, match_overview_ui, match_ui, session_ui};
 use crate::core::{Error, Result};
 
 use crate::core::api;
@@ -80,6 +80,23 @@ pub fn load_detailed_match_by_id(
         if let Ok(mut content) = content.lock() {
             if let Ok(detailed_match_dto) = result {
                 content.detailed_match = Some(detailed_match_dto);
+            }
+        }
+        context.request_repaint();
+    });
+}
+
+pub fn load_detailed_session(
+    context: Context,
+    content: Arc<Mutex<session_ui::Content>>,
+    match_guids: Vec<Uuid>
+) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_session(match_guids).await;
+
+        if let Ok(mut content) = content.lock() {
+            if let Ok(detailed_session_dto) = result {
+                content.detailed_session = Some(detailed_session_dto)
             }
         }
         context.request_repaint();

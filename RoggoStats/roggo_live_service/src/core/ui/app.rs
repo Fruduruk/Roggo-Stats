@@ -42,7 +42,9 @@ impl eframe::App for RoggoApp {
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
             if let Ok(content) = self.content.lock() {
-                tasks::load_version(ui.ctx().clone(), self.content.clone());
+                if content.agent_version.is_none() {
+                    tasks::load_version(ui.ctx().clone(), self.content.clone());
+                }
                 if content.player_name.is_none() {
                     tasks::load_main_character(ui.ctx().clone(), self.content.clone());
                 }

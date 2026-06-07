@@ -3,8 +3,8 @@ use std::path::Path;
 use uuid::Uuid;
 
 use crate::core::api::contract::{
-    DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto, MainCharacterDto,
-    SimpleMatchDto, SimpleSessionDto, VersionDto,
+    DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
+    DetailedTeamDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
@@ -23,6 +23,16 @@ fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
         .get_player_with_most_replays()
         .map_err(|err| Error::NoPlayerFound { source: err })?;
     Ok(global_player)
+}
+
+pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
+    let repo = Repository::connect(path)?;
+
+    let main_character = get_most_played_player(&repo)?;
+
+    let mut dto = DetailedSessionDto { match_guids };
+
+    Ok(dto)
 }
 
 pub fn get_all_sessions(path: &Path, pause_ms: i64) -> Result<Vec<SimpleSessionDto>> {
