@@ -1,8 +1,10 @@
-use rusqlite::params;
+use rusqlite::{params, params_from_iter};
+use rusqlite::types::Value;
 use uuid::Uuid;
 
 use crate::core::bl::query_models::{
-    F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow, F4MatchRow, F5AverageCoreStatsRow, GlobalPlayerRow
+    F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow,
+    F4MatchRow, F5AverageCoreStatsRow, GlobalPlayerRow,
 };
 use crate::core::db::{Repository, Result};
 
@@ -247,21 +249,54 @@ impl Repository {
         Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
     }
 
-    pub fn f5_get_own_team_player_averages(&self, match_guids: Vec<Uuid>) -> Result<Vec<F5AverageCoreStatsRow>> {
-        let mut stmt = self.connection.prepare(
+    pub fn f5_get_own_team_player_averages(
+        &self,
+        match_guids: Vec<Uuid>,
+        main_character_global_player_id: i64,
+    ) -> Result<Vec<F5AverageCoreStatsRow>> {
+        let values_placeholders = (2..=match_guids.len() + 1) // Start at 2, because player_id is 1
+            .map(|i| format!("(?{i})"))
+            .collect::<Vec<_>>()
+            .join(",");
+        let start = format!(
             "
+                with selected_matches(match_guid) as (
+                values
+                    {values_placeholders}
+                ),
+            "
+        );
 
-            ",
-        )?;
+        let rest = include_str!("sql/average_stats_for_player_and_friends.sql");
 
-        let rows = stmt.query_map([], |row| {
+        let mut stmt = self.connection.prepare(&format!("{start}{rest}"))?;
+
+        let mut params = vec![Value::Integer(main_character_global_player_id)];
+        params.extend(
+            match_guids
+                .into_iter()
+                .map(|guid| Value::Blob(guid.as_bytes().to_vec())),
+        );
+
+        let rows = stmt.query_map(params_from_iter(params.iter()), |row| {
             Ok(F5AverageCoreStatsRow {
-                average_score: todo!(),
-                average_goals: todo!(),
-                average_shots: todo!(),
-                average_assists: todo!(),
-                average_saves: todo!(),
-                average_demos: todo!(),
+                global_player_id: row.get("global_player_id")?,
+                last_username: row.get("last_username")?,
+                
+                average_score: row.get("average_score")?,
+
+                average_goals: row.get("average_goals")?,
+                average_shots: row.get("average_shots")?,
+                average_assists: row.get("average_assists")?,
+                average_saves: row.get("average_saves")?,
+                average_demos: row.get("average_demos")?,
+                
+                average_percent_boosting: row.get("average_percent_boosting")?,
+                average_percent_demolished: row.get("average_percent_demolished")?,
+                average_percent_on_ground: row.get("average_percent_on_ground")?,
+                average_percent_on_wall: row.get("average_percent_on_wall")?,
+                average_percent_powersliding: row.get("average_percent_powersliding")?,
+                average_percent_supersonic: row.get("average_percent_supersonic")?,
             })
         })?;
 
