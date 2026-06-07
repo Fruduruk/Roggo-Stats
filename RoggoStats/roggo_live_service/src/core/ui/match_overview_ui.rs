@@ -8,6 +8,11 @@ use crate::core::{
     ui::{match_ui::MatchUi, tasks},
 };
 
+const RED: egui::Color32 = egui::Color32::from_rgb(150, 65, 65);
+const YELLOW: egui::Color32 = egui::Color32::from_rgb(180, 160, 70);
+const GREEN: egui::Color32 = egui::Color32::from_rgb(52, 125, 70);
+const GREY: egui::Color32 = egui::Color32::from_rgb(96, 96, 104);
+
 #[derive(Default)]
 pub struct Content {
     pub matches: Option<Vec<SimpleMatchDto>>,
@@ -103,9 +108,9 @@ fn match_button(ui: &mut egui::Ui, match_dto: &SimpleMatchDto) -> egui::Response
     let enemy_team_score = match_dto.enemy_team_score;
 
     let fill = match get_match_type(match_dto) {
-        NavBarMatchType::Won => egui::Color32::from_rgb(52, 125, 70),
-        NavBarMatchType::Lost => egui::Color32::from_rgb(150, 65, 65),
-        NavBarMatchType::Unknown => egui::Color32::from_rgb(96, 96, 104),
+        NavBarMatchType::Won => GREEN,
+        NavBarMatchType::Lost => RED,
+        NavBarMatchType::Unknown => GREY,
     };
 
     nav_button(
@@ -134,20 +139,13 @@ fn session_button(ui: &mut egui::Ui, session: &SimpleSessionDto) -> egui::Respon
         session.matches_won as f32 / session.match_count as f32
     };
 
-    let red = egui::Color32::from_rgb(150, 65, 65);
-    let yellow = egui::Color32::from_rgb(180, 160, 70);
-    let green = egui::Color32::from_rgb(52, 125, 70);
-    let gold = egui::Color32::from_rgb(212, 175, 55);
 
     let fill = if win_rate < 0.5 {
-        // 0% -> rot, 50% -> gelb
-        lerp_color(red, yellow, win_rate / 0.5)
-    } else if win_rate < 1.0 {
-        // 50% -> gelb, 100% -> grün
-        lerp_color(yellow, green, (win_rate - 0.5) / 0.5)
+        RED
+    } else if win_rate == 0.5 {
+        YELLOW
     } else {
-        // exakt 100% -> gold
-        gold
+        GREEN
     };
 
     nav_button(
@@ -156,19 +154,9 @@ fn session_button(ui: &mut egui::Ui, session: &SimpleSessionDto) -> egui::Respon
         ended_at_date,
         ended_at_time,
         duration,
-        format!("{} : {}", session.matches_won, session.match_count),
+        format!("{} / {}", session.matches_won, session.match_count),
         fill,
     )
-}
-
-fn lerp_color(from: egui::Color32, to: egui::Color32, t: f32) -> egui::Color32 {
-    let t = t.clamp(0.0, 1.0);
-
-    let r = from.r() as f32 + (to.r() as f32 - from.r() as f32) * t;
-    let g = from.g() as f32 + (to.g() as f32 - from.g() as f32) * t;
-    let b = from.b() as f32 + (to.b() as f32 - from.b() as f32) * t;
-
-    egui::Color32::from_rgb(r as u8, g as u8, b as u8)
 }
 
 fn nav_button(
