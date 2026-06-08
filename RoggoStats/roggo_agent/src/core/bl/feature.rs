@@ -3,7 +3,9 @@ use std::path::Path;
 use uuid::Uuid;
 
 use crate::core::api::contract::{
-    DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto, DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto, DetailedTeamDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto
+    DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
+    DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
+    DetailedTeamDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
@@ -29,32 +31,29 @@ pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<Detai
 
     let main_character = get_most_played_player(&repo)?;
 
-    let own_team_player_averages =
-        repo.f5_get_own_team_player_averages(match_guids.clone(), main_character.id)?
+    let own_team_player_averages = repo
+        .f5_get_own_team_player_averages(match_guids.clone(), main_character.id)?
         .into_iter()
-        .map(|row| {
-            DetailedAveragePlayerDto {
-                username: row.last_username,
-                average_core_stats: DetailedAverageCoreStatsDto {
-                    average_score: row.average_score,
-                    average_goals: row.average_goals,
-                    average_shots: row.average_shots,
-                    average_assists: row.average_assists,
-                    average_saves: row.average_saves,
-                    average_demos: row.average_demos,
-                },
-                average_advanced_stats: DetailedAverageAdvancedStatsDto {
-                    average_percent_boosting: row.average_percent_boosting,
-                    average_percent_demolished: row.average_percent_demolished,
-                    average_percent_on_ground: row.average_percent_on_ground,
-                    average_percent_on_wall: row.average_percent_on_wall,
-                    average_percent_powersliding: row.average_percent_powersliding,
-                    average_percent_supersonic: row.average_percent_supersonic,
-                },
-            }
-        }).collect();
-
-
+        .map(|row| DetailedAveragePlayerDto {
+            username: row.last_username,
+            average_core_stats: DetailedAverageCoreStatsDto {
+                average_score: row.average_score,
+                average_goals: row.average_goals,
+                average_shots: row.average_shots,
+                average_assists: row.average_assists,
+                average_saves: row.average_saves,
+                average_demos: row.average_demos,
+            },
+            average_advanced_stats: DetailedAverageAdvancedStatsDto::from_options(
+                row.average_percent_boosting,
+                row.average_percent_demolished,
+                row.average_percent_on_ground,
+                row.average_percent_on_wall,
+                row.average_percent_powersliding,
+                row.average_percent_supersonic,
+            ),
+        })
+        .collect();
 
     let mut dto = DetailedSessionDto {
         match_guids,
