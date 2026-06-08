@@ -1,14 +1,12 @@
 use std::sync::{Arc, Mutex};
 
-use eframe::egui::{
-    self, Align2, Color32, Context, FontId, RichText, Sense, Stroke, Vec2,
-};
+use eframe::egui::{self, Align2, Color32, Context, FontId, RichText, Sense, Stroke, Vec2};
 use uuid::Uuid;
 
 use crate::core::{
     contract::{
-        DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto,
-        DetailedAveragePlayerDto, DetailedSessionDto,
+        DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
+        DetailedSessionDto,
     },
     ui::tasks,
 };
@@ -65,16 +63,18 @@ impl SessionUi {
     ) {
         ui.heading("Core Stats");
 
-        let enemy_average = session.average_enemy_core_stats.as_ref();
+        let mut bars: Vec<CoreBarValue> = Vec::new();
 
-        let own_player = session
+        if let Some(player) = session
             .own_team_player_averages
             .iter()
-            .find(|p| p.username == player_name);
-
-        if let Some(player) = own_player {
-            self.render_core_player_card(ui, "You", player, enemy_average);
-            ui.add_space(8.0);
+            .find(|p| p.username == player_name)
+        {
+            bars.push(CoreBarValue {
+                label: "You".to_string(),
+                stats: &player.average_core_stats,
+                color: Color32::from_rgb(90, 145, 230),
+            });
         }
 
         let mates: Vec<_> = session
@@ -83,124 +83,161 @@ impl SessionUi {
             .filter(|p| p.username != player_name)
             .collect();
 
-        if !mates.is_empty() {
-            ui.label(RichText::new("Mates").strong());
+        for mate in &mates {
+            bars.push(CoreBarValue {
+                label: mate.username.clone(),
+                stats: &mate.average_core_stats,
+                color: Color32::from_rgb(180, 130, 220),
+            });
+        }
 
-            for mate in mates {
-                self.render_core_player_card(ui, &mate.username, mate, enemy_average);
-                ui.add_space(6.0);
+        if mates.is_empty() {
+            if let Some(team_average) = &session.average_team_player_core_stats {
+                bars.push(CoreBarValue {
+                    label: "Mate Ø".to_string(),
+                    stats: team_average,
+                    color: Color32::from_rgb(240, 170, 70),
+                });
             }
         }
 
-        if let Some(team_average) = &session.average_team_player_core_stats {
-            ui.add_space(10.0);
-            ui.label(RichText::new("Team mate average").strong());
-
-            egui::Frame::group(ui.style()).show(ui, |ui| {
-                self.render_core_grid(ui, team_average, enemy_average);
+        if let Some(enemy_average) = &session.average_enemy_core_stats {
+            bars.push(CoreBarValue {
+                label: "Enemy Ø".to_string(),
+                stats: enemy_average,
+                color: Color32::from_rgb(210, 80, 80),
             });
         }
+
+        if bars.is_empty() {
+            ui.label(RichText::new("No core stats available.").weak());
+            return;
+        }
+
+        self.core_chart(ui, "Score", &bars, |s| s.average_score, 1);
+        self.core_chart(ui, "Goals", &bars, |s| s.average_goals, 2);
+        self.core_chart(ui, "Shots", &bars, |s| s.average_shots, 2);
+        self.core_chart(ui, "Assists", &bars, |s| s.average_assists, 2);
+        self.core_chart(ui, "Saves", &bars, |s| s.average_saves, 2);
+        self.core_chart(ui, "Demos", &bars, |s| s.average_demos, 2);
     }
 
-    fn render_core_player_card(
+    fn core_chart(
         &self,
         ui: &mut egui::Ui,
         title: &str,
-        player: &DetailedAveragePlayerDto,
-        enemy_average: Option<&DetailedAverageCoreStatsDto>,
-    ) {
-        egui::Frame::group(ui.style()).show(ui, |ui| {
-            ui.label(RichText::new(title).strong());
-            ui.add_space(4.0);
-
-            self.render_core_grid(ui, &player.average_core_stats, enemy_average);
-        });
-    }
-
-    fn render_core_grid(
-        &self,
-        ui: &mut egui::Ui,
-        stats: &DetailedAverageCoreStatsDto,
-        enemy_average: Option<&DetailedAverageCoreStatsDto>,
-    ) {
-        egui::Grid::new(ui.next_auto_id())
-            .num_columns(3)
-            .spacing([18.0, 4.0])
-            .show(ui, |ui| {
-                self.core_row(
-                    ui,
-                    "Score",
-                    stats.average_score,
-                    enemy_average.map(|e| e.average_score),
-                    1,
-                );
-                self.core_row(
-                    ui,
-                    "Goals",
-                    stats.average_goals,
-                    enemy_average.map(|e| e.average_goals),
-                    2,
-                );
-                self.core_row(
-                    ui,
-                    "Shots",
-                    stats.average_shots,
-                    enemy_average.map(|e| e.average_shots),
-                    2,
-                );
-                self.core_row(
-                    ui,
-                    "Assists",
-                    stats.average_assists,
-                    enemy_average.map(|e| e.average_assists),
-                    2,
-                );
-                self.core_row(
-                    ui,
-                    "Saves",
-                    stats.average_saves,
-                    enemy_average.map(|e| e.average_saves),
-                    2,
-                );
-                self.core_row(
-                    ui,
-                    "Demos",
-                    stats.average_demos,
-                    enemy_average.map(|e| e.average_demos),
-                    2,
-                );
-            });
-    }
-
-    fn core_row(
-        &self,
-        ui: &mut egui::Ui,
-        label: &str,
-        value: f64,
-        enemy_value: Option<f64>,
+        bars: &[CoreBarValue<'_>],
+        value_selector: fn(&DetailedAverageCoreStatsDto) -> f64,
         decimals: usize,
     ) {
-        ui.label(label);
-        ui.monospace(format!("{value:.decimals$}"));
+        ui.add_space(10.0);
+        ui.label(RichText::new(title).strong());
 
-        if let Some(enemy_value) = enemy_value {
-            let diff = value - enemy_value;
-            let color = if diff >= 0.0 {
-                Color32::from_rgb(70, 170, 90)
-            } else {
-                Color32::from_rgb(210, 80, 80)
-            };
+        let raw_max_value = bars
+            .iter()
+            .map(|bar| value_selector(bar.stats))
+            .fold(0.0_f64, f64::max);
 
-            ui.label(
-                RichText::new(format!("({diff:+.1})"))
-                    .color(color)
-                    .monospace(),
-            );
+        let max_value = if raw_max_value <= 0.0 {
+            0.01
         } else {
-            ui.label(RichText::new("(enemy n/a)").weak());
+            raw_max_value * 1.15
+        };
+
+        let desired_size = Vec2::new(ui.available_width(), 180.0);
+        let (rect, _) = ui.allocate_exact_size(desired_size, Sense::hover());
+        let painter = ui.painter_at(rect);
+
+        let left_padding = 54.0;
+        let bottom_padding = 34.0;
+        let top_padding = 10.0;
+        let right_padding = 12.0;
+
+        let chart_left = rect.left() + left_padding;
+        let chart_right = rect.right() - right_padding;
+        let chart_top = rect.top() + top_padding;
+        let chart_bottom = rect.bottom() - bottom_padding;
+
+        let chart_width = chart_right - chart_left;
+        let chart_height = chart_bottom - chart_top;
+
+        painter.line_segment(
+            [
+                egui::pos2(chart_left, chart_top),
+                egui::pos2(chart_left, chart_bottom),
+            ],
+            Stroke::new(1.0, Color32::GRAY),
+        );
+
+        painter.line_segment(
+            [
+                egui::pos2(chart_left, chart_bottom),
+                egui::pos2(chart_right, chart_bottom),
+            ],
+            Stroke::new(1.0, Color32::GRAY),
+        );
+
+        let tick_count = 4;
+
+        for tick in 0..=tick_count {
+            let t = tick as f32 / tick_count as f32;
+            let y = chart_bottom - chart_height * t;
+            let value = max_value * t as f64;
+
+            painter.line_segment(
+                [egui::pos2(chart_left - 4.0, y), egui::pos2(chart_left, y)],
+                Stroke::new(1.0, Color32::GRAY),
+            );
+
+            painter.text(
+                egui::pos2(chart_left - 6.0, y),
+                Align2::RIGHT_CENTER,
+                format!("{:.*}", decimals, value),
+                FontId::monospace(11.0),
+                Color32::GRAY,
+            );
+
+            if tick > 0 {
+                painter.line_segment(
+                    [egui::pos2(chart_left, y), egui::pos2(chart_right, y)],
+                    Stroke::new(0.5, Color32::from_gray(55)),
+                );
+            }
         }
 
-        ui.end_row();
+        let bar_count = bars.len().max(1) as f32;
+        let slot_width = chart_width / bar_count;
+        let bar_width = slot_width * 0.55;
+
+        for (index, bar) in bars.iter().enumerate() {
+            let value = value_selector(bar.stats);
+            let center_x = chart_left + slot_width * (index as f32 + 0.5);
+            let normalized = (value / max_value).clamp(0.0, 1.0) as f32;
+            let bar_height = chart_height * normalized;
+
+            let bar_rect = egui::Rect::from_min_max(
+                egui::pos2(center_x - bar_width / 2.0, chart_bottom - bar_height),
+                egui::pos2(center_x + bar_width / 2.0, chart_bottom),
+            );
+
+            painter.rect_filled(bar_rect, 3.0, bar.color);
+
+            painter.text(
+                egui::pos2(center_x, bar_rect.top() - 4.0),
+                Align2::CENTER_BOTTOM,
+                format!("{:.*}", decimals, value),
+                FontId::monospace(11.0),
+                Color32::WHITE,
+            );
+
+            painter.text(
+                egui::pos2(center_x, chart_bottom + 6.0),
+                Align2::CENTER_TOP,
+                &bar.label,
+                FontId::proportional(11.0),
+                Color32::GRAY,
+            );
+        }
     }
 
     fn render_advanced_stats(
@@ -249,53 +286,29 @@ impl SessionUi {
             return;
         }
 
-        self.advanced_chart(
-            ui,
-            "Boosting %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_boosting,
-        );
+        self.advanced_chart(ui, "Boosting %", &players, team_average.as_ref(), |s| {
+            s.average_percent_boosting
+        });
 
-        self.advanced_chart(
-            ui,
-            "Demolished %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_demolished,
-        );
+        self.advanced_chart(ui, "Demolished %", &players, team_average.as_ref(), |s| {
+            s.average_percent_demolished
+        });
 
-        self.advanced_chart(
-            ui,
-            "On ground %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_on_ground,
-        );
+        self.advanced_chart(ui, "On ground %", &players, team_average.as_ref(), |s| {
+            s.average_percent_on_ground
+        });
 
-        self.advanced_chart(
-            ui,
-            "On wall %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_on_wall,
-        );
+        self.advanced_chart(ui, "On wall %", &players, team_average.as_ref(), |s| {
+            s.average_percent_on_wall
+        });
 
-        self.advanced_chart(
-            ui,
-            "Powersliding %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_powersliding,
-        );
+        self.advanced_chart(ui, "Powersliding %", &players, team_average.as_ref(), |s| {
+            s.average_percent_powersliding
+        });
 
-        self.advanced_chart(
-            ui,
-            "Supersonic %",
-            &players,
-            team_average.as_ref(),
-            |s| s.average_percent_supersonic,
-        );
+        self.advanced_chart(ui, "Supersonic %", &players, team_average.as_ref(), |s| {
+            s.average_percent_supersonic
+        });
     }
 
     fn advanced_chart(
@@ -311,13 +324,7 @@ impl SessionUi {
 
         let mut bars: Vec<(&str, f64, Color32)> = players
             .iter()
-            .map(|p| {
-                (
-                    p.label.as_str(),
-                    value_selector(p.stats),
-                    p.color,
-                )
-            })
+            .map(|p| (p.label.as_str(), value_selector(p.stats), p.color))
             .collect();
 
         if let Some(team_average) = team_average {
@@ -328,17 +335,27 @@ impl SessionUi {
             ));
         }
 
-        let max_value = bars
+        if bars.is_empty() {
+            ui.label(RichText::new("No data available.").weak());
+            return;
+        }
+
+        let raw_max_value = bars
             .iter()
             .map(|(_, value, _)| *value)
-            .fold(0.0_f64, f64::max)
-            .max(1.0);
+            .fold(0.0_f64, f64::max);
+
+        let max_value = if raw_max_value <= 0.0 {
+            0.01
+        } else {
+            raw_max_value * 1.15
+        };
 
         let desired_size = Vec2::new(ui.available_width(), 180.0);
         let (rect, _) = ui.allocate_exact_size(desired_size, Sense::hover());
         let painter = ui.painter_at(rect);
 
-        let left_padding = 42.0;
+        let left_padding = 54.0;
         let bottom_padding = 34.0;
         let top_padding = 10.0;
         let right_padding = 12.0;
@@ -347,6 +364,9 @@ impl SessionUi {
         let chart_right = rect.right() - right_padding;
         let chart_top = rect.top() + top_padding;
         let chart_bottom = rect.bottom() - bottom_padding;
+
+        let chart_width = chart_right - chart_left;
+        let chart_height = chart_bottom - chart_top;
 
         painter.line_segment(
             [
@@ -364,27 +384,37 @@ impl SessionUi {
             Stroke::new(1.0, Color32::GRAY),
         );
 
-        painter.text(
-            egui::pos2(chart_left - 6.0, chart_top),
-            Align2::RIGHT_TOP,
-            format!("{max_value:.1}"),
-            FontId::monospace(11.0),
-            Color32::GRAY,
-        );
+        let tick_count = 4;
 
-        painter.text(
-            egui::pos2(chart_left - 6.0, chart_bottom),
-            Align2::RIGHT_BOTTOM,
-            "0",
-            FontId::monospace(11.0),
-            Color32::GRAY,
-        );
+        for tick in 0..=tick_count {
+            let t = tick as f32 / tick_count as f32;
+            let y = chart_bottom - chart_height * t;
+            let value = max_value * t as f64;
+
+            painter.line_segment(
+                [egui::pos2(chart_left - 4.0, y), egui::pos2(chart_left, y)],
+                Stroke::new(1.0, Color32::GRAY),
+            );
+
+            painter.text(
+                egui::pos2(chart_left - 6.0, y),
+                Align2::RIGHT_CENTER,
+                format!("{:.1}%", value * 100.0),
+                FontId::monospace(11.0),
+                Color32::GRAY,
+            );
+
+            if tick > 0 {
+                painter.line_segment(
+                    [egui::pos2(chart_left, y), egui::pos2(chart_right, y)],
+                    Stroke::new(0.5, Color32::from_gray(55)),
+                );
+            }
+        }
 
         let bar_count = bars.len().max(1) as f32;
-        let chart_width = chart_right - chart_left;
         let slot_width = chart_width / bar_count;
         let bar_width = slot_width * 0.55;
-        let chart_height = chart_bottom - chart_top;
 
         for (index, (label, value, color)) in bars.iter().enumerate() {
             let center_x = chart_left + slot_width * (index as f32 + 0.5);
@@ -401,7 +431,7 @@ impl SessionUi {
             painter.text(
                 egui::pos2(center_x, bar_rect.top() - 4.0),
                 Align2::CENTER_BOTTOM,
-                format!("{value:.1}"),
+                format!("{:.1}%", value * 100.0),
                 FontId::monospace(11.0),
                 Color32::WHITE,
             );
@@ -420,5 +450,10 @@ impl SessionUi {
 struct AdvancedBarValue<'a> {
     label: String,
     stats: &'a DetailedAverageAdvancedStatsDto,
+    color: Color32,
+}
+struct CoreBarValue<'a> {
+    label: String,
+    stats: &'a DetailedAverageCoreStatsDto,
     color: Color32,
 }

@@ -1,8 +1,7 @@
 use std::ffi::OsStr;
 use std::fs::File;
 use std::{
-    fs,
-    path::{Path, PathBuf},
+    path::{Path},
 };
 use tokio::sync::{mpsc, watch};
 
