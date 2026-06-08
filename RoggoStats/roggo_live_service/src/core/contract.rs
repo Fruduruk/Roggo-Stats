@@ -25,7 +25,7 @@ pub struct DetailedAverageCoreStatsDto {
 pub struct DetailedAveragePlayerDto {
     pub username: String,
     pub average_core_stats: DetailedAverageCoreStatsDto,
-    pub average_advanced_stats: DetailedAverageAdvancedStatsDto,
+    pub average_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
