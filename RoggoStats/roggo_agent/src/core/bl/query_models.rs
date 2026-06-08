@@ -38,7 +38,7 @@ pub struct F3PlayerRow {
     pub assists: i64,
     pub saves: i64,
     pub demos: i64,
-    pub stats: Option<F3PlayerStatsRow>
+    pub stats: Option<F3PlayerStatsRow>,
 }
 
 pub struct F3TeamRow {

@@ -5,8 +5,7 @@ use uuid::Uuid;
 
 use crate::core::{
     contract::{
-        DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
-        DetailedTeamDto,
+         DetailedSessionDto,
     },
     time::format_ms_min_seconds,
     ui::tasks,
