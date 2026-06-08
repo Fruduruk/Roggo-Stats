@@ -11,12 +11,12 @@ pub struct F5AverageCoreStatsRow {
     pub average_saves: f64,
     pub average_demos: f64,
 
-    pub average_percent_boosting: f64,
-    pub average_percent_demolished: f64,
-    pub average_percent_on_ground: f64,
-    pub average_percent_on_wall: f64,
-    pub average_percent_powersliding: f64,
-    pub average_percent_supersonic: f64,
+    pub average_percent_boosting: Option<f64>,
+    pub average_percent_demolished: Option<f64>,
+    pub average_percent_on_ground: Option<f64>,
+    pub average_percent_on_wall: Option<f64>,
+    pub average_percent_powersliding: Option<f64>,
+    pub average_percent_supersonic: Option<f64>,
 }
 
 pub struct F3PlayerStatsRow {
