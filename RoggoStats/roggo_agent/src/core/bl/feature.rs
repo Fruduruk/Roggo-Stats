@@ -55,9 +55,21 @@ pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<Detai
         })
         .collect();
 
-    let mut dto = DetailedSessionDto {
+    let row = repo
+        .f5_get_enemy_player_core_averages(match_guids.clone(), main_character.id)?;
+    let average_enemy_core_stats = DetailedAverageCoreStatsDto{
+        average_score: row.average_score,
+        average_goals: row.average_goals,
+        average_shots: row.average_shots,
+        average_assists: row.average_assists,
+        average_saves: row.average_saves,
+        average_demos: row.average_demos,
+    };
+
+    let dto = DetailedSessionDto {
         match_guids,
         own_team_player_averages,
+        average_enemy_core_stats,
         ..Default::default()
     };
 
