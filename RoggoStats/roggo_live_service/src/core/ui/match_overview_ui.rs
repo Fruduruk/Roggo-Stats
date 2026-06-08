@@ -41,7 +41,7 @@ enum NavBarMatchType {
 }
 
 impl MatchOverviewUi {
-    pub fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    pub fn ui(&mut self, ui: &mut eframe::egui::Ui, player_name: &String) {
         egui::Panel::left("match_list")
             .resizable(false)
             .default_size(150.)
@@ -96,13 +96,13 @@ impl MatchOverviewUi {
             }
             ViewMode::Session => {
                 egui::CentralPanel::default().show_inside(ui, |ui| {
-                    self.session_ui.ui(ui);
+                    self.session_ui.ui(ui, player_name);
                 });
             },
         }
     }
 
-    pub fn reload(&self, context: Context) {
+    pub fn reload(&mut self, context: Context) {
         tasks::load_matches(context.clone(), self.content.clone());
         tasks::load_sessions(context, self.content.clone(), 3_600_000);
     }

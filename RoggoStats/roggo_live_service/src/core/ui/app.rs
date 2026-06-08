@@ -70,8 +70,11 @@ impl eframe::App for RoggoApp {
         });
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            self.match_overview_ui.ui(ui);
-
+            if let Ok(content) = self.content.lock() {
+                if let Some(player_name) = &content.player_name {
+                    self.match_overview_ui.ui(ui, player_name);
+                }
+            }
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 if let Ok(content) = self.content.lock() {
                     if let Some(error) = &content.current_error {
