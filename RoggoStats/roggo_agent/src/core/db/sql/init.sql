@@ -74,6 +74,9 @@ on players(match_id);
 create index if not exists idx_players_global_player_id
 on players(global_player_id);
 
+create index if not exists idx_players_team_id
+on players(team_id);
+
 create table if not exists player_stats (
     player_id integer primary key,
     time_boosting integer not null,
