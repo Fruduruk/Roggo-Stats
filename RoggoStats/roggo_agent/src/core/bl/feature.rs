@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::path::Path;
 
 use uuid::Uuid;
@@ -31,46 +32,78 @@ pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<Detai
 
     let main_character = get_most_played_player(&repo)?;
 
+    let mut seen = HashSet::new();
+
+    let match_guids: Vec<_> = match_guids
+        .into_iter()
+        .filter(|guid| seen.insert(*guid))
+        .collect();
+
     let own_team_player_averages = repo
         .f5_get_own_team_player_averages(match_guids.clone(), main_character.id)?
         .into_iter()
-        .map(|row| DetailedAveragePlayerDto {
-            username: row.last_username,
-            average_core_stats: DetailedAverageCoreStatsDto {
-                average_score: row.average_score,
-                average_goals: row.average_goals,
-                average_shots: row.average_shots,
-                average_assists: row.average_assists,
-                average_saves: row.average_saves,
-                average_demos: row.average_demos,
-            },
-            average_advanced_stats: DetailedAverageAdvancedStatsDto::from_options(
-                row.average_percent_boosting,
-                row.average_percent_demolished,
-                row.average_percent_on_ground,
-                row.average_percent_on_wall,
-                row.average_percent_powersliding,
-                row.average_percent_supersonic,
-            ),
+        .map(|row| {
+            Ok(DetailedAveragePlayerDto {
+                username: row.last_username,
+                average_core_stats: DetailedAverageCoreStatsDto::from_options(
+                    row.average_core_stats.average_score,
+                    row.average_core_stats.average_goals,
+                    row.average_core_stats.average_shots,
+                    row.average_core_stats.average_assists,
+                    row.average_core_stats.average_saves,
+                    row.average_core_stats.average_demos,
+                )
+                .ok_or(Error::CalculationError(
+                    "Core stats should be available here".into(),
+                ))?,
+                average_advanced_stats: DetailedAverageAdvancedStatsDto::from_options(
+                    row.average_advanced_stats.average_percent_boosting,
+                    row.average_advanced_stats.average_percent_demolished,
+                    row.average_advanced_stats.average_percent_on_ground,
+                    row.average_advanced_stats.average_percent_on_wall,
+                    row.average_advanced_stats.average_percent_powersliding,
+                    row.average_advanced_stats.average_percent_supersonic,
+                ),
+            })
         })
-        .collect();
+        .collect::<Result<Vec<_>>>()?;
 
-    let row = repo
-        .f5_get_enemy_player_core_averages(match_guids.clone(), main_character.id)?;
-    let average_enemy_core_stats = DetailedAverageCoreStatsDto{
-        average_score: row.average_score,
-        average_goals: row.average_goals,
-        average_shots: row.average_shots,
-        average_assists: row.average_assists,
-        average_saves: row.average_saves,
-        average_demos: row.average_demos,
-    };
+    let row = repo.f5_get_enemy_player_core_averages(match_guids.clone(), main_character.id)?;
+    let average_enemy_core_stats = DetailedAverageCoreStatsDto::from_options(
+        row.average_score,
+        row.average_goals,
+        row.average_shots,
+        row.average_assists,
+        row.average_saves,
+        row.average_demos,
+    );
+
+    let row = repo.f5_get_team_player_core_averages(match_guids.clone(), main_character.id)?;
+    let average_team_player_core_stats = DetailedAverageCoreStatsDto::from_options(
+        row.average_score,
+        row.average_goals,
+        row.average_shots,
+        row.average_assists,
+        row.average_saves,
+        row.average_demos,
+    );
+
+    let row = repo.f5_get_team_player_advanced_averages(match_guids.clone(), main_character.id)?;
+    let average_team_player_advanced_stats = DetailedAverageAdvancedStatsDto::from_options(
+        row.average_percent_boosting,
+        row.average_percent_demolished,
+        row.average_percent_on_ground,
+        row.average_percent_on_wall,
+        row.average_percent_powersliding,
+        row.average_percent_supersonic,
+    );
 
     let dto = DetailedSessionDto {
         match_guids,
         own_team_player_averages,
         average_enemy_core_stats,
-        ..Default::default()
+        average_team_player_core_stats,
+        average_team_player_advanced_stats,
     };
 
     Ok(dto)

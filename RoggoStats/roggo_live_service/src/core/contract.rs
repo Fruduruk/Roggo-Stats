@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedAverageAdvancedStatsDto {
     pub average_percent_boosting: f64,
     pub average_percent_demolished: f64,
@@ -32,9 +32,9 @@ pub struct DetailedAveragePlayerDto {
 pub struct DetailedSessionDto {
     pub match_guids: Vec<Uuid>,
     pub own_team_player_averages: Vec<DetailedAveragePlayerDto>,
-    pub average_enemy_core_stats: DetailedAverageCoreStatsDto,
-    pub average_team_mate_core_stats: DetailedAverageCoreStatsDto,
-    pub average_team_mate_advanced_stats: DetailedAverageAdvancedStatsDto,
+    pub average_enemy_core_stats: Option<DetailedAverageCoreStatsDto>,
+    pub average_team_player_core_stats: Option<DetailedAverageCoreStatsDto>,
+    pub average_team_player_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -123,6 +123,7 @@ pub struct MainCharacterDto {
 pub enum AgentErrorCode {
     NoEntries,
     InternalError,
+    UserError
 }
 
 #[derive(Debug, Serialize, Deserialize)]

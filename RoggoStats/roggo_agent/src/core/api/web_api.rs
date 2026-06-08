@@ -102,6 +102,10 @@ async fn get_session(
     State(state): State<AppState>,
     Json(request): Json<SessionRequest>
 ) -> Result<Json<DetailedSessionDto>> {
+    if request.match_guids.is_empty() {
+        return Err(Error::UserError("Cannot process empty match list".into()));
+    }
+
     let dto = feature::get_detailed_session(&state.db_file_path, request.match_guids)?;
 
     Ok(Json(dto))
