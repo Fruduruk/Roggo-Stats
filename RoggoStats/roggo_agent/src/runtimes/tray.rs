@@ -12,10 +12,12 @@ use winit::{
     window::WindowId,
 };
 
-use crate::core::{agent::run_agent, logging::init_logging};
+use crate::{
+    core::{agent::run_agent, logging::init_logging},
+    get_db_file_path,
+};
 
 const WEB_UI_URL: &str = "https://roggo.frudd.dev";
-const DB_FILE_PATH: &str = "roggo-agent.db";
 
 pub fn run() {
     let _log_guard = init_logging();
@@ -36,7 +38,8 @@ fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiv
         };
 
         runtime.block_on(async {
-            if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx)), DB_FILE_PATH.into()).await {
+            if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx)), get_db_file_path()).await
+            {
                 tracing::error!(error = %err, "Roggo agent failed");
             }
         });

@@ -1,8 +1,11 @@
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
+use crate::get_app_data_directory;
+
 pub fn init_logging() -> WorkerGuard {
-    let file_appender = tracing_appender::rolling::daily("logs", "roggo-agent.log");
+    let directory = get_app_data_directory().join("logs");
+    let file_appender = tracing_appender::rolling::daily(directory, "roggo-agent.log");
     let (file_writer, guard) = tracing_appender::non_blocking(file_appender);
 
     let filter = EnvFilter::try_from_default_env()
