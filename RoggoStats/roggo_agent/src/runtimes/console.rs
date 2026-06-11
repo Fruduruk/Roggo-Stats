@@ -7,6 +7,15 @@ pub fn run() {
 
     tracing::info!("Starting roggo agent in console mode");
 
+    let instance = single_instance::SingleInstance::new("roggo-stats-agent")
+        .expect("Failed to create single instance lock");
+
+    if !instance.is_single() {
+        tracing::info!("Roggo Stats Agent is already running. Exiting.");
+        return;
+    }
+
+
     let runtime = match tokio::runtime::Runtime::new() {
         Ok(runtime) => runtime,
         Err(err) => {
