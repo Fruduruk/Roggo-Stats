@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::core::{
     api::{
         Error, Result,
-        contract::{DetailedMatchDto, MainCharacterDto, DetailedSessionDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto},
+        contract::{DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto},
     },
     bl::feature,
 };
@@ -61,6 +61,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/version", get(get_version))
         .route("/sessions/{pause_ms}", get(get_all_sessions))
         .route("/session", post(get_session))
+        .route("/hide_match", post(hide_match))
 }
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
@@ -109,4 +110,13 @@ async fn get_session(
     let dto = feature::get_detailed_session(&state.db_file_path, request.match_guids)?;
 
     Ok(Json(dto))
+}
+
+async fn hide_match(
+    State(state): State<AppState>,
+    Json(request): Json<HideRequest>
+) -> Result<()> {
+
+    feature::hide_match(&state.db_file_path, request.match_guid, request.hide)?;
+    Ok(())
 }

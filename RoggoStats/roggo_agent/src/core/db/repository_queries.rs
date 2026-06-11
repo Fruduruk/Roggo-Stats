@@ -434,4 +434,19 @@ impl Repository {
 
         Ok(row)
     }
+
+    
+    pub fn hide_match(&self, match_guid: uuid::Uuid, hide: bool) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "
+            update matches
+            set deleted = ?2
+            where match_guid = ?1
+            ",
+        )?;
+
+        stmt.execute(params![match_guid,hide])?;
+
+        Ok(())
+    }
 }
