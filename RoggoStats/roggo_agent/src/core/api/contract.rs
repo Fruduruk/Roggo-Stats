@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct HideRequest {
+    pub match_guid: Uuid,
+    pub hide: bool
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedAverageAdvancedStatsDto {
     pub average_percent_boosting: f64,
     pub average_percent_demolished: f64,
