@@ -2,7 +2,7 @@ use gloo_net::http::Request;
 use uuid::Uuid;
 
 use crate::core::contract::{
-    AgentErrorDto, DetailedMatchDto, DetailedSessionDto, MainCharacterDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto
+    AgentErrorDto, DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto
 };
 use crate::core::{Error, Result};
 
@@ -10,6 +10,22 @@ const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49124";
 
 pub fn request(route: &str) -> gloo_net::http::RequestBuilder {
     Request::get(&format!("{WEB_SOCKET_ADDR}/{route}"))
+}
+
+pub async fn hide_session(match_guid: Uuid, hide: bool) -> Result<()> {
+    let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_session"))
+    .json(&HideRequest {
+        match_guid,
+        hide
+    })?
+    .send()
+    .await?;
+
+    if response.ok() {
+        Ok(())
+    }else {
+        parse_error(response).await
+    }
 }
 
 pub async fn get_session(match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
