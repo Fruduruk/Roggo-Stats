@@ -22,6 +22,14 @@ const WEB_UI_URL: &str = "https://roggo.frudd.dev";
 pub fn run() {
     let _log_guard = init_logging();
 
+    let instance =
+        single_instance::SingleInstance::new("roggo-stats-agent").expect("Failed to create single instance lock");
+
+    if !instance.is_single() {
+        tracing::info!("Roggo Stats Agent is already running. Exiting.");
+        return;
+    }
+
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
     run_agent_thread(shutdown_tx.clone(), shutdown_rx);
     run_tray(shutdown_tx);
