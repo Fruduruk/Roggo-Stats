@@ -3,6 +3,7 @@ use std::path::Path;
 
 use uuid::Uuid;
 
+use crate::AGENT_VERSION;
 use crate::core::api::contract::{
     DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
     DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
@@ -11,8 +12,6 @@ use crate::core::api::contract::{
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
-
-const AGENT_VERSION: &str = "0.2.0";
 
 pub fn get_version() -> VersionDto {
     VersionDto {

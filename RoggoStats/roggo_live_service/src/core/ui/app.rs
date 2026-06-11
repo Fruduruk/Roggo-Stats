@@ -11,6 +11,7 @@ use crate::core::{
 };
 
 const COMPATIBLE_AGENT_VERSION: &str = "0.2.0";
+const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.2.0/RoggoAgentSetup_0.2.0.exe";
 
 #[derive(Default)]
 pub struct Content {
@@ -99,7 +100,7 @@ impl eframe::App for RoggoApp {
                                 COMPATIBLE_AGENT_VERSION
                             ));
 
-                            ui.hyperlink_to("download here", "https://github.com/Fruduruk/Roggo-Stats/releases/download/untagged-604945b51adc062c7002/Roggo-Agent.exe");
+                            ui.hyperlink_to("download here", DOWNLOAD_URL);
                         });
                     });
             }
