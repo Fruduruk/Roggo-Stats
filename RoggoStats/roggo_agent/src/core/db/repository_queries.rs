@@ -435,7 +435,6 @@ impl Repository {
         Ok(row)
     }
 
-    
     pub fn hide_match(&self, match_guid: uuid::Uuid, hide: bool) -> Result<()> {
         let mut stmt = self.connection.prepare(
             "
@@ -445,7 +444,7 @@ impl Repository {
             ",
         )?;
 
-        stmt.execute(params![match_guid,hide])?;
+        stmt.execute(params![match_guid, hide])?;
 
         Ok(())
     }
