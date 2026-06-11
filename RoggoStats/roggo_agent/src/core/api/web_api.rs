@@ -1,6 +1,10 @@
 use std::path::PathBuf;
 
-use axum::{Json, Router, extract::{Path, State}, routing::{get, post}};
+use axum::{
+    Json, Router,
+    extract::{Path, State},
+    routing::{get, post},
+};
 use tokio::sync::watch;
 use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
@@ -8,7 +12,10 @@ use uuid::Uuid;
 use crate::core::{
     api::{
         Error, Result,
-        contract::{DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto},
+        contract::{
+            DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest,
+            SimpleMatchDto, SimpleSessionDto, VersionDto,
+        },
     },
     bl::feature,
 };
@@ -82,9 +89,7 @@ async fn get_match_by_id(
     Ok(Json(dto))
 }
 
-async fn get_version(
-    State(_state): State<AppState>
-) -> Result<Json<VersionDto>> {
+async fn get_version(State(_state): State<AppState>) -> Result<Json<VersionDto>> {
     let dto = feature::get_version();
 
     Ok(Json(dto))
@@ -92,7 +97,7 @@ async fn get_version(
 
 async fn get_all_sessions(
     State(state): State<AppState>,
-    Path(pause_ms): Path<i64>
+    Path(pause_ms): Path<i64>,
 ) -> Result<Json<Vec<SimpleSessionDto>>> {
     let dtos = feature::get_all_sessions(&state.db_file_path, pause_ms)?;
 
@@ -101,7 +106,7 @@ async fn get_all_sessions(
 
 async fn get_session(
     State(state): State<AppState>,
-    Json(request): Json<SessionRequest>
+    Json(request): Json<SessionRequest>,
 ) -> Result<Json<DetailedSessionDto>> {
     if request.match_guids.is_empty() {
         return Err(Error::UserError("Cannot process empty match list".into()));
@@ -112,11 +117,7 @@ async fn get_session(
     Ok(Json(dto))
 }
 
-async fn hide_match(
-    State(state): State<AppState>,
-    Json(request): Json<HideRequest>
-) -> Result<()> {
-
+async fn hide_match(State(state): State<AppState>, Json(request): Json<HideRequest>) -> Result<()> {
     feature::hide_match(&state.db_file_path, request.match_guid, request.hide)?;
     Ok(())
 }

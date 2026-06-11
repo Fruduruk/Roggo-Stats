@@ -4,7 +4,7 @@ use uuid::Uuid;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HideRequest {
     pub match_guid: Uuid,
-    pub hide: bool
+    pub hide: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -129,7 +129,7 @@ pub struct MainCharacterDto {
 pub enum AgentErrorCode {
     NoEntries,
     InternalError,
-    UserError
+    UserError,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

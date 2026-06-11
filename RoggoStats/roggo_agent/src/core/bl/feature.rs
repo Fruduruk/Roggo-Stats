@@ -27,7 +27,6 @@ fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
     Ok(global_player)
 }
 
-
 pub fn hide_match(path: &Path, match_guid: Uuid, hide: bool) -> Result<()> {
     let repo = Repository::connect(path)?;
 
@@ -35,7 +34,6 @@ pub fn hide_match(path: &Path, match_guid: Uuid, hide: bool) -> Result<()> {
 
     Ok(())
 }
-
 
 pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
     let repo = Repository::connect(path)?;
