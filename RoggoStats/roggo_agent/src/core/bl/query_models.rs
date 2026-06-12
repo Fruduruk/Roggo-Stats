@@ -75,6 +75,7 @@ pub struct F3MatchRow {
     pub created_at: i64,
     pub ended_at: i64,
     pub had_overtime: bool,
+    pub hidden: bool,
 }
 
 pub struct F2PlayerRow {
@@ -91,6 +92,7 @@ pub struct F2MatchRow {
     pub match_guid: Uuid,
     pub duration: i64,
     pub ended_at: i64,
+    pub hidden: bool,
 }
 
 pub struct F4MatchRow {
@@ -99,6 +101,7 @@ pub struct F4MatchRow {
     pub duration: i64,
     pub created_at: i64,
     pub ended_at: i64,
+    pub hidden: bool,
 }
 
 pub struct GlobalPlayerRow {

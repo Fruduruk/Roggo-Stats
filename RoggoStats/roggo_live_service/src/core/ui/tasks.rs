@@ -20,6 +20,14 @@ pub fn load_version(context: Context, content: Arc<Mutex<app::Content>>) {
     });
 }
 
+pub fn toggle_hide_match(context: Context, match_guid: Uuid, hidden: bool) {
+    wasm_bindgen_futures::spawn_local(async move {
+        _ = api::hide_match(match_guid, hidden).await;
+
+        context.request_repaint();
+    });
+}
+
 pub fn load_main_character(context: Context, content: Arc<Mutex<app::Content>>) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_main_character().await;

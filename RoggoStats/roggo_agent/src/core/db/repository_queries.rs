@@ -40,8 +40,7 @@ impl Repository {
         let mut stmt = self.connection.prepare(
             "
             select * from matches
-            where deleted = false
-            and duration != 0
+            where duration != 0
             ",
         )?;
 
@@ -51,6 +50,7 @@ impl Repository {
                 match_guid: row.get("match_guid")?,
                 duration: row.get("duration")?,
                 ended_at: row.get("ended_at_ms")?,
+                hidden: row.get("deleted")?,
             })
         })?;
 
@@ -109,6 +109,7 @@ impl Repository {
                 created_at: row.get("created_at_ms")?,
                 ended_at: row.get("ended_at_ms")?,
                 had_overtime: row.get("had_overtime")?,
+                hidden: row.get("deleted")?,
             })
         })?;
 
@@ -229,10 +230,10 @@ impl Repository {
                 match_guid,
                 duration,
                 ended_at_ms,
-                created_at_ms
+                created_at_ms,
+                deleted
             from matches
-            where deleted = false
-            and duration != 0
+            where duration != 0
             order by ended_at_ms asc
             ",
         )?;
@@ -244,6 +245,7 @@ impl Repository {
                 duration: row.get("duration")?,
                 ended_at: row.get("ended_at_ms")?,
                 created_at: row.get("created_at_ms")?,
+                hidden: row.get("deleted")?,
             })
         })?;
 

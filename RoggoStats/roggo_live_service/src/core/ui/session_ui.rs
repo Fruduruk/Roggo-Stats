@@ -47,7 +47,11 @@ impl SessionUi {
                 ui.heading("Session Stats");
                 ui.add_space(8.0);
 
-                self.render_match_timeline(ui, session);
+                let result = self.render_match_timeline(ui, session);
+                if let Some((match_guid, hidden)) = result {
+                    tasks::toggle_hide_match(ui.ctx().clone(), match_guid, !hidden);
+                }
+
                 ui.add_space(18.0);
                 ui.separator();
                 ui.add_space(12.0);
@@ -61,26 +65,22 @@ impl SessionUi {
             });
     }
 
-    fn render_match_timeline(&self, ui: &mut egui::Ui, session: &DetailedSessionDto) {
+    fn render_match_timeline(&self, ui: &mut egui::Ui, session: &DetailedSessionDto) -> Option<(Uuid, bool)>{
         ui.heading("Timeline");
 
-        let visible_matches: Vec<_> = session
-            .session_matches
-            .iter()
-            .filter(|m| !m.hidden)
-            .collect();
+        let session_matches = &session.session_matches;
 
-        if visible_matches.is_empty() {
+        if session_matches.is_empty() {
             ui.label(RichText::new("No visible matches available.").weak());
-            return;
+            return None;
         }
 
-        let Some(first_started_at) = visible_matches.iter().map(|m| m.created_at).min() else {
-            return;
+        let Some(first_started_at) = session_matches.iter().map(|m| m.created_at).min() else {
+            return None;
         };
 
-        let Some(last_ended_at) = visible_matches.iter().map(|m| m.ended_at).max() else {
-            return;
+        let Some(last_ended_at) = session_matches.iter().map(|m| m.ended_at).max() else {
+            return None;
         };
 
         let total_duration = (last_ended_at - first_started_at).max(1) as f32;
@@ -174,7 +174,9 @@ impl SessionUi {
             );
         }
 
-        for session_match in visible_matches {
+        let mut result = None;
+
+        for session_match in session_matches {
             let start_offset = (session_match.created_at - first_started_at).max(0) as f32;
             let end_offset = (session_match.ended_at - first_started_at).max(0) as f32;
 
@@ -190,12 +192,49 @@ impl SessionUi {
                 None => GREY,
             };
 
+            let color = if session_match.hidden {
+                color.gamma_multiply(0.5)
+            }
+            else {
+                color
+            };
+
             let bar_rect = egui::Rect::from_min_max(
                 egui::pos2(x1, bar_y - bar_height / 2.0),
                 egui::pos2(bar_right, bar_y + bar_height / 2.0),
             );
 
-            painter.rect_filled(bar_rect, 3.0, color);
+            let clickable_rect = bar_rect.expand2(Vec2::new(3.0, 6.0));
+
+            let response = ui
+                .interact(
+                    clickable_rect,
+                    ui.make_persistent_id(("session_timeline_match", session_match.match_guid)),
+                    Sense::click(),
+                )
+                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                .on_hover_text(format!(
+                    "{} · {}",
+                    format_clock_time(session_match.created_at),
+                    format_duration(session_match.ended_at - session_match.created_at),
+                ));
+
+            let draw_color = if response.hovered() {
+                color.gamma_multiply(1.25)
+            } else {
+                color
+            };
+
+            painter.rect_filled(bar_rect, 3.0, draw_color);
+
+            if response.hovered() {
+                painter.rect_stroke(
+                    bar_rect.expand(1.0),
+                    3.0,
+                    Stroke::new(1.5, Color32::WHITE),
+                    egui::StrokeKind::Outside,
+                );
+            }
 
             let marker = match session_match.mvp_type {
                 MVPType::MVP => Some("MVP"),
@@ -225,6 +264,10 @@ impl SessionUi {
                 FontId::monospace(10.0),
                 Color32::GRAY,
             );
+
+            if response.clicked() {
+                result = Some((session_match.match_guid,session_match.hidden));
+            }
         }
 
         ui.horizontal(|ui| {
@@ -232,6 +275,8 @@ impl SessionUi {
             timeline_legend(ui, RED, "Lost");
             timeline_legend(ui, GREY, "Unknown");
         });
+
+        result
     }
     fn render_core_stats(
         &self,

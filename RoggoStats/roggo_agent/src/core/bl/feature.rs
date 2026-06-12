@@ -189,9 +189,11 @@ pub fn get_all_sessions(path: &Path, pause_ms: i64) -> Result<Vec<SimpleSessionD
                 }
 
                 session.ended_at = match_row.ended_at;
-                session.match_count += 1;
-                if won {
-                    session.matches_won += 1;
+                if !match_row.hidden {
+                    session.match_count += 1;
+                    if won {
+                        session.matches_won += 1;
+                    }
                 }
                 session.match_guids.push(match_row.match_guid);
 
@@ -203,8 +205,12 @@ pub fn get_all_sessions(path: &Path, pause_ms: i64) -> Result<Vec<SimpleSessionD
                 let dto = SimpleSessionDto {
                     created_at: match_row.created_at,
                     ended_at: match_row.ended_at,
-                    match_count: 1,
-                    matches_won: if won { 1 } else { 0 },
+                    match_count: if match_row.hidden { 0 } else { 1 },
+                    matches_won: if match_row.hidden {
+                        0
+                    } else {
+                        if won { 1 } else { 0 }
+                    },
                     match_guids: vec![match_row.match_guid],
                     own_player_count: own_players.len() as i64,
                     enemy_player_count: enemy_players.len() as i64,
@@ -265,6 +271,7 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
             match_guid: match_row.match_guid,
             duration: match_row.duration,
             ended_at: match_row.ended_at,
+            hidden: match_row.hidden,
             own_team_score,
             enemy_team_score,
             own_player_count,
@@ -346,6 +353,7 @@ pub fn get_detailed_match_by_id(path: &Path, match_guid: Uuid) -> Result<Detaile
         had_overtime: match_row.had_overtime,
         own_team,
         enemy_team,
+        hidden: match_row.hidden,
     })
 }
 

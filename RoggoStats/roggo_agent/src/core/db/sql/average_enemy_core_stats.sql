@@ -20,6 +20,7 @@ enemy_teams as (
     from selected_matches sm
     join matches m
         on m.match_guid = sm.match_guid
+        and m.deleted = false
     join players main_character
         on main_character.match_id = m.id
         and main_character.global_player_id = ?1

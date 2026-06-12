@@ -12,6 +12,7 @@ own_teams as (
     from selected_matches sm
     join matches m
         on m.match_guid = sm.match_guid
+        and m.deleted = false
     join players p
         on p.match_id = m.id
     where p.global_player_id = ?1
