@@ -1,5 +1,17 @@
 use uuid::Uuid;
 
+pub struct F5SessionMatchRow {
+    pub match_guid: Uuid,
+    pub created_at: i64,
+    pub ended_at: i64,
+    pub hidden: bool,
+    pub main_character_won: Option<bool>,
+    pub own_best_global_player_id: i64,
+    pub own_best_score: i64,
+    pub enemy_best_global_player_id: i64,
+    pub enemy_best_score: i64,
+}
+
 pub struct F5AverageCoreStatsRow {
     pub average_score: Option<f64>,
     pub average_goals: Option<f64>,

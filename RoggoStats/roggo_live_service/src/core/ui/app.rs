@@ -100,7 +100,7 @@ impl eframe::App for RoggoApp {
                                 COMPATIBLE_AGENT_VERSION
                             ));
 
-                            ui.hyperlink_to("download here", DOWNLOAD_URL);
+                            ui.hyperlink_to(DOWNLOAD_URL, DOWNLOAD_URL);
                         });
                     });
             }

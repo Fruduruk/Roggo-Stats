@@ -4,10 +4,7 @@ use eframe::egui::{self, Align2, Color32, Context, FontId, RichText, Sense, Stro
 use uuid::Uuid;
 
 use crate::core::{
-    contract::{
-        DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
-        DetailedSessionDto,
-    },
+    contract::{DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedSessionDto},
     ui::tasks,
 };
 
@@ -45,14 +42,115 @@ impl SessionUi {
                 ui.heading("Session Stats");
                 ui.add_space(8.0);
 
-                self.render_core_stats(ui, session, player_name);
+                self.render_match_timeline(ui, session);
+                ui.add_space(18.0);
+                ui.separator();
+                ui.add_space(12.0);
 
+                self.render_core_stats(ui, session, player_name);
                 ui.add_space(18.0);
                 ui.separator();
                 ui.add_space(12.0);
 
                 self.render_advanced_stats(ui, session, player_name);
             });
+    }
+
+    fn render_match_timeline(&self, ui: &mut egui::Ui, session: &DetailedSessionDto) {
+        ui.heading("Timeline");
+
+        let visible_matches: Vec<_> = session
+            .session_matches
+            .iter()
+            .filter(|m| !m.hidden)
+            .collect();
+
+        if visible_matches.is_empty() {
+            ui.label(RichText::new("No visible matches available.").weak());
+            return;
+        }
+
+        let Some(first_started_at) = visible_matches.iter().map(|m| m.created_at).min() else {
+            return;
+        };
+
+        let Some(last_ended_at) = visible_matches.iter().map(|m| m.ended_at).max() else {
+            return;
+        };
+
+        let total_duration = (last_ended_at - first_started_at).max(1) as f32;
+
+        let desired_size = Vec2::new(ui.available_width(), 96.0);
+        let (rect, _) = ui.allocate_exact_size(desired_size, Sense::hover());
+        let painter = ui.painter_at(rect);
+
+        let left_padding = 54.0;
+        let right_padding = 12.0;
+        let top_padding = 24.0;
+        let bottom_padding = 28.0;
+
+        let timeline_left = rect.left() + left_padding;
+        let timeline_right = rect.right() - right_padding;
+        let timeline_top = rect.top() + top_padding;
+        let timeline_bottom = rect.bottom() - bottom_padding;
+        let timeline_y = (timeline_top + timeline_bottom) / 2.0;
+
+        let timeline_width = timeline_right - timeline_left;
+        let bar_height = 18.0;
+
+        painter.line_segment(
+            [
+                egui::pos2(timeline_left, timeline_y),
+                egui::pos2(timeline_right, timeline_y),
+            ],
+            Stroke::new(1.0, Color32::GRAY),
+        );
+
+        painter.text(
+            egui::pos2(timeline_left, rect.bottom() - 6.0),
+            Align2::LEFT_BOTTOM,
+            format_time_offset(0),
+            FontId::monospace(11.0),
+            Color32::GRAY,
+        );
+
+        painter.text(
+            egui::pos2(timeline_right, rect.bottom() - 6.0),
+            Align2::RIGHT_BOTTOM,
+            format_time_offset(last_ended_at - first_started_at),
+            FontId::monospace(11.0),
+            Color32::GRAY,
+        );
+
+        for session_match in visible_matches {
+            let start_offset = (session_match.created_at - first_started_at).max(0) as f32;
+            let end_offset = (session_match.ended_at - first_started_at).max(0) as f32;
+
+            let x1 = timeline_left + timeline_width * (start_offset / total_duration);
+            let x2 = timeline_left + timeline_width * (end_offset / total_duration);
+
+            let min_width = 3.0;
+            let bar_right = x2.max(x1 + min_width);
+
+            let color = match session_match.won {
+                Some(true) => Color32::from_rgb(80, 180, 110),
+                Some(false) => Color32::from_rgb(210, 80, 80),
+                None => Color32::from_rgb(130, 130, 130),
+            };
+
+            let bar_rect = egui::Rect::from_min_max(
+                egui::pos2(x1, timeline_y - bar_height / 2.0),
+                egui::pos2(bar_right, timeline_y + bar_height / 2.0),
+            );
+
+            painter.rect_filled(bar_rect, 3.0, color);
+        }
+
+        ui.horizontal(|ui| {
+            timeline_legend(ui, Color32::from_rgb(80, 180, 110), "Won");
+            timeline_legend(ui, Color32::from_rgb(210, 80, 80), "Lost");
+            timeline_legend(ui, Color32::from_rgb(130, 130, 130), "Unknown");
+        });
     }
 
     fn render_core_stats(
@@ -456,4 +554,25 @@ struct CoreBarValue<'a> {
     label: String,
     stats: &'a DetailedAverageCoreStatsDto,
     color: Color32,
+}
+
+fn timeline_legend(ui: &mut egui::Ui, color: Color32, label: &str) {
+    let (rect, _) = ui.allocate_exact_size(Vec2::new(10.0, 10.0), Sense::hover());
+    ui.painter().rect_filled(rect, 2.0, color);
+    ui.label(RichText::new(label).weak());
+    ui.add_space(8.0);
+}
+
+fn format_time_offset(seconds: i64) -> String {
+    let seconds = seconds.max(0);
+    let minutes = seconds / 60;
+    let remaining_seconds = seconds % 60;
+
+    if minutes >= 60 {
+        let hours = minutes / 60;
+        let remaining_minutes = minutes % 60;
+        format!("{hours}h {remaining_minutes}m")
+    } else {
+        format!("{minutes}:{remaining_seconds:02}")
+    }
 }

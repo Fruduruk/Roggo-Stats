@@ -7,7 +7,8 @@ use crate::AGENT_VERSION;
 use crate::core::api::contract::{
     DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
     DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
-    DetailedTeamDto, MainCharacterDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
+    DetailedTeamDto, MVPType, MainCharacterDto, SessionMatchDto, SimpleMatchDto, SimpleSessionDto,
+    VersionDto,
 };
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
@@ -105,8 +106,33 @@ pub fn get_detailed_session(path: &Path, match_guids: Vec<Uuid>) -> Result<Detai
         row.average_percent_supersonic,
     );
 
+    let session_matches = repo
+        .f5_get_session_matches(match_guids.clone(), main_character.id)?
+        .into_iter()
+        .map(|row| {
+            let mvp_type = if row.own_best_global_player_id == main_character.id {
+                if row.main_character_won.unwrap_or(true) {
+                    MVPType::MVP
+                } else {
+                    MVPType::ACE
+                }
+            } else {
+                MVPType::Nothing
+            };
+
+            SessionMatchDto {
+                match_guid: row.match_guid,
+                created_at: row.created_at,
+                ended_at: row.ended_at,
+                won: row.main_character_won,
+                mvp_type,
+                hidden: row.hidden,
+            }
+        })
+        .collect();
+
     let dto = DetailedSessionDto {
-        match_guids,
+        session_matches,
         own_team_player_averages,
         average_enemy_core_stats,
         average_team_player_core_stats,

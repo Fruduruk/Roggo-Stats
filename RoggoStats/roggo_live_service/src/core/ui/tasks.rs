@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
 use crate::core::ui::{app, match_overview_ui, match_ui, session_ui};
-use crate::core::{Error, Result};
+use crate::core::{Error};
 
 use crate::core::api;
 

@@ -17,7 +17,7 @@ pub struct DetailedAverageAdvancedStatsDto {
     pub average_percent_supersonic: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedAverageCoreStatsDto {
     pub average_score: f64,
     pub average_goals: f64,
@@ -27,16 +27,33 @@ pub struct DetailedAverageCoreStatsDto {
     pub average_demos: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedAveragePlayerDto {
     pub username: String,
     pub average_core_stats: DetailedAverageCoreStatsDto,
     pub average_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
+pub enum MVPType {
+    MVP,
+    ACE,
+    Nothing
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SessionMatchDto {
+    pub match_guid: Uuid,
+    pub created_at: i64,
+    pub ended_at: i64,
+    pub won: Option<bool>,
+    pub mvp_type: MVPType,
+    pub hidden: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedSessionDto {
-    pub match_guids: Vec<Uuid>,
+    pub session_matches: Vec<SessionMatchDto>,
     pub own_team_player_averages: Vec<DetailedAveragePlayerDto>,
     pub average_enemy_core_stats: Option<DetailedAverageCoreStatsDto>,
     pub average_team_player_core_stats: Option<DetailedAverageCoreStatsDto>,
