@@ -12,8 +12,8 @@ pub fn request(route: &str) -> gloo_net::http::RequestBuilder {
     Request::get(&format!("{WEB_SOCKET_ADDR}/{route}"))
 }
 
-pub async fn hide_session(match_guid: Uuid, hide: bool) -> Result<()> {
-    let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_session"))
+pub async fn hide_match(match_guid: Uuid, hide: bool) -> Result<()> {
+    let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_match"))
     .json(&HideRequest {
         match_guid,
         hide

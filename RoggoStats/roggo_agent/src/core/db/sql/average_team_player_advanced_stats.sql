@@ -21,6 +21,7 @@ own_teams as (
     from selected_matches sm
     join matches m
         on m.match_guid = sm.match_guid
+        and m.deleted = false
     join players main_character
         on main_character.match_id = m.id
         and main_character.global_player_id = 4
@@ -39,6 +40,7 @@ team_player_stats as (
         and p.global_player_id <> 4
     join matches m
         on m.id = p.match_id
+        and m.deleted = false
     left join player_stats ps
         on ps.player_id = p.id
 ),

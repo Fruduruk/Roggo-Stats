@@ -154,6 +154,12 @@ fn match_button(ui: &mut egui::Ui, match_dto: &SimpleMatchDto) -> egui::Response
         NavBarMatchType::Unknown => GREY,
     };
 
+    let fill = if match_dto.hidden {
+        fill.gamma_multiply(0.5)
+    } else {
+        fill
+    };
+
     nav_button(
         ui,
         queue,

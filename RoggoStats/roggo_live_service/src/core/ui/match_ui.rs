@@ -4,7 +4,9 @@ use eframe::egui::{self, Context};
 use uuid::Uuid;
 
 use crate::core::{
-    contract::{DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto}, time::format_ms_min_seconds, ui::tasks
+    contract::{DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto},
+    time::format_ms_min_seconds,
+    ui::tasks,
 };
 
 #[derive(Clone, Copy)]
@@ -40,60 +42,80 @@ impl MatchUi {
             return;
         };
 
-        render_match_leaderboards(ui, detailed_match);
+        self.render_match_leaderboards(ui, detailed_match);
     }
-}
 
-fn render_match_leaderboards(ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
-    let players = collect_players(detailed_match);
+    fn render_match_leaderboards(&self, ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
+        let players = collect_players(detailed_match);
 
-    egui::ScrollArea::vertical().show(ui, |ui| {
-        render_match_header(ui, detailed_match);
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            self.render_match_header(ui, detailed_match);
 
-        ui.add_space(12.0);
+            ui.add_space(12.0);
 
-        ui.heading("Classic Stats");
+            ui.heading("Classic Stats");
 
-        render_number_leaderboard(ui, "Score", &players, |p| p.score);
-        render_number_leaderboard(ui, "Goals", &players, |p| p.goals);
-        render_number_leaderboard(ui, "Shots", &players, |p| p.shots);
-        render_number_leaderboard(ui, "Assists", &players, |p| p.assists);
-        render_number_leaderboard(ui, "Saves", &players, |p| p.saves);
-        render_number_leaderboard(ui, "Demos", &players, |p| p.demos);
+            render_number_leaderboard(ui, "Score", &players, |p| p.score);
+            render_number_leaderboard(ui, "Goals", &players, |p| p.goals);
+            render_number_leaderboard(ui, "Shots", &players, |p| p.shots);
+            render_number_leaderboard(ui, "Assists", &players, |p| p.assists);
+            render_number_leaderboard(ui, "Saves", &players, |p| p.saves);
+            render_number_leaderboard(ui, "Demos", &players, |p| p.demos);
 
-        ui.add_space(16.0);
+            ui.add_space(16.0);
 
-        ui.heading("Detailed Stats");
+            ui.heading("Detailed Stats");
 
-        render_percent_leaderboard(ui, "Boosting", &players, |s| s.percent_boosting);
-        render_percent_leaderboard(ui, "Supersonic", &players, |s| s.percent_supersonic);
-        render_percent_leaderboard(ui, "On Ground", &players, |s| s.percent_on_ground);
-        render_percent_leaderboard(ui, "On Wall", &players, |s| s.percent_on_wall);
-        render_percent_leaderboard(ui, "Powersliding", &players, |s| s.percent_powersliding);
-        render_percent_leaderboard(ui, "Demolished", &players, |s| s.percent_demolished);
-    });
-}
-fn render_match_header(ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
-    ui.vertical_centered(|ui| {
-        ui.heading(format!(
-            "{} {} : {} {}",
-            detailed_match.own_team.name,
-            detailed_match.own_team.score,
-            detailed_match.enemy_team.score,
-            detailed_match.enemy_team.name
-        ));
+            render_percent_leaderboard(ui, "Boosting", &players, |s| s.percent_boosting);
+            render_percent_leaderboard(ui, "Supersonic", &players, |s| s.percent_supersonic);
+            render_percent_leaderboard(ui, "On Ground", &players, |s| s.percent_on_ground);
+            render_percent_leaderboard(ui, "On Wall", &players, |s| s.percent_on_wall);
+            render_percent_leaderboard(ui, "Powersliding", &players, |s| s.percent_powersliding);
+            render_percent_leaderboard(ui, "Demolished", &players, |s| s.percent_demolished);
+        });
+    }
 
-        ui.label(format!(
-            "{} | {} {}",
-            detailed_match.arena,
-            format_ms_min_seconds(detailed_match.duration),
-            if detailed_match.had_overtime {
-                " | Overtime"
-            } else {
-                ""
-            }
-        ));
-    });
+    fn render_match_header(&self, ui: &mut egui::Ui, detailed_match: &DetailedMatchDto) {
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                ui.heading(format!(
+                    "{} {} : {} {}",
+                    detailed_match.own_team.name,
+                    detailed_match.own_team.score,
+                    detailed_match.enemy_team.score,
+                    detailed_match.enemy_team.name
+                ));
+
+                ui.label(format!(
+                    "{} | {}{}",
+                    detailed_match.arena,
+                    format_ms_min_seconds(detailed_match.duration),
+                    if detailed_match.had_overtime {
+                        " | Overtime"
+                    } else {
+                        ""
+                    }
+                ));
+            });
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
+                let button_text = if detailed_match.hidden {
+                    "Unhide match"
+                } else {
+                    "Hide match"
+                };
+
+                if ui.button(button_text).clicked() {
+                    tasks::toggle_hide_match(
+                        ui.ctx().clone(),
+                        detailed_match.match_guid,
+                        !detailed_match.hidden,
+                    );
+                    self.reload(ui.ctx().clone(), detailed_match.match_guid);
+                }
+            });
+        });
+    }
 }
 
 fn collect_players<'a>(detailed_match: &'a DetailedMatchDto) -> Vec<LeaderboardPlayer<'a>> {
@@ -116,7 +138,8 @@ fn collect_players<'a>(detailed_match: &'a DetailedMatchDto) -> Vec<LeaderboardP
                 }),
         )
         .collect()
-}fn render_number_leaderboard<F>(
+}
+fn render_number_leaderboard<F>(
     ui: &mut egui::Ui,
     title: &str,
     players: &[LeaderboardPlayer<'_>],
@@ -181,10 +204,7 @@ fn render_percent_leaderboard<F>(
         })
         .collect();
 
-    entries.sort_by(|a, b| {
-        b.1.partial_cmp(&a.1)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
+    entries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
     egui::Frame::group(ui.style())
         .inner_margin(egui::Margin::same(8))
