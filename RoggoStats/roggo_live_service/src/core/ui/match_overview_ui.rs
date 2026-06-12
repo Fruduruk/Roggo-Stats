@@ -8,10 +8,10 @@ use crate::core::{
     ui::{match_ui::MatchUi, session_ui::SessionUi, tasks},
 };
 
-const RED: egui::Color32 = egui::Color32::from_rgb(150, 65, 65);
-const YELLOW: egui::Color32 = egui::Color32::from_rgb(180, 160, 70);
-const GREEN: egui::Color32 = egui::Color32::from_rgb(52, 125, 70);
-const GREY: egui::Color32 = egui::Color32::from_rgb(96, 96, 104);
+pub const RED: egui::Color32 = egui::Color32::from_rgb(150, 65, 65);
+pub const YELLOW: egui::Color32 = egui::Color32::from_rgb(180, 160, 70);
+pub const GREEN: egui::Color32 = egui::Color32::from_rgb(52, 125, 70);
+pub const GREY: egui::Color32 = egui::Color32::from_rgb(96, 96, 104);
 
 #[derive(Default)]
 pub struct Content {
@@ -27,11 +27,11 @@ pub struct MatchOverviewUi {
     content: Arc<Mutex<Content>>,
 }
 
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 enum ViewMode {
     #[default]
     SingleMatch,
-    Session,
+    Session(i64),
 }
 
 enum NavBarMatchType {
@@ -78,7 +78,7 @@ impl MatchOverviewUi {
                             if let Some(sessions) = &content.sessions {
                                 for session in sessions {
                                     if session_button(ui, session).clicked() {
-                                        self.view_mode = ViewMode::Session;
+                                        self.view_mode = ViewMode::Session(session.created_at);
                                         self.session_ui
                                             .reload(ui.ctx().clone(), session.match_guids.clone());
                                     }
@@ -94,17 +94,35 @@ impl MatchOverviewUi {
                     self.match_ui.ui(ui);
                 });
             }
-            ViewMode::Session => {
+            ViewMode::Session(_) => {
                 egui::CentralPanel::default().show_inside(ui, |ui| {
                     self.session_ui.ui(ui, player_name);
                 });
-            },
+            }
         }
     }
 
     pub fn reload(&mut self, context: Context) {
         tasks::load_matches(context.clone(), self.content.clone());
-        tasks::load_sessions(context, self.content.clone(), 3_600_000);
+        tasks::load_sessions(context.clone(), self.content.clone(), 3_600_000);
+        if let ViewMode::Session(created_at) = &self.view_mode {
+            let match_guids = {
+                let Ok(content) = self.content.lock() else {
+                    return;
+                };
+
+                let Some(sessions) = &content.sessions else {
+                    return;
+                };
+
+                let Some(session) = sessions.iter().find(|s| s.created_at == *created_at) else {
+                    return;
+                };
+
+                session.match_guids.clone()
+            };
+            self.session_ui.reload(context, match_guids);
+        }
     }
 }
 

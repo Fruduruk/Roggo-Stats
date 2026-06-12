@@ -1,12 +1,17 @@
 use std::sync::{Arc, Mutex};
 
+use crate::core::{
+    contract::{
+        DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedSessionDto, MVPType,
+    },
+    ui::{
+        match_overview_ui::{GREEN, GREY, RED},
+        tasks,
+    },
+};
+use chrono::{DateTime, Local, Utc};
 use eframe::egui::{self, Align2, Color32, Context, FontId, RichText, Sense, Stroke, Vec2};
 use uuid::Uuid;
-
-use crate::core::{
-    contract::{DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedSessionDto},
-    ui::tasks,
-};
 
 #[derive(Default)]
 pub struct Content {
@@ -20,7 +25,7 @@ pub struct SessionUi {
 
 impl SessionUi {
     pub fn reload(&self, context: Context, match_guids: Vec<Uuid>) {
-        tasks::load_detailed_session(context, self.content.clone(), match_guids);
+        tasks::load_detailed_session(context, self.content.clone(), match_guids.clone());
     }
 
     pub fn ui(&self, ui: &mut egui::Ui, player_name: &String) {
@@ -80,79 +85,154 @@ impl SessionUi {
 
         let total_duration = (last_ended_at - first_started_at).max(1) as f32;
 
-        let desired_size = Vec2::new(ui.available_width(), 96.0);
+        let desired_size = Vec2::new(ui.available_width(), 150.0);
         let (rect, _) = ui.allocate_exact_size(desired_size, Sense::hover());
         let painter = ui.painter_at(rect);
 
-        let left_padding = 54.0;
-        let right_padding = 12.0;
-        let top_padding = 24.0;
-        let bottom_padding = 28.0;
+        let left_padding = 64.0;
+        let right_padding = 16.0;
+        let top_padding = 18.0;
 
-        let timeline_left = rect.left() + left_padding;
-        let timeline_right = rect.right() - right_padding;
-        let timeline_top = rect.top() + top_padding;
-        let timeline_bottom = rect.bottom() - bottom_padding;
-        let timeline_y = (timeline_top + timeline_bottom) / 2.0;
+        let chart_left = rect.left() + left_padding;
+        let chart_right = rect.right() - right_padding;
+        let chart_top = rect.top() + top_padding;
 
-        let timeline_width = timeline_right - timeline_left;
+        let chart_width = chart_right - chart_left;
+
+        let bar_y = chart_top + 34.0;
+        let duration_y = chart_top + 72.0;
+        let x_axis_y = chart_top + 104.0;
+
         let bar_height = 18.0;
 
         painter.line_segment(
             [
-                egui::pos2(timeline_left, timeline_y),
-                egui::pos2(timeline_right, timeline_y),
+                egui::pos2(chart_left, chart_top),
+                egui::pos2(chart_left, x_axis_y),
+            ],
+            Stroke::new(1.0, Color32::GRAY),
+        );
+
+        painter.line_segment(
+            [
+                egui::pos2(chart_left, x_axis_y),
+                egui::pos2(chart_right, x_axis_y),
             ],
             Stroke::new(1.0, Color32::GRAY),
         );
 
         painter.text(
-            egui::pos2(timeline_left, rect.bottom() - 6.0),
-            Align2::LEFT_BOTTOM,
-            format_time_offset(0),
-            FontId::monospace(11.0),
+            egui::pos2(chart_left - 8.0, bar_y),
+            Align2::RIGHT_CENTER,
+            "Match",
+            FontId::proportional(11.0),
             Color32::GRAY,
         );
 
         painter.text(
-            egui::pos2(timeline_right, rect.bottom() - 6.0),
-            Align2::RIGHT_BOTTOM,
-            format_time_offset(last_ended_at - first_started_at),
-            FontId::monospace(11.0),
+            egui::pos2(chart_left - 8.0, duration_y),
+            Align2::RIGHT_CENTER,
+            "Duration",
+            FontId::proportional(11.0),
             Color32::GRAY,
         );
+
+        let tick_count = nice_tick_count(chart_width);
+
+        for tick in 0..=tick_count {
+            let t = tick as f32 / tick_count as f32;
+            let x = chart_left + chart_width * t;
+            let timestamp =
+                first_started_at + ((last_ended_at - first_started_at) as f32 * t) as i64;
+
+            painter.line_segment(
+                [egui::pos2(x, x_axis_y), egui::pos2(x, x_axis_y + 5.0)],
+                Stroke::new(1.0, Color32::GRAY),
+            );
+
+            if tick > 0 && tick < tick_count {
+                painter.line_segment(
+                    [egui::pos2(x, chart_top), egui::pos2(x, x_axis_y)],
+                    Stroke::new(0.5, Color32::from_gray(55)),
+                );
+            }
+
+            let align = if tick == 0 {
+                Align2::LEFT_TOP
+            } else if tick == tick_count {
+                Align2::RIGHT_TOP
+            } else {
+                Align2::CENTER_TOP
+            };
+
+            painter.text(
+                egui::pos2(x, x_axis_y + 8.0),
+                align,
+                format_clock_time(timestamp),
+                FontId::monospace(11.0),
+                Color32::GRAY,
+            );
+        }
 
         for session_match in visible_matches {
             let start_offset = (session_match.created_at - first_started_at).max(0) as f32;
             let end_offset = (session_match.ended_at - first_started_at).max(0) as f32;
 
-            let x1 = timeline_left + timeline_width * (start_offset / total_duration);
-            let x2 = timeline_left + timeline_width * (end_offset / total_duration);
+            let x1 = chart_left + chart_width * (start_offset / total_duration);
+            let x2 = chart_left + chart_width * (end_offset / total_duration);
 
             let min_width = 3.0;
             let bar_right = x2.max(x1 + min_width);
 
             let color = match session_match.won {
-                Some(true) => Color32::from_rgb(80, 180, 110),
-                Some(false) => Color32::from_rgb(210, 80, 80),
-                None => Color32::from_rgb(130, 130, 130),
+                Some(true) => GREEN,
+                Some(false) => RED,
+                None => GREY,
             };
 
             let bar_rect = egui::Rect::from_min_max(
-                egui::pos2(x1, timeline_y - bar_height / 2.0),
-                egui::pos2(bar_right, timeline_y + bar_height / 2.0),
+                egui::pos2(x1, bar_y - bar_height / 2.0),
+                egui::pos2(bar_right, bar_y + bar_height / 2.0),
             );
 
             painter.rect_filled(bar_rect, 3.0, color);
+
+            let marker = match session_match.mvp_type {
+                MVPType::MVP => Some("MVP"),
+                MVPType::ACE => Some("ACE"),
+                MVPType::Nothing => None,
+            };
+
+            if let Some(marker) = marker {
+                painter.text(
+                    bar_rect.center(),
+                    Align2::CENTER_CENTER,
+                    marker,
+                    FontId::monospace(10.0),
+                    Color32::WHITE,
+                );
+            }
+
+            let duration = (session_match.ended_at - session_match.created_at).max(0);
+            let duration_label = format_duration(duration);
+
+            let duration_center_x = (x1 + bar_right) / 2.0;
+
+            painter.text(
+                egui::pos2(duration_center_x, duration_y),
+                Align2::CENTER_CENTER,
+                duration_label,
+                FontId::monospace(10.0),
+                Color32::GRAY,
+            );
         }
 
         ui.horizontal(|ui| {
-            timeline_legend(ui, Color32::from_rgb(80, 180, 110), "Won");
-            timeline_legend(ui, Color32::from_rgb(210, 80, 80), "Lost");
-            timeline_legend(ui, Color32::from_rgb(130, 130, 130), "Unknown");
+            timeline_legend(ui, GREEN, "Won");
+            timeline_legend(ui, RED, "Lost");
+            timeline_legend(ui, GREY, "Unknown");
         });
     }
-
     fn render_core_stats(
         &self,
         ui: &mut egui::Ui,
@@ -563,16 +643,39 @@ fn timeline_legend(ui: &mut egui::Ui, color: Color32, label: &str) {
     ui.add_space(8.0);
 }
 
-fn format_time_offset(seconds: i64) -> String {
-    let seconds = seconds.max(0);
-    let minutes = seconds / 60;
-    let remaining_seconds = seconds % 60;
+fn nice_tick_count(width: f32) -> i32 {
+    if width < 360.0 {
+        3
+    } else if width < 600.0 {
+        4
+    } else if width < 900.0 {
+        6
+    } else {
+        8
+    }
+}
+
+fn format_clock_time(timestamp_millis: i64) -> String {
+    let Some(date_time_utc) = DateTime::<Utc>::from_timestamp_millis(timestamp_millis) else {
+        return "--:--".to_string();
+    };
+
+    date_time_utc
+        .with_timezone(&Local)
+        .format("%H:%M")
+        .to_string()
+}
+
+fn format_duration(duration_millis: i64) -> String {
+    let total_seconds = duration_millis.max(0) / 1000;
+    let minutes = total_seconds / 60;
+    let seconds = total_seconds % 60;
 
     if minutes >= 60 {
         let hours = minutes / 60;
         let remaining_minutes = minutes % 60;
         format!("{hours}h {remaining_minutes}m")
     } else {
-        format!("{minutes}:{remaining_seconds:02}")
+        format!("{minutes}:{seconds:02}")
     }
 }
