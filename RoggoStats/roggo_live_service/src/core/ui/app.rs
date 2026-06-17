@@ -11,7 +11,7 @@ use crate::core::{
 };
 
 const COMPATIBLE_AGENT_VERSION: &str = "0.4.0";
-const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.3.0/RoggoAgentSetup_0.3.0.exe";
+const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.4.0/RoggoAgentSetup_0.4.0.exe";
 const PATCH_NOTES: &'static str = "
     PATCH NOTES:
         You can now click on usernames to get to their tracker network profile.
