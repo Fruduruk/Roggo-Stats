@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::core::{
     contract::{DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedTeamDto},
+    links::to_tracker_network_link,
     time::format_ms_min_seconds,
     ui::tasks,
 };
@@ -175,7 +176,14 @@ fn render_number_leaderboard<F>(
 
                     for (index, (entry, value)) in entries.iter().enumerate() {
                         ui.label(format!("{}", index + 1));
-                        ui.label(&entry.player.display_name);
+                        if let Some(link) = to_tracker_network_link(
+                            &entry.player.primary_id,
+                            &entry.player.username,
+                        ) {
+                            ui.hyperlink_to(&entry.player.display_name, link);
+                        } else {
+                            ui.label(&entry.player.display_name);
+                        }
                         ui.label(&entry.team.name);
                         ui.strong(value.to_string());
                         ui.end_row();

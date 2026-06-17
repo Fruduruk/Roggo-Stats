@@ -95,6 +95,7 @@ pub struct DetailedPlayerStatsDto {
 pub struct DetailedPlayerDto {
     pub username: String,
     pub display_name: String,
+    pub primary_id: String,
     pub score: i64,
     pub goals: i64,
     pub shots: i64,
