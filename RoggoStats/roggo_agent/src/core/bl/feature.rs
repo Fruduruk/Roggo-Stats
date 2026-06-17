@@ -366,9 +366,8 @@ fn convert_to_detailed_team(
     let players: Vec<DetailedPlayerDto> = players
         .into_iter()
         .map(|p| {
-            let username = repo
-                .get_global_player_by_id(p.global_player_id)?
-                .last_username;
+            let global_player = repo
+                .get_global_player_by_id(p.global_player_id)?;
 
             let stats = match p.stats {
                 Some(stats) => Some(DetailedPlayerStatsDto {
@@ -383,8 +382,9 @@ fn convert_to_detailed_team(
             };
 
             Ok(DetailedPlayerDto {
-                username,
+                username: global_player.last_username,
                 display_name: p.display_name,
+                primary_id: global_player.primary_id,
                 score: p.score,
                 goals: p.goals,
                 shots: p.shots,

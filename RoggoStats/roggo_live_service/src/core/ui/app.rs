@@ -10,8 +10,12 @@ use crate::core::{
     ui::{match_overview_ui::MatchOverviewUi, tasks},
 };
 
-const COMPATIBLE_AGENT_VERSION: &str = "0.3.0";
+const COMPATIBLE_AGENT_VERSION: &str = "0.4.0";
 const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.3.0/RoggoAgentSetup_0.3.0.exe";
+const PATCH_NOTES: &'static str = "
+    PATCH NOTES:
+        You can now click on usernames to get to their tracker network profile.
+";
 
 #[derive(Default)]
 pub struct Content {
@@ -101,6 +105,13 @@ impl eframe::App for RoggoApp {
                             ));
 
                             ui.hyperlink_to(DOWNLOAD_URL, DOWNLOAD_URL);
+                            ui.separator();
+
+                            ui.label(PATCH_NOTES);
+                            egui_extras::install_image_loaders(&ui.ctx());
+                            egui::Frame::popup(ui.style()).show(ui, |ui| {
+                                ui.image(egui::include_image!("../../../patch_0.4.0.png"));
+                            });
                         });
                     });
             }

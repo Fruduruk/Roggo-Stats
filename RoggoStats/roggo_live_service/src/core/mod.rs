@@ -4,6 +4,7 @@ pub mod api;
 pub mod ui;
 pub mod contract;
 pub mod time;
+pub mod links;
 
 #[derive(thiserror::Error,Debug)]
 pub enum Error {
