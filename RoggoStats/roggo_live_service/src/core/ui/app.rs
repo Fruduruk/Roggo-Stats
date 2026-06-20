@@ -10,7 +10,7 @@ use crate::core::{
     ui::{match_overview_ui::MatchOverviewUi, tasks},
 };
 
-const COMPATIBLE_AGENT_VERSION: &str = "0.4.0";
+const COMPATIBLE_AGENT_VERSION: &str = "0.5.0";
 const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.4.0/RoggoAgentSetup_0.4.0.exe";
 const PATCH_NOTES: &'static str = "
     PATCH NOTES:

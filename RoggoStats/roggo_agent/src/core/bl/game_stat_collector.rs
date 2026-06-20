@@ -121,7 +121,6 @@ impl GameStatCollector {
             Event::CountdownBegin(_) => {
                 self.state.count_down = true;
                 self.state.goal_scored = false;
-                tracing::debug!("Countdown begins: {}", crate::core::debug::time::format_ms_time(timestamp));
             }
             Event::CrossbarHit(crossbar_hit) => self.push_crossbar_hit(crossbar_hit),
             Event::GoalScored(goal_scored) => self.push_goal_scored(goal_scored),
@@ -131,7 +130,6 @@ impl GameStatCollector {
             }
             Event::RoundStarted(_) => {
                 self.state.round_started_once = true;
-                tracing::debug!("Round started: {}", crate::core::debug::time::format_ms_time(timestamp));
             },
             Event::StatfeedEvent(statfeed_event) => self.push_stat_feed_event(statfeed_event),
             _ => return,

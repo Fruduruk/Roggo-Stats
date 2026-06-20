@@ -65,7 +65,11 @@ impl SessionUi {
             });
     }
 
-    fn render_match_timeline(&self, ui: &mut egui::Ui, session: &DetailedSessionDto) -> Option<(Uuid, bool)>{
+    fn render_match_timeline(
+        &self,
+        ui: &mut egui::Ui,
+        session: &DetailedSessionDto,
+    ) -> Option<(Uuid, bool)> {
         ui.heading("Timeline");
 
         let session_matches = &session.session_matches;
@@ -194,8 +198,7 @@ impl SessionUi {
 
             let color = if session_match.hidden {
                 color.gamma_multiply(0.5)
-            }
-            else {
+            } else {
                 color
             };
 
@@ -266,7 +269,7 @@ impl SessionUi {
             );
 
             if response.clicked() {
-                result = Some((session_match.match_guid,session_match.hidden));
+                result = Some((session_match.match_guid, session_match.hidden));
             }
         }
 
@@ -337,12 +340,19 @@ impl SessionUi {
             return;
         }
 
-        self.core_chart(ui, "Score", &bars, |s| s.average_score, 1);
-        self.core_chart(ui, "Goals", &bars, |s| s.average_goals, 2);
-        self.core_chart(ui, "Shots", &bars, |s| s.average_shots, 2);
-        self.core_chart(ui, "Assists", &bars, |s| s.average_assists, 2);
-        self.core_chart(ui, "Saves", &bars, |s| s.average_saves, 2);
-        self.core_chart(ui, "Demos", &bars, |s| s.average_demos, 2);
+        self.core_chart(ui, "Score", &bars, |s| Some(s.average_score), 1);
+        self.core_chart(ui, "Goals", &bars, |s| Some(s.average_goals), 2);
+        self.core_chart(ui, "Shots", &bars, |s| Some(s.average_shots), 2);
+        self.core_chart(
+            ui,
+            "Shooting Percentage",
+            &bars,
+            |s| s.average_shooting_percentage,
+            2,
+        );
+        self.core_chart(ui, "Assists", &bars, |s| Some(s.average_assists), 2);
+        self.core_chart(ui, "Saves", &bars, |s| Some(s.average_saves), 2);
+        self.core_chart(ui, "Demos", &bars, |s| Some(s.average_demos), 2);
     }
 
     fn core_chart(
@@ -350,7 +360,7 @@ impl SessionUi {
         ui: &mut egui::Ui,
         title: &str,
         bars: &[CoreBarValue<'_>],
-        value_selector: fn(&DetailedAverageCoreStatsDto) -> f64,
+        value_selector: fn(&DetailedAverageCoreStatsDto) -> Option<f64>,
         decimals: usize,
     ) {
         ui.add_space(10.0);
@@ -358,7 +368,7 @@ impl SessionUi {
 
         let raw_max_value = bars
             .iter()
-            .map(|bar| value_selector(bar.stats))
+            .filter_map(|bar| value_selector(bar.stats))
             .fold(0.0_f64, f64::max);
 
         let max_value = if raw_max_value <= 0.0 {
@@ -433,7 +443,10 @@ impl SessionUi {
         let bar_width = slot_width * 0.55;
 
         for (index, bar) in bars.iter().enumerate() {
-            let value = value_selector(bar.stats);
+            let Some(value) = value_selector(bar.stats)
+            else {
+                continue;
+            };
             let center_x = chart_left + slot_width * (index as f32 + 0.5);
             let normalized = (value / max_value).clamp(0.0, 1.0) as f32;
             let bar_height = chart_height * normalized;

@@ -31,7 +31,12 @@ enemy_teams as (
 
 enemy_players as (
     select
-        p.*
+        p.*,
+        case
+            when p.shots = 0 then null
+            when (p.goals * 1.0 / p.shots) > 1.0 then 1.0
+            else (p.goals * 1.0 / p.shots)
+        end as shooting_percentage
     from enemy_teams et
     join players p
         on p.team_id = et.id
@@ -42,6 +47,7 @@ aggregated as (
         avg(ep.score) as average_score,
         avg(ep.goals) as average_goals,
         avg(ep.shots) as average_shots,
+        avg(ep.shooting_percentage) as average_shooting_percentage,
         avg(ep.assists) as average_assists,
         avg(ep.saves) as average_saves,
         avg(ep.demos) as average_demos
