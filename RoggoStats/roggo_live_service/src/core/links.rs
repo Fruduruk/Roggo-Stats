@@ -1,9 +1,3 @@
-
-//https://rocketleague.tracker.network/rocket-league/profile/psn/MaNiAc_tino/overview
-//https://rocketleague.tracker.network/rocket-league/profile/steam/76561198257624518/overview
-//https://rocketleague.tracker.network/rocket-league/profile/epic/FriedChicken_OIL/overview
-//https://rocketleague.tracker.network/rocket-league/profile/xbl/MiniDyer99/overview
-
 pub fn to_tracker_network_link(primary_id: &str, username: &str) -> Option<String> {
     let parts: Vec<_> = primary_id.split("|").collect();
     let platform = parts[0];

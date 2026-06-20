@@ -19,12 +19,12 @@ pub struct Content {
     pub sessions: Option<Vec<SimpleSessionDto>>,
 }
 
-#[derive(Default)]
 pub struct MatchOverviewUi {
     match_ui: MatchUi,
     session_ui: SessionUi,
     view_mode: ViewMode,
     content: Arc<Mutex<Content>>,
+    full_reload_requested: Arc<Mutex<bool>>,
 }
 
 #[derive(Default, PartialEq, Eq)]
@@ -41,6 +41,16 @@ enum NavBarMatchType {
 }
 
 impl MatchOverviewUi {
+    pub fn new_with_single_reload_arc(arc: Arc<Mutex<bool>>) -> Self {
+        Self {
+            match_ui: MatchUi::new_with_single_reload_arc(arc.clone()),
+            session_ui: SessionUi::new_with_single_reload_arc(arc.clone()),
+            view_mode: Default::default(),
+            content: Default::default(),
+            full_reload_requested: arc,
+        }
+    }
+
     pub fn ui(&mut self, ui: &mut eframe::egui::Ui, player_name: &String) {
         egui::Panel::left("match_list")
             .resizable(false)

@@ -18,12 +18,19 @@ pub struct Content {
     pub detailed_session: Option<DetailedSessionDto>,
 }
 
-#[derive(Default)]
 pub struct SessionUi {
     content: Arc<Mutex<Content>>,
+    full_reload_requested: Arc<Mutex<bool>>,
 }
 
 impl SessionUi {
+    pub fn new_with_single_reload_arc(arc: Arc<Mutex<bool>>) -> Self {
+        Self {
+            content: Default::default(),
+            full_reload_requested: arc,
+        }
+    }
+
     pub fn reload(&self, context: Context, match_guids: Vec<Uuid>) {
         tasks::load_detailed_session(context, self.content.clone(), match_guids.clone());
     }
@@ -49,7 +56,12 @@ impl SessionUi {
 
                 let result = self.render_match_timeline(ui, session);
                 if let Some((match_guid, hidden)) = result {
-                    tasks::toggle_hide_match(ui.ctx().clone(), match_guid, !hidden);
+                    tasks::toggle_hide_match(
+                        ui.ctx().clone(),
+                        match_guid,
+                        !hidden,
+                        self.full_reload_requested.clone(),
+                    );
                 }
 
                 ui.add_space(18.0);
@@ -196,11 +208,7 @@ impl SessionUi {
                 None => GREY,
             };
 
-            let color = if session_match.hidden {
-                color.gamma_multiply(0.5)
-            } else {
-                color
-            };
+            let color = if session_match.hidden { GREY } else { color };
 
             let bar_rect = egui::Rect::from_min_max(
                 egui::pos2(x1, bar_y - bar_height / 2.0),
@@ -217,7 +225,7 @@ impl SessionUi {
                 )
                 .on_hover_cursor(egui::CursorIcon::PointingHand)
                 .on_hover_text(format!(
-                    "{} · {}",
+                    "at {} with duration {}",
                     format_clock_time(session_match.created_at),
                     format_duration(session_match.ended_at - session_match.created_at),
                 ));
@@ -276,7 +284,7 @@ impl SessionUi {
         ui.horizontal(|ui| {
             timeline_legend(ui, GREEN, "Won");
             timeline_legend(ui, RED, "Lost");
-            timeline_legend(ui, GREY, "Unknown");
+            timeline_legend(ui, GREY, "Hidden");
         });
 
         result
@@ -443,8 +451,7 @@ impl SessionUi {
         let bar_width = slot_width * 0.55;
 
         for (index, bar) in bars.iter().enumerate() {
-            let Some(value) = value_selector(bar.stats)
-            else {
+            let Some(value) = value_selector(bar.stats) else {
                 continue;
             };
             let center_x = chart_left + slot_width * (index as f32 + 0.5);
@@ -563,12 +570,14 @@ impl SessionUi {
             .map(|p| (p.label.as_str(), value_selector(p.stats), p.color))
             .collect();
 
-        if let Some(team_average) = team_average {
-            bars.push((
-                team_average.label.as_str(),
-                value_selector(team_average.stats),
-                team_average.color,
-            ));
+        if players.len() == 1 {
+            if let Some(team_average) = team_average {
+                bars.push((
+                    team_average.label.as_str(),
+                    value_selector(team_average.stats),
+                    team_average.color,
+                ));
+            }
         }
 
         if bars.is_empty() {

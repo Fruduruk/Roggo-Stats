@@ -21,11 +21,18 @@ pub struct Content {
     pub detailed_match: Option<DetailedMatchDto>,
 }
 
-#[derive(Default)]
 pub struct MatchUi {
     content: Arc<Mutex<Content>>,
+    full_reload_requested: Arc<Mutex<bool>>,
 }
 impl MatchUi {
+    pub fn new_with_single_reload_arc(arc: Arc<Mutex<bool>>) -> Self {
+        Self {
+            content: Default::default(),
+            full_reload_requested: arc,
+        }
+    }
+
     pub fn reload(&self, context: Context, match_guid: Uuid) {
         tasks::load_detailed_match_by_id(context, self.content.clone(), match_guid);
     }
@@ -112,6 +119,7 @@ impl MatchUi {
                         ui.ctx().clone(),
                         detailed_match.match_guid,
                         !detailed_match.hidden,
+                        self.full_reload_requested.clone()
                     );
                     self.reload(ui.ctx().clone(), detailed_match.match_guid);
                 }
