@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use tokio::sync::watch;
 
 use tray_icon::{
@@ -22,8 +24,8 @@ const WEB_UI_URL: &str = "https://roggo.frudd.dev";
 pub fn run() {
     let _log_guard = init_logging();
 
-    let instance =
-        single_instance::SingleInstance::new("roggo-stats-agent").expect("Failed to create single instance lock");
+    let instance = single_instance::SingleInstance::new("roggo-stats-agent")
+        .expect("Failed to create single instance lock");
 
     if !instance.is_single() {
         tracing::info!("Roggo Stats Agent is already running. Exiting.");
@@ -60,7 +62,8 @@ enum UserEvent {
 
 struct TrayApp {
     tray_icon: Option<TrayIcon>,
-    open_item: Option<MenuItem>,
+    open_web_item: Option<MenuItem>,
+    open_config_file_item: Option<MenuItem>,
     quit_item: Option<MenuItem>,
     shutdown_tx: watch::Sender<bool>,
 }
@@ -78,7 +81,8 @@ fn run_tray(shutdown_tx: watch::Sender<bool>) {
 
     let mut app = TrayApp {
         tray_icon: None,
-        open_item: None,
+        open_web_item: None,
+        open_config_file_item: None,
         quit_item: None,
         shutdown_tx,
     };
@@ -92,12 +96,15 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             return;
         }
 
-        let open_item = MenuItem::new("Open Web UI", true, None);
+        let open_web_item = MenuItem::new("Open Web UI (roggo.frudd.dev)", true, None);
+        let open_config_file = MenuItem::new("Open Rocket League API Config File", true, None);
         let exit_item = MenuItem::new("Exit", true, None);
 
         let menu = Menu::new();
-        menu.append(&open_item)
+        menu.append(&open_web_item)
             .expect("Could not append open web ui menu item");
+        menu.append(&open_config_file)
+            .expect("Could not append open config file menu item");
         menu.append(&exit_item)
             .expect("Could not append exit menu item");
 
@@ -108,8 +115,9 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             .build()
             .expect("Could not create tray icon");
 
-        self.open_item = Some(open_item);
+        self.open_web_item = Some(open_web_item);
         self.quit_item = Some(exit_item);
+        self.open_config_file_item = Some(open_config_file);
         self.tray_icon = Some(tray_icon);
     }
 
@@ -118,9 +126,19 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             UserEvent::Menu(event) => {
                 let id = event.id();
 
-                if let Some(open_item) = &self.open_item {
+                if let Some(open_item) = &self.open_web_item {
                     if id == open_item.id() {
                         let _ = open::that(WEB_UI_URL);
+                    }
+                }
+
+                if let Some(settings_item) = &self.open_config_file_item {
+                    if id == settings_item.id() {
+                        if let Some(documents_dir) = dirs::document_dir() {
+                            let config_path = documents_dir.join("My Games\\Rocket League\\TAGame\\Config\\TAStatsAPI.ini");
+                            tracing::debug!("{:#?}",config_path);
+                            _ = Command::new("notepad").arg(config_path).spawn();
+                        }
                     }
                 }
 
