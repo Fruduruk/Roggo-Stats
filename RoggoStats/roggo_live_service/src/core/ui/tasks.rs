@@ -2,8 +2,8 @@ use eframe::egui::Context;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
+use crate::core::Error;
 use crate::core::ui::{app, match_overview_ui, match_ui, session_ui};
-use crate::core::{Error};
 
 use crate::core::api;
 
@@ -16,14 +16,6 @@ pub fn load_version(context: Context, content: Arc<Mutex<app::Content>>) {
                 content.agent_version = Some(version);
             }
         }
-        context.request_repaint();
-    });
-}
-
-pub fn toggle_hide_match(context: Context, match_guid: Uuid, hidden: bool) {
-    wasm_bindgen_futures::spawn_local(async move {
-        _ = api::hide_match(match_guid, hidden).await;
-
         context.request_repaint();
     });
 }
@@ -63,7 +55,11 @@ pub fn load_matches(context: Context, content: Arc<Mutex<match_overview_ui::Cont
     });
 }
 
-pub fn load_sessions(context: Context, content: Arc<Mutex<match_overview_ui::Content>>,pause_ms: i64) {
+pub fn load_sessions(
+    context: Context,
+    content: Arc<Mutex<match_overview_ui::Content>>,
+    pause_ms: i64,
+) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_sessions(pause_ms).await;
 
@@ -97,7 +93,7 @@ pub fn load_detailed_match_by_id(
 pub fn load_detailed_session(
     context: Context,
     content: Arc<Mutex<session_ui::Content>>,
-    match_guids: Vec<Uuid>
+    match_guids: Vec<Uuid>,
 ) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_session(match_guids).await;
@@ -106,6 +102,22 @@ pub fn load_detailed_session(
             if let Ok(detailed_session_dto) = result {
                 content.detailed_session = Some(detailed_session_dto)
             }
+        }
+        context.request_repaint();
+    });
+}
+
+pub fn toggle_hide_match(
+    context: Context,
+    match_guid: Uuid,
+    hidden: bool,
+    full_reload_requested: Arc<Mutex<bool>>,
+) {
+    wasm_bindgen_futures::spawn_local(async move {
+        _ = api::hide_match(match_guid, hidden).await;
+
+        if let Ok(mut reload) = full_reload_requested.lock() {
+            *reload = true;
         }
         context.request_repaint();
     });

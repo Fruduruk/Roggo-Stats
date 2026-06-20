@@ -24,38 +24,52 @@ pub struct Content {
     pub agent_version: Option<String>,
 }
 
-#[derive(Default)]
 pub struct RoggoApp {
     last_reload: f64,
     match_overview_ui: MatchOverviewUi,
     content: Arc<Mutex<Content>>,
+    full_reload_requested: Arc<Mutex<bool>>,
 }
 
 impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_pixels_per_point(2.0);
-        let app = Self::default();
+        let app = RoggoApp::new_with_single_reload_arc();
         tasks::load_main_character(cc.egui_ctx.clone(), app.content.clone());
         app
     }
+
+    pub fn new_with_single_reload_arc() -> Self {
+        let arc: Arc<Mutex<bool>> = Default::default();
+        Self {
+            last_reload: 0.0,
+            match_overview_ui: MatchOverviewUi::new_with_single_reload_arc(arc.clone()),
+            content: Default::default(),
+            full_reload_requested: arc,
+        }
+    }
 }
+
 
 impl eframe::App for RoggoApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         ui.ctx().request_repaint_after(Duration::from_secs(1));
 
         let now = ui.ctx().input(|i| i.time);
-        if self.last_reload + 1.0 < now {
-            if let Ok(content) = self.content.lock() {
-                if content.agent_version.is_none() {
-                    tasks::load_version(ui.ctx().clone(), self.content.clone());
+        if let Ok(mut full_reload_requested) = self.full_reload_requested.lock() {
+            if self.last_reload + 1.0 < now || *full_reload_requested {
+                if let Ok(content) = self.content.lock() {
+                    if content.agent_version.is_none() {
+                        tasks::load_version(ui.ctx().clone(), self.content.clone());
+                    }
+                    if content.player_name.is_none() {
+                        tasks::load_main_character(ui.ctx().clone(), self.content.clone());
+                    }
+                    self.match_overview_ui.reload(ui.ctx().clone());
                 }
-                if content.player_name.is_none() {
-                    tasks::load_main_character(ui.ctx().clone(), self.content.clone());
-                }
-                self.match_overview_ui.reload(ui.ctx().clone());
+                self.last_reload = now;
+                *full_reload_requested = false;
             }
-            self.last_reload = now;
         }
 
         egui::Panel::top("header").show_inside(ui, |ui| {
