@@ -153,6 +153,11 @@ impl Repository {
                 p.score,
                 p.goals,
                 p.shots,
+                case
+                    when p.shots = 0 then null
+                    when (p.goals * 1.0 / p.shots) > 1.0 then 1.0
+                    else (p.goals * 1.0 / p.shots)
+                end as shooting_percentage,
                 p.assists,
                 p.saves,
                 p.demos,
@@ -193,6 +198,7 @@ impl Repository {
                 score: row.get("score")?,
                 goals: row.get("goals")?,
                 shots: row.get("shots")?,
+                shooting_percentage: row.get("shooting_percentage")?,
                 assists: row.get("assists")?,
                 saves: row.get("saves")?,
                 demos: row.get("demos")?,
@@ -290,6 +296,7 @@ impl Repository {
                     average_score: row.get("average_score")?,
                     average_goals: row.get("average_goals")?,
                     average_shots: row.get("average_shots")?,
+                    average_shooting_percentage: row.get("average_shooting_percentage")?,
                     average_assists: row.get("average_assists")?,
                     average_saves: row.get("average_saves")?,
                     average_demos: row.get("average_demos")?,
@@ -342,6 +349,7 @@ impl Repository {
                 average_score: row.get("average_score")?,
                 average_goals: row.get("average_goals")?,
                 average_shots: row.get("average_shots")?,
+                average_shooting_percentage: row.get("average_shooting_percentage")?,
                 average_assists: row.get("average_assists")?,
                 average_saves: row.get("average_saves")?,
                 average_demos: row.get("average_demos")?,
@@ -385,6 +393,7 @@ impl Repository {
                 average_score: row.get("average_score")?,
                 average_goals: row.get("average_goals")?,
                 average_shots: row.get("average_shots")?,
+                average_shooting_percentage: row.get("average_shooting_percentage")?,
                 average_assists: row.get("average_assists")?,
                 average_saves: row.get("average_saves")?,
                 average_demos: row.get("average_demos")?,

@@ -21,6 +21,11 @@ own_teams as (
 team_players as (
     select
         p.*,
+        case
+            when p.shots = 0 then null
+            when (p.goals * 1.0 / p.shots) > 1.0 then 1.0
+            else (p.goals * 1.0 / p.shots)
+        end as shooting_percentage,
         ot.duration
     from own_teams ot
     join players p
@@ -44,6 +49,7 @@ aggregated as (
         avg(tp.score) as average_score,
         avg(tp.goals) as average_goals,
         avg(tp.shots) as average_shots,
+        avg(tp.shooting_percentage) as average_shooting_percentage,
         avg(tp.assists) as average_assists,
         avg(tp.saves) as average_saves,
         avg(tp.demos) as average_demos,
@@ -70,6 +76,7 @@ select
     a.average_score,
     a.average_goals,
     a.average_shots,
+    a.average_shooting_percentage,
     a.average_assists,
     a.average_saves,
     a.average_demos,

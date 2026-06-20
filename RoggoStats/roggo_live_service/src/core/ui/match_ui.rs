@@ -56,12 +56,13 @@ impl MatchUi {
 
             ui.heading("Classic Stats");
 
-            render_number_leaderboard(ui, "Score", &players, |p| p.score);
-            render_number_leaderboard(ui, "Goals", &players, |p| p.goals);
-            render_number_leaderboard(ui, "Shots", &players, |p| p.shots);
-            render_number_leaderboard(ui, "Assists", &players, |p| p.assists);
-            render_number_leaderboard(ui, "Saves", &players, |p| p.saves);
-            render_number_leaderboard(ui, "Demos", &players, |p| p.demos);
+            render_number_leaderboard(ui, "Score", &players, |p| Some(p.score as f64));
+            render_number_leaderboard(ui, "Goals", &players, |p| Some(p.goals as f64));
+            render_number_leaderboard(ui, "Shots", &players, |p| Some(p.shots as f64));
+            render_number_leaderboard(ui,  "Shooting Percentage", &players, |p| p.shooting_percentage);
+            render_number_leaderboard(ui, "Assists", &players, |p| Some(p.assists as f64));
+            render_number_leaderboard(ui, "Saves", &players, |p| Some(p.saves as f64));
+            render_number_leaderboard(ui, "Demos", &players, |p| Some(p.demos as f64));
 
             ui.add_space(16.0);
 
@@ -146,14 +147,22 @@ fn render_number_leaderboard<F>(
     players: &[LeaderboardPlayer<'_>],
     value_fn: F,
 ) where
-    F: Fn(&DetailedPlayerDto) -> i64,
+    F: Fn(&DetailedPlayerDto) -> Option<f64>,
 {
     let mut entries: Vec<_> = players
         .iter()
-        .map(|entry| (*entry, value_fn(entry.player)))
+        .filter_map(|entry|
+            {
+                let value = value_fn(entry.player);
+                if let Some(value) = value {
+                    Some((*entry, value))
+                }else {
+                    None
+                }
+            })
         .collect();
 
-    entries.sort_by(|a, b| b.1.cmp(&a.1));
+    entries.sort_by(|a, b| b.1.total_cmp(&a.1));
 
     egui::Frame::group(ui.style())
         .inner_margin(egui::Margin::same(8))

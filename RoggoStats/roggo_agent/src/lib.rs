@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 const APP_DIR_NAME: &str = "RoggoStats";
 const DB_FILE_NAME: &str = "roggo-agent.db";
-pub const AGENT_VERSION: &str = "0.4.0";
+pub const AGENT_VERSION: &str = "0.5.0";
 
 
 pub fn get_app_data_directory() -> PathBuf {
