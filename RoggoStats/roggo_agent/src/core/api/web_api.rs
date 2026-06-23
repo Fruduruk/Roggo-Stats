@@ -18,6 +18,7 @@ use crate::core::{
         },
     },
     bl::feature,
+    windows_api,
 };
 
 const WEB_SOCKET_ADDR: &str = "127.0.0.1:49124";
@@ -39,7 +40,13 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
 
     let listener = tokio::net::TcpListener::bind(WEB_SOCKET_ADDR)
         .await
-        .unwrap();
+        .map_err(|err| Error::ConnectionError(err.to_string()))?;
+
+    // The agent as a tray can start roggo-settings.exe, which changes the config and this restarts the agent.
+    // But the agent cannot restart, because the socket is inherited by roggo-settings as a child process, even though it has nothing to do with the web api.
+    // This function tells windows, that this socket cannot be inherited.
+    windows_api::make_socket_not_inheritable(&listener)
+        .map_err(|err| Error::ConnectionError(err.to_string()))?;
 
     tracing::info!("Web socket running on http://{}/matches", WEB_SOCKET_ADDR);
 

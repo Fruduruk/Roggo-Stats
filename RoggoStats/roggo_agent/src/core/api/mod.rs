@@ -14,6 +14,8 @@ pub enum Error {
     InternalError(#[from] crate::core::bl::Error),
     #[error("Axum Error")]
     AxumError { source: std::io::Error },
+    #[error("Connection Error: {0}")]
+    ConnectionError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -26,6 +28,7 @@ impl IntoResponse for Error {
             Error::UserError(_) => http::StatusCode::BAD_REQUEST,
             Error::InternalError(_error) => http::StatusCode::INTERNAL_SERVER_ERROR,
             Error::AxumError { source: _ } => http::StatusCode::INTERNAL_SERVER_ERROR,
+            Error::ConnectionError(_) => http::StatusCode::INTERNAL_SERVER_ERROR
         };
 
         let body = Json(get_agent_error_dto(self));
@@ -39,6 +42,7 @@ fn get_agent_error_dto(value: Error) -> AgentErrorDto {
         Error::InternalError(error) => get_error_code(error),
         Error::AxumError { source: _ } => AgentErrorCode::InternalError,
         Error::UserError(_) => AgentErrorCode::UserError,
+        Error::ConnectionError(_) => AgentErrorCode::InternalError,
     };
 
     let message = get_error_message(&value);
@@ -55,6 +59,7 @@ fn get_error_message(value: &Error) -> String {
         Error::InternalError(error) => error.to_string(),
         Error::AxumError { source } => source.to_string(),
         Error::UserError(s) => s.to_string(),
+        Error::ConnectionError(_) => String::new(),
     }
 }
 
