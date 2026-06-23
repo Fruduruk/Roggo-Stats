@@ -5,14 +5,15 @@ use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, watch};
 
-const ROCKET_LEAGUE_TCP_ADDR: &str = "127.0.0.1:49123";
+const ROCKET_LEAGUE_TCP_ADDR: &str = "127.0.0.1";
 
 pub async fn read_rocket_league_api(
+    port: u16,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
 ) -> Result<()> {
     loop {
-        let mut rl_stream = match TcpStream::connect(ROCKET_LEAGUE_TCP_ADDR).await {
+        let mut rl_stream = match TcpStream::connect(format!("{ROCKET_LEAGUE_TCP_ADDR}:{port}")).await {
             Ok(stream) => stream,
             Err(_) => {
                 tokio::select! {

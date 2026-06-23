@@ -35,6 +35,7 @@ single-instance = "0.3.3"
 eframe = "0.34.3"
 toml = "1.1.2"
 egui = "0.34.3"
+notify = "8.2.0"
 
 
 [profile.dev]

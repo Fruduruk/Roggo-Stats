@@ -1,46 +1,32 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{fs, path::PathBuf};
+use std::fs;
 
 use eframe::egui;
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct AgentConfig {
-    enabled: bool,
-    api_url: String,
-}
-
-impl Default for AgentConfig {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            api_url: "https://roggo.frudd.dev".to_owned(),
-        }
-    }
-}
+use roggo_agent::{AgentConfig, get_config_file_path, load_config_or_default};
+const UNSAVED_NOTIFICATION: &str = "Not saved yet.";
 
 struct ConfigApp {
     config: AgentConfig,
-    config_path: PathBuf,
     status: String,
 }
 
 impl ConfigApp {
-    fn new() -> Self {
-        let config_path = config_path();
-        let config = load_config(&config_path);
+    fn new(cc: &eframe::CreationContext) -> Self {
+        cc.egui_ctx.set_pixels_per_point(1.5);
+
+        let config = load_config_or_default();
 
         Self {
             config,
-            config_path,
             status: String::new(),
         }
     }
 
     fn save(&mut self) {
-        let Some(parent) = self.config_path.parent() else {
-            self.status = "Invalid config path.".to_owned();
+        let config_path = get_config_file_path();
+        let Some(parent) = config_path.parent() else {
+            self.status = "Invalid config path.".into();
             return;
         };
 
@@ -57,36 +43,56 @@ impl ConfigApp {
             }
         };
 
-        match fs::write(&self.config_path, text) {
+        match fs::write(config_path, text) {
             Ok(_) => self.status = "Saved.".to_owned(),
             Err(err) => self.status = format!("Could not save config: {err}"),
         }
+    }
+
+    fn reset(&mut self) {
+        self.config = Default::default();
+        self.status = "Restored defaults. Not saved yet.".into();
     }
 }
 
 impl eframe::App for ConfigApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            ui.heading("Roggo Agent Settings");
+            ui.label("Web UI URL");
+            if ui.text_edit_singleline(&mut self.config.ui_url).changed() {
+                self.status = UNSAVED_NOTIFICATION.into();
+            }
+            ui.separator();
+            ui.label("Rocket League API Port");
+            if ui
+                .add(
+                    egui::DragValue::new(&mut self.config.rl_api_port)
+                        .range(1..=u16::MAX)
+                        .speed(1),
+                )
+                .changed()
+            {
+                self.status = UNSAVED_NOTIFICATION.into();
+            }
+            ui.separator();
+            if ui
+                .checkbox(
+                    &mut self.config.start_ui_when_rl_closes,
+                    "Start Web UI when Rocket League closes",
+                )
+                .changed()
+            {
+                self.status = UNSAVED_NOTIFICATION.into();
+            }
 
-            ui.add_space(8.0);
-
-            ui.checkbox(&mut self.config.enabled, "Enable agent");
-
-            ui.add_space(8.0);
-
-            ui.label("API URL");
-            ui.text_edit_singleline(&mut self.config.api_url);
-
-            ui.add_space(12.0);
-
+            ui.separator();
             ui.horizontal(|ui| {
                 if ui.button("Save").clicked() {
                     self.save();
                 }
 
-                if ui.button("Close").clicked() {
-                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+                if ui.button("Reset to default").clicked() {
+                    self.reset();
                 }
             });
 
@@ -102,28 +108,15 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Roggo Agent Settings")
-            .with_inner_size([360.0, 160.0])
-            .with_resizable(false),
+            .with_inner_size([500.0, 290.0])
+            .with_min_inner_size([500.0, 290.0])
+            .with_resizable(true),
         ..Default::default()
     };
 
     eframe::run_native(
         "Roggo Agent Settings",
         options,
-        Box::new(|_cc| Ok(Box::new(ConfigApp::new()))),
+        Box::new(|cc| Ok(Box::new(ConfigApp::new(cc)))),
     )
-}
-
-fn config_path() -> PathBuf {
-    dirs::config_dir()
-        .unwrap_or_else(|| std::env::current_dir().unwrap())
-        .join("RoggoStats")
-        .join("agent.toml")
-}
-
-fn load_config(path: &PathBuf) -> AgentConfig {
-    fs::read_to_string(path)
-        .ok()
-        .and_then(|text| toml::from_str(&text).ok())
-        .unwrap_or_default()
 }

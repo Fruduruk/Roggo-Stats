@@ -4,11 +4,10 @@ use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::task::JoinError;
 
+use crate::AgentConfig;
 use crate::core::api::web_api;
-use crate::core::db::Repository;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
-
 use crate::core::{Error, Result};
 
 enum FinishedTask {
@@ -17,37 +16,24 @@ enum FinishedTask {
     Web(std::result::Result<Result<()>, JoinError>),
 }
 
-pub async fn run_agent(
-    shutdown_otpion: Option<(watch::Sender<bool>, watch::Receiver<bool>)>,
+pub async fn run_agent_instance(
+    shutdown_tx: watch::Sender<bool>,
+    shutdown_rx: watch::Receiver<bool>,
+    config: AgentConfig,
     db_file_path: PathBuf,
 ) -> Result<()> {
-    tracing::info!("Roggo agent is running");
-
-    tracing::info!("Creating database if needed");
-    Repository::new(&db_file_path)?;
-
-    let (shutdown_tx, shutdown_rx) = match shutdown_otpion {
-        Some(watch) => watch,
-        None => watch::channel(false),
-    };
-
     let final_shutdown_tx = shutdown_tx.clone();
 
     let (tx, rx) = mpsc::channel::<(i64, String)>(1_000_000);
 
-    tokio::spawn(async move {
-        if tokio::signal::ctrl_c().await.is_ok() {
-            tracing::info!("Shutting down agent...");
-            let _ = shutdown_tx.send(true);
-        }
-    });
+    let mut send_handle = tokio::spawn(send_packets(config.rl_api_port, shutdown_rx.clone(), tx));
 
-    let mut send_handle = tokio::spawn(send_packets(shutdown_rx.clone(), tx));
     let mut receive_handle = tokio::spawn(receive_packets(
         shutdown_rx.clone(),
         rx,
         db_file_path.clone(),
     ));
+
     let mut web_handle = tokio::spawn(start_web_api(shutdown_rx.clone(), db_file_path));
 
     let finished_task = tokio::select! {
@@ -64,24 +50,24 @@ pub async fn run_agent(
         }
     };
 
-    final_shutdown_tx
-        .send(true)
-        .map_err(|err| Error::ShutdownError(err.to_string()))?;
+    let _ = final_shutdown_tx.send(true);
 
     let finished_first_result = match finished_task {
         FinishedTask::Sender(result) => {
-            _ = web_handle.await;
-            _ = receive_handle.await;
+            let _ = web_handle.await;
+            let _ = receive_handle.await;
             result
         }
+
         FinishedTask::Receiver(result) => {
-            _ = web_handle.await;
-            _ = send_handle.await;
+            let _ = web_handle.await;
+            let _ = send_handle.await;
             result
         }
+
         FinishedTask::Web(result) => {
-            _ = send_handle.await;
-            _ = receive_handle.await;
+            let _ = send_handle.await;
+            let _ = receive_handle.await;
             result
         }
     };
@@ -91,11 +77,14 @@ pub async fn run_agent(
 
 async fn start_web_api(shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) -> Result<()> {
     tracing::info!("Web API is running");
+
     web_api::run(shutdown_rx, db_file_path).await?;
+
     Ok(())
 }
 
 async fn send_packets(
+    port: u16,
     shutdown_rx: watch::Receiver<bool>,
     tx: mpsc::Sender<(i64, String)>,
 ) -> Result<()> {
@@ -107,8 +96,9 @@ async fn send_packets(
         )
         .await;
     } else {
-        read_rocket_league_api(tx, shutdown_rx.clone()).await?;
+        read_rocket_league_api(port, tx, shutdown_rx.clone()).await?;
     }
+
     Ok(())
 }
 
