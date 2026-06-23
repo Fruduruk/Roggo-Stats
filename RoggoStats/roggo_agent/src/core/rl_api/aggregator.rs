@@ -48,7 +48,6 @@ impl Aggregator {
                 log_stats(&stats);
                 log_errors(&errors);
                 let mut repository = Repository::connect(&self.db_file_path)?;
-                // let mut repository = Repository::new_in_memory()?;
 
                 if let Err(err) = repository.insert_game_stats(stats, errors) {
                     tracing::error!(error= %err, "Failed to save match stats");
@@ -98,19 +97,14 @@ fn log_stats(stats: &intermediate_models::GameStats) {
     tracing::info!(
         "Start: {} End: {} Duration: {} Had Overtime: {}",
         chrono::DateTime::from_timestamp_millis(stats.created_at_timestamp)
-            .unwrap()
+            .unwrap_or_default()
             .format("%d.%m.%Y %H:%M:%S"),
         chrono::DateTime::from_timestamp_millis(stats.ended_at_timestamp)
-            .unwrap()
+            .unwrap_or_default()
             .format("%d.%m.%Y %H:%M:%S"),
         chrono::DateTime::from_timestamp_millis(stats.duration)
-            .unwrap()
+            .unwrap_or_default()
             .format("%M:%S"),
         stats.had_overtime
     );
-
-    // tracing::debug!(
-    //     "Excluded timeline instants: {}",
-    //     stats.excluded_timeline_instants
-    // );
 }

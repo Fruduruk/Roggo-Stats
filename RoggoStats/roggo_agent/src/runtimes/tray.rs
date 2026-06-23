@@ -36,10 +36,12 @@ pub fn run() {
     let agent_handle = run_agent_thread(shutdown_tx.clone(), shutdown_rx);
     run_tray(shutdown_tx);
     _ = agent_handle.join();
-    tracing::info!("Roggo Agent shut down gracefully.");
 }
 
-fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiver<bool>) -> JoinHandle<()> {
+fn run_agent_thread(
+    shutdown_tx: watch::Sender<bool>,
+    shutdown_rx: watch::Receiver<bool>,
+) -> JoinHandle<()> {
     std::thread::spawn(move || {
         let runtime = match tokio::runtime::Runtime::new() {
             Ok(runtime) => runtime,
@@ -53,8 +55,12 @@ fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiv
             if let Err(err) = run_agent(Some((shutdown_tx, shutdown_rx)), get_db_file_path()).await
             {
                 tracing::error!(error = %err, "Roggo agent failed");
+                std::process::exit(-1);
             }
         });
+
+        tracing::info!("Roggo Agent shut down gracefully.");
+        std::process::exit(0);
     })
 }
 
@@ -64,8 +70,9 @@ enum UserEvent {
 
 struct TrayApp {
     tray_icon: Option<TrayIcon>,
-    open_web_item: Option<MenuItem>,
-    open_config_file_item: Option<MenuItem>,
+    web_item: Option<MenuItem>,
+    config_file_item: Option<MenuItem>,
+    settings_item: Option<MenuItem>,
     quit_item: Option<MenuItem>,
     shutdown_tx: watch::Sender<bool>,
 }
@@ -83,8 +90,9 @@ fn run_tray(shutdown_tx: watch::Sender<bool>) {
 
     let mut app = TrayApp {
         tray_icon: None,
-        open_web_item: None,
-        open_config_file_item: None,
+        web_item: None,
+        config_file_item: None,
+        settings_item: None,
         quit_item: None,
         shutdown_tx,
     };
@@ -98,15 +106,18 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             return;
         }
 
-        let open_web_item = MenuItem::new("Web UI (roggo.frudd.dev)", true, None);
-        let open_config_file = MenuItem::new("Rocket League API Config File", true, None);
+        let web_item = MenuItem::new("Web UI (roggo.frudd.dev)", true, None);
+        let config_file_item = MenuItem::new("Rocket League API Config File", true, None);
+        let settings_item = MenuItem::new("Settings", true, None);
         let exit_item = MenuItem::new("Exit", true, None);
 
         let menu = Menu::new();
-        menu.append(&open_web_item)
-            .expect("Could not append open web ui menu item");
-        menu.append(&open_config_file)
-            .expect("Could not append open config file menu item");
+        menu.append(&web_item)
+            .expect("Could not append web ui menu item");
+        menu.append(&config_file_item)
+            .expect("Could not append config file menu item");
+        menu.append(&settings_item)
+            .expect("Could not append settings menu item");
         menu.append(&exit_item)
             .expect("Could not append exit menu item");
 
@@ -117,9 +128,10 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             .build()
             .expect("Could not create tray icon");
 
-        self.open_web_item = Some(open_web_item);
+        self.web_item = Some(web_item);
         self.quit_item = Some(exit_item);
-        self.open_config_file_item = Some(open_config_file);
+        self.config_file_item = Some(config_file_item);
+        self.settings_item = Some(settings_item);
         self.tray_icon = Some(tray_icon);
     }
 
@@ -128,18 +140,28 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             UserEvent::Menu(event) => {
                 let id = event.id();
 
-                if let Some(open_item) = &self.open_web_item {
+                if let Some(open_item) = &self.web_item {
                     if id == open_item.id() {
                         let _ = open::that(WEB_UI_URL);
                     }
                 }
 
-                if let Some(settings_item) = &self.open_config_file_item {
-                    if id == settings_item.id() {
+                if let Some(config_item) = &self.config_file_item {
+                    if id == config_item.id() {
                         if let Some(documents_dir) = dirs::document_dir() {
-                            let config_path = documents_dir.join("My Games\\Rocket League\\TAGame\\Config\\TAStatsAPI.ini");
-                            tracing::debug!("{:#?}",config_path);
+                            let config_path = documents_dir
+                                .join("My Games\\Rocket League\\TAGame\\Config\\TAStatsAPI.ini");
+                            tracing::debug!("{:#?}", config_path);
                             _ = Command::new("notepad").arg(config_path).spawn();
+                        }
+                    }
+                }
+
+                if let Some(settings_item) = &self.settings_item {
+                    if id == settings_item.id() {
+                        let result = Command::new("roggo-settings.exe").spawn();
+                        if let Err(err) = result {
+                            tracing::error!(error=%err, "Could not run roggo settings");
                         }
                     }
                 }

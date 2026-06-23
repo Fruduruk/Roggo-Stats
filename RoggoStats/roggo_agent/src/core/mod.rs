@@ -7,6 +7,7 @@ pub mod debug;
 pub mod logging;
 pub mod rl_api;
 pub mod agent_supervisor;
+pub mod windows_api;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
