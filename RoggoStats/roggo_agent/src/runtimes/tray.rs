@@ -71,7 +71,6 @@ enum UserEvent {
 struct TrayApp {
     tray_icon: Option<TrayIcon>,
     web_item: Option<MenuItem>,
-    config_file_item: Option<MenuItem>,
     settings_item: Option<MenuItem>,
     quit_item: Option<MenuItem>,
     shutdown_tx: watch::Sender<bool>,
@@ -91,7 +90,6 @@ fn run_tray(shutdown_tx: watch::Sender<bool>) {
     let mut app = TrayApp {
         tray_icon: None,
         web_item: None,
-        config_file_item: None,
         settings_item: None,
         quit_item: None,
         shutdown_tx,
@@ -107,15 +105,12 @@ impl ApplicationHandler<UserEvent> for TrayApp {
         }
 
         let web_item = MenuItem::new("Web UI (roggo.frudd.dev)", true, None);
-        let config_file_item = MenuItem::new("Rocket League API Config File", true, None);
         let settings_item = MenuItem::new("Settings", true, None);
         let exit_item = MenuItem::new("Exit", true, None);
 
         let menu = Menu::new();
         menu.append(&web_item)
             .expect("Could not append web ui menu item");
-        menu.append(&config_file_item)
-            .expect("Could not append config file menu item");
         menu.append(&settings_item)
             .expect("Could not append settings menu item");
         menu.append(&exit_item)
@@ -130,7 +125,6 @@ impl ApplicationHandler<UserEvent> for TrayApp {
 
         self.web_item = Some(web_item);
         self.quit_item = Some(exit_item);
-        self.config_file_item = Some(config_file_item);
         self.settings_item = Some(settings_item);
         self.tray_icon = Some(tray_icon);
     }
@@ -143,17 +137,6 @@ impl ApplicationHandler<UserEvent> for TrayApp {
                 if let Some(open_item) = &self.web_item {
                     if id == open_item.id() {
                         let _ = open::that(WEB_UI_URL);
-                    }
-                }
-
-                if let Some(config_item) = &self.config_file_item {
-                    if id == config_item.id() {
-                        if let Some(documents_dir) = dirs::document_dir() {
-                            let config_path = documents_dir
-                                .join("My Games\\Rocket League\\TAGame\\Config\\TAStatsAPI.ini");
-                            tracing::debug!("{:#?}", config_path);
-                            _ = Command::new("notepad").arg(config_path).spawn();
-                        }
                     }
                 }
 
