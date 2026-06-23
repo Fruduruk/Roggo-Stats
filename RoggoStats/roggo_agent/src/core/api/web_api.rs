@@ -48,7 +48,7 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
     windows_api::make_socket_not_inheritable(&listener)
         .map_err(|err| Error::ConnectionError(err.to_string()))?;
 
-    tracing::info!("Web socket running on http://{}/matches", WEB_SOCKET_ADDR);
+    tracing::info!("Web socket running on http://{}", WEB_SOCKET_ADDR);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(async move {
