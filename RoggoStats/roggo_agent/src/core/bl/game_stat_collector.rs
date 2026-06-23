@@ -81,26 +81,6 @@ impl GameStatCollector {
             }
         }
 
-        // for (player_id, snapshots) in player_stats_buffer {
-        //     let count = snapshots.len() as f64;
-        //     let average_speed = snapshots
-        //         .iter()
-        //         .map(|(_, snapshot)| snapshot.speed)
-        //         .sum::<f64>()
-        //         / count;
-        //     let average_boost = snapshots
-        //         .iter()
-        //         .map(|(_, snapshot)| snapshot.boost)
-        //         .sum::<f64>()
-        //         / count;
-        //     tracing::debug!(
-        //         "average stats for {}: speed {}, boost {}",
-        //         player_id,
-        //         average_speed,
-        //         average_boost
-        //     );
-        // }
-
         (stats, errors)
     }
 

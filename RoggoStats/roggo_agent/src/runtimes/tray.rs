@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{process::Command, thread::JoinHandle};
 
 use tokio::sync::watch;
 
@@ -15,7 +15,7 @@ use winit::{
 };
 
 use crate::{
-    core::{agent::run_agent, logging::init_logging},
+    core::{agent_supervisor::run_agent, logging::init_logging},
     get_db_file_path,
 };
 
@@ -33,11 +33,13 @@ pub fn run() {
     }
 
     let (shutdown_tx, shutdown_rx) = watch::channel(false);
-    run_agent_thread(shutdown_tx.clone(), shutdown_rx);
+    let agent_handle = run_agent_thread(shutdown_tx.clone(), shutdown_rx);
     run_tray(shutdown_tx);
+    _ = agent_handle.join();
+    tracing::info!("Roggo Agent shut down gracefully.");
 }
 
-fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiver<bool>) {
+fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiver<bool>) -> JoinHandle<()> {
     std::thread::spawn(move || {
         let runtime = match tokio::runtime::Runtime::new() {
             Ok(runtime) => runtime,
@@ -53,7 +55,7 @@ fn run_agent_thread(shutdown_tx: watch::Sender<bool>, shutdown_rx: watch::Receiv
                 tracing::error!(error = %err, "Roggo agent failed");
             }
         });
-    });
+    })
 }
 
 enum UserEvent {
@@ -96,8 +98,8 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             return;
         }
 
-        let open_web_item = MenuItem::new("Open Web UI (roggo.frudd.dev)", true, None);
-        let open_config_file = MenuItem::new("Open Rocket League API Config File", true, None);
+        let open_web_item = MenuItem::new("Web UI (roggo.frudd.dev)", true, None);
+        let open_config_file = MenuItem::new("Rocket League API Config File", true, None);
         let exit_item = MenuItem::new("Exit", true, None);
 
         let menu = Menu::new();
