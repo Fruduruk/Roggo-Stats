@@ -15,11 +15,9 @@ use winit::{
 };
 
 use crate::{
-    core::{agent_supervisor::run_agent, logging::init_logging},
-    get_db_file_path,
+    WEB_UI_URL, core::{agent_supervisor::run_agent, logging::init_logging}, get_db_file_path,
 };
 
-const WEB_UI_URL: &str = "https://roggo.frudd.dev";
 
 pub fn run() {
     let _log_guard = init_logging();

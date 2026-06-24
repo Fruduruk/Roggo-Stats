@@ -26,7 +26,7 @@ pub async fn run_agent_instance(
 
     let (tx, rx) = mpsc::channel::<(i64, String)>(1_000_000);
 
-    let mut send_handle = tokio::spawn(send_packets(config.rl_api_port, shutdown_rx.clone(), tx));
+    let mut send_handle = tokio::spawn(send_packets(config, shutdown_rx.clone(), tx));
 
     let mut receive_handle = tokio::spawn(receive_packets(
         shutdown_rx.clone(),
@@ -84,7 +84,7 @@ async fn start_web_api(shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf
 }
 
 async fn send_packets(
-    port: u16,
+    config: AgentConfig,
     shutdown_rx: watch::Receiver<bool>,
     tx: mpsc::Sender<(i64, String)>,
 ) -> Result<()> {
@@ -96,7 +96,7 @@ async fn send_packets(
         )
         .await;
     } else {
-        read_rocket_league_api(port, tx, shutdown_rx.clone()).await?;
+        read_rocket_league_api(config, tx, shutdown_rx.clone()).await?;
     }
 
     Ok(())

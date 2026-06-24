@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 const APP_DIR_NAME: &str = "RoggoStats";
 const DB_FILE_NAME: &str = "roggo-agent.db";
+const WEB_UI_URL: &str = "https://roggo.frudd.dev";
 
 pub const AGENT_VERSION: &str = "0.5.0";
 

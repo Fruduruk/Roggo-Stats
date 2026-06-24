@@ -341,7 +341,7 @@ fn get_rocket_league_api_config_path() -> Option<PathBuf> {
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("Roggo Agent")
+            .with_title("Roggo Agent Settings")
             .with_inner_size([1000.0, 490.0])
             .with_min_inner_size([1000.0, 490.0])
             .with_resizable(true)
