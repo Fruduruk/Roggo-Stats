@@ -4,11 +4,11 @@ use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::task::JoinError;
 
-use crate::AgentConfig;
 use crate::core::api::web_api;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
 use crate::core::{Error, Result};
+use crate::settings::models::AgentConfig;
 
 enum FinishedTask {
     Sender(std::result::Result<Result<()>, JoinError>),
