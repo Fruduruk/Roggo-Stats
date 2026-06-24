@@ -24,7 +24,6 @@ pub struct MatchOverviewUi {
     session_ui: SessionUi,
     view_mode: ViewMode,
     content: Arc<Mutex<Content>>,
-    full_reload_requested: Arc<Mutex<bool>>,
 }
 
 #[derive(Default, PartialEq, Eq)]
@@ -47,7 +46,6 @@ impl MatchOverviewUi {
             session_ui: SessionUi::new_with_single_reload_arc(arc.clone()),
             view_mode: Default::default(),
             content: Default::default(),
-            full_reload_requested: arc,
         }
     }
 
