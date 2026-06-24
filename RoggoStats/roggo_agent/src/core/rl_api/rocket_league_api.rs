@@ -1,6 +1,8 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use crate::WEB_UI_URL;
 use crate::core::rl_api::{Error, Result};
+use crate::settings::models::AgentConfig;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, watch};
@@ -8,25 +10,28 @@ use tokio::sync::{mpsc, watch};
 const ROCKET_LEAGUE_TCP_ADDR: &str = "127.0.0.1";
 
 pub async fn read_rocket_league_api(
-    port: u16,
+    config: AgentConfig,
     tx: mpsc::Sender<(i64, String)>,
     shutdown_rx: watch::Receiver<bool>,
 ) -> Result<()> {
     loop {
-        let mut rl_stream = match TcpStream::connect(format!("{ROCKET_LEAGUE_TCP_ADDR}:{port}")).await {
-            Ok(stream) => stream,
-            Err(_) => {
-                tokio::select! {
-                    _ = wait_for_shutdown(shutdown_rx.clone()) => {
-                        tracing::info!("Shutting down rocket league api listener...");
-                        return Ok(());
-                    }
+        let mut rl_stream =
+            match TcpStream::connect(format!("{ROCKET_LEAGUE_TCP_ADDR}:{}", config.rl_api_port))
+                .await
+            {
+                Ok(stream) => stream,
+                Err(_) => {
+                    tokio::select! {
+                        _ = wait_for_shutdown(shutdown_rx.clone()) => {
+                            tracing::info!("Shutting down rocket league api listener...");
+                            return Ok(());
+                        }
 
-                    _ = tokio::time::sleep(Duration::from_secs(10)) => {}
+                        _ = tokio::time::sleep(Duration::from_secs(10)) => {}
+                    }
+                    continue;
                 }
-                continue;
-            }
-        };
+            };
 
         tracing::info!("Connected with Rocket League API.");
 
@@ -40,6 +45,10 @@ pub async fn read_rocket_league_api(
                 match result {
                     Ok(()) => {
                         tracing::warn!("Rocket League API disconnected. Reconnecting...");
+                        if config.start_ui_when_rl_closes {
+                            let _ = open::that(WEB_UI_URL);
+                        }
+
                         continue;
                     }
 
