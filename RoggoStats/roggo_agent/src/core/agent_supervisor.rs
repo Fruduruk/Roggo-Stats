@@ -7,8 +7,7 @@ use crate::core::agent::run_agent_instance;
 use crate::core::config_watcher::wait_until_changed;
 use crate::core::db::Repository;
 use crate::core::{Error, Result};
-use crate::get_config_file_path;
-use crate::load_config_or_default;
+use crate::settings::{get_config_file_path, load_config_or_default};
 
 enum FinishedTask {
     Agent(std::result::Result<Result<()>, JoinError>),
