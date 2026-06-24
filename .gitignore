@@ -28,3 +28,4 @@
 
 /RoggoStats/roggo_agent/logs/
 /RoggoStats/roggo_agent/installer/*
+/RoggoStats/roggo_agent/test.db

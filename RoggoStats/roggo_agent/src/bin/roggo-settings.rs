@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{fmt::format, fs, path::PathBuf, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
 use eframe::egui;
 use roggo_agent::{AgentConfig, get_config_file_path, load_config_or_default};
@@ -12,8 +12,6 @@ use serde::Deserialize;
 pub struct TAStatsAPI {
     #[serde(rename = "TAGame")]
     pub ta_game: TaGame,
-    // #[serde(rename = "IniVersion")]
-    // pub ini_version: IniVersion,
 }
 
 impl TAStatsAPI {
@@ -216,7 +214,18 @@ fn main() -> eframe::Result {
             .with_title("Roggo Agent Settings")
             .with_inner_size([700.0, 290.0])
             .with_min_inner_size([700.0, 290.0])
-            .with_resizable(true),
+            .with_resizable(true)
+            .with_icon({
+                let bytes = include_bytes!("../../assets/icon.ico");
+                let image = image::load_from_memory(bytes)
+                    .expect("Failed to load icon")
+                    .to_rgba8();
+                egui::IconData {
+                    width: image.width(),
+                    height: image.height(),
+                    rgba: image.into_raw(),
+                }
+            }),
         ..Default::default()
     };
 
