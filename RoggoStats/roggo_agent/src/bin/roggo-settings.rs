@@ -110,6 +110,7 @@ impl ConfigApp {
 
     fn reset(&mut self) {
         self.config = Default::default();
+        self.display_information("changed", "Not saved yet.", INFO_COLOR);
         self.display_information("restore", "Restored defaults", INFO_COLOR);
         self.remove_information("saved");
     }
