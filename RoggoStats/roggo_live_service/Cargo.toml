@@ -1,6 +1,6 @@
 [package]
 name = "roggo_live_service"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2024"
 
 [dependencies]
@@ -15,3 +15,5 @@ uuid = { version = "1", features = ["serde"] }
 chrono = "0.4"
 thiserror = "2.0.18"
 egui_extras = { version = "0.34.3", features = ["image"] }
+egui_commonmark = "0.23"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }

@@ -7,15 +7,10 @@ use eframe::egui;
 
 use crate::core::{
     contract::AgentErrorDto,
-    ui::{match_overview_ui::MatchOverviewUi, tasks},
+    ui::{install_ui::InstallUi, match_overview_ui::MatchOverviewUi, tasks},
 };
-
-const COMPATIBLE_AGENT_VERSION: &str = "0.5.0";
-const DOWNLOAD_URL: &'static str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.4.0/RoggoAgentSetup_0.4.0.exe";
-const PATCH_NOTES: &'static str = "
-    PATCH NOTES:
-        You can now click on usernames to get to their tracker network profile.
-";
+pub const UI_VERSION: &str = "0.5.0";
+pub const COMPATIBLE_AGENT_VERSION: &str = "0.5.0";
 
 #[derive(Default)]
 pub struct Content {
@@ -27,6 +22,7 @@ pub struct Content {
 pub struct RoggoApp {
     last_reload: f64,
     match_overview_ui: MatchOverviewUi,
+    install_ui: InstallUi,
     content: Arc<Mutex<Content>>,
     full_reload_requested: Arc<Mutex<bool>>,
 }
@@ -34,9 +30,23 @@ pub struct RoggoApp {
 impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_pixels_per_point(2.0);
+
         let app = RoggoApp::new_with_single_reload_arc();
+
         tasks::load_main_character(cc.egui_ctx.clone(), app.content.clone());
         app
+    }
+
+    fn get_agent_version(&self) -> String {
+        if let Ok(content) = self.content.lock() {
+            content
+                .agent_version
+                .as_deref()
+                .unwrap_or(&String::new())
+                .into()
+        } else {
+            String::new()
+        }
     }
 
     pub fn new_with_single_reload_arc() -> Self {
@@ -46,13 +56,11 @@ impl RoggoApp {
             match_overview_ui: MatchOverviewUi::new_with_single_reload_arc(arc.clone()),
             content: Default::default(),
             full_reload_requested: arc,
+            install_ui: Default::default(),
         }
     }
-}
 
-
-impl eframe::App for RoggoApp {
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+    fn reload_cycle(&mut self, ui: &mut egui::Ui) {
         ui.ctx().request_repaint_after(Duration::from_secs(1));
 
         let now = ui.ctx().input(|i| i.time);
@@ -71,23 +79,9 @@ impl eframe::App for RoggoApp {
                 *full_reload_requested = false;
             }
         }
+    }
 
-        egui::Panel::top("header").show_inside(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.heading("Roggo Stats Monitor");
-
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if let Ok(content) = self.content.lock() {
-                        if let Some(name) = &content.player_name {
-                            ui.label(name);
-                        }
-                    }
-
-                    // egui::widgets::global_theme_preference_switch(ui);
-                });
-            })
-        });
-
+    fn main_ui(&mut self, ui: &mut egui::Ui) {
         egui::CentralPanel::default().show_inside(ui, |ui| {
             if let Ok(content) = self.content.lock() {
                 if let Some(player_name) = &content.player_name {
@@ -97,38 +91,43 @@ impl eframe::App for RoggoApp {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 if let Ok(content) = self.content.lock() {
                     if let Some(error) = &content.current_error {
-                        // web_sys::console::log_1(&"Hallo aus WASM".into());
                         ui.label(&error.message);
                     }
                 }
             });
         });
+    }
+}
 
-        if let Ok(content) = self.content.lock() {
-            let version = content.agent_version.as_deref().unwrap_or("0".into());
+impl eframe::App for RoggoApp {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        self.reload_cycle(ui);
 
-            if version != COMPATIBLE_AGENT_VERSION {
-                egui::Area::new("center_message".into())
-                    .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
-                    .order(egui::Order::Foreground)
-                    .show(ui.ctx(), |ui| {
-                        egui::Frame::popup(ui.style()).show(ui, |ui| {
-                            ui.label(format!(
-                                "Please download and run roggo agent with version {}",
-                                COMPATIBLE_AGENT_VERSION
-                            ));
+        let version = self.get_agent_version();
 
-                            ui.hyperlink_to(DOWNLOAD_URL, DOWNLOAD_URL);
-                            ui.separator();
+        egui::Panel::top("header").show_inside(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.heading("Roggo Stats");
 
-                            ui.label(PATCH_NOTES);
-                            egui_extras::install_image_loaders(&ui.ctx());
-                            egui::Frame::popup(ui.style()).show(ui, |ui| {
-                                ui.image(egui::include_image!("../../../patch_0.4.0.png"));
-                            });
-                        });
-                    });
-            }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if let Ok(content) = self.content.lock() {
+                        if let Some(name) = &content.player_name {
+                            ui.label(name);
+                        }
+                    }
+                    ui.separator();
+                    // egui::widgets::global_theme_preference_switch(ui);
+                    if !version.is_empty() {
+                        ui.label(&format!("WebUi version {UI_VERSION}"));
+                    }
+                });
+            })
+        });
+
+        if version == COMPATIBLE_AGENT_VERSION {
+            self.main_ui(ui);
+        } else {
+            self.install_ui.ui(ui, version);
         }
     }
 }
