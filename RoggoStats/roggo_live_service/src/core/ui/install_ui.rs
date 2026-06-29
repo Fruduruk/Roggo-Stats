@@ -31,7 +31,7 @@ impl InstallUi {
                     self.view_mode = ViewMode::Info;
                 }
                 if ui
-                    .add_sized([ui.available_width(), 32.0], egui::Button::new("Source"))
+                    .add_sized([ui.available_width(), 32.0], egui::Button::new("Download"))
                     .clicked()
                 {
                     self.view_mode = ViewMode::Download;
@@ -39,7 +39,7 @@ impl InstallUi {
                 if ui
                     .add_sized(
                         [ui.available_width(), 32.0],
-                        egui::Button::new("Patch Notes"),
+                        egui::Button::new("Patch History"),
                     )
                     .clicked()
                 {
@@ -48,7 +48,7 @@ impl InstallUi {
             });
         match self.view_mode {
             ViewMode::Info => self.show_info(ui, version),
-            ViewMode::Download => self.show_download(ui, version),
+            ViewMode::Download => self.show_download(ui),
             ViewMode::PatchNotes => self.show_patch_notes(ui, version),
         };
     }
@@ -74,12 +74,12 @@ impl InstallUi {
         });
     }
 
-    fn show_download(&mut self, ui: &mut egui::Ui, version: String) {
+    fn show_download(&mut self, ui: &mut egui::Ui) {
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            // ui.label(format!(
-            //     "Please download and run roggo agent with version {}",
-            //     COMPATIBLE_AGENT_VERSION
-            // ));
+            ui.label(format!(
+                "Please download and run roggo agent with version {}",
+                COMPATIBLE_AGENT_VERSION
+            ));
             ui.hyperlink_to(DOWNLOAD_URL, DOWNLOAD_URL);
         });
     }

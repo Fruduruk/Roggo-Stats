@@ -9,7 +9,8 @@ use crate::core::{
     contract::AgentErrorDto,
     ui::{install_ui::InstallUi, match_overview_ui::MatchOverviewUi, tasks},
 };
-pub const UI_VERSION: &str = "0.5.0";
+const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
+pub const UI_VERSION: &str = "0.5.1";
 pub const COMPATIBLE_AGENT_VERSION: &str = "0.5.0";
 
 #[derive(Default)]
@@ -110,6 +111,8 @@ impl eframe::App for RoggoApp {
                 ui.heading("Roggo Stats");
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    show_github_button(ui);
+                    ui.separator();
                     if let Ok(content) = self.content.lock() {
                         if let Some(name) = &content.player_name {
                             ui.label(name);
@@ -129,5 +132,26 @@ impl eframe::App for RoggoApp {
         } else {
             self.install_ui.ui(ui, version);
         }
+    }
+}
+
+fn show_github_button(ui: &mut egui::Ui) {
+    let image = egui::Image::new(egui::include_image!("../../../assets/github.png"))
+        .fit_to_exact_size(egui::vec2(16.0, 16.0));
+    let response = ui
+        .add(
+            egui::Button::image(image)
+                .min_size(egui::vec2(24.0, 24.0))
+                .corner_radius(egui::CornerRadius::same(12))
+                .frame(true)
+                .frame_when_inactive(false),
+        )
+        .on_hover_text(GITHUB_URL);
+
+    if response.clicked() {
+        ui.open_url(egui::OpenUrl {
+            url: GITHUB_URL.into(),
+            new_tab: true,
+        });
     }
 }
