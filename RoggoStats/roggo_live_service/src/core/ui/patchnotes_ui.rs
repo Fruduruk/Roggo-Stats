@@ -1,4 +1,3 @@
-use eframe::egui;
 use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 
 pub struct PatchNotesUi {
