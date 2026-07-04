@@ -10,8 +10,8 @@ use crate::core::{
     ui::{install_ui::InstallUi, match_overview_ui::MatchOverviewUi, tasks},
 };
 const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
-pub const UI_VERSION: &str = "0.5.1";
-pub const COMPATIBLE_AGENT_VERSION: &str = "0.5.0";
+pub const UI_VERSION: &str = "0.6.0";
+pub const COMPATIBLE_AGENT_VERSION: &str = "0.6.0";
 
 #[derive(Default)]
 pub struct Content {
