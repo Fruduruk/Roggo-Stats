@@ -21,8 +21,8 @@ pub async fn run_agent(
 ) -> Result<()> {
     tracing::info!("Roggo agent supervisor is running");
 
-    tracing::info!("Creating database if needed");
-    Repository::new(&db_file_path)?;
+    tracing::info!("Creating and or migrating database if needed");
+    Repository::ensure_created_and_migrated(&db_file_path)?;
 
     let (global_shutdown_tx, mut global_shutdown_rx) = match shutdown_option {
         Some(channel) => channel,

@@ -17,13 +17,13 @@ pub enum Error {
     #[error("Web API error: {0}")]
     WebAPIError(#[from] crate::core::api::Error),
 
-    #[error("Repository Error {0}")]
+    #[error("Repository Error: {0}")]
     RepositoryError(#[from] crate::core::db::Error),
 
-    #[error("Notify Error {0}")]
+    #[error("Notify Error: {0}")]
     NotifyError(#[from] notify::Error),
 
-    #[error("Config Error {0}")]
+    #[error("Config Error: {0}")]
     ConfigError(String),
 
     #[error("Shutdown error: {0}")]
