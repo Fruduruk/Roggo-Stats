@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::rl_api::{
     self,
-    models::{BallState, Location},
+    models::{ Location},
 };
 
 #[derive(Debug)]
@@ -59,11 +59,6 @@ pub struct GameStats {
     pub goal_details: Vec<GoalDetails>,
     pub ball_hits: Vec<BallHitStatistic>,
     pub statfeed_events: Vec<StatfeedEventStatistic>,
-    
-
-    pub timeline: Vec<TimelineInstant>,
-
-    pub excluded_timeline_instants: u128,
 }
 
 impl GameStats {
@@ -81,9 +76,6 @@ impl GameStats {
             goal_details: vec![],
             ball_hits: vec![],
             statfeed_events: vec![],
-
-            timeline: vec![],
-            excluded_timeline_instants: 0,
         }
     }
 
@@ -123,12 +115,6 @@ pub struct ClockSample {
     pub timestamp: i64,
     pub time_seconds: u16,
     pub is_overtime: bool,
-}
-
-#[derive(Debug)]
-pub struct TimelineInstant {
-    pub timestamp: i64,
-    pub ball_state: BallState,
 }
 
 #[derive(Debug)]

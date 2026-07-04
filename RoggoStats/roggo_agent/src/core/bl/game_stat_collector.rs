@@ -7,7 +7,7 @@ use crate::core::{
         Error, Result,
         intermediate_models::{
             BallHitStatistic, ClockSample, CrossbarHitStatistic, GameState, GameStats, GoalDetails,
-            PlayerStats, StatSnapshot, StatfeedEventStatistic, TimelineInstant,
+            PlayerStats, StatSnapshot, StatfeedEventStatistic,
         },
     },
     rl_api::models::{
@@ -176,12 +176,6 @@ impl GameStatCollector {
             self.stats.duration += delta;
         }
 
-        if self.timeline_update_reasonable(&update_state) {
-            self.update_timeline(&update_state);
-        } else {
-            self.stats.excluded_timeline_instants += 1;
-        }
-
         self.stats.arena_name.get_or_insert(update_state.game.arena);
 
         for team in update_state.game.teams {
@@ -221,29 +215,6 @@ impl GameStatCollector {
             .players
             .entry(player.name.clone())
             .or_insert(PlayerStats::new(player.name, player.primary_id))
-    }
-
-    fn timeline_update_reasonable(&self, update_state: &UpdateState) -> bool {
-        const MIN_DELTA: f64 = 0.5;
-        // const RELATIVE_DELTA: f64 = 0.1;
-
-        if let Some(last_timeline_instant) = self.stats.timeline.last() {
-            let last_speed = last_timeline_instant.ball_state.speed;
-            let speed = update_state.game.ball_state.speed;
-
-            (speed - last_speed).abs() >= MIN_DELTA
-        } else {
-            true
-        }
-    }
-
-    fn update_timeline(&mut self, update_state: &UpdateState) {
-        if let Some(timestamp) = self.state.timestamp {
-            self.stats.timeline.push(TimelineInstant {
-                timestamp,
-                ball_state: update_state.game.ball_state.clone(),
-            });
-        }
     }
 
     fn push_crossbar_hit(&mut self, crossbar_hit: CrossbarHit) {

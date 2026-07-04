@@ -2,10 +2,9 @@ use std::collections::HashMap;
 
 use rusqlite::{Transaction, params};
 
+use crate::AGENT_VERSION;
 use crate::core::bl::{self, intermediate_models};
-use crate::core::db::{Error, Repository, Result};
-
-
+use crate::core::db::{Error, Repository, Result, get_current_timestamp};
 
 impl Repository {
     pub fn insert_game_stats(
@@ -15,10 +14,11 @@ impl Repository {
     ) -> Result<()> {
         let mut player_ids = HashMap::new();
         let mut team_ids = HashMap::new();
+        let schema_version = self.get_version()?;
 
         let tx = self.connection.transaction()?;
         let match_id = insert_match(&stats, stats.match_guid, &tx)?;
-        insert_metadata(match_id, &tx)?;
+        insert_metadata(match_id, &tx, schema_version)?;
 
         for error in errors {
             insert_error(match_id, error, &tx)?;
@@ -90,35 +90,11 @@ impl Repository {
             insert_statfeed_event(match_id, &player_ids, &tx, statfeed_event)?;
         }
 
-        for timeline_instant in &stats.timeline {
-            let team_id = team_ids.get(&timeline_instant.ball_state.team_num);
-
-            tx.execute(
-                "
-                    insert into timeline (
-                        match_id,
-                        timestamp_ms,
-                        last_touch_team_id,
-                        ball_speed
-                    )
-                    values (?1,?2,?3,?4);
-                ",
-                params![
-                    match_id,
-                    timeline_instant.timestamp,
-                    team_id,
-                    timeline_instant.ball_state.speed
-                ],
-            )?;
-        }
-
         tx.commit()?;
 
         tracing::info!("Saved {} in database", stats.match_guid);
         Ok(())
     }
-
-   
 }
 
 fn insert_statfeed_event(
@@ -466,15 +442,8 @@ fn insert_match(
     Ok(tx.last_insert_rowid())
 }
 
-fn insert_metadata(match_id: i64, tx: &Transaction<'_>) -> Result<()> {
-    let timestamp_ms = i64::try_from(
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
-            .as_millis(),
-    )
-    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))?;
-
+fn insert_metadata(match_id: i64, tx: &Transaction<'_>, schema_version: i64) -> Result<()> {
+    let timestamp_ms = get_current_timestamp()?;
     tx.execute(
         "
         insert into match_metadata (
@@ -485,7 +454,7 @@ fn insert_metadata(match_id: i64, tx: &Transaction<'_>) -> Result<()> {
         )
         values (?1,?2,?3,?4);
         ",
-        params![match_id, super::SCHEMA_VERSION, super::AGENT_VERSION, timestamp_ms],
+        params![match_id, schema_version, AGENT_VERSION, timestamp_ms],
     )?;
     Ok(())
 }
