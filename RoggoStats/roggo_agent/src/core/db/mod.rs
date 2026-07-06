@@ -12,6 +12,9 @@ pub enum Error {
 
     #[error("Migration Error: {0}")]
     MigrationError(String),
+
+    #[error("Error: {0}")]
+    InsertionError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

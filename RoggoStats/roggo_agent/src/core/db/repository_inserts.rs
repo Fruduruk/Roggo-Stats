@@ -106,11 +106,11 @@ fn insert_statfeed_event(
     Ok(
         if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
             let secondary_target = match &statfeed_event.secondary_target_primary_id {
-                Some(id) => Some(
-                    player_ids
-                        .get(id)
-                        .expect("Secondary target not inserted for this statfeed event."),
-                ),
+                Some(id) => Some(player_ids.get(id).ok_or_else(|| {
+                    Error::InsertionError(
+                        "Secondary target not inserted for this statfeed event.".into(),
+                    )
+                })?),
                 None => None,
             };
 
@@ -178,18 +178,20 @@ fn insert_goal_details(
 ) -> Result<()> {
     let scorer_id = player_ids
         .get(&goal_details.scorer_primary_id)
-        .expect("Scorer not inserted for this goal.");
-    let assister_id = match goal_details.assister_primary_id {
-        Some(id) => Some(
-            player_ids
-                .get(&id)
-                .expect("Assister not inserted for this goal."),
-        ),
-        None => None,
-    };
+        .ok_or_else(|| Error::InsertionError("Scorer not inserted for this goal".into()))?;
+    let assister_id =
+        match goal_details.assister_primary_id {
+            Some(id) => Some(player_ids.get(&id).ok_or_else(|| {
+                Error::InsertionError("Assister not inserted for this goal".into())
+            })?),
+            None => None,
+        };
     let last_touch_player_id = player_ids
         .get(&goal_details.last_touch_primary_id)
-        .expect("Last touch player not inserted for this goal.");
+        .ok_or_else(|| {
+            Error::InsertionError("Last touch player not inserted for this goal".into())
+        })?;
+
     tx.execute(
         "
             insert into goal_details (
