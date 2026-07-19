@@ -1,1 +1,0 @@
-docker build -t egui-wasm-builder:rust-1.95-trunk .

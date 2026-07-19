@@ -1,7 +1,0 @@
-services:
-  egui-wasm:
-    image: roggo-live-service:dev
-    container_name: roggo-live-service-dev
-    ports:
-      - "8080:80"
-    restart: unless-stopped

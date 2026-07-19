@@ -1,59 +1,5 @@
 kind: pipeline
 type: docker
-name: release-roggo-stats
-
-trigger:
-  event:
-    - tag
-  ref:
-    - refs/tags/roggo-stats-v*
-
-steps:
-  - name: build and push ballchasing-wrapper
-    image: plugins/docker
-    settings:
-      registry: registry.local.frudd.dev
-      repo: registry.local.frudd.dev/ballchasing-wrapper
-      tags:
-        - latest
-        - ${DRONE_TAG##roggo-stats-v}
-      build_args:
-        - APP_VERSION=${DRONE_TAG##roggo-stats-v}
-      dockerfile: ./RoggoStats/BallchasingWrapper/Dockerfile
-      context: ./RoggoStats/BallchasingWrapper/.
-
-  - name: build and push roggo-discord-bot
-    image: plugins/docker
-    settings:
-      registry: registry.local.frudd.dev
-      repo: registry.local.frudd.dev/roggo-discord-bot
-      tags:
-        - latest
-        - ${DRONE_TAG##roggo-stats-v}
-      build_args:
-        - APP_VERSION=${DRONE_TAG##roggo-stats-v}
-      dockerfile: ./RoggoStats/RoggoDiscordBot/Dockerfile
-      context: ./RoggoStats/RoggoDiscordBot/.
-
-  - name: deploy
-    image: appleboy/drone-ssh
-    depends_on:
-      - build and push ballchasing-wrapper
-      - build and push roggo-discord-bot
-    settings:
-      host: homepage.local.frudd.dev
-      username: fish
-      password:
-        from_secret: local_docker_ssh_password
-      port: 22
-      script:
-        - cd /home/fish/docker/roggo-stats/
-        - docker compose pull
-        - docker compose up -d
-
----
-kind: pipeline
-type: docker
 name: release-egui-wasm-builder
 
 trigger:
@@ -71,8 +17,8 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG##egui-wasm-builder-v}
-      dockerfile: ./RoggoStats/roggo_live_service/trunk_builder/Dockerfile
-      context: ./RoggoStats/roggo_live_service/trunk_builder/.
+      dockerfile: ./roggo_web/trunk_builder/Dockerfile
+      context: ./roggo_web/trunk_builder/.
 
 ---
 kind: pipeline
@@ -96,8 +42,8 @@ steps:
         - ${DRONE_TAG##roggo-web-v}
       build_args:
         - APP_VERSION=${DRONE_TAG##roggo-web-v}
-      dockerfile: ./RoggoStats/roggo_live_service/Dockerfile
-      context: ./RoggoStats/roggo_live_service/.
+      dockerfile: ./roggo_web/Dockerfile
+      context: ./roggo_web/.
 
   - name: deploy staging
     image: appleboy/drone-ssh
