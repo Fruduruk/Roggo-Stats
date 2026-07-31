@@ -12,3 +12,4 @@
 /roggo_agent/logs/
 /roggo_agent/installer/*
 /roggo_agent/test.db
+/roggo_agent/db_versions/**
