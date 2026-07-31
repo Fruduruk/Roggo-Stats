@@ -80,8 +80,12 @@ async fn read_tcp_packets(
     let mut buffer = [0u8; 8192];
 
     loop {
-        match read_tcp_packet(rl_stream, &mut buffer, tx).await {
-            Ok(()) => {}
+        match read_tcp_packet(rl_stream, &mut buffer).await {
+            Ok((timestamp, text)) => {
+                if let Err(err) = tx.send((timestamp,text)).await {
+                    tracing::error!(error = %err, "Failed to send packet");
+                }
+            }
 
             Err(Error::APIConnectionClosed) => {
                 return Ok(());
@@ -97,8 +101,7 @@ async fn read_tcp_packets(
 async fn read_tcp_packet(
     rl_stream: &mut TcpStream,
     buffer: &mut [u8; 8192],
-    tx: &mpsc::Sender<(i64, String)>,
-) -> Result<()> {
+) -> Result<(i64, String)> {
     let n = rl_stream.read(buffer).await.unwrap_or(0);
 
     let timestamp_ms = i64::try_from(
@@ -116,9 +119,5 @@ async fn read_tcp_packet(
 
     let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
 
-    if let Err(err) = tx.send((timestamp_ms, raw)).await {
-        tracing::error!(error = %err, "Failed to send packet");
-    }
-
-    Ok(())
+    Ok((timestamp_ms, raw))
 }

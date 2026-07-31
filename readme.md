@@ -101,7 +101,7 @@ A recent Rust toolchain is required for the agent.
 
 ```bash
 git clone https://github.com/Fruduruk/Roggo-Stats.git
-cd Roggo-Stats
+cd roggo_agent
 cargo build --release
 ```
 
