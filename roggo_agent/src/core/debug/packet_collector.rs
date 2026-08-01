@@ -27,12 +27,12 @@ impl PacketCollector {
         })
     }
 
-    pub fn next(&mut self, timestamp: i64, raw: &str) -> io::Result<()> {
+    pub fn next(&mut self, timestamp: i64, bytes: Vec<u8>) -> io::Result<()> {
         let file_name = format!("{timestamp}.json");
 
         let entry = SevenZArchiveEntry::from_path(Path::new(&file_name), file_name.clone());
 
-        let reader = Cursor::new(raw.as_bytes());
+        let reader = Cursor::new(bytes);
 
         self.writer
             .as_mut()

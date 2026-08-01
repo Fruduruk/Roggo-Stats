@@ -1,9 +1,10 @@
 use crate::core::rl_api::models::RawPacket;
 use crate::core::rl_api::{Error, Result};
 
+// Size of the buffer. Whenever this threshold is passed read_position starts at 0 again.
 const VECTOR_COMPACTION_THRESHOLD: usize = 1_048_576;
 
-#[derive(Default)]
+#[derive(Debug,Default)]
 pub struct ByteBuffer {
     bytes: Vec<u8>,
     read_position: usize,
@@ -38,7 +39,6 @@ impl ByteBuffer {
         };
 
         self.read_position += consumed;
-
         if self.read_position > VECTOR_COMPACTION_THRESHOLD {
             self.bytes.drain(..self.read_position);
             self.read_position = 0;

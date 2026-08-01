@@ -5,11 +5,17 @@ use uuid::Uuid;
 use crate::core::{
     bl::{game_stat_collector::GameStatCollector, intermediate_models},
     db::Repository,
-    rl_api::{Result, deserializer::deserialize, models::Event},
+    rl_api::{
+        Result,
+        byte_buffer::ByteBuffer,
+        deserializer::{deserialize_single_event},
+        models::Event,
+    },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Aggregator {
+    byte_buffer: ByteBuffer,
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
     db_file_path: PathBuf,
@@ -18,18 +24,22 @@ pub struct Aggregator {
 impl Aggregator {
     pub fn new(db_file_path: PathBuf) -> Self {
         Self {
-            collector: None,
-            collected_matches: HashSet::new(),
             db_file_path,
+            ..Default::default()
         }
     }
 
-    pub fn insert(&mut self, timestamp: i64, raw: String) -> Result<()> {
-        for event in deserialize(&raw) {
+    pub fn insert(&mut self, timestamp: i64, bytes: Vec<u8>) -> Result<()> {
+        self.byte_buffer.push(bytes);
+        while let Some(raw_packet) = self.byte_buffer.get()? {
+            let Some(event) = deserialize_single_event(&raw_packet) else {
+                continue;
+            };
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event)?;
             self.export_collector_if_finished()?;
         }
+
         Ok(())
     }
 

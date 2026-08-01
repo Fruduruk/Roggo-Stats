@@ -10,7 +10,7 @@ use sevenz_rust::{Password, SevenZReader};
 
 pub async fn read_test_files_from_7z(
     path: impl AsRef<OsStr>,
-    tx: mpsc::Sender<(i64, String)>,
+    tx: mpsc::Sender<(i64, Vec<u8>)>,
     shutdown_rx: watch::Receiver<bool>,
 ) {
     {
@@ -47,8 +47,6 @@ pub async fn read_test_files_from_7z(
                 break;
             }
 
-            let raw = String::from_utf8_lossy(&content).into_owned();
-
             let file_name_timestamp = Path::new(&filename)
                 .file_stem()
                 .expect("No file name")
@@ -57,7 +55,7 @@ pub async fn read_test_files_from_7z(
                 .parse()
                 .expect("Not a valid i64");
 
-            if let Err(err) = tx.send((file_name_timestamp, raw)).await {
+            if let Err(err) = tx.send((file_name_timestamp, content)).await {
                 tracing::error!(error = %err, "Failed to send packet");
                 break;
             }

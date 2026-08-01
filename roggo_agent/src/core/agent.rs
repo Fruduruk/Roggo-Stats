@@ -24,7 +24,7 @@ pub async fn run_agent_instance(
 ) -> Result<()> {
     let final_shutdown_tx = shutdown_tx.clone();
 
-    let (tx, rx) = mpsc::channel::<(i64, String)>(1_000_000);
+    let (tx, rx) = mpsc::channel::<(i64, Vec<u8>)>(1_000_000);
 
     let mut send_handle = tokio::spawn(send_packets(config, shutdown_rx.clone(), tx));
 
@@ -86,7 +86,7 @@ async fn start_web_api(shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf
 async fn send_packets(
     config: AgentConfig,
     shutdown_rx: watch::Receiver<bool>,
-    tx: mpsc::Sender<(i64, String)>,
+    tx: mpsc::Sender<(i64, Vec<u8>)>,
 ) -> Result<()> {
     if let Ok(path) = std::env::var("import_path") {
         crate::core::debug::test_file_reader::read_test_files_from_7z(
@@ -104,7 +104,7 @@ async fn send_packets(
 
 async fn receive_packets(
     shutdown_rx: watch::Receiver<bool>,
-    mut rx: mpsc::Receiver<(i64, String)>,
+    mut rx: mpsc::Receiver<(i64, Vec<u8>)>,
     db_file_path: PathBuf,
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
@@ -113,14 +113,14 @@ async fn receive_packets(
     let mut aggregator = Aggregator::new(db_file_path);
     let mut count: u128 = 0;
 
-    while let Some((timestamp, raw)) = rx.recv().await {
+    while let Some((timestamp, bytes)) = rx.recv().await {
         if *shutdown_rx.borrow() {
             return Ok(());
         }
 
         print!("\rReceiving packet number {}", count);
         // packet_collector.next(timestamp, &raw).map_err(|err| Error::ShutdownError(err.to_string()))?;
-        if let Err(err) = aggregator.insert(timestamp, raw) {
+        if let Err(err) = aggregator.insert(timestamp, bytes) {
             tracing::warn!(error=%err,"failed to insert packet");
         }
         count += 1;

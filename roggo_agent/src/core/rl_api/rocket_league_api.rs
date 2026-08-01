@@ -11,7 +11,7 @@ const ROCKET_LEAGUE_TCP_ADDR: &str = "127.0.0.1";
 
 pub async fn read_rocket_league_api(
     config: AgentConfig,
-    tx: mpsc::Sender<(i64, String)>,
+    tx: mpsc::Sender<(i64, Vec<u8>)>,
     shutdown_rx: watch::Receiver<bool>,
 ) -> Result<()> {
     loop {
@@ -75,15 +75,15 @@ async fn wait_for_shutdown(mut shutdown_rx: watch::Receiver<bool>) {
 
 async fn read_tcp_packets(
     rl_stream: &mut TcpStream,
-    tx: &mpsc::Sender<(i64, String)>,
+    tx: &mpsc::Sender<(i64, Vec<u8>)>,
 ) -> Result<()> {
     let mut buffer = [0u8; 8192];
 
     loop {
-        match read_tcp_packet(rl_stream, &mut buffer).await {
-            Ok((timestamp, text)) => {
-                if let Err(err) = tx.send((timestamp,text)).await {
-                    tracing::error!(error = %err, "Failed to send packet");
+        match read_tcp_segment(rl_stream, &mut buffer).await {
+            Ok((timestamp, bytes)) => {
+                if let Err(err) = tx.send((timestamp, bytes)).await {
+                    tracing::error!(error = %err, "Failed to send bytes");
                 }
             }
 
@@ -98,26 +98,31 @@ async fn read_tcp_packets(
     }
 }
 
-async fn read_tcp_packet(
+async fn read_tcp_segment(
     rl_stream: &mut TcpStream,
     buffer: &mut [u8; 8192],
-) -> Result<(i64, String)> {
+) -> Result<(i64, Vec<u8>)> {
     let n = rl_stream.read(buffer).await.unwrap_or_default();
 
-    let timestamp_ms = i64::try_from(
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
-            .as_millis(),
-    )
-    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))?;
+    let timestamp_ms = now()?;
 
     if n == 0 {
         tracing::warn!("Rocket League API connection closed");
         return Err(Error::APIConnectionClosed);
     }
 
-    let raw = String::from_utf8_lossy(&buffer[..n]).to_string();
+    let raw = buffer[..n].to_vec();
 
     Ok((timestamp_ms, raw))
+}
+
+#[inline]
+fn now() -> Result<i64> {
+    Ok(i64::try_from(
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
+            .as_millis(),
+    )
+    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))?)
 }
