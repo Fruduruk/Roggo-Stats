@@ -102,7 +102,7 @@ async fn read_tcp_packet(
     rl_stream: &mut TcpStream,
     buffer: &mut [u8; 8192],
 ) -> Result<(i64, String)> {
-    let n = rl_stream.read(buffer).await.unwrap_or(0);
+    let n = rl_stream.read(buffer).await.unwrap_or_default();
 
     let timestamp_ms = i64::try_from(
         SystemTime::now()

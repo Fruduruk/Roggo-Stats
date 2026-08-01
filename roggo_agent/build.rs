@@ -3,6 +3,6 @@ fn main() {
     {
         let mut res = winresource::WindowsResource::new();
         res.set_icon("assets/icon.ico");
-        res.compile().unwrap();
+        res.compile().expect("failed to set windows icon");
     }
 }

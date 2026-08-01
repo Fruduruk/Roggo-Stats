@@ -18,7 +18,7 @@ impl Repository {
 
     fn init(&mut self) -> Result<()> {
         // anything higher than 0 means the database is initialized
-        if self.get_version().unwrap_or(0) > 0 {
+        if self.get_version().unwrap_or_default() > 0 {
             tracing::info!("Database is already initialized");
             return Ok(());
         }
@@ -49,7 +49,7 @@ impl Repository {
 
     fn migrate_v1(&mut self) -> Result<()> {
         const MIGRATION_VERSION: i64 = 1;
-        if self.get_version().unwrap_or(0) >= MIGRATION_VERSION {
+        if self.get_version().unwrap_or_default() >= MIGRATION_VERSION {
             info_already_migrated(MIGRATION_VERSION);
             return Ok(());
         }
