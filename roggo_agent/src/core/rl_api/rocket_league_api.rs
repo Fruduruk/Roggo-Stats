@@ -118,11 +118,11 @@ async fn read_tcp_segment(
 
 #[inline]
 fn now() -> Result<i64> {
-    Ok(i64::try_from(
+    i64::try_from(
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
             .as_millis(),
     )
-    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))?)
+    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))
 }

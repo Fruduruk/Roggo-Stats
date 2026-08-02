@@ -39,7 +39,7 @@ impl Repository {
                     continue;
                 }
 
-                let global_player_id = upsert_global_player(&tx, player_name, &player)?;
+                let global_player_id = upsert_global_player(&tx, player_name, player)?;
                 let player_id = insert_player(&tx, match_id, team_id, global_player_id, player)?;
                 if player_ids
                     .insert(player.primary_id.clone(), player_id)
@@ -103,19 +103,18 @@ fn insert_statfeed_event(
     tx: &Transaction<'_>,
     statfeed_event: &intermediate_models::StatfeedEventStatistic,
 ) -> Result<()> {
-    Ok(
-        if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
-            let secondary_target = match &statfeed_event.secondary_target_primary_id {
-                Some(id) => Some(player_ids.get(id).ok_or_else(|| {
-                    Error::InsertionError(
-                        "Secondary target not inserted for this statfeed event.".into(),
-                    )
-                })?),
-                None => None,
-            };
+    if let Some(player_id) = player_ids.get(&statfeed_event.main_target_primary_id) {
+        let secondary_target = match &statfeed_event.secondary_target_primary_id {
+            Some(id) => Some(player_ids.get(id).ok_or_else(|| {
+                Error::InsertionError(
+                    "Secondary target not inserted for this statfeed event.".into(),
+                )
+            })?),
+            None => None,
+        };
 
-            tx.execute(
-                "
+        tx.execute(
+            "
                     insert into statfeed_events (
                         match_id,
                         timestamp_ms,
@@ -126,17 +125,17 @@ fn insert_statfeed_event(
                     )
                     values(?1,?2,?3,?4,?5,?6);
                 ",
-                params![
-                    match_id,
-                    statfeed_event.timestamp,
-                    statfeed_event.event_name,
-                    statfeed_event.event_type,
-                    player_id,
-                    secondary_target
-                ],
-            )?;
-        },
-    )
+            params![
+                match_id,
+                statfeed_event.timestamp,
+                statfeed_event.event_name,
+                statfeed_event.event_type,
+                player_id,
+                secondary_target
+            ],
+        )?;
+    }
+    Ok(())
 }
 
 fn insert_ball_hit(

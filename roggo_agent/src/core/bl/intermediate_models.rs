@@ -8,6 +8,7 @@ use crate::core::rl_api::{
 };
 
 #[derive(Debug)]
+#[derive(Default)]
 pub struct GameState {
     pub round_started_once: bool,
     pub match_started: bool,
@@ -28,22 +29,6 @@ impl GameState {
     }
 }
 
-impl Default for GameState {
-    fn default() -> GameState {
-        Self {
-            round_started_once: false,
-            match_started: false,
-            in_replay: false,
-            finished: false,
-            in_overtime: false,
-            timestamp: None,
-            last_state_update_timestamp: None,
-            state_update_timestamp: None,
-            count_down: false,
-            goal_scored: false,
-        }
-    }
-}
 
 #[derive(Debug)]
 pub struct GameStats {
@@ -81,7 +66,7 @@ impl GameStats {
 
     #[inline]
     pub fn get_player_primary_id(&self, player: &rl_api::models::GamePlayer) -> Option<String> {
-        Some(self.get_player_stats(&player)?.primary_id.clone())
+        Some(self.get_player_stats(player)?.primary_id.clone())
     }
 
     #[inline]

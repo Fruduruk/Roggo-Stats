@@ -52,5 +52,5 @@ impl PacketCollector {
 }
 
 fn to_io_error(err: sevenz_rust::Error) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, err)
+    io::Error::other(err)
 }

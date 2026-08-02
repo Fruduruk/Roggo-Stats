@@ -80,7 +80,7 @@ impl ConfigApp {
                 self.display_information("saved", "Saved agent settings.", SUCCESS_COLOR);
                 self.remove_information("restore");
                 self.remove_information("changed");
-            },
+            }
             Err(err) => self.display_information(
                 "error",
                 format!("Could not save config: {err}"),
@@ -182,13 +182,12 @@ impl ConfigApp {
 
     fn reload_rl_config_if_notepad_closed(&mut self) {
         let mut remove_handle = false;
-        if let Some(child) = &mut self.notepad_process {
-            if let Ok(exit_code) = child.try_wait() {
-                if exit_code.is_some() {
-                    self.rl_config = load_rl_config();
-                    remove_handle = true;
-                }
-            }
+        if let Some(child) = &mut self.notepad_process
+            && let Ok(exit_code) = child.try_wait()
+            && exit_code.is_some()
+        {
+            self.rl_config = load_rl_config();
+            remove_handle = true;
         }
         if remove_handle {
             self.display_information(
@@ -244,7 +243,7 @@ impl ConfigApp {
         ui.add_space(5.5);
         ui.heading("Information");
         ui.separator();
-        for (_, notification) in &self.notifications {
+        for notification in self.notifications.values() {
             ui.label(egui::RichText::new(&notification.text).color(notification.color));
             ui.separator();
         }
@@ -368,9 +367,7 @@ fn main() -> eframe::Result {
 }
 
 pub fn load_rl_config() -> Option<TAStatsAPI> {
-    Some(
-        fs::read_to_string(get_rocket_league_api_config_path()?)
-            .ok()
-            .and_then(|text| toml::from_str(&text).ok())?,
-    )
+    fs::read_to_string(get_rocket_league_api_config_path()?)
+        .ok()
+        .and_then(|text| toml::from_str(&text).ok())
 }

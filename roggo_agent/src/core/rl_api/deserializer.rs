@@ -2,7 +2,7 @@ use crate::core::rl_api::models::{Event, RawPacket};
 
 
 pub fn deserialize_single_event(packet: &RawPacket) -> Option<Event> {
-    match Event::new(&packet) {
+    match Event::new(packet) {
         Ok(event) => {
             // println!("Parsed Event: {event:#?}");
             Some(event)

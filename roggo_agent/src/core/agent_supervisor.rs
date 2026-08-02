@@ -15,6 +15,12 @@ enum FinishedTask {
     ShutdownRequested,
 }
 
+
+/// .
+///
+/// # Errors
+///
+/// This function will return an error if yes
 pub async fn run_agent(
     shutdown_option: Option<(watch::Sender<bool>, watch::Receiver<bool>)>,
     db_file_path: PathBuf,
@@ -24,10 +30,7 @@ pub async fn run_agent(
     tracing::info!("Creating and or migrating database if needed");
     Repository::ensure_created_and_migrated(&db_file_path)?;
 
-    let (global_shutdown_tx, mut global_shutdown_rx) = match shutdown_option {
-        Some(channel) => channel,
-        None => watch::channel(false),
-    };
+    let (global_shutdown_tx, mut global_shutdown_rx) = shutdown_option.unwrap_or_else(|| watch::channel(false));
 
     let ctrl_c_shutdown_tx = global_shutdown_tx.clone();
 

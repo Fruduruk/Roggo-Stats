@@ -268,6 +268,7 @@ pub struct BallState {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
+#[derive(Default)]
 pub struct Location {
     #[serde(rename = "X")]
     pub x: f64,
@@ -277,15 +278,6 @@ pub struct Location {
     pub z: f64,
 }
 
-impl Default for Location {
-    fn default() -> Self {
-        Self {
-            x: Default::default(),
-            y: Default::default(),
-            z: Default::default(),
-        }
-    }
-}
 
 #[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
 pub struct Ball {

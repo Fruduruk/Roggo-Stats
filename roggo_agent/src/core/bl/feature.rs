@@ -348,7 +348,7 @@ pub fn get_detailed_match_by_id(path: &Path, match_guid: Uuid) -> Result<Detaile
     let enemy_team = convert_to_detailed_team(&repo, enemy_team, enemy_players, duration)?;
 
     Ok(DetailedMatchDto {
-        match_guid: match_guid,
+        match_guid,
         arena: match_row.arena,
         duration: match_row.duration,
         created_at: match_row.created_at,
@@ -369,20 +369,16 @@ fn convert_to_detailed_team(
     let players: Vec<DetailedPlayerDto> = players
         .into_iter()
         .map(|p| {
-            let global_player = repo
-                .get_global_player_by_id(p.global_player_id)?;
+            let global_player = repo.get_global_player_by_id(p.global_player_id)?;
 
-            let stats = match p.stats {
-                Some(stats) => Some(DetailedPlayerStatsDto {
-                    percent_boosting: stats.time_boosting as f64 / duration,
-                    percent_demolished: stats.time_demolished as f64 / duration,
-                    percent_on_ground: stats.time_on_ground as f64 / duration,
-                    percent_on_wall: stats.time_on_wall as f64 / duration,
-                    percent_powersliding: stats.time_powersliding as f64 / duration,
-                    percent_supersonic: stats.time_supersonic as f64 / duration,
-                }),
-                None => None,
-            };
+            let stats = p.stats.map(|stats| DetailedPlayerStatsDto {
+                percent_boosting: stats.time_boosting as f64 / duration,
+                percent_demolished: stats.time_demolished as f64 / duration,
+                percent_on_ground: stats.time_on_ground as f64 / duration,
+                percent_on_wall: stats.time_on_wall as f64 / duration,
+                percent_powersliding: stats.time_powersliding as f64 / duration,
+                percent_supersonic: stats.time_supersonic as f64 / duration,
+            });
 
             Ok(DetailedPlayerDto {
                 username: global_player.last_username,

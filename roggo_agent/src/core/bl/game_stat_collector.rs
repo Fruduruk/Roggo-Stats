@@ -11,8 +11,8 @@ use crate::core::{
         },
     },
     rl_api::models::{
-        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player,
-        StatfeedEvent, UpdateState,
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player, StatfeedEvent,
+        UpdateState,
     },
 };
 
@@ -110,9 +110,9 @@ impl GameStatCollector {
             }
             Event::RoundStarted(_) => {
                 self.state.round_started_once = true;
-            },
+            }
             Event::StatfeedEvent(statfeed_event) => self.push_stat_feed_event(statfeed_event),
-            _ => return,
+            _ => (),
         }
     }
 
@@ -189,19 +189,19 @@ impl GameStatCollector {
             let player_stats = self.get_or_create_player_stats_mut(player.clone());
 
             update_core_player_stats(&player, player_stats);
-            if let Some(delta) = delta {
-                if round_started_once {
-                    // Don't count, if round never started once.
-                    increment_counters(player_stats, &player, delta);
-                    if let Some(timestamp) = self.state.timestamp {
-                        if let (Some(boost), Some(speed)) = (player.boost, player.speed) {
-                            let buffer = self
-                                .player_stats_buffer
-                                .entry(player.primary_id)
-                                .or_default();
-                            buffer.push((timestamp, StatSnapshot { speed, boost }));
-                        }
-                    }
+            if let Some(delta) = delta
+                && round_started_once
+            {
+                // Don't count, if round never started once.
+                increment_counters(player_stats, &player, delta);
+                if let Some(timestamp) = self.state.timestamp
+                    && let (Some(boost), Some(speed)) = (player.boost, player.speed)
+                {
+                    let buffer = self
+                        .player_stats_buffer
+                        .entry(player.primary_id)
+                        .or_default();
+                    buffer.push((timestamp, StatSnapshot { speed, boost }));
                 }
             }
         }
@@ -211,7 +211,7 @@ impl GameStatCollector {
         self.stats
             .teams
             .get_mut(&player.team_num)
-            .unwrap_or_else(|| panic!("Team doesn't exist for player {}", &player.name))
+            .unwrap_or_else(|| panic!("Team doesn't exist for player {}", player.name))
             .players
             .entry(player.name.clone())
             .or_insert(PlayerStats::new(player.name, player.primary_id))
@@ -265,7 +265,7 @@ fn insert_goal_scored(
         .ok_or_else(|| {
             Error::InsertionFailed(format!(
                 "GoalScored: cannot find primary id for scorer {}",
-                &goal_scored.scorer.name
+                goal_scored.scorer.name
             ))
         })?;
 
@@ -275,7 +275,7 @@ fn insert_goal_scored(
         } else {
             return Err(Error::InsertionFailed(format!(
                 "GoalScored: cannot find primary id for assister {:#?}",
-                &goal_scored.assister
+                goal_scored.assister
             )));
         }
     } else {
@@ -287,7 +287,7 @@ fn insert_goal_scored(
         .ok_or_else(|| {
             Error::InsertionFailed(format!(
                 "GoalScored: cannot find primary id for last touch player {}",
-                &goal_scored.ball_last_touch.player.name
+                goal_scored.ball_last_touch.player.name
             ))
         })?;
 
@@ -314,7 +314,7 @@ fn insert_stat_feed_event(
         .ok_or_else(|| {
             Error::InsertionFailed(format!(
                 "StatfeedEvent: cannot find primary id for main target {}",
-                &statfeed_event.main_target.name
+                statfeed_event.main_target.name
             ))
         })?;
 
@@ -325,7 +325,7 @@ fn insert_stat_feed_event(
             } else {
                 return Err(Error::InsertionFailed(format!(
                     "StatfeedEvent: cannot find primary id for secondary target {}",
-                    &secondary_target.name
+                    secondary_target.name
                 )));
             }
         } else {

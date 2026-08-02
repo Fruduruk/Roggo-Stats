@@ -42,7 +42,7 @@ impl Repository {
             ",
         )?;
 
-        Ok(stmt.query_row([], |row| Ok(row.get("version")?))?)
+        Ok(stmt.query_row([], |row| row.get("version"))?)
     }
 
     

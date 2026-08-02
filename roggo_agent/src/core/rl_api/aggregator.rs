@@ -6,10 +6,7 @@ use crate::core::{
     bl::{game_stat_collector::GameStatCollector, intermediate_models},
     db::Repository,
     rl_api::{
-        Result,
-        byte_buffer::ByteBuffer,
-        deserializer::{deserialize_single_event},
-        models::Event,
+        Result, byte_buffer::ByteBuffer, deserializer::deserialize_single_event, models::Event,
     },
 };
 
@@ -49,31 +46,28 @@ impl Aggregator {
             .as_ref()
             .is_some_and(|collector| collector.is_finished());
 
-        if finished {
-            if let Some(collector) = self.collector.take() {
-                self.collected_matches.insert(collector.get_match_guid());
-                tracing::info!("Game {} finished.", collector.get_match_guid());
-                let (stats, errors) = collector.export();
+        if finished && let Some(collector) = self.collector.take() {
+            self.collected_matches.insert(collector.get_match_guid());
+            tracing::info!("Game {} finished.", collector.get_match_guid());
+            let (stats, errors) = collector.export();
 
-                log_stats(&stats);
-                log_errors(&errors);
-                let mut repository = Repository::connect(&self.db_file_path)?;
+            log_stats(&stats);
+            log_errors(&errors);
+            let mut repository = Repository::connect(&self.db_file_path)?;
 
-                if let Err(err) = repository.insert_game_stats(stats, errors) {
-                    tracing::error!(error= %err, "Failed to save match stats");
-                }
+            if let Err(err) = repository.insert_game_stats(stats, errors) {
+                tracing::error!(error= %err, "Failed to save match stats");
             }
         }
         Ok(())
     }
 
     fn cancel_if_outdated(&mut self, match_guid: Option<Uuid>) {
-        if let Some(match_guid) = match_guid {
-            if let Some(collector) = &self.collector {
-                if match_guid != collector.get_match_guid() {
-                    self.collector = None;
-                }
-            }
+        if let Some(match_guid) = match_guid
+            && let Some(collector) = &self.collector
+            && match_guid != collector.get_match_guid()
+        {
+            self.collector = None;
         }
     }
 
