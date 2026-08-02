@@ -133,24 +133,26 @@ impl ApplicationHandler<UserEvent> for TrayApp {
             UserEvent::Menu(event) => {
                 let id = event.id();
 
-                if let Some(open_item) = &self.web_item
-                    && id == open_item.id()
-                {
-                    let _ = open::that(WEB_UI_URL);
+                if let Some(open_item) = &self.web_item {
+                    if id == open_item.id() {
+                        let _ = open::that(WEB_UI_URL);
+                    }
                 }
 
-                if let Some(settings_item) = &self.settings_item
-                    && id == settings_item.id()
-                    && let Err(err) = Command::new("roggo-settings.exe").spawn()
-                {
-                    tracing::error!(error=%err, "Could not run roggo settings");
+                if let Some(settings_item) = &self.settings_item {
+                    if id == settings_item.id() {
+                        let result = Command::new("roggo-settings.exe").spawn();
+                        if let Err(err) = result {
+                            tracing::error!(error=%err, "Could not run roggo settings");
+                        }
+                    }
                 }
 
-                if let Some(quit_item) = &self.quit_item
-                    && id == quit_item.id()
-                {
-                    let _ = self.shutdown_tx.send(true);
-                    event_loop.exit();
+                if let Some(quit_item) = &self.quit_item {
+                    if id == quit_item.id() {
+                        let _ = self.shutdown_tx.send(true);
+                        event_loop.exit();
+                    }
                 }
             }
         }

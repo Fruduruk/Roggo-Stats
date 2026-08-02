@@ -15,12 +15,6 @@ enum FinishedTask {
     ShutdownRequested,
 }
 
-
-/// .
-///
-/// # Errors
-///
-/// This function will return an error if yes
 pub async fn run_agent(
     shutdown_option: Option<(watch::Sender<bool>, watch::Receiver<bool>)>,
     db_file_path: PathBuf,

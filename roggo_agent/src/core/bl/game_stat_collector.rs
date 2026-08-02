@@ -189,19 +189,19 @@ impl GameStatCollector {
             let player_stats = self.get_or_create_player_stats_mut(player.clone());
 
             update_core_player_stats(&player, player_stats);
-            if let Some(delta) = delta
-                && round_started_once
-            {
-                // Don't count, if round never started once.
-                increment_counters(player_stats, &player, delta);
-                if let Some(timestamp) = self.state.timestamp
-                    && let (Some(boost), Some(speed)) = (player.boost, player.speed)
-                {
-                    let buffer = self
-                        .player_stats_buffer
-                        .entry(player.primary_id)
-                        .or_default();
-                    buffer.push((timestamp, StatSnapshot { speed, boost }));
+            if let Some(delta) = delta {
+                if round_started_once {
+                    // Don't count, if round never started once.
+                    increment_counters(player_stats, &player, delta);
+                    if let Some(timestamp) = self.state.timestamp {
+                        if let (Some(boost), Some(speed)) = (player.boost, player.speed) {
+                            let buffer = self
+                                .player_stats_buffer
+                                .entry(player.primary_id)
+                                .or_default();
+                            buffer.push((timestamp, StatSnapshot { speed, boost }));
+                        }
+                    }
                 }
             }
         }
