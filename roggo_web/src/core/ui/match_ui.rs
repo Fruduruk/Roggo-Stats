@@ -66,7 +66,9 @@ impl MatchUi {
             render_number_leaderboard(ui, "Score", &players, |p| Some(p.score as f64));
             render_number_leaderboard(ui, "Goals", &players, |p| Some(p.goals as f64));
             render_number_leaderboard(ui, "Shots", &players, |p| Some(p.shots as f64));
-            render_number_leaderboard(ui,  "Shooting Percentage", &players, |p| p.shooting_percentage);
+            render_number_leaderboard(ui, "Shooting Percentage", &players, |p| {
+                p.shooting_percentage
+            });
             render_number_leaderboard(ui, "Assists", &players, |p| Some(p.assists as f64));
             render_number_leaderboard(ui, "Saves", &players, |p| Some(p.saves as f64));
             render_number_leaderboard(ui, "Demos", &players, |p| Some(p.demos as f64));
@@ -119,7 +121,7 @@ impl MatchUi {
                         ui.ctx().clone(),
                         detailed_match.match_guid,
                         !detailed_match.hidden,
-                        self.full_reload_requested.clone()
+                        self.full_reload_requested.clone(),
                     );
                     self.reload(ui.ctx().clone(), detailed_match.match_guid);
                 }
@@ -159,15 +161,10 @@ fn render_number_leaderboard<F>(
 {
     let mut entries: Vec<_> = players
         .iter()
-        .filter_map(|entry|
-            {
-                let value = value_fn(entry.player);
-                if let Some(value) = value {
-                    Some((*entry, value))
-                }else {
-                    None
-                }
-            })
+        .filter_map(|entry| {
+            let value = value_fn(entry.player);
+            value.map(|value| (*entry, value))
+        })
         .collect();
 
     entries.sort_by(|a, b| b.1.total_cmp(&a.1));

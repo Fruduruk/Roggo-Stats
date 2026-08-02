@@ -182,12 +182,13 @@ impl ConfigApp {
 
     fn reload_rl_config_if_notepad_closed(&mut self) {
         let mut remove_handle = false;
-        if let Some(child) = &mut self.notepad_process
-            && let Ok(exit_code) = child.try_wait()
-            && exit_code.is_some()
-        {
-            self.rl_config = load_rl_config();
-            remove_handle = true;
+        if let Some(child) = &mut self.notepad_process {
+            if let Ok(exit_code) = child.try_wait() {
+                if exit_code.is_some() {
+                    self.rl_config = load_rl_config();
+                    remove_handle = true;
+                }
+            }
         }
         if remove_handle {
             self.display_information(

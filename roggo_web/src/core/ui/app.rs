@@ -10,8 +10,8 @@ use crate::core::{
     ui::{install_ui::InstallUi, match_overview_ui::MatchOverviewUi, tasks},
 };
 const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
-pub const UI_VERSION: &str = "0.6.0";
-pub const COMPATIBLE_AGENT_VERSION: &str = "0.6.0";
+pub const UI_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const COMPATIBLE_AGENT_VERSION: &str = "0.7.0";
 
 #[derive(Default)]
 pub struct Content {
@@ -40,11 +40,7 @@ impl RoggoApp {
 
     fn get_agent_version(&self) -> String {
         if let Ok(content) = self.content.lock() {
-            content
-                .agent_version
-                .as_deref()
-                .unwrap_or(&String::new())
-                .into()
+            content.agent_version.as_deref().unwrap_or("").into()
         } else {
             String::new()
         }
@@ -121,7 +117,7 @@ impl eframe::App for RoggoApp {
                     ui.separator();
                     // egui::widgets::global_theme_preference_switch(ui);
                     if !version.is_empty() {
-                        ui.label(&format!("WebUi version {UI_VERSION}"));
+                        ui.label(format!("WebUi version {UI_VERSION}"));
                     }
                 });
             })

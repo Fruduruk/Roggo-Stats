@@ -1,3 +1,5 @@
+#![allow(clippy::collapsible_if)]
+
 pub mod core;
 pub mod runtimes;
 pub mod settings;

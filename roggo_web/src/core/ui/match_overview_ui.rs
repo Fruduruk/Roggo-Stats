@@ -49,7 +49,7 @@ impl MatchOverviewUi {
         }
     }
 
-    pub fn ui(&mut self, ui: &mut eframe::egui::Ui, player_name: &String) {
+    pub fn ui(&mut self, ui: &mut eframe::egui::Ui, player_name: &str) {
         egui::Panel::left("match_list")
             .resizable(false)
             .default_size(150.)
@@ -141,7 +141,7 @@ fn get_match_type(match_dto: &SimpleMatchDto) -> NavBarMatchType {
     if match_dto.own_team_score < match_dto.enemy_team_score {
         return NavBarMatchType::Lost;
     }
-    return NavBarMatchType::Unknown;
+    NavBarMatchType::Unknown
 }
 
 fn match_button(ui: &mut egui::Ui, match_dto: &SimpleMatchDto) -> egui::Response {

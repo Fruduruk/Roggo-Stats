@@ -35,7 +35,7 @@ impl SessionUi {
         tasks::load_detailed_session(context, self.content.clone(), match_guids.clone());
     }
 
-    pub fn ui(&self, ui: &mut egui::Ui, player_name: &String) {
+    pub fn ui(&self, ui: &mut egui::Ui, player_name: &str) {
         let Ok(content) = self.content.lock() else {
             ui.label("Failed to lock match content.");
             return;
@@ -91,13 +91,9 @@ impl SessionUi {
             return None;
         }
 
-        let Some(first_started_at) = session_matches.iter().map(|m| m.created_at).min() else {
-            return None;
-        };
+        let first_started_at = session_matches.iter().map(|m| m.created_at).min()?;
 
-        let Some(last_ended_at) = session_matches.iter().map(|m| m.ended_at).max() else {
-            return None;
-        };
+        let last_ended_at = session_matches.iter().map(|m| m.ended_at).max()?;
 
         let total_duration = (last_ended_at - first_started_at).max(1) as f32;
 
@@ -126,7 +122,7 @@ impl SessionUi {
                 egui::pos2(chart_left, chart_top),
                 egui::pos2(chart_left, x_axis_y),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         painter.line_segment(
@@ -134,7 +130,7 @@ impl SessionUi {
                 egui::pos2(chart_left, x_axis_y),
                 egui::pos2(chart_right, x_axis_y),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         painter.text(
@@ -163,13 +159,13 @@ impl SessionUi {
 
             painter.line_segment(
                 [egui::pos2(x, x_axis_y), egui::pos2(x, x_axis_y + 5.0)],
-                Stroke::new(1.0, Color32::GRAY),
+                Stroke::new(1.0_f32, Color32::GRAY),
             );
 
             if tick > 0 && tick < tick_count {
                 painter.line_segment(
                     [egui::pos2(x, chart_top), egui::pos2(x, x_axis_y)],
-                    Stroke::new(0.5, Color32::from_gray(55)),
+                    Stroke::new(0.5_f32, Color32::from_gray(55)),
                 );
             }
 
@@ -242,7 +238,7 @@ impl SessionUi {
                 painter.rect_stroke(
                     bar_rect.expand(1.0),
                     3.0,
-                    Stroke::new(1.5, Color32::WHITE),
+                    Stroke::new(1.5_f32, Color32::WHITE),
                     egui::StrokeKind::Outside,
                 );
             }
@@ -407,7 +403,7 @@ impl SessionUi {
                 egui::pos2(chart_left, chart_top),
                 egui::pos2(chart_left, chart_bottom),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         painter.line_segment(
@@ -415,7 +411,7 @@ impl SessionUi {
                 egui::pos2(chart_left, chart_bottom),
                 egui::pos2(chart_right, chart_bottom),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         let tick_count = 4;
@@ -427,7 +423,7 @@ impl SessionUi {
 
             painter.line_segment(
                 [egui::pos2(chart_left - 4.0, y), egui::pos2(chart_left, y)],
-                Stroke::new(1.0, Color32::GRAY),
+                Stroke::new(1.0_f32, Color32::GRAY),
             );
 
             painter.text(
@@ -441,7 +437,7 @@ impl SessionUi {
             if tick > 0 {
                 painter.line_segment(
                     [egui::pos2(chart_left, y), egui::pos2(chart_right, y)],
-                    Stroke::new(0.5, Color32::from_gray(55)),
+                    Stroke::new(0.5_f32, Color32::from_gray(55)),
                 );
             }
         }
@@ -618,7 +614,7 @@ impl SessionUi {
                 egui::pos2(chart_left, chart_top),
                 egui::pos2(chart_left, chart_bottom),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         painter.line_segment(
@@ -626,7 +622,7 @@ impl SessionUi {
                 egui::pos2(chart_left, chart_bottom),
                 egui::pos2(chart_right, chart_bottom),
             ],
-            Stroke::new(1.0, Color32::GRAY),
+            Stroke::new(1.0_f32, Color32::GRAY),
         );
 
         let tick_count = 4;
@@ -638,7 +634,7 @@ impl SessionUi {
 
             painter.line_segment(
                 [egui::pos2(chart_left - 4.0, y), egui::pos2(chart_left, y)],
-                Stroke::new(1.0, Color32::GRAY),
+                Stroke::new(1.0_f32, Color32::GRAY),
             );
 
             painter.text(
@@ -652,7 +648,7 @@ impl SessionUi {
             if tick > 0 {
                 painter.line_segment(
                     [egui::pos2(chart_left, y), egui::pos2(chart_right, y)],
-                    Stroke::new(0.5, Color32::from_gray(55)),
+                    Stroke::new(0.5_f32, Color32::from_gray(55)),
                 );
             }
         }
