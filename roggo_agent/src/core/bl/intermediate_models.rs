@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::rl_api::{
     self,
-    models::{ Location},
+    models::{Location, RawEvent},
 };
 
 #[derive(Debug)]
@@ -59,6 +59,7 @@ pub struct GameStats {
     pub goal_details: Vec<GoalDetails>,
     pub ball_hits: Vec<BallHitStatistic>,
     pub statfeed_events: Vec<StatfeedEventStatistic>,
+    pub raw_events: Vec<RawEvent>,
 }
 
 impl GameStats {
@@ -76,6 +77,7 @@ impl GameStats {
             goal_details: vec![],
             ball_hits: vec![],
             statfeed_events: vec![],
+            raw_events: vec![],
         }
     }
 
