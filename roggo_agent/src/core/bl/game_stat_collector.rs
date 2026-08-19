@@ -11,8 +11,8 @@ use crate::core::{
         },
     },
     rl_api::models::{
-        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player, StatfeedEvent,
-        UpdateState,
+        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player, RawEvent,
+        StatfeedEvent, UpdateState,
     },
 };
 
@@ -26,6 +26,7 @@ pub struct GameStatCollector {
     statfeed_event_buffer: Vec<(i64, StatfeedEvent)>,
     goal_scored_buffer: Vec<(i64, GoalScored)>,
     player_stats_buffer: HashMap<String, Vec<(i64, StatSnapshot)>>,
+    raw_events: Vec<RawEvent>,
 }
 
 impl GameStatCollector {
@@ -39,6 +40,7 @@ impl GameStatCollector {
             statfeed_event_buffer: vec![],
             goal_scored_buffer: vec![],
             player_stats_buffer: HashMap::new(),
+            raw_events: vec![],
         }
     }
 
@@ -56,6 +58,7 @@ impl GameStatCollector {
             statfeed_event_buffer,
             goal_scored_buffer,
             player_stats_buffer: _,
+            raw_events,
         } = self;
 
         let mut errors = vec![];
@@ -80,7 +83,7 @@ impl GameStatCollector {
                 errors.push(error);
             }
         }
-
+        stats.raw_events = raw_events;
         (stats, errors)
     }
 
