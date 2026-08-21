@@ -6,7 +6,7 @@ use crate::core::contract::{
 };
 use crate::core::{Error, Result};
 
-const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49124";
+const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49122";
 
 pub fn request(route: &str) -> gloo_net::http::RequestBuilder {
     Request::get(&format!("{WEB_SOCKET_ADDR}/{route}"))

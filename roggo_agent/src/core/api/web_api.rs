@@ -21,7 +21,7 @@ use crate::core::{
     windows_api,
 };
 
-const WEB_SOCKET_ADDR: &str = "127.0.0.1:49124";
+const WEB_SOCKET_ADDR: &str = "127.0.0.1:49122";
 
 #[derive(Clone)]
 struct AppState {
