@@ -1,7 +1,8 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use crate::WEB_UI_URL;
 use crate::core::rl_api::{Error, Result};
+use crate::core::time::now;
 use crate::settings::models::AgentConfig;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
@@ -104,7 +105,7 @@ async fn read_tcp_segment(
 ) -> Result<(i64, Vec<u8>)> {
     let n = rl_stream.read(buffer).await.unwrap_or_default();
 
-    let timestamp_ms = now()?;
+    let timestamp_ms = now().map_err(|err| Error::GeneralError(err.to_string()))?;
 
     if n == 0 {
         tracing::warn!("Rocket League API connection closed");
@@ -114,15 +115,4 @@ async fn read_tcp_segment(
     let raw = buffer[..n].to_vec();
 
     Ok((timestamp_ms, raw))
-}
-
-#[inline]
-fn now() -> Result<i64> {
-    i64::try_from(
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|_| Error::GeneralError("System time is before UNIX_EPOCH".into()))?
-            .as_millis(),
-    )
-    .map_err(|_| Error::GeneralError("System time millis does not fit into i64".into()))
 }

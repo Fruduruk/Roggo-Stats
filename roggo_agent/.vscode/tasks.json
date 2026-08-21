@@ -8,7 +8,7 @@
       "args": [
         "build",
         "--bin",
-        "roggo-agent-console"
+        "roggo_agent_console"
       ],
       "problemMatcher": ["$rustc"],
       "group": "build"
@@ -21,7 +21,7 @@
         "build",
         "--release",
         "--bin",
-        "roggo-agent-console"
+        "roggo_agent_console"
       ],
       "problemMatcher": ["$rustc"],
       "group": "build"

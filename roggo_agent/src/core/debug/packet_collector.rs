@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use sevenz_rust::{SevenZArchiveEntry, SevenZWriter, lzma};
+use sevenz_rust::{SeqReader, SevenZArchiveEntry, SevenZWriter, SourceReader, lzma};
 
 pub struct PacketCollector {
     writer: Option<SevenZWriter<File>>,
@@ -42,6 +42,37 @@ impl PacketCollector {
 
         Ok(())
     }
+
+    pub fn next_bulk(&mut self, events: Vec<(i64, Vec<u8>)>) -> io::Result<()> {
+        if events.is_empty() {
+            return Ok(());
+        }
+
+        let mut entries = Vec::with_capacity(events.len());
+        let mut readers = Vec::with_capacity(events.len());
+
+        for (timestamp, bytes) in events {
+            let file_name = format!("{timestamp}.json");
+
+            let mut entry = SevenZArchiveEntry::from_path(Path::new(&file_name), file_name.clone());
+
+            entry.has_stream = true;
+
+            entries.push(entry);
+            readers.push(SourceReader::new(Cursor::new(bytes)));
+        }
+
+        let reader = SeqReader::new(readers);
+
+        self.writer
+            .as_mut()
+            .expect("PacketCollector already finished")
+            .push_archive_entries(entries, reader)
+            .map_err(to_io_error)?;
+
+        Ok(())
+    }
+
     pub fn finish(mut self) -> io::Result<()> {
         if let Some(writer) = self.writer.take() {
             writer.finish()?;

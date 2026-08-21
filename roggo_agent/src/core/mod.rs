@@ -8,6 +8,7 @@ pub mod logging;
 pub mod rl_api;
 pub mod agent_supervisor;
 pub mod windows_api;
+pub mod time;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -31,6 +32,9 @@ pub enum Error {
 
     #[error("Resume error: {0}")]
     ResumeError(String),
+
+    #[error("Error: {0}")]
+    GeneralError(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

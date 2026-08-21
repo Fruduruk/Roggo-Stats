@@ -3,9 +3,7 @@ use std::{collections::HashSet, path::PathBuf};
 use uuid::Uuid;
 
 use crate::core::{
-    bl::{game_stat_collector::GameStatCollector, intermediate_models},
-    db::Repository,
-    rl_api::{
+    bl::{game_stat_collector::GameStatCollector, intermediate_models}, db::Repository, debug::error_dump::{create_error_dump}, rl_api::{
         Result, byte_buffer::ByteBuffer, deserializer::deserialize_single_event, models::Event,
     },
 };
@@ -16,6 +14,7 @@ pub struct Aggregator {
     collector: Option<GameStatCollector>,
     collected_matches: HashSet<Uuid>,
     db_file_path: PathBuf,
+    raw_events: Vec<(i64, Vec<u8>)>,
 }
 
 impl Aggregator {
@@ -27,6 +26,7 @@ impl Aggregator {
     }
 
     pub fn insert(&mut self, timestamp: i64, bytes: Vec<u8>) -> Result<()> {
+        self.raw_events.push((timestamp, bytes.clone()));
         self.byte_buffer.push(bytes);
         while let Some(raw_packet) = self.byte_buffer.get()? {
             let Some(event) = deserialize_single_event(&raw_packet) else {
@@ -56,8 +56,11 @@ impl Aggregator {
                 log_errors(&errors);
                 let mut repository = Repository::connect(&self.db_file_path)?;
 
+                let raw_events = std::mem::take(&mut self.raw_events);
+
                 if let Err(err) = repository.insert_game_stats(stats, errors) {
                     tracing::error!(error= %err, "Failed to save match stats");
+                    create_error_dump(raw_events, err.to_string());
                 }
             }
         }
@@ -69,6 +72,7 @@ impl Aggregator {
             if let Some(collector) = &self.collector {
                 if match_guid != collector.get_match_guid() {
                     self.collector = None;
+                    self.raw_events = vec![];
                 }
             }
         }

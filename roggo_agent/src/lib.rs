@@ -20,3 +20,7 @@ pub fn get_app_data_directory() -> PathBuf {
 pub fn get_db_file_path() -> PathBuf {
     get_app_data_directory().join(DB_FILE_NAME)
 }
+
+pub fn get_dumps_folder_path() -> PathBuf {
+     get_app_data_directory().join("dumps")
+}

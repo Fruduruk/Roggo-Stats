@@ -7,6 +7,7 @@ use tokio::task::JoinError;
 use crate::core::api::web_api;
 use crate::core::rl_api::aggregator::Aggregator;
 use crate::core::rl_api::rocket_league_api::read_rocket_league_api;
+use crate::core::time::now;
 use crate::core::{Error, Result};
 use crate::settings::models::AgentConfig;
 
@@ -108,8 +109,14 @@ async fn receive_packets(
     db_file_path: PathBuf,
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
-    // let mut packet_collector =
-    //     crate::core::debug::packet_collector::PacketCollector::new("captures/new.7z").unwrap();
+
+    let mut collector = (std::env::var("capture_input")
+        .is_ok_and(|value| value.eq_ignore_ascii_case("true")))
+    .then(|| {
+        let path = format!("captures/new/input {}.7z", now().unwrap());
+        crate::core::debug::packet_collector::PacketCollector::new(path).unwrap()
+    });
+
     let mut aggregator = Aggregator::new(db_file_path);
     let mut count: u128 = 0;
 
@@ -119,14 +126,22 @@ async fn receive_packets(
         }
 
         print!("\rReceiving packet number {}", count);
-        // packet_collector.next(timestamp, &raw).map_err(|err| Error::ShutdownError(err.to_string()))?;
+        if let Some(collector) = collector.as_mut() {
+            collector
+                .next(timestamp, bytes.clone())
+                .map_err(|err| Error::ShutdownError(err.to_string()))?;
+        }
         if let Err(err) = aggregator.insert(timestamp, bytes) {
-            tracing::warn!(error=%err,"failed to insert packet");
+            tracing::warn!(error=%err,"failed to insert tcp bytes");
         }
         count += 1;
     }
 
-    // packet_collector.finish().map_err(|err| Error::ShutdownError(err.to_string()))?;
+    if let Some(collector) = collector {
+        collector
+            .finish()
+            .map_err(|err| Error::ShutdownError(err.to_string()))?;
+    }
 
     tracing::info!("Shutting down aggregator...");
     Ok(())

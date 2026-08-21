@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 use std::fs::File;
+use std::time::Duration;
 use std::{
     path::{Path},
 };
@@ -62,6 +63,8 @@ pub async fn read_test_files_from_7z(
         }
     }
     loop {
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        
         if *shutdown_rx.borrow() {
             break;
         }
