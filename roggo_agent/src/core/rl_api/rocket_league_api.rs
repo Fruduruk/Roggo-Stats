@@ -1,3 +1,5 @@
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use crate::WEB_UI_URL;
@@ -14,6 +16,7 @@ pub async fn read_rocket_league_api(
     config: AgentConfig,
     tx: mpsc::Sender<(i64, Vec<u8>)>,
     shutdown_rx: watch::Receiver<bool>,
+    any_match_saved: Arc<AtomicBool>,
 ) -> Result<()> {
     loop {
         let mut rl_stream =
@@ -46,8 +49,10 @@ pub async fn read_rocket_league_api(
                 match result {
                     Ok(()) => {
                         tracing::warn!("Rocket League API disconnected. Reconnecting...");
-                        if config.start_ui_when_rl_closes {
-                            let _ = open::that(WEB_UI_URL);
+                        if config.start_ui_when_rl_closes && any_match_saved.load(Ordering::Relaxed) {
+                            if let Err(err) = open::that(WEB_UI_URL){
+                                tracing::error!(error = %err, "Failed to open Web UI after Rocket League closed:");
+                            }
                         }
 
                         continue;

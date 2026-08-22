@@ -1,9 +1,19 @@
-use std::{collections::HashSet, path::PathBuf};
+use std::{
+    collections::HashSet,
+    path::PathBuf,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+};
 
 use uuid::Uuid;
 
 use crate::core::{
-    bl::{game_stat_collector::GameStatCollector, intermediate_models}, db::Repository, debug::error_dump::{create_error_dump}, rl_api::{
+    bl::{game_stat_collector::GameStatCollector, intermediate_models},
+    db::Repository,
+    debug::error_dump::create_error_dump,
+    rl_api::{
         Result, byte_buffer::ByteBuffer, deserializer::deserialize_single_event, models::Event,
     },
 };
@@ -25,7 +35,12 @@ impl Aggregator {
         }
     }
 
-    pub fn insert(&mut self, timestamp: i64, bytes: Vec<u8>) -> Result<()> {
+    pub fn insert(
+        &mut self,
+        timestamp: i64,
+        bytes: Vec<u8>,
+        any_match_saved: &mut Arc<AtomicBool>,
+    ) -> Result<()> {
         self.raw_events.push((timestamp, bytes.clone()));
         self.byte_buffer.push(bytes);
         while let Some(raw_packet) = self.byte_buffer.get()? {
@@ -34,13 +49,13 @@ impl Aggregator {
             };
             self.cancel_if_outdated(event.get_match_guid());
             self.handle_event(timestamp, event)?;
-            self.export_collector_if_finished()?;
+            self.export_collector_if_finished(any_match_saved)?;
         }
 
         Ok(())
     }
 
-    fn export_collector_if_finished(&mut self) -> Result<()> {
+    fn export_collector_if_finished(&mut self, any_match_saved: &mut Arc<AtomicBool>) -> Result<()> {
         let finished = self
             .collector
             .as_ref()
@@ -61,6 +76,8 @@ impl Aggregator {
                 if let Err(err) = repository.insert_game_stats(stats, errors) {
                     tracing::error!(error= %err, "Failed to save match stats");
                     create_error_dump(raw_events, err.to_string());
+                } else {
+                    any_match_saved.store(true, Ordering::Relaxed);
                 }
             }
         }

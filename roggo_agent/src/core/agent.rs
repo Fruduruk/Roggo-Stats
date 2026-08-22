@@ -1,4 +1,6 @@
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use tokio::sync::mpsc;
 use tokio::sync::watch;
@@ -27,12 +29,20 @@ pub async fn run_agent_instance(
 
     let (tx, rx) = mpsc::channel::<(i64, Vec<u8>)>(1_000_000);
 
-    let mut send_handle = tokio::spawn(send_packets(config, shutdown_rx.clone(), tx));
+    let any_match_saved = Arc::new(AtomicBool::new(false));
+
+    let mut send_handle = tokio::spawn(send_packets(
+        config,
+        shutdown_rx.clone(),
+        tx,
+        any_match_saved.clone(),
+    ));
 
     let mut receive_handle = tokio::spawn(receive_packets(
         shutdown_rx.clone(),
         rx,
         db_file_path.clone(),
+        any_match_saved.clone()
     ));
 
     let mut web_handle = tokio::spawn(start_web_api(shutdown_rx.clone(), db_file_path));
@@ -88,6 +98,7 @@ async fn send_packets(
     config: AgentConfig,
     shutdown_rx: watch::Receiver<bool>,
     tx: mpsc::Sender<(i64, Vec<u8>)>,
+    any_match_saved: Arc<AtomicBool>,
 ) -> Result<()> {
     if let Ok(path) = std::env::var("import_path") {
         crate::core::debug::test_file_reader::read_test_files_from_7z(
@@ -97,7 +108,7 @@ async fn send_packets(
         )
         .await;
     } else {
-        read_rocket_league_api(config, tx, shutdown_rx.clone()).await?;
+        read_rocket_league_api(config, tx, shutdown_rx.clone(), any_match_saved).await?;
     }
 
     Ok(())
@@ -107,6 +118,7 @@ async fn receive_packets(
     shutdown_rx: watch::Receiver<bool>,
     mut rx: mpsc::Receiver<(i64, Vec<u8>)>,
     db_file_path: PathBuf,
+    mut any_match_saved: Arc<AtomicBool>
 ) -> Result<()> {
     tracing::info!("Aggregator is running");
 
@@ -131,7 +143,7 @@ async fn receive_packets(
                 .next(timestamp, bytes.clone())
                 .map_err(|err| Error::ShutdownError(err.to_string()))?;
         }
-        if let Err(err) = aggregator.insert(timestamp, bytes) {
+        if let Err(err) = aggregator.insert(timestamp, bytes, &mut any_match_saved) {
             tracing::warn!(error=%err,"failed to insert tcp bytes");
         }
         count += 1;
