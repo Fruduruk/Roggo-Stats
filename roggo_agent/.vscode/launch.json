@@ -31,7 +31,7 @@
       "environment": [
         {
           "name": "import_path",
-          "value": "captures/0.7.0/new_rl_api_3v3_1v1.7z"
+          "value": "captures/0.7.0/replay_input.7z"
         },
         {
           "name": "capture_input",

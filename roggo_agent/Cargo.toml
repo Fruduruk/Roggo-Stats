@@ -44,4 +44,4 @@ notify = "8.2.0"
 
 [profile.dev]
 opt-level = 0
-debug = true
+debug = "line-tables-only"

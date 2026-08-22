@@ -426,9 +426,10 @@ fn insert_match(
             created_at_ms,
             ended_at_ms,
             had_overtime,
-            deleted
+            deleted,
+            playlist
         )
-        values (?1,?2,?3,?4,?5,?6,?7);
+        values (?1,?2,?3,?4,?5,?6,?7,?8);
         ",
         params![
             match_guid,
@@ -437,7 +438,8 @@ fn insert_match(
             stats.created_at_timestamp,
             stats.ended_at_timestamp,
             stats.had_overtime,
-            false
+            false,
+            stats.playlist as i64
         ],
     )?;
     Ok(tx.last_insert_rowid())

@@ -11,7 +11,12 @@ impl Repository {
         repo.connection.pragma_update(None, "foreign_keys", "ON")?;
 
         repo.init()?;
-        repo.migrate_v1().map_err(|sql_error| Error::MigrationError(format!("Migration 1 failed: {:#?}",sql_error)))?;
+        repo.migrate_v1().map_err(|sql_error| {
+            Error::MigrationError(format!("Migration 1 failed: {:#?}", sql_error))
+        })?;
+        repo.migrate_v2().map_err(|sql_error| {
+            Error::MigrationError(format!("Migration 2 failed: {:#?}", sql_error))
+        })?;
 
         Ok(())
     }
@@ -44,8 +49,6 @@ impl Repository {
 
         Ok(stmt.query_row([], |row| row.get("version"))?)
     }
-
-    
 
     fn migrate_v1(&mut self) -> Result<()> {
         const MIGRATION_VERSION: i64 = 1;
@@ -85,6 +88,35 @@ impl Repository {
         info_successfully_migrated(MIGRATION_VERSION);
         Ok(())
     }
+
+    fn migrate_v2(&mut self) -> Result<()> {
+        const MIGRATION_VERSION: i64 = 2;
+        if self.get_version().unwrap_or_default() >= MIGRATION_VERSION {
+            info_already_migrated(MIGRATION_VERSION);
+            return Ok(());
+        }
+
+        let now = Instant::now();
+
+        let tx = self.connection.transaction()?;
+        tx.execute_batch(include_str!("sql/migrations/v2.sql"))?;
+
+        check_foreign_keys(&tx)?;
+
+        add_migration_history_entry(
+            &tx,
+            MIGRATION_VERSION,
+            "
+                    2.1: Added Playlist for Match
+                ",
+            elapsed_ms(now)?,
+        )?;
+        tx.commit()?;
+
+        info_successfully_migrated(MIGRATION_VERSION);
+
+        Ok(())
+    }
 }
 
 fn info_already_migrated(version: i64) {
@@ -96,27 +128,25 @@ fn info_successfully_migrated(version: i64) {
 }
 
 fn check_foreign_keys(tx: &Transaction<'_>) -> Result<()> {
-        let mut stmt = tx.prepare("pragma foreign_key_check;")?;
+    let mut stmt = tx.prepare("pragma foreign_key_check;")?;
 
-        let violations = stmt
-            .query_map([], |row| {
-                let table: String = row.get(0)?;
+    let violations = stmt
+        .query_map([], |row| {
+            let table: String = row.get(0)?;
 
-                Ok(format!(
-                    "{table} has wrong foreign keys"
-                ))
-            })?
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            Ok(format!("{table} has wrong foreign keys"))
+        })?
+        .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        if !violations.is_empty() {
-            return Err(Error::GeneralError(format!(
-                "Foreign key check failed: {}",
-                violations.join("\n")
-            )));
-        }
-
-        Ok(())
+    if !violations.is_empty() {
+        return Err(Error::GeneralError(format!(
+            "Foreign key check failed: {}",
+            violations.join("\n")
+        )));
     }
+
+    Ok(())
+}
 
 pub fn add_migration_history_entry(
     tx: &Transaction<'_>,

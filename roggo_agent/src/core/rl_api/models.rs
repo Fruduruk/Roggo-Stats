@@ -1,8 +1,7 @@
+use crate::core::rl_api::Result;
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer};
 use uuid::Uuid;
-use crate::core::rl_api::{Result};
-
 
 fn empty_string_as_none_uuid<'de, D>(deserializer: D) -> std::result::Result<Option<Uuid>, D::Error>
 where
@@ -13,6 +12,20 @@ where
     match value.as_deref() {
         None | Some("") => Ok(None),
         Some(s) => Uuid::parse_str(s).map(Some).map_err(D::Error::custom),
+    }
+}
+
+fn playlist_id_as_playlist<'de, D>(deserializer: D) -> std::result::Result<Playlist, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<u32>::deserialize(deserializer)?;
+
+    match value {
+        None => Ok(Playlist::Unknown),
+        Some(id) => {
+            Ok(id.into())
+        }
     }
 }
 
@@ -29,6 +42,7 @@ pub struct RawPacket {
 pub enum RawEvent {
     UpdateState,
     BallHit,
+    BoostPickup,
     ClockUpdatedSeconds,
     CountdownBegin,
     CrossbarHit,
@@ -49,12 +63,15 @@ pub enum RawEvent {
     StatfeedEvent,
     ReplayPlaybackStart,
     ReplayPlaybackEnd,
+    PlayerJoined,
+    PlayerLeft,
 }
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Event {
     UpdateState(UpdateState),
     BallHit(BallHit),
+    BoostPickup(BoostPickup),
     ClockUpdatedSeconds(ClockUpdatedSeconds),
     CountdownBegin(MatchIdentfier),
     CrossbarHit(CrossbarHit),
@@ -70,11 +87,13 @@ pub enum Event {
     MatchPaused(MatchIdentfier),
     MatchUnpaused(MatchIdentfier),
     PodiumStart(MatchIdentfier),
-    ReplayCreated(MatchIdentfier),
+    ReplayCreated(ReplayCreated),
     RoundStarted(MatchIdentfier),
     StatfeedEvent(StatfeedEvent),
     ReplayPlaybackStart(MatchIdentfier),
-    ReplayPlaybackEnd(MatchIdentfier)
+    ReplayPlaybackEnd(MatchIdentfier),
+    PlayerJoined(PlayerIdentifier),
+    PlayerLeft(PlayerIdentifier),
 }
 
 impl Event {
@@ -82,6 +101,7 @@ impl Event {
         Ok(match raw_packet.event {
             RawEvent::UpdateState => Event::UpdateState(serde_json::from_str(&raw_packet.data)?),
             RawEvent::BallHit => Event::BallHit(serde_json::from_str(&raw_packet.data)?),
+            RawEvent::BoostPickup => Event::BoostPickup(serde_json::from_str(&raw_packet.data)?),
             RawEvent::ClockUpdatedSeconds => {
                 Event::ClockUpdatedSeconds(serde_json::from_str(&raw_packet.data)?)
             }
@@ -122,8 +142,14 @@ impl Event {
             RawEvent::ReplayWillEnd => {
                 Event::ReplayWillEnd(serde_json::from_str(&raw_packet.data)?)
             }
-            RawEvent::ReplayPlaybackStart => Event::ReplayPlaybackStart(serde_json::from_str(&raw_packet.data)?),
-            RawEvent::ReplayPlaybackEnd => Event::ReplayPlaybackEnd(serde_json::from_str(&raw_packet.data)?),
+            RawEvent::ReplayPlaybackStart => {
+                Event::ReplayPlaybackStart(serde_json::from_str(&raw_packet.data)?)
+            }
+            RawEvent::ReplayPlaybackEnd => {
+                Event::ReplayPlaybackEnd(serde_json::from_str(&raw_packet.data)?)
+            }
+            RawEvent::PlayerJoined => Event::PlayerJoined(serde_json::from_str(&raw_packet.data)?),
+            RawEvent::PlayerLeft => Event::PlayerLeft(serde_json::from_str(&raw_packet.data)?),
         })
     }
 
@@ -131,6 +157,7 @@ impl Event {
         match self {
             Event::UpdateState(update_state) => update_state.match_guid,
             Event::BallHit(ball_hit) => ball_hit.match_guid,
+            Event::BoostPickup(boost_pickup) => boost_pickup.match_guid,
             Event::ClockUpdatedSeconds(clock_updated_seconds) => clock_updated_seconds.match_guid,
             Event::CountdownBegin(match_identfier) => match_identfier.match_guid,
             Event::CrossbarHit(crossbar_hit) => crossbar_hit.match_guid,
@@ -151,6 +178,8 @@ impl Event {
             Event::StatfeedEvent(statfeed_event) => statfeed_event.match_guid,
             Event::ReplayPlaybackStart(match_identifier) => match_identifier.match_guid,
             Event::ReplayPlaybackEnd(match_identfier) => match_identfier.match_guid,
+            Event::PlayerJoined(player_identifier) => player_identifier.match_guid,
+            Event::PlayerLeft(player_identifier) => player_identifier.match_guid,
         }
     }
 }
@@ -195,6 +224,8 @@ pub struct Player {
     pub car_touches: u32,
     #[serde(rename = "Demos")]
     pub demos: u16,
+    #[serde(rename = "Loadout")]
+    pub loadout: Vec<String>,
     #[serde(rename = "bHasCar")]
     pub b_has_car: Option<bool>,
     #[serde(rename = "Speed")]
@@ -215,12 +246,20 @@ pub struct Player {
     pub b_supersonic: Option<bool>,
     #[serde(rename = "Attacker")]
     pub attacker: Option<GamePlayer>,
+    #[serde(rename = "PickupClass")]
+    pub pickup_class: Option<String>,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
 pub struct Game {
     #[serde(rename = "Teams")]
     pub teams: Vec<Team>,
+    #[serde(
+        rename = "PlaylistId",
+        default,
+        deserialize_with = "playlist_id_as_playlist"
+    )]
+    pub playlist: Playlist,
     #[serde(rename = "TimeSeconds")]
     pub time_seconds: u16,
     #[serde(rename = "bOvertime")]
@@ -267,8 +306,7 @@ pub struct BallState {
     pub team_num: u8,
 }
 
-#[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
-#[derive(Default)]
+#[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize, Default)]
 pub struct Location {
     #[serde(rename = "X")]
     pub x: f64,
@@ -277,7 +315,6 @@ pub struct Location {
     #[serde(rename = "Z")]
     pub z: f64,
 }
-
 
 #[derive(PartialEq, Debug, Clone, Copy, serde::Deserialize)]
 pub struct Ball {
@@ -313,6 +350,26 @@ pub struct BallHit {
     pub ball: Ball,
 }
 
+#[derive(PartialEq, Debug, Clone, serde::Deserialize)]
+pub struct BoostPickup {
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
+    #[serde(rename = "Player")]
+    pub player: GamePlayer,
+    #[serde(rename = "Location")]
+    pub location: Location,
+    #[serde(rename = "BoostAmount")]
+    pub boost_amount: f64,
+    #[serde(rename = "BoostType")]
+    pub boost_type: String,
+    #[serde(rename = "bReplay")]
+    pub b_replay: bool,
+}
+
 #[derive(PartialEq, Eq, Hash, Debug, Clone, serde::Deserialize)]
 pub struct ClockUpdatedSeconds {
     #[serde(
@@ -335,6 +392,34 @@ pub struct MatchIdentfier {
         deserialize_with = "empty_string_as_none_uuid"
     )]
     pub match_guid: Option<Uuid>,
+}
+
+#[derive(PartialEq, Debug, Clone, serde::Deserialize)]
+pub struct ReplayCreated {
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
+    #[serde(rename = "FileName")]
+    pub file_name: String,
+    #[serde(rename = "Date")]
+    pub date: String,
+}
+
+#[derive(PartialEq, Debug, Clone, serde::Deserialize)]
+pub struct PlayerIdentifier {
+    #[serde(
+        rename = "MatchGuid",
+        default,
+        deserialize_with = "empty_string_as_none_uuid"
+    )]
+    pub match_guid: Option<Uuid>,
+    #[serde(rename = "PlayerName")]
+    pub player_name: String,
+    #[serde(rename = "PrimaryId")]
+    pub primary_id: String,
 }
 
 #[derive(PartialEq, Debug, Clone, serde::Deserialize)]
@@ -413,4 +498,138 @@ pub struct StatfeedEvent {
     pub main_target: GamePlayer,
     #[serde(rename = "SecondaryTarget")]
     pub secondary_target: Option<GamePlayer>,
+}
+
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize)]
+#[repr(u32)]
+pub enum Playlist {
+    #[default]
+    Unknown = 0,
+    Duel = 1,
+    Doubles = 2,
+    Standard = 3,
+    Chaos = 4,
+
+    RankedDuel = 10,
+    RankedDoubles = 11,
+    RankedStandard = 13,
+
+    SnowDay = 15,
+    RocketLabs = 16,
+    Hoops = 17,
+    Rumble = 18,
+
+    TournamentMatch = 22,
+    Dropshot = 23,
+    ExternalMatch = 26,
+
+    RankedHoops = 27,
+    RankedRumble = 28,
+    RankedDropshot = 29,
+    RankedSnowDay = 30,
+
+    GhostHunt = 31,
+    BeachBall = 32,
+    SpikeRush = 33,
+
+    TournamentMatch34 = 34,
+    RocketLabs35 = 35,
+
+    DropshotRumble = 37,
+    Heatseeker = 38,
+    BoomerBall = 41,
+    HeatseekerDoubles = 43,
+    WinterBreakaway = 44,
+    Gridiron = 46,
+    SuperCube = 47,
+    TacticalRumble = 48,
+    SpringLoaded = 49,
+    SpeedDemon = 50,
+    GothamCityRumble = 52,
+    Knockout = 54,
+
+    ConfidentialThirdWheelTest = 55,
+
+    NikeFcShowdown = 62,
+    HauntedHeatseekerDoubles = 64,
+    HauntedHeatseeker = 65,
+    HeatseekerRicochet = 66,
+    SpookyCube = 67,
+    GForceFrenzy = 68,
+
+    DropshotRumbleDoubles = 70,
+}
+
+impl From<u32> for Playlist {
+    fn from(id: u32) -> Self {
+        match id {
+            1 => Self::Duel,
+            2 => Self::Doubles,
+            3 => Self::Standard,
+            4 => Self::Chaos,
+            10 => Self::RankedDuel,
+            11 => Self::RankedDoubles,
+            13 => Self::RankedStandard,
+            15 => Self::SnowDay,
+            16 => Self::RocketLabs,
+            17 => Self::Hoops,
+            18 => Self::Rumble,
+            22 => Self::TournamentMatch,
+            23 => Self::Dropshot,
+            26 => Self::ExternalMatch,
+            27 => Self::RankedHoops,
+            28 => Self::RankedRumble,
+            29 => Self::RankedDropshot,
+            30 => Self::RankedSnowDay,
+            31 => Self::GhostHunt,
+            32 => Self::BeachBall,
+            33 => Self::SpikeRush,
+            34 => Self::TournamentMatch34,
+            35 => Self::RocketLabs35,
+            37 => Self::DropshotRumble,
+            38 => Self::Heatseeker,
+            41 => Self::BoomerBall,
+            43 => Self::HeatseekerDoubles,
+            44 => Self::WinterBreakaway,
+            46 => Self::Gridiron,
+            47 => Self::SuperCube,
+            48 => Self::TacticalRumble,
+            49 => Self::SpringLoaded,
+            50 => Self::SpeedDemon,
+            52 => Self::GothamCityRumble,
+            54 => Self::Knockout,
+            55 => Self::ConfidentialThirdWheelTest,
+            62 => Self::NikeFcShowdown,
+            64 => Self::HauntedHeatseekerDoubles,
+            65 => Self::HauntedHeatseeker,
+            66 => Self::HeatseekerRicochet,
+            67 => Self::SpookyCube,
+            68 => Self::GForceFrenzy,
+            70 => Self::DropshotRumbleDoubles,
+
+            _ => Self::Unknown,
+        }
+    }
+}
+
+impl Playlist {
+    pub const fn id(self) -> u32 {
+        self as u32
+    }
+
+    pub const fn is_ranked(self) -> bool {
+        matches!(
+            self,
+            Self::RankedDuel
+                | Self::RankedDoubles
+                | Self::RankedStandard
+                | Self::TournamentMatch
+                | Self::ExternalMatch
+                | Self::RankedHoops
+                | Self::RankedRumble
+                | Self::RankedDropshot
+                | Self::RankedSnowDay
+                | Self::TournamentMatch34
+        )
+    }
 }

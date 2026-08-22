@@ -176,6 +176,7 @@ impl GameStatCollector {
             self.stats.duration += delta;
         }
 
+        self.stats.playlist = update_state.game.playlist;
         self.stats.arena_name.get_or_insert(update_state.game.arena);
 
         for team in update_state.game.teams {

@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::core::rl_api::{
-    self,
-    models::{Location},
+    self, models::{Location, Playlist},
 };
 
 #[derive(Debug)]
@@ -33,6 +32,7 @@ impl GameState {
 #[derive(Debug)]
 pub struct GameStats {
     pub match_guid: Uuid,
+    pub playlist: Playlist,
     pub arena_name: Option<String>,
     pub duration: i64,
     pub created_at_timestamp: i64,
@@ -50,6 +50,7 @@ impl GameStats {
     pub fn new(match_guid: Uuid, timestamp: i64) -> Self {
         Self {
             match_guid,
+            playlist: Playlist::Unknown,
             arena_name: None,
             duration: 0,
             created_at_timestamp: timestamp,
