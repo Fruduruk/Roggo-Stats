@@ -26,6 +26,10 @@ impl Default for PatchNotesUi {
 fn generate_patch_notes() -> Vec<(String, String)> {
     vec![
         (
+            "0.7.0".into(),
+            include_str!("../../../patch_notes/v0.7.0.md").into(),
+        ),
+        (
             "0.6.0".into(),
             include_str!("../../../patch_notes/v0.6.0.md").into(),
         ),
