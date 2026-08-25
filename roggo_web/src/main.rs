@@ -6,8 +6,6 @@ fn main() {
     use eframe::wasm_bindgen::JsCast as _;
 
     wasm_bindgen_futures::spawn_local(async {
-        use crate::core::ui::app::RoggoApp;
-
         let document = web_sys::window().unwrap().document().unwrap();
 
         let canvas = document
@@ -22,7 +20,7 @@ fn main() {
                 eframe::WebOptions::default(),
                 Box::new(|cc| {
                     egui_extras::install_image_loaders(&cc.egui_ctx);
-                    Ok(Box::new(RoggoApp::new(cc)))
+                    Ok(Box::new(core::app::RoggoApp::new(cc)))
                 }),
             )
             .await

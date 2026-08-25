@@ -1,6 +1,6 @@
 use eframe::egui;
 
-use crate::core::ui::{app::COMPATIBLE_AGENT_VERSION, patchnotes_ui::PatchNotesUi};
+use crate::core::{app::COMPATIBLE_AGENT_VERSION, ui::patchnotes_ui::PatchNotesUi};
 
 pub const DOWNLOAD_URL: &str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.6.0/RoggoAgentSetup_0.6.0.exe";
 
@@ -23,7 +23,7 @@ impl InstallUi {
         egui::Panel::left("info_nav_list")
             .resizable(false)
             .default_size(150.)
-            .show_inside(ui, |ui| {
+            .show(ui, |ui| {
                 if ui
                     .add_sized([ui.available_width(), 32.0], egui::Button::new("Overview"))
                     .clicked()
@@ -54,7 +54,7 @@ impl InstallUi {
     }
 
     fn show_patch_notes(&mut self, ui: &mut egui::Ui, version: String) {
-        egui::CentralPanel::default().show_inside(ui, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("Patch Notes:");
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.patch_notes_ui.show(ui, version);
@@ -63,7 +63,7 @@ impl InstallUi {
     }
 
     fn show_info(&mut self, ui: &mut egui::Ui, version: String) {
-        egui::CentralPanel::default().show_inside(ui, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.heading("Welcome to Roggo Stats!");
             ui.separator();
 
@@ -75,7 +75,7 @@ impl InstallUi {
     }
 
     fn show_download(&mut self, ui: &mut egui::Ui) {
-        egui::CentralPanel::default().show_inside(ui, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.label(format!(
                 "Please download and run roggo agent with version {}",
                 COMPATIBLE_AGENT_VERSION
