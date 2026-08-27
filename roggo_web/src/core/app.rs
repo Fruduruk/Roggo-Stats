@@ -5,7 +5,7 @@ use crate::core::{
     app_state::{AppState, agent_state::AgentState},
     contract::AgentErrorDto,
     tasks,
-    ui::install_ui::InstallUi,
+    ui::{install_ui::InstallUi, pages::development_page::DevelopmentPage, theme::apply_theme},
 };
 use eframe::egui;
 use futures_channel::mpsc::{self, Receiver, Sender};
@@ -26,11 +26,12 @@ pub struct RoggoApp {
     last_reload: f64,
     install_ui: InstallUi,
     state: AppState,
+    development_page: DevelopmentPage,
 }
 
 impl RoggoApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        cc.egui_ctx.set_pixels_per_point(2.0);
+        apply_theme(&cc.egui_ctx);
 
         let (sender, receiver) = mpsc::channel(1000);
         tasks::load_main_character(sender.clone());
@@ -42,6 +43,7 @@ impl RoggoApp {
             last_reload: Default::default(),
             install_ui: Default::default(),
             state: Default::default(),
+            development_page: Default::default(),
         }
     }
 
@@ -59,8 +61,7 @@ impl RoggoApp {
     }
 
     fn main_ui(&mut self, ui: &mut egui::Ui) {
-        egui::CentralPanel::default().show(ui, |ui| {
-        });
+        self.development_page.ui(ui);
     }
 }
 
@@ -77,27 +78,33 @@ impl eframe::App for RoggoApp {
             _ => None,
         };
 
-        egui::Panel::top("header").show(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.heading("Roggo Stats");
+        egui::Panel::top("header")
+            .show_separator_line(false)
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.heading("Roggo Stats");
 
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    show_github_button(ui);
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        show_github_button(ui);
 
-                    ui.separator();
+                        ui.separator();
 
-                    if let Some(name) = &self.state.player_name {
-                        ui.label(name);
-                    }
+                        egui::widgets::global_theme_preference_switch(ui);
 
-                    ui.separator();
+                        ui.separator();
 
-                    if agent_version.is_some() {
-                        ui.label(format!("WebUi version {UI_VERSION}"));
-                    }
+                        if let Some(name) = &self.state.player_name {
+                            ui.label(name);
+                        }
+
+                        ui.separator();
+
+                        if agent_version.is_some() {
+                            ui.label(format!("WebUi version {UI_VERSION}"));
+                        }
+                    });
                 });
             });
-        });
 
         if matches!(self.state.agent_state, AgentState::CheckingAgent) {
             egui::CentralPanel::default().show(ui, |ui| {
