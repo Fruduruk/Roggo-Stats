@@ -33,17 +33,5 @@ pub fn tab_button(ui: &mut egui::Ui, text: String, selected: bool) -> egui::Resp
         text_color,
     );
 
-    if selected {
-        let underline_y = rect.bottom() - 2.0;
-
-        ui.painter().line_segment(
-            [
-                egui::pos2(rect.left() + padding_x, underline_y),
-                egui::pos2(rect.right() - padding_x, underline_y),
-            ],
-            egui::Stroke::new(2.0, ui.visuals().selection.bg_fill),
-        );
-    }
-
     response
 }
