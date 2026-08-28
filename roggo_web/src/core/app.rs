@@ -5,11 +5,15 @@ use crate::core::{
     app_state::{AppState, agent_state::AgentState},
     contract::AgentErrorDto,
     tasks,
-    ui::{install_ui::InstallUi, pages::development_page::DevelopmentPage, theme::apply_theme},
+    ui::{
+        components::{footer, header},
+        install_ui::InstallUi,
+        pages::development_page::DevelopmentPage,
+        theme::apply_theme,
+    },
 };
 use eframe::egui;
 use futures_channel::mpsc::{self, Receiver, Sender};
-const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
 pub const UI_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const COMPATIBLE_AGENT_VERSION: &str = "0.7.0";
 
@@ -61,7 +65,7 @@ impl RoggoApp {
     }
 
     fn main_ui(&mut self, ui: &mut egui::Ui) {
-        self.development_page.ui(ui);
+        self.development_page.ui(ui, &mut self.state);
     }
 }
 
@@ -74,37 +78,15 @@ impl eframe::App for RoggoApp {
         }
 
         let agent_version = match &self.state.agent_state {
-            AgentState::AgentOutdated(version) | AgentState::Ready(version) => Some(version),
+            AgentState::AgentOutdated(version) | AgentState::Ready(version) => {
+                Some(version.clone())
+            }
             _ => None,
         };
 
-        egui::Panel::top("header")
-            .show_separator_line(false)
-            .show(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.heading("Roggo Stats");
+        header::ui(ui, &mut self.state.parameters.date, &self.state.player_name);
 
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        show_github_button(ui);
-
-                        ui.separator();
-
-                        egui::widgets::global_theme_preference_switch(ui);
-
-                        ui.separator();
-
-                        if let Some(name) = &self.state.player_name {
-                            ui.label(name);
-                        }
-
-                        ui.separator();
-
-                        if agent_version.is_some() {
-                            ui.label(format!("WebUi version {UI_VERSION}"));
-                        }
-                    });
-                });
-            });
+        footer::ui(ui, agent_version.clone());
 
         if matches!(self.state.agent_state, AgentState::CheckingAgent) {
             egui::CentralPanel::default().show(ui, |ui| {
@@ -119,29 +101,8 @@ impl eframe::App for RoggoApp {
                 self.main_ui(ui);
             }
             version => {
-                self.install_ui.ui(ui, version.cloned().unwrap_or_default());
+                self.install_ui.ui(ui, version.unwrap_or_default());
             }
         }
-    }
-}
-
-fn show_github_button(ui: &mut egui::Ui) {
-    let image = egui::Image::new(egui::include_image!("../../assets/github.png"))
-        .fit_to_exact_size(egui::vec2(16.0, 16.0));
-    let response = ui
-        .add(
-            egui::Button::image(image)
-                .min_size(egui::vec2(24.0, 24.0))
-                .corner_radius(egui::CornerRadius::same(12))
-                .frame(true)
-                .frame_when_inactive(false),
-        )
-        .on_hover_text(GITHUB_URL);
-
-    if response.clicked() {
-        ui.open_url(egui::OpenUrl {
-            url: GITHUB_URL.into(),
-            new_tab: true,
-        });
     }
 }

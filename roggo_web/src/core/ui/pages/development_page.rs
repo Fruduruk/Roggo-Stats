@@ -1,11 +1,12 @@
 use eframe::egui;
 
-use crate::core::ui::{
-    components::tab_control::{Tab, TabControl},
-    theme::{
-        colors::{colors, reset_colors, set_colors},
+use crate::core::{
+    app_state::AppState,
+    ui::{
+        components::tab_control::{Tab, TabControl},
+        theme::colors::{colors, reset_colors, set_colors},
+        widgets::{color_test::color_test, live_editor::theme_editor},
     },
-    widgets::{color_test::color_test, live_editor::theme_editor},
 };
 
 #[derive(Default)]
@@ -14,15 +15,20 @@ pub struct DevelopmentPage {
 }
 
 impl DevelopmentPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
-        egui::CentralPanel::default().show(ui, |ui| {
-            let tab = self.tab_control.ui(ui);
+    pub fn ui(&mut self, ui: &mut egui::Ui, _state: &mut AppState) {
+        egui::CentralPanel::default()
+            .frame(egui::Frame::new().fill(colors(ui).background))
+            .show(ui, |ui| {
+                let tab = self.tab_control.ui(ui);
 
-            ui.label(tab.to_string());
-            if tab == Tab::AllTime {
-                theme_edit(ui);
-            }
-        });
+                ui.label(tab.to_string());
+                if tab == Tab::AllTime {
+                    theme_edit(ui);
+                }
+                if tab == Tab::Day {
+                    // date_control(ui, &mut state.parameters.date);
+                }
+            });
     }
 }
 

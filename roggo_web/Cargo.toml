@@ -14,11 +14,12 @@ serde = { version = "1.0.229", features = ["derive"] }
 uuid = { version = "1", features = ["serde"] }
 chrono = "0.4"
 thiserror = "2.0.20"
-egui_extras = { version = "0.36.1", features = ["image"] }
+egui_extras = { version = "0.36.1", features = ["image", "datepicker"] }
 egui_commonmark = "0.25"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
 futures-channel = "0.3.34"
 enum-iterator = "2.3.0"
+jiff = "0.2.35"
 
 [profile.dev]
 opt-level = 0
