@@ -11,7 +11,6 @@ pub struct DayPage {}
 impl DayPage {
     pub fn ui(&mut self, ui: &mut egui::Ui, date: &mut Date) {
         FullPanel.show(ui, |ui| {
-            date_control(ui, date);
         });
     }
 }

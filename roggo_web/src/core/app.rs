@@ -1,8 +1,22 @@
 use std::time::Duration;
 
 use crate::core::{
-    api_result::APIResult, app_state::{AppState, agent_state::AgentState}, contract::AgentErrorDto, tasks, ui::{
-        components::{footer, header, tab_control::{Tab, TabControl}}, install_ui::InstallUi, pages::{all_time_page::AllTimePage, day_page::DayPage, development_page::DevelopmentPage, match_page::MatchPage, session_page::SessionPage}, theme::{apply_theme, colors::colors},
+    api_result::APIResult,
+    app_state::{AppState, agent_state::AgentState},
+    contract::AgentErrorDto,
+    tasks,
+    ui::{
+        components::{
+            footer, header,
+            tab_control::{Tab, TabControl},
+        },
+        install_ui::InstallUi,
+        pages::{
+            all_time_page::AllTimePage, day_page::DayPage, development_page::DevelopmentPage,
+            match_page::MatchPage, session_page::SessionPage,
+        },
+        theme::{apply_theme, colors::colors},
+        widgets::date_control::date_control,
     },
 };
 use eframe::egui;
@@ -75,7 +89,7 @@ impl eframe::App for RoggoApp {
             _ => None,
         };
 
-        header::ui(ui, &self.state.player_name);
+        header::ui(ui, &self.state.player_name, &mut self.state.parameters.date);
 
         footer::ui(ui, agent_version.clone());
 
