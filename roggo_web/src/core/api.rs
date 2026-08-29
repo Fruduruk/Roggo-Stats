@@ -1,8 +1,10 @@
 use gloo_net::http::Request;
+use jiff::civil::Date;
 use uuid::Uuid;
 
 use crate::core::contract::{
-    AgentErrorDto, DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto
+    AgentErrorDto, DayDto, DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto,
+    SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
 use crate::core::{Error, Result};
 
@@ -12,33 +14,37 @@ pub fn request(route: &str) -> gloo_net::http::RequestBuilder {
     Request::get(&format!("{WEB_SOCKET_ADDR}/{route}"))
 }
 
+pub async fn get_day(date: Date) -> Result<DayDto> {
+    let response = request(&format!("day/{}", date)).send().await?;
+    if response.ok() {
+        Ok(response.json::<DayDto>().await?)
+    } else {
+        parse_error(response).await
+    }
+}
+
 pub async fn hide_match(match_guid: Uuid, hide: bool) -> Result<()> {
     let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_match"))
-    .json(&HideRequest {
-        match_guid,
-        hide
-    })?
-    .send()
-    .await?;
+        .json(&HideRequest { match_guid, hide })?
+        .send()
+        .await?;
 
     if response.ok() {
         Ok(())
-    }else {
+    } else {
         parse_error(response).await
     }
 }
 
 pub async fn get_session(match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
     let response = Request::post(&format!("{WEB_SOCKET_ADDR}/session"))
-    .json(&SessionRequest {
-        match_guids
-    })?
-    .send()
-    .await?;
+        .json(&SessionRequest { match_guids })?
+        .send()
+        .await?;
 
     if response.ok() {
         Ok(response.json::<DetailedSessionDto>().await?)
-    }else {
+    } else {
         parse_error(response).await
     }
 }

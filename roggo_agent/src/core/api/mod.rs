@@ -16,6 +16,8 @@ pub enum Error {
     AxumError { source: std::io::Error },
     #[error("Connection Error: {0}")]
     ConnectionError(String),
+    #[error("Failed to parse date {0}")]
+    DateParseFailed(#[from] jiff::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -28,7 +30,8 @@ impl IntoResponse for Error {
             Error::UserError(_) => http::StatusCode::BAD_REQUEST,
             Error::InternalError(_error) => http::StatusCode::INTERNAL_SERVER_ERROR,
             Error::AxumError { source: _ } => http::StatusCode::INTERNAL_SERVER_ERROR,
-            Error::ConnectionError(_) => http::StatusCode::INTERNAL_SERVER_ERROR
+            Error::ConnectionError(_) => http::StatusCode::INTERNAL_SERVER_ERROR,
+            Error::DateParseFailed(_) => http::StatusCode::BAD_REQUEST,
         };
 
         let body = Json(get_agent_error_dto(self));
@@ -43,6 +46,7 @@ fn get_agent_error_dto(value: Error) -> AgentErrorDto {
         Error::AxumError { source: _ } => AgentErrorCode::InternalError,
         Error::UserError(_) => AgentErrorCode::UserError,
         Error::ConnectionError(_) => AgentErrorCode::InternalError,
+        Error::DateParseFailed(_) => AgentErrorCode::UserError,
     };
 
     let message = get_error_message(&value);
@@ -60,6 +64,7 @@ fn get_error_message(value: &Error) -> String {
         Error::AxumError { source } => source.to_string(),
         Error::UserError(s) => s.to_string(),
         Error::ConnectionError(_) => String::new(),
+        Error::DateParseFailed(error) => error.to_string(),
     }
 }
 

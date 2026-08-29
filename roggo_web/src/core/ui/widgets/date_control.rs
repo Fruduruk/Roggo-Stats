@@ -1,7 +1,7 @@
 use eframe::egui::{self, Widget};
 use jiff::civil::Date;
 
-pub fn date_control(ui: &mut egui::Ui, date: &mut Date) -> egui::Response {
+pub fn ui(ui: &mut egui::Ui, date: &mut Date) -> egui::Response {
     let today = jiff::Zoned::now().date();
     let response = egui_extras::DatePickerButton::new(date)
         .arrows(false)
@@ -10,7 +10,7 @@ pub fn date_control(ui: &mut egui::Ui, date: &mut Date) -> egui::Response {
         .format("%d.%m.%Y")
         .reverse_years(true)
         .calendar_week(false)
-        .start_end_years(2026..=2026)
+        .start_end_years(2026..=today.year())
         .ui(ui);
 
 

@@ -2,15 +2,16 @@ use eframe::egui;
 use jiff::civil::Date;
 
 use crate::core::ui::{
-    components::full_panel::FullPanel, widgets::date_control::date_control,
+    components::full_panel::FullPanel,
 };
 
 #[derive(Default)]
 pub struct DayPage {}
 
 impl DayPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui, date: &mut Date) {
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
         FullPanel.show(ui, |ui| {
+            
         });
     }
 }

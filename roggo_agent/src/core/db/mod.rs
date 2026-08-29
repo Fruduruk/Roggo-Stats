@@ -1,6 +1,7 @@
 pub mod repository_inserts;
 pub mod repository_migrations;
 pub mod repository_queries;
+pub mod repository_features;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

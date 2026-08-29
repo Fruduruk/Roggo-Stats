@@ -32,9 +32,9 @@ pub struct TabControl {
 }
 
 impl TabControl {
-    pub fn ui(&mut self, ui: &mut egui::Ui) -> Tab {
+    pub fn ui(&mut self, ui: &mut egui::Ui) -> (Tab, bool) {
         let mut selected_rect = None;
-
+        let mut changed = false;
         egui::Frame::new()
             .fill(colors(ui).background)
             .outer_margin(egui::Margin::symmetric(8, 0))
@@ -50,12 +50,11 @@ impl TabControl {
                         color: colors(ui).panel_shadow,
                     })
                     .show(ui, |ui| {
-                        selected_rect = self.show_tab_buttons(ui);
+                        (selected_rect, changed) = self.show_tab_buttons(ui);
                     });
             });
 
         if let Some(rect) = selected_rect {
-
             let target_left = rect.left();
             let target_right = rect.right();
 
@@ -81,12 +80,12 @@ impl TabControl {
             );
         }
 
-        self.selected
+        (self.selected, changed)
     }
 
-    fn show_tab_buttons(&mut self, ui: &mut egui::Ui) -> Option<egui::Rect> {
+    fn show_tab_buttons(&mut self, ui: &mut egui::Ui) -> (Option<egui::Rect>, bool) {
         let mut selected_rect = None;
-
+        let mut changed = false;
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 20.0;
             for tab in enum_iterator::all::<Tab>() {
@@ -100,6 +99,9 @@ impl TabControl {
                 };
 
                 if response.clicked() {
+                    if self.selected != tab {
+                        changed = true;
+                    }
                     self.selected = tab;
                 }
 
@@ -108,6 +110,6 @@ impl TabControl {
                 }
             }
         });
-        selected_rect
+        (selected_rect, changed)
     }
 }

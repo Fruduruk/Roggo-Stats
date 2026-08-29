@@ -40,6 +40,7 @@ eframe = "0.34.3"
 toml = "1.1.2"
 egui = "0.34.3"
 notify = "8.2.0"
+jiff = "0.2.35"
 
 
 [profile.dev]

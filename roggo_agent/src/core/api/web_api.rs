@@ -13,12 +13,10 @@ use crate::core::{
     api::{
         Error, Result,
         contract::{
-            DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto, SessionRequest,
-            SimpleMatchDto, SimpleSessionDto, VersionDto,
+            DayDto, DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto,
+            SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto,
         },
-    },
-    bl::feature,
-    windows_api,
+    }, bl::{feature, features}, windows_api,
 };
 
 const WEB_SOCKET_ADDR: &str = "127.0.0.1:49122";
@@ -76,6 +74,12 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/sessions/{pause_ms}", get(get_all_sessions))
         .route("/session", post(get_session))
         .route("/hide_match", post(hide_match))
+        .route("/day/{day}", get(get_day))
+}
+
+async fn get_day(State(state): State<AppState>, Path(day): Path<String>) -> Result<Json<DayDto>> {
+    let day = features::day::get(&state.db_file_path, day.parse()?)?;
+    Ok(Json(day))
 }
 
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {

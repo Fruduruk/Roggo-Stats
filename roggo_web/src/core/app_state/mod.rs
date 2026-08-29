@@ -1,5 +1,5 @@
 use crate::core::{
-    api_result::APIResult, app::COMPATIBLE_AGENT_VERSION, app_state::{agent_state::AgentState, parameters::Parameters}, contract::AgentErrorDto,
+    api_result::APIResult, app::COMPATIBLE_AGENT_VERSION, app_state::{agent_state::AgentState, parameters::Parameters}, contract::{AgentErrorDto, DayDto},
 };
 
 pub mod agent_state;
@@ -10,6 +10,7 @@ pub struct AppState {
     pub agent_state: AgentState,
     pub player_name: Option<String>,
     pub errors: Vec<AgentErrorDto>,
+    pub day: Option<DayDto>,
     pub parameters: Parameters
 }
 
@@ -28,6 +29,7 @@ impl AppState {
                 }
                 None => self.agent_state = AgentState::AgentMissing,
             },
+            APIResult::Day(day) => self.day = Some(day),
         }
     }
 }

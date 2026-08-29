@@ -1,4 +1,5 @@
 use futures_channel::mpsc::Sender;
+use jiff::civil::Date;
 
 use crate::core::Error;
 
@@ -28,6 +29,23 @@ pub fn load_main_character(mut sender: Sender<APIResult>) {
         match result {
             Ok(name) => {
                 let _ = sender.try_send(APIResult::PlayerName(name));
+            }
+            Err(err) => match err {
+                Error::HTTPError(_) => {}
+                Error::AgentError(agent_error_dto) => {
+                    let _ = sender.try_send(APIResult::AgentError(agent_error_dto));
+                }
+            },
+        }
+    });
+}
+
+pub fn load_day(mut sender: Sender<APIResult>, date: Date) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_day(date).await;
+        match result {
+            Ok(day) => {
+                let _ = sender.try_send(APIResult::Day(day));
             }
             Err(err) => match err {
                 Error::HTTPError(_) => {}

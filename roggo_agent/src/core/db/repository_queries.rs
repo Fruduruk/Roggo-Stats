@@ -1,42 +1,16 @@
 use rusqlite::types::Value;
 use rusqlite::{params, params_from_iter};
 use uuid::Uuid;
+use crate::core::db::{Repository, Result};
 
 use crate::core::bl::query_models::{
     F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow,
     F4MatchRow, F5AverageAdvancedStatsRow, F5AverageCoreStatsRow, F5AveragePlayerStatsRow,
     F5SessionMatchRow, GlobalPlayerRow,
 };
-use crate::core::db::{Repository, Result};
 
 impl Repository {
-    pub fn get_player_with_most_replays(&self) -> Result<GlobalPlayerRow> {
-        let mut stmt = self.connection.prepare(
-            "
-            select global_players.id,
-                global_players.last_username,
-                global_players.primary_id,
-                count(players.global_player_id) as play_count
-            from players
-            join global_players on global_player_id = global_players.id
-            group by global_player_id
-            order by play_count desc
-            limit 1
-            ",
-        )?;
-
-        let row = stmt.query_row([], |row| {
-            Ok(GlobalPlayerRow {
-                id: row.get("id")?,
-                primary_id: row.get("primary_id")?,
-                last_username: row.get("last_username")?,
-            })
-        })?;
-
-        Ok(row)
-    }
-
-    pub fn f2_get_matches(&self) -> Result<Vec<F2MatchRow>> {
+        pub fn f2_get_matches(&self) -> Result<Vec<F2MatchRow>> {
         let mut stmt = self.connection.prepare(
             "
             select * from matches

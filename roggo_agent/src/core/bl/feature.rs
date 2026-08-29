@@ -5,11 +5,9 @@ use uuid::Uuid;
 
 use crate::AGENT_VERSION;
 use crate::core::api::contract::{
-    DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto,
-    DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto,
-    DetailedTeamDto, MVPType, MainCharacterDto, SessionMatchDto, SimpleMatchDto, SimpleSessionDto,
-    VersionDto,
+    DayDto, DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto, DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto, DetailedTeamDto, MVPType, MainCharacterDto, SessionMatchDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
+use crate::core::bl::features::{get_most_played_player, is_main_character_team};
 use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
@@ -18,13 +16,6 @@ pub fn get_version() -> VersionDto {
     VersionDto {
         version: AGENT_VERSION.into(),
     }
-}
-
-fn get_most_played_player(repo: &Repository) -> Result<GlobalPlayerRow> {
-    let global_player = repo
-        .get_player_with_most_replays()
-        .map_err(|err| Error::NoPlayerFound { source: err })?;
-    Ok(global_player)
 }
 
 pub fn hide_match(path: &Path, match_guid: Uuid, hide: bool) -> Result<()> {
@@ -285,15 +276,7 @@ pub fn get_all_matches(path: &Path) -> Result<Vec<SimpleMatchDto>> {
     Ok(dtos)
 }
 
-#[inline]
-fn is_main_character_team(main_character: &GlobalPlayerRow, player_ids: Vec<i64>) -> bool {
-    for id in player_ids {
-        if id == main_character.id {
-            return true;
-        }
-    }
-    false
-}
+
 
 pub fn get_main_character(path: &Path) -> Result<MainCharacterDto> {
     let repo = Repository::connect(path)?;

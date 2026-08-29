@@ -16,7 +16,6 @@ use crate::core::{
             match_page::MatchPage, session_page::SessionPage,
         },
         theme::{apply_theme, colors::colors},
-        widgets::date_control::date_control,
     },
 };
 use eframe::egui;
@@ -65,6 +64,8 @@ impl RoggoApp {
 
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
+            tasks::load_day(self.content_sender.clone(), self.state.parameters.date);
+
             if self.state.player_name.is_none() {
                 tasks::load_main_character(self.content_sender.clone());
                 tasks::load_version(self.content_sender.clone());
@@ -111,10 +112,18 @@ impl eframe::App for RoggoApp {
                 egui::CentralPanel::default()
                     .frame(egui::Frame::new().fill(colors(ui).background))
                     .show(ui, |ui| match self.tab_control.ui(ui) {
-                        Tab::Day => DayPage::default().ui(ui, &mut self.state.parameters.date),
-                        Tab::Session => SessionPage::default().ui(ui),
-                        Tab::Match => MatchPage::default().ui(ui),
-                        Tab::AllTime => AllTimePage::default().ui(ui),
+                        (Tab::Day, changed) => {
+                            if changed {
+                                tasks::load_day(
+                                    self.content_sender.clone(),
+                                    self.state.parameters.date,
+                                );
+                            }
+                            DayPage::default().ui(ui)
+                        }
+                        (Tab::Session, _changed) => SessionPage::default().ui(ui),
+                        (Tab::Match, _changed) => MatchPage::default().ui(ui),
+                        (Tab::AllTime, _changed) => AllTimePage::default().ui(ui),
                     });
             }
             version => {

@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::rl_api::{
-    self, models::{Location, Playlist},
-};
+use crate::core::{api::contract::Playlist, rl_api::{
+    self, models::Location,
+}};
 
 #[derive(Debug)]
 #[derive(Default)]

@@ -1,6 +1,7 @@
 pub mod game_stat_collector;
 pub mod intermediate_models;
 pub mod feature;
+pub mod features;
 pub mod query_models;
 
 #[derive(thiserror::Error,Debug)]

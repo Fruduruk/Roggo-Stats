@@ -1,4 +1,4 @@
-use crate::core::ui::{theme::colors::colors, widgets::date_control::date_control};
+use crate::core::ui::{theme::colors::colors, widgets::date_control::{self}};
 use eframe::egui::{self};
 use jiff::civil::Date;
 
@@ -25,14 +25,13 @@ pub fn ui(ui: &mut egui::Ui, player_name: &Option<String>, date: &mut Date) {
 
             mid_rect_scope(ui, egui::vec2(220.0, ui.max_rect().height()), |ui| {
                 ui.horizontal(|ui| {
-                    
                     if ui.button("←").clicked() {
                         if let Ok(yesterday) = date.yesterday() {
                             *date = yesterday;
                         }
                     }
 
-                    date_control(ui, date);
+                    date_control::ui(ui, date);
 
                     if ui.button("→").clicked() {
                         if let Ok(tomorrow) = date.tomorrow() {
