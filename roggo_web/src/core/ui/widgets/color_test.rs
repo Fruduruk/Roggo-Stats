@@ -56,16 +56,9 @@ pub fn color_test(
 
     color_block(
         ui,
-        "Primary",
-        colors.primary,
-        colors.on_primary,
-    );
-
-    color_block(
-        ui,
-        "Secondary",
-        colors.secondary,
-        colors.on_secondary,
+        "Panel",
+        colors.panel,
+        colors.on_panel,
     );
 
     color_block(

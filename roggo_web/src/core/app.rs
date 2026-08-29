@@ -1,15 +1,8 @@
 use std::time::Duration;
 
 use crate::core::{
-    api_result::APIResult,
-    app_state::{AppState, agent_state::AgentState},
-    contract::AgentErrorDto,
-    tasks,
-    ui::{
-        components::{footer, header},
-        install_ui::InstallUi,
-        pages::development_page::DevelopmentPage,
-        theme::apply_theme,
+    api_result::APIResult, app_state::{AppState, agent_state::AgentState}, contract::AgentErrorDto, tasks, ui::{
+        components::{footer, header, tab_control::{Tab, TabControl}}, install_ui::InstallUi, pages::{all_time_page::AllTimePage, day_page::DayPage, development_page::DevelopmentPage, match_page::MatchPage, session_page::SessionPage}, theme::{apply_theme, colors::colors},
     },
 };
 use eframe::egui;
@@ -29,6 +22,7 @@ pub struct RoggoApp {
     content_receiver: Receiver<APIResult>,
     last_reload: f64,
     install_ui: InstallUi,
+    tab_control: TabControl,
     state: AppState,
     development_page: DevelopmentPage,
 }
@@ -48,6 +42,7 @@ impl RoggoApp {
             install_ui: Default::default(),
             state: Default::default(),
             development_page: Default::default(),
+            tab_control: Default::default(),
         }
     }
 
@@ -62,10 +57,6 @@ impl RoggoApp {
             }
             self.last_reload = now;
         }
-    }
-
-    fn main_ui(&mut self, ui: &mut egui::Ui) {
-        self.development_page.ui(ui, &mut self.state);
     }
 }
 
@@ -84,13 +75,18 @@ impl eframe::App for RoggoApp {
             _ => None,
         };
 
-        header::ui(ui, &mut self.state.parameters.date, &self.state.player_name);
+        header::ui(ui, &self.state.player_name);
 
         footer::ui(ui, agent_version.clone());
 
         if matches!(self.state.agent_state, AgentState::CheckingAgent) {
             egui::CentralPanel::default().show(ui, |ui| {
-                ui.label("Loading...");
+                ui.with_layout(
+                    egui::Layout::centered_and_justified(egui::Direction::TopDown),
+                    |ui| {
+                        ui.add(egui::Spinner::new().size(24.0));
+                    },
+                );
             });
 
             return;
@@ -98,7 +94,14 @@ impl eframe::App for RoggoApp {
 
         match agent_version {
             Some(version) if version == COMPATIBLE_AGENT_VERSION => {
-                self.main_ui(ui);
+                egui::CentralPanel::default()
+                    .frame(egui::Frame::new().fill(colors(ui).background))
+                    .show(ui, |ui| match self.tab_control.ui(ui) {
+                        Tab::Day => DayPage::default().ui(ui, &mut self.state.parameters.date),
+                        Tab::Session => SessionPage::default().ui(ui),
+                        Tab::Match => MatchPage::default().ui(ui),
+                        Tab::AllTime => AllTimePage::default().ui(ui),
+                    });
             }
             version => {
                 self.install_ui.ui(ui, version.unwrap_or_default());

@@ -6,19 +6,14 @@ pub struct ThemeColors {
     pub surface: egui::Color32,
     pub surface_alt: egui::Color32,
     pub surface_hover: egui::Color32,
-    pub surface_shadow: egui::Color32,
-
-    pub primary: egui::Color32,
-    pub primary_hover: egui::Color32,
-    pub on_primary: egui::Color32,
-
-    pub secondary: egui::Color32,
-    pub secondary_hover: egui::Color32,
-    pub on_secondary: egui::Color32,
 
     pub accent: egui::Color32,
     pub accent_hover: egui::Color32,
     pub on_accent: egui::Color32,
+
+    pub panel: egui::Color32,
+    pub on_panel: egui::Color32,
+    pub panel_shadow: egui::Color32,
 
     pub text: egui::Color32,
     pub text_weak: egui::Color32,
@@ -35,19 +30,14 @@ pub const DARK: ThemeColors = ThemeColors {
     surface: egui::Color32::from_rgb(34, 34, 38),
     surface_alt: egui::Color32::from_rgb(34, 34, 38),
     surface_hover: egui::Color32::from_rgb(42, 42, 47),
-    surface_shadow: egui::Color32::from_rgba_unmultiplied_const(13, 13, 24, 120),
-
-    primary: egui::Color32::from_rgb(39, 46, 90),
-    primary_hover: egui::Color32::from_rgb(100, 140, 235),
-    on_primary: egui::Color32::WHITE,
-
-    secondary: egui::Color32::from_rgb(34, 34, 66),
-    secondary_hover: egui::Color32::from_rgb(165, 120, 235),
-    on_secondary: egui::Color32::WHITE,
 
     accent: egui::Color32::from_rgb(146, 102, 37),
     accent_hover: egui::Color32::from_rgb(70, 210, 220),
     on_accent: egui::Color32::WHITE,
+
+    panel: egui::Color32::from_rgb(34, 34, 38),
+    on_panel: egui::Color32::WHITE,
+    panel_shadow: egui::Color32::from_rgba_unmultiplied_const(13, 13, 24, 120),
 
     text: egui::Color32::from_rgb(235, 235, 235),
     text_weak: egui::Color32::from_rgb(160, 160, 165),
@@ -65,19 +55,14 @@ pub const LIGHT: ThemeColors = ThemeColors {
     surface: egui::Color32::from_rgb(193, 193, 193),
     surface_alt: egui::Color32::from_rgb(238, 238, 242),
     surface_hover: egui::Color32::from_rgb(228, 228, 233),
-    surface_shadow: egui::Color32::from_rgb(175, 175, 175),
-
-    primary: egui::Color32::from_rgb(55, 95, 200),
-    primary_hover: egui::Color32::from_rgb(45, 80, 180),
-    on_primary: egui::Color32::WHITE,
-
-    secondary: egui::Color32::from_rgb(120, 75, 190),
-    secondary_hover: egui::Color32::from_rgb(100, 60, 170),
-    on_secondary: egui::Color32::WHITE,
 
     accent: egui::Color32::from_rgb(20, 145, 160),
     accent_hover: egui::Color32::from_rgb(15, 125, 140),
     on_accent: egui::Color32::WHITE,
+
+    panel: egui::Color32::from_rgb(209, 209, 209),
+    on_panel: egui::Color32::from_rgb(34, 34, 38),
+    panel_shadow: egui::Color32::from_rgb(175, 175, 175),
 
     text: egui::Color32::from_rgb(25, 25, 28),
     text_weak: egui::Color32::from_rgb(100, 100, 105),
@@ -210,7 +195,7 @@ pub fn apply_colors(ctx: &egui::Context, theme: egui::Theme, colors: &ThemeColor
         // Active
         visuals.widgets.active.bg_fill = colors.surface_hover;
         visuals.widgets.active.weak_bg_fill = colors.surface_hover;
-        visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, colors.primary);
+        visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, colors.panel);
         visuals.widgets.active.fg_stroke = egui::Stroke::new(1.0, colors.text);
 
         // Open dropdown/menu

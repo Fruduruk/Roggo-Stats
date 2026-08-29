@@ -6,7 +6,7 @@ pub fn date_control(ui: &mut egui::Ui, date: &mut Date) -> egui::Response {
     let response = egui_extras::DatePickerButton::new(date)
         .arrows(false)
         .highlight_weekends(false)
-        .show_icon(false)
+        .show_icon(true)
         .format("%d.%m.%Y")
         .reverse_years(true)
         .calendar_week(false)

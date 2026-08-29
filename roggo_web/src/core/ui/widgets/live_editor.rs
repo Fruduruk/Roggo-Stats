@@ -21,19 +21,11 @@ pub fn theme_editor(ui: &mut egui::Ui, colors: &mut ThemeColors) -> bool {
 
             changed |= color_edit_row(ui, "Surface Hover", &mut colors.surface_hover);
 
-            changed |= color_edit_row(ui, "Surface Shadow", &mut colors.surface_shadow);
+            changed |= color_edit_row(ui, "Panel", &mut colors.panel);
 
-            changed |= color_edit_row(ui, "Primary", &mut colors.primary);
-
-            changed |= color_edit_row(ui, "Primary Hover", &mut colors.primary_hover);
-
-            changed |= color_edit_row(ui, "On Primary", &mut colors.on_primary);
-
-            changed |= color_edit_row(ui, "Secondary", &mut colors.secondary);
-
-            changed |= color_edit_row(ui, "Secondary Hover", &mut colors.secondary_hover);
-
-            changed |= color_edit_row(ui, "On Secondary", &mut colors.on_secondary);
+            changed |= color_edit_row(ui, "On Panel", &mut colors.on_panel);
+            
+            changed |= color_edit_row(ui, "Panel Shadow", &mut colors.panel_shadow);
 
             changed |= color_edit_row(ui, "Accent", &mut colors.accent);
 
