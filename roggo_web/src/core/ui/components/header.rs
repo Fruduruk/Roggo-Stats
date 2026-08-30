@@ -38,7 +38,7 @@ pub fn ui(
 
             mid_rect_scope(ui, egui::vec2(220.0, ui.max_rect().height()), |ui| {
                 ui.horizontal(|ui| {
-                    let past_date = date.clone();
+                    let past_date = *date;
                     if ui.button("←").clicked() {
                         if let Ok(yesterday) = date.yesterday() {
                             *date = yesterday;
@@ -53,8 +53,8 @@ pub fn ui(
                         }
                     }
 
-                    if past_date != date.clone() {
-                        tasks::load_day(sender, date.clone());
+                    if past_date != *date {
+                        tasks::load_day(sender, *date);
                     }
                 });
             });

@@ -28,7 +28,7 @@ pub const DARK: ThemeColors = ThemeColors {
     background: egui::Color32::from_rgb(27, 27, 30),
 
     surface: egui::Color32::from_rgb(34, 34, 38),
-    surface_alt: egui::Color32::from_rgb(30, 28, 48),
+    surface_alt: egui::Color32::from_rgb(53, 53, 60),
     surface_hover: egui::Color32::from_rgb(42, 42, 47),
 
     accent: egui::Color32::from_rgb(146, 102, 37),
@@ -42,7 +42,7 @@ pub const DARK: ThemeColors = ThemeColors {
     text: egui::Color32::from_rgb(235, 235, 235),
     text_weak: egui::Color32::from_rgb(160, 160, 165),
 
-    border: egui::Color32::from_rgb(55, 55, 60),
+    border: egui::Color32::from_rgb(84, 84, 84),
 
     success: egui::Color32::from_rgb(80, 190, 120),
     warning: egui::Color32::from_rgb(230, 175, 70),
@@ -67,7 +67,7 @@ pub const LIGHT: ThemeColors = ThemeColors {
     text: egui::Color32::from_rgb(25, 25, 28),
     text_weak: egui::Color32::from_rgb(100, 100, 105),
 
-    border: egui::Color32::from_rgb(210, 210, 215),
+    border: egui::Color32::from_rgb(84, 84, 84),
 
     success: egui::Color32::from_rgb(40, 145, 80),
     warning: egui::Color32::from_rgb(185, 125, 25),
