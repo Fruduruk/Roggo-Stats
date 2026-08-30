@@ -1,3 +1,4 @@
+use std::collections::{BTreeSet, HashSet};
 use std::path::Path;
 
 use jiff::ToSpan;
@@ -6,7 +7,7 @@ use jiff::tz::TimeZone;
 use uuid::Uuid;
 
 use crate::AGENT_VERSION;
-use crate::core::api::contract::{DayDto, DayMatchDto, DaySessionDto};
+use crate::core::api::contract::{DayDto, DayMatchDto, DaySessionDto, PlayerDto, SessionTypeDto};
 use crate::core::bl::features::{get_most_played_player, is_main_character_team};
 use crate::core::bl::{Error, Result};
 use crate::core::db::repository_features::day::get_teams_by_match_id;
@@ -38,20 +39,27 @@ pub fn get(path: &Path, day: Date) -> Result<DayDto> {
 
     let main_character = get_most_played_player(&repo)?;
 
+    let filled_matches = get_full_matches(day, repo, main_character)?;
+
+    let sessions = create_sessions(filled_matches);
+
+    Ok(DayDto { sessions })
+}
+
+fn get_full_matches(
+    day: Date,
+    repo: Repository,
+    main_character: crate::core::bl::query_models::GlobalPlayerRow,
+) -> Result<Vec<MatchWithTeams>> {
     let (start_ms, end_ms) = get_ms_range(day)?;
-
     let matches = repo.get_all_matches_for_day(start_ms, end_ms)?;
-
     let mut filled_matches = vec![];
     for match_row in matches {
         if let Some(m) = with_teams_and_players(&repo, &main_character, match_row)? {
             filled_matches.push(m);
         }
     }
-
-    let sessions = create_sessions(filled_matches);
-
-    Ok(DayDto { sessions })
+    Ok(filled_matches)
 }
 
 fn create_sessions(matches: Vec<MatchWithTeams>) -> Vec<DaySessionDto> {
@@ -72,32 +80,55 @@ fn create_sessions(matches: Vec<MatchWithTeams>) -> Vec<DaySessionDto> {
 }
 
 fn belongs_to_session(session: &DaySessionDto, m: &MatchWithTeams) -> bool {
-    let pause_small_enough =
-        session.ended_at.saturating_add(SESSION_PAUSE_MS) >= m.match_row.created_at;
-
-
-    pause_small_enough
+    session.ended_at.saturating_add(SESSION_PAUSE_MS) >= m.match_row.created_at
+        && session.playlist == m.match_row.playlist
 }
 
 fn add_match_to_session(session: &mut DaySessionDto, m: &MatchWithTeams) {
+    if let SessionTypeDto::Team(team) = &session.session_type {
+        let session_team: HashSet<&PlayerDto> = team.iter().collect();
+        let players = to_team_session_type_dto(&m.own_team.players);
+        let match_team: HashSet<&PlayerDto> = players.iter().collect();
+
+        if session_team != match_team {
+            session.session_type = SessionTypeDto::Solo;
+        }
+    }
+
+    session.matches.push(DayMatchDto {
+        match_guid: m.match_row.match_guid,
+        won: m.won,
+        own_score: m.own_team.score,
+        enemy_score: m.enemy_team.score,
+    });
     session.ended_at = m.match_row.ended_at;
 }
 
 fn create_session(m: &MatchWithTeams) -> DaySessionDto {
-    let team_mates = m.own_team.players.iter().map(|p| p.display_name.clone()).collect();
-
     let matches = vec![DayMatchDto {
         match_guid: m.match_row.match_guid,
         won: m.won,
+        own_score: m.own_team.score,
+        enemy_score: m.enemy_team.score,
     }];
 
     DaySessionDto {
+        playlist: m.match_row.playlist,
         created_at: m.match_row.created_at,
         ended_at: m.match_row.ended_at,
-        playlist: m.match_row.playlist,
-        team_mates,
+        session_type: SessionTypeDto::Team(to_team_session_type_dto(&m.own_team.players)),
         matches,
     }
+}
+
+fn to_team_session_type_dto(players: &Vec<Player>) -> Vec<PlayerDto> {
+    players
+        .iter()
+        .map(|p| PlayerDto {
+            primary_id: p.primary_id.clone(),
+            display_name: p.display_name.clone(),
+        })
+        .collect()
 }
 
 fn with_teams_and_players(
@@ -155,8 +186,6 @@ fn with_teams_and_players(
         enemy_team,
     }))
 }
-
-// println!("{:#?}", m);
 
 fn get_ms_range(day: Date) -> Result<(i64, i64)> {
     let tz = TimeZone::system();

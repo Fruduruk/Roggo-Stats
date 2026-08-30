@@ -1,8 +1,21 @@
-use crate::core::ui::{theme::colors::colors, widgets::date_control::{self}};
+use crate::core::{
+    api_result::APIResult,
+    tasks,
+    ui::{
+        theme::colors::colors,
+        widgets::date_control::{self},
+    },
+};
 use eframe::egui::{self};
+use futures_channel::mpsc::Sender;
 use jiff::civil::Date;
 
-pub fn ui(ui: &mut egui::Ui, player_name: &Option<String>, date: &mut Date) {
+pub fn ui(
+    ui: &mut egui::Ui,
+    player_name: &Option<String>,
+    date: &mut Date,
+    sender: Sender<APIResult>,
+) {
     egui::Panel::top("header")
         .frame(
             egui::Frame::new()
@@ -25,6 +38,7 @@ pub fn ui(ui: &mut egui::Ui, player_name: &Option<String>, date: &mut Date) {
 
             mid_rect_scope(ui, egui::vec2(220.0, ui.max_rect().height()), |ui| {
                 ui.horizontal(|ui| {
+                    let past_date = date.clone();
                     if ui.button("←").clicked() {
                         if let Ok(yesterday) = date.yesterday() {
                             *date = yesterday;
@@ -37,6 +51,10 @@ pub fn ui(ui: &mut egui::Ui, player_name: &Option<String>, date: &mut Date) {
                         if let Ok(tomorrow) = date.tomorrow() {
                             *date = tomorrow;
                         }
+                    }
+
+                    if past_date != date.clone() {
+                        tasks::load_day(sender, date.clone());
                     }
                 });
             });

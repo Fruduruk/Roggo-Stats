@@ -1,3 +1,5 @@
+use std::fmt::{Display, write};
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -7,11 +9,23 @@ pub struct DayDto {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub enum SessionTypeDto {
+    Solo,
+    Team(Vec<PlayerDto>),
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct PlayerDto {
+    pub primary_id: String,
+    pub display_name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DaySessionDto {
     pub playlist: Playlist,
     pub created_at: i64,
     pub ended_at: i64,
-    pub team_mates: Vec<String>,
+    pub session_type: SessionTypeDto,
     pub matches: Vec<DayMatchDto>,
 }
 
@@ -19,6 +33,59 @@ pub struct DaySessionDto {
 pub struct DayMatchDto {
     pub match_guid: Uuid,
     pub won: bool,
+    pub own_score: i64,
+    pub enemy_score: i64,
+}
+
+impl std::fmt::Display for Playlist {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Playlist::Unknown => "Unknown",
+            Playlist::Duel => "Duel",
+            Playlist::Doubles => "Doubles",
+            Playlist::Standard => "Standard",
+            Playlist::Chaos => "Chaos",
+            Playlist::RankedDuel => "Ranked Duel",
+            Playlist::RankedDoubles => "Ranked Doubles",
+            Playlist::RankedStandard => "Ranked Standard",
+            Playlist::SnowDay => "Snow Day",
+            Playlist::RocketLabs => "Rocket Labs",
+            Playlist::Hoops => "Hoops",
+            Playlist::Rumble => "Rumble",
+            Playlist::TournamentMatch => "Tournament Match",
+            Playlist::Dropshot => "Dropshot",
+            Playlist::ExternalMatch => "External Match",
+            Playlist::RankedHoops => "Ranked Hoops",
+            Playlist::RankedRumble => "Ranked Rumble",
+            Playlist::RankedDropshot => "Ranked Dropshot",
+            Playlist::RankedSnowDay => "Ranked Snow Day",
+            Playlist::GhostHunt => "Ghost Hunt",
+            Playlist::BeachBall => "Beach Ball",
+            Playlist::SpikeRush => "Spike Rush",
+            Playlist::TournamentMatch34 => "Tournament Match 34",
+            Playlist::RocketLabs35 => "Rocket Labs 35",
+            Playlist::DropshotRumble => "Dropshot Rumble",
+            Playlist::Heatseeker => "Heatseeker",
+            Playlist::BoomerBall => "Boomer Ball",
+            Playlist::HeatseekerDoubles => "Heatseeker Doubles",
+            Playlist::WinterBreakaway => "Winter Breakaway",
+            Playlist::Gridiron => "Gridiron",
+            Playlist::SuperCube => "Super Cube",
+            Playlist::TacticalRumble => "Tactical Rumble",
+            Playlist::SpringLoaded => "Spring Loaded",
+            Playlist::SpeedDemon => "Speed Demon",
+            Playlist::GothamCityRumble => "Gotham City Rumble",
+            Playlist::Knockout => "Knockout",
+            Playlist::ConfidentialThirdWheelTest => "Confidential Third Wheel Test",
+            Playlist::NikeFcShowdown => "Nike FC Showdown",
+            Playlist::HauntedHeatseekerDoubles => "Haunted Heatseeker Doubles",
+            Playlist::HauntedHeatseeker => "Haunted Heatseeker",
+            Playlist::HeatseekerRicochet => "Heatseeker Ricochet",
+            Playlist::SpookyCube => "Spooky Cube",
+            Playlist::GForceFrenzy => "G-Force Frenzy",
+            Playlist::DropshotRumbleDoubles => "Dropshot Rumble Doubles",
+        })
+    }
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

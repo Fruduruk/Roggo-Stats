@@ -90,7 +90,7 @@ impl eframe::App for RoggoApp {
             _ => None,
         };
 
-        header::ui(ui, &self.state.player_name, &mut self.state.parameters.date);
+        header::ui(ui, &self.state.player_name, &mut self.state.parameters.date, self.content_sender.clone());
 
         footer::ui(ui, agent_version.clone());
 
@@ -119,7 +119,9 @@ impl eframe::App for RoggoApp {
                                     self.state.parameters.date,
                                 );
                             }
-                            DayPage::default().ui(ui)
+                            if let Some(day) = &self.state.day {
+                                DayPage::default().ui(ui, day);
+                            }
                         }
                         (Tab::Session, _changed) => SessionPage::default().ui(ui),
                         (Tab::Match, _changed) => MatchPage::default().ui(ui),
