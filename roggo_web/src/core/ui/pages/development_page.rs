@@ -13,7 +13,7 @@ pub struct DevelopmentPage {
 }
 
 impl DevelopmentPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui, state: &mut AppState) {
+    pub fn ui(&mut self, _ui: &mut egui::Ui, _state: &mut AppState) {
         
     }
 }

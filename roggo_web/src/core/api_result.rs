@@ -3,4 +3,5 @@ pub enum APIResult {
     AgentError(super::contract::AgentErrorDto),
     Version(Option<String>),
     Day(super::contract::DayDto),
+    DetailedSession(super::contract::DetailedSessionDto),
 }

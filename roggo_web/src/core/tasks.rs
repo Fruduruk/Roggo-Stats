@@ -1,5 +1,6 @@
 use futures_channel::mpsc::Sender;
 use jiff::civil::Date;
+use uuid::Uuid;
 
 use crate::core::Error;
 
@@ -18,7 +19,7 @@ pub fn load_version(mut sender: Sender<APIResult>) {
             }
             Err(_error) => {
                 let _ = sender.try_send(APIResult::Version(None));
-            },
+            }
         }
     });
 }
@@ -46,6 +47,24 @@ pub fn load_day(mut sender: Sender<APIResult>, date: Date) {
         match result {
             Ok(day) => {
                 let _ = sender.try_send(APIResult::Day(day));
+            }
+            Err(err) => match err {
+                Error::HTTPError(_) => {}
+                Error::AgentError(agent_error_dto) => {
+                    let _ = sender.try_send(APIResult::AgentError(agent_error_dto));
+                }
+            },
+        }
+    });
+}
+
+pub fn load_detailed_session(mut sender: Sender<APIResult>, match_guids: Vec<Uuid>) {
+    wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_session(match_guids).await;
+
+        match result {
+            Ok(detailed_session) => {
+                let _ = sender.try_send(APIResult::DetailedSession(detailed_session));
             }
             Err(err) => match err {
                 Error::HTTPError(_) => {}
@@ -96,23 +115,6 @@ pub fn load_day(mut sender: Sender<APIResult>, date: Date) {
 //         if let Ok(mut content) = content.lock() {
 //             if let Ok(detailed_match_dto) = result {
 //                 content.detailed_match = Some(detailed_match_dto);
-//             }
-//         }
-//         context.request_repaint();
-//     });
-// }
-
-// pub fn load_detailed_session(
-//     context: Context,
-//     content: Arc<Mutex<session_ui::Content>>,
-//     match_guids: Vec<Uuid>,
-// ) {
-//     wasm_bindgen_futures::spawn_local(async move {
-//         let result = api::get_session(match_guids).await;
-
-//         if let Ok(mut content) = content.lock() {
-//             if let Ok(detailed_session_dto) = result {
-//                 content.detailed_session = Some(detailed_session_dto)
 //             }
 //         }
 //         context.request_repaint();

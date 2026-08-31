@@ -28,7 +28,7 @@ impl Display for Tab {
 
 #[derive(Default)]
 pub struct TabControl {
-    selected: Tab,
+    pub selected: Tab,
 }
 
 impl TabControl {

@@ -9,7 +9,7 @@ pub struct MatchPage {}
 
 impl MatchPage {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
-        FullPanel.show(ui, |ui| {
+        FullPanel.show(ui, |_ui| {
         });
     }
 }
