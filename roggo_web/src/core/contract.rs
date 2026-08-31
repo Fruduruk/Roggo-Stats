@@ -33,6 +33,8 @@ pub struct DayMatchDto {
     pub won: bool,
     pub own_score: i64,
     pub enemy_score: i64,
+    pub created_at: i64,
+    pub ended_at: i64,
 }
 
 impl std::fmt::Display for Playlist {

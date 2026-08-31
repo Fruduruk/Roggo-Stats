@@ -1,6 +1,6 @@
 use crate::core::api::contract::Playlist;
 use crate::core::db::{Repository, Result};
-use rusqlite::{params, params_from_iter};
+use rusqlite::{params};
 use uuid::Uuid;
 
 #[derive(Debug)]

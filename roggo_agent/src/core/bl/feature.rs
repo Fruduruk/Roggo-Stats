@@ -5,10 +5,10 @@ use uuid::Uuid;
 
 use crate::AGENT_VERSION;
 use crate::core::api::contract::{
-    DayDto, DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto, DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto, DetailedTeamDto, MVPType, MainCharacterDto, SessionMatchDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
+    DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto, DetailedAveragePlayerDto, DetailedMatchDto, DetailedPlayerDto, DetailedPlayerStatsDto, DetailedSessionDto, DetailedTeamDto, MVPType, MainCharacterDto, SessionMatchDto, SimpleMatchDto, SimpleSessionDto, VersionDto,
 };
 use crate::core::bl::features::{get_most_played_player, is_main_character_team};
-use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow, GlobalPlayerRow};
+use crate::core::bl::query_models::{F3PlayerRow, F3TeamRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
 

@@ -6,7 +6,7 @@ pub struct DayDto {
     pub sessions: Vec<DaySessionDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash)]
 pub enum SessionTypeDto {
     Solo,
     Team(Vec<PlayerDto>),
@@ -18,7 +18,7 @@ pub struct PlayerDto {
     pub display_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash)]
 pub struct DaySessionDto {
     pub playlist: Playlist,
     pub created_at: i64,
@@ -27,12 +27,14 @@ pub struct DaySessionDto {
     pub matches: Vec<DayMatchDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash)]
 pub struct DayMatchDto {
     pub match_guid: Uuid,
     pub won: bool,
     pub own_score: i64,
     pub enemy_score: i64,
+    pub created_at: i64,
+    pub ended_at: i64,
 }
 
 impl std::fmt::Display for Playlist {

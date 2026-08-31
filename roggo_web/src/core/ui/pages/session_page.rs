@@ -6,7 +6,7 @@ use crate::core::{contract::DetailedSessionDto, ui::components::full_panel::Full
 pub struct SessionPage {}
 
 impl SessionPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui, detailed_session: &DetailedSessionDto) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, detailed_session: &DetailedSessionDto, player_name: &str) {
         FullPanel.show(ui, |ui| {
             for m in &detailed_session.session_matches {
                 ui.label(m.match_guid.to_string());

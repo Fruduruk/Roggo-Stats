@@ -1,8 +1,5 @@
 pub mod day;
 
-use rusqlite::types::Value;
-use rusqlite::{params, params_from_iter};
-use uuid::Uuid;
 use crate::core::db::{Repository, Result};
 
 use crate::core::bl::query_models::{

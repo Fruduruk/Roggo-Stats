@@ -1,9 +1,5 @@
 pub mod day;
 
-
-use uuid::Uuid;
-
-use crate::AGENT_VERSION;
 use crate::core::bl::query_models::{ GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;

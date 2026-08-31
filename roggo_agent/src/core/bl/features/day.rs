@@ -1,18 +1,15 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::HashSet;
 use std::path::Path;
 
-use jiff::ToSpan;
-use jiff::civil::Date;
-use jiff::tz::TimeZone;
-use uuid::Uuid;
-
-use crate::AGENT_VERSION;
 use crate::core::api::contract::{DayDto, DayMatchDto, DaySessionDto, PlayerDto, SessionTypeDto};
 use crate::core::bl::features::{get_most_played_player, is_main_character_team};
 use crate::core::bl::{Error, Result};
+use crate::core::db::Repository;
 use crate::core::db::repository_features::day::get_teams_by_match_id;
-use crate::core::db::repository_features::day::{DayMatchRow, PlayerRow, get_players_by_team_id};
-use crate::core::db::{Repository, repository_features};
+use crate::core::db::repository_features::day::{DayMatchRow, get_players_by_team_id};
+use jiff::ToSpan;
+use jiff::civil::Date;
+use jiff::tz::TimeZone;
 
 const SESSION_PAUSE_MS: i64 = 60 * 60 * 1000;
 
@@ -24,7 +21,6 @@ struct MatchWithTeams {
 }
 
 struct Team {
-    id: i64,
     score: i64,
     players: Vec<Player>,
 }
@@ -100,6 +96,8 @@ fn add_match_to_session(session: &mut DaySessionDto, m: &MatchWithTeams) {
         won: m.won,
         own_score: m.own_team.score,
         enemy_score: m.enemy_team.score,
+        created_at: m.match_row.created_at,
+        ended_at: m.match_row.ended_at,
     });
     session.ended_at = m.match_row.ended_at;
 }
@@ -110,6 +108,8 @@ fn create_session(m: &MatchWithTeams) -> DaySessionDto {
         won: m.won,
         own_score: m.own_team.score,
         enemy_score: m.enemy_team.score,
+        created_at: m.match_row.created_at,
+        ended_at: m.match_row.ended_at,
     }];
 
     DaySessionDto {
@@ -121,7 +121,7 @@ fn create_session(m: &MatchWithTeams) -> DaySessionDto {
     }
 }
 
-fn to_team_session_type_dto(players: &Vec<Player>) -> Vec<PlayerDto> {
+fn to_team_session_type_dto(players: &[Player]) -> Vec<PlayerDto> {
     players
         .iter()
         .map(|p| PlayerDto {
@@ -153,7 +153,6 @@ fn with_teams_and_players(
         );
 
         let team = Team {
-            id: team_row.id,
             score: team_row.score,
             players: players
                 .into_iter()
