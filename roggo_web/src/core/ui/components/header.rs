@@ -1,9 +1,6 @@
 use crate::core::{
-    api_result::APIResult,
-    tasks,
-    ui::{
-        theme::colors::colors,
-        widgets::date_control::{self},
+    api_result::APIResult, tasks, ui::{
+        components::tab_control::Tab, theme::colors::colors, widgets::date_control::{self},
     },
 };
 use eframe::egui::{self};
@@ -14,7 +11,8 @@ pub fn ui(
     ui: &mut egui::Ui,
     player_name: &Option<String>,
     date: &mut Date,
-    sender: Sender<APIResult>,
+    sender: &Sender<APIResult>,
+    current_tab: &mut Tab
 ) {
     egui::Panel::top("header")
         .frame(
@@ -54,7 +52,8 @@ pub fn ui(
                     }
 
                     if past_date != *date {
-                        tasks::load_day(sender, *date);
+                        tasks::load_day(sender.clone(), *date);
+                        *current_tab = Tab::Day;
                     }
                 });
             });

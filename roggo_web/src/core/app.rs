@@ -59,7 +59,8 @@ impl eframe::App for RoggoApp {
             ui,
             &self.state.player_name,
             &mut self.state.parameters.date,
-            self.content_sender.clone(),
+            &self.content_sender,
+            &mut self.tab_control.selected,
         );
 
         footer::ui(ui, agent_version.clone());
