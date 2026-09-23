@@ -82,6 +82,21 @@ async fn get_day(State(state): State<AppState>, Path(day): Path<String>) -> Resu
     Ok(Json(day))
 }
 
+async fn get_session(
+    State(state): State<AppState>,
+    Json(request): Json<SessionRequest>,
+) -> Result<Json<DetailedSessionDto>> {
+    if request.match_guids.is_empty() {
+        return Err(Error::UserError("Cannot process empty match list".into()));
+    }
+
+    let dto = features::session::get(&state.db_file_path, request.match_guids)?;
+
+    Ok(Json(dto))
+}
+
+// from now on old requests
+
 async fn get_matches(State(state): State<AppState>) -> Result<Json<Vec<SimpleMatchDto>>> {
     let matches = feature::get_all_matches(&state.db_file_path)?;
     Ok(Json(matches))
@@ -115,18 +130,7 @@ async fn get_all_sessions(
     Ok(Json(dtos))
 }
 
-async fn get_session(
-    State(state): State<AppState>,
-    Json(request): Json<SessionRequest>,
-) -> Result<Json<DetailedSessionDto>> {
-    if request.match_guids.is_empty() {
-        return Err(Error::UserError("Cannot process empty match list".into()));
-    }
 
-    let dto = feature::get_detailed_session(&state.db_file_path, request.match_guids)?;
-
-    Ok(Json(dto))
-}
 
 async fn hide_match(State(state): State<AppState>, Json(request): Json<HideRequest>) -> Result<()> {
     feature::hide_match(&state.db_file_path, request.match_guid, request.hide)?;

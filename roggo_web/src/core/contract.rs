@@ -2,6 +2,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct DaysPlayedDto {
+    days: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DaysPlayedRequest;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DayDto {
     pub sessions: Vec<DaySessionDto>,
 }

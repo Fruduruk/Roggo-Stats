@@ -1,4 +1,5 @@
 pub mod day;
+pub mod session;
 
 use crate::core::bl::query_models::{ GlobalPlayerRow};
 use crate::core::bl::{Error, Result};

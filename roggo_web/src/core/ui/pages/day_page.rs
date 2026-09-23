@@ -101,7 +101,7 @@ impl DayPage {
                         ui.end_row();
 
                         ui.label("Record");
-                        ui.strong(format!("{won} - {lost}"));
+                        ui.strong(format!("{won} won - {lost} lost"));
                         ui.end_row();
 
                         ui.label("Winrate");
