@@ -24,6 +24,13 @@ pub fn format_ms_time(timestamp_ms: i64) -> String {
         .unwrap_or_else(|| "Invalid time".to_string())
 }
 
+pub fn format_ms_time_without_seconds(timestamp_ms: i64) -> String {
+    DateTime::from_timestamp_millis(timestamp_ms)
+        .map(|dt| dt.with_timezone(&Local))
+        .map(|dt| dt.format("%H:%M").to_string())
+        .unwrap_or_else(|| "Invalid time".to_string())
+}
+
 pub fn format_ms_min_seconds(duration_ms: i64) -> String {
     let total_seconds = duration_ms / 1000;
     let minutes = total_seconds / 60;

@@ -2,7 +2,8 @@ use eframe::egui::{self};
 use jiff::{Timestamp, Zoned, tz::TimeZone};
 
 use crate::core::{
-    contract::day::{DaySessionDto, SessionTypeDto}, ui::theme::colors::colors,
+    contract::day::{DaySessionDto, SessionTypeDto},
+    ui::theme::colors::colors,
 };
 
 pub fn ui(ui: &mut egui::Ui, session: &DaySessionDto) -> egui::Response {
@@ -75,11 +76,17 @@ fn center(session: &DaySessionDto, won: usize, win_color: egui::Color32, ui: &mu
                 ui.label(egui::RichText::new("Team").color(colors(ui).text_weak));
 
                 ui.label(
-                    players
-                        .iter()
-                        .map(|p| p.display_name.as_str())
-                        .collect::<Vec<_>>()
-                        .join(", "),
+                    egui::RichText::new(
+                        players
+                            .iter()
+                            .map(|p| p.display_name.as_str())
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    )
+                    .font(egui::FontId::new(
+                        13.0,
+                        egui::FontFamily::Name("player_name".into()),
+                    )),
                 );
             }
         }

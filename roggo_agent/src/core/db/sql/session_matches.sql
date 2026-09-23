@@ -15,7 +15,7 @@
 --         (x'889232ce11f15140c545cea79ba46d2f')
 -- ),
 
-own_teams as (
+match_data as (
     select
         m.id as match_id,
         p.team_id as own_team_id,
@@ -24,7 +24,10 @@ own_teams as (
             when own_team.score > enemy_team.score then 1
             when own_team.score < enemy_team.score then 0
             else null
-        end as main_character_won
+        end as main_character_won,
+
+        own_team.score as own_score,
+        enemy_team.score as enemy_score
 
     from selected_matches sm
     join matches m
@@ -40,52 +43,41 @@ own_teams as (
         and enemy_team.id <> own_team.id
 ),
 
+
 best_own_players as (
     select
         p.match_id,
         p.global_player_id,
         p.display_name,
         max(p.score) as score
-    from own_teams ot
+    from match_data md
     join players p
-        on p.match_id = ot.match_id
-       and p.team_id = ot.own_team_id
-    group by p.match_id
-),
-
-best_enemy_players as (
-    select
-        p.match_id,
-        p.global_player_id,
-        p.display_name,
-        max(p.score) as score
-    from own_teams ot
-    join players p
-        on p.match_id = ot.match_id
-       and p.team_id <> ot.own_team_id
+        on p.match_id = md.match_id
+       and p.team_id = md.own_team_id
     group by p.match_id
 )
 
 select
+    m.id,
     m.match_guid,
+    m.arena,
+    m.duration,
     m.created_at_ms,
     m.ended_at_ms,
+    m.had_overtime,
     m.deleted,
+    m.playlist,
 
-    ot.main_character_won,
+    md.main_character_won,
+    md.own_score,
+    md.enemy_score,
+    own_best.global_player_id as own_best_global_player_id
 
-    own_best.global_player_id as own_best_global_player_id,
-    own_best.score as own_best_score,
-
-    enemy_best.global_player_id as enemy_best_global_player_id,
-    enemy_best.score as enemy_best_score
 
 from selected_matches sm
 join matches m
     on m.match_guid = sm.match_guid
-join own_teams ot
-    on ot.match_id = m.id
+join match_data md
+    on md.match_id = m.id
 join best_own_players own_best
     on own_best.match_id = m.id
-join best_enemy_players enemy_best
-    on enemy_best.match_id = m.id

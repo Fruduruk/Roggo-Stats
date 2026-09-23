@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use crate::core::api::contract::day::{DayDto, DayMatchDto, DaySessionDto, PlayerDto, SessionTypeDto};
+use crate::core::api::contract::PlayerDto;
+use crate::core::api::contract::day::{DayDto, DayMatchDto, DaySessionDto,  SessionTypeDto};
 use crate::core::bl::features::{get_most_played_player, is_main_character_team};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;

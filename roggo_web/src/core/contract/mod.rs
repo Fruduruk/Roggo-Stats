@@ -16,10 +16,10 @@ pub struct VersionDto {
     pub version: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MainCharacterDto {
-    pub username: String,
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct PlayerDto {
     pub primary_id: String,
+    pub display_name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -220,6 +220,7 @@ impl Playlist {
         )
     }
 }
+
 
 // #[derive(Debug, Serialize, Deserialize)]
 // pub struct HideRequest {

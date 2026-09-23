@@ -1,22 +1,58 @@
 use std::path::Path;
 
-use crate::core::api::contract::session::DetailedSessionDto;
-use crate::core::bl::features::{get_most_played_player};
+use crate::core::api::contract::session::{DetailedSessionDto, SessionDto, SessionMatchDto};
+use crate::core::api::contract::{MVPType, PlayerDto};
+use crate::core::bl::features::get_most_played_player;
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
 use uuid::Uuid;
 
-pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
+pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<SessionDto> {
     let repo = Repository::connect(path)?;
 
     let main_character = get_most_played_player(&repo)?;
 
-    todo!()
-    // Ok(DetailedSessionDto {
-    //     session_matches: (),
-    //     own_team_player_averages: (),
-    //     average_enemy_core_stats: (),
-    //     average_team_player_core_stats: (),
-    //     average_team_player_advanced_stats: (),
-    // })
+    let enemies = repo.get_session_enemies(match_guids.clone(), main_character.id)?;
+
+    let matches = repo
+        .get_session_matches(match_guids, main_character.id)?
+        .into_iter()
+        .map(|row| {
+            let mvp_type = if row.own_best_global_player_id == main_character.id {
+                if row.main_character_won.unwrap_or(true) {
+                    MVPType::MVP
+                } else {
+                    MVPType::ACE
+                }
+            } else {
+                MVPType::Nothing
+            };
+
+            let match_enemies = enemies
+                .iter()
+                .filter(|enemy| enemy.match_guid == row.match_guid)
+                .map(|enemy| PlayerDto {
+                    primary_id: enemy.primary_id.clone(),
+                    display_name: enemy.display_name.clone(),
+                })
+                .collect();
+
+            SessionMatchDto {
+                match_guid: row.match_guid,
+                created_at: row.created_at,
+                ended_at: row.ended_at,
+                won: row.main_character_won,
+                mvp_type,
+                overtime: row.had_overtime,
+                arena: row.arena,
+                own_score: row.own_score,
+                enemy_score: row.enemy_score,
+                enemies: match_enemies,
+                deleted: row.deleted,
+                duration: row.duration,
+            }
+        })
+        .collect();
+
+    Ok(SessionDto { matches })
 }

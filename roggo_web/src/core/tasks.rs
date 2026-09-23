@@ -63,8 +63,8 @@ pub fn load_detailed_session(mut sender: Sender<APIResult>, match_guids: Vec<Uui
         let result = api::get_session(match_guids).await;
 
         match result {
-            Ok(detailed_session) => {
-                let _ = sender.try_send(APIResult::DetailedSession(detailed_session));
+            Ok(session) => {
+                let _ = sender.try_send(APIResult::DetailedSession(session));
             }
             Err(err) => match err {
                 Error::HTTPError(_) => {}

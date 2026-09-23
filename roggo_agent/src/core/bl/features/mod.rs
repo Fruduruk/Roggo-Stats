@@ -3,7 +3,7 @@ pub mod session;
 
 use std::path::Path;
 
-use crate::core::api::contract::{MainCharacterDto, VersionDto};
+use crate::core::api::contract::{PlayerDto, VersionDto};
 use crate::core::bl::query_models::{ GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
@@ -15,12 +15,12 @@ pub fn get_version() -> VersionDto {
     }
 }
 
-pub fn get_main_character(path: &Path) -> Result<MainCharacterDto> {
+pub fn get_main_character(path: &Path) -> Result<PlayerDto> {
     let repo = Repository::connect(path)?;
     let main_character = get_most_played_player(&repo)?;
 
-    Ok(MainCharacterDto {
-        username: main_character.last_username,
+    Ok(PlayerDto {
+        display_name: main_character.last_username,
         primary_id: main_character.primary_id,
     })
 }

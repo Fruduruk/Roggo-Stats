@@ -2,6 +2,32 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SessionRequest {
+    pub match_guids: Vec<Uuid>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SessionDto {
+    pub matches: Vec<SessionMatchDto>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SessionMatchDto {
+    pub match_guid: Uuid,
+    pub arena: String,
+    pub duration: i64,
+    pub created_at: i64,
+    pub ended_at: i64,
+    pub won: Option<bool>,
+    pub mvp_type: super::MVPType,
+    pub overtime: bool,
+    pub own_score: i64,
+    pub enemy_score: i64,
+    pub enemies: Vec<super::PlayerDto>,
+    pub deleted: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedSessionDto {
     pub session_matches: Vec<SessionMatchDto>,
     pub own_team_player_averages: Vec<DetailedAveragePlayerDto>,
@@ -9,8 +35,6 @@ pub struct DetailedSessionDto {
     pub average_team_player_core_stats: Option<DetailedAverageCoreStatsDto>,
     pub average_team_player_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
 }
-
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DetailedAverageAdvancedStatsDto {
@@ -38,21 +62,4 @@ pub struct DetailedAveragePlayerDto {
     pub username: String,
     pub average_core_stats: DetailedAverageCoreStatsDto,
     pub average_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
-}
-
-
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SessionMatchDto {
-    pub match_guid: Uuid,
-    pub created_at: i64,
-    pub ended_at: i64,
-    pub won: Option<bool>,
-    pub mvp_type: super::MVPType,
-    pub hidden: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SessionRequest {
-    pub match_guids: Vec<Uuid>,
 }

@@ -2,7 +2,11 @@ use crate::core::{
     api_result::APIResult,
     app::COMPATIBLE_AGENT_VERSION,
     app_state::{agent_state::AgentState, parameters::Parameters},
-    contract::{AgentErrorDto, day::DayDto, session::DetailedSessionDto},
+    contract::{
+        AgentErrorDto,
+        day::DayDto,
+        session::{DetailedSessionDto, SessionDto},
+    },
 };
 
 pub mod agent_state;
@@ -14,7 +18,7 @@ pub struct AppState {
     pub player_name: Option<String>,
     pub errors: Vec<AgentErrorDto>,
     pub day: Option<DayDto>,
-    pub session: Option<DetailedSessionDto>,
+    pub session: Option<SessionDto>,
     pub parameters: Parameters,
 }
 
@@ -34,8 +38,8 @@ impl AppState {
                 None => self.agent_state = AgentState::AgentMissing,
             },
             APIResult::Day(day) => self.day = Some(day),
-            APIResult::DetailedSession(detailed_session_dto) => {
-                self.session = Some(detailed_session_dto)
+            APIResult::DetailedSession(session_dto) => {
+                self.session = Some(session_dto)
             }
         }
     }

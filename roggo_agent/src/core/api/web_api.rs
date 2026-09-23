@@ -10,15 +10,10 @@ use tower_http::cors::{Any, CorsLayer};
 
 use crate::core::{
     api::{
-        Error, Result,
-        contract::{
-            MainCharacterDto, VersionDto,
-            day::DayDto,
-            session::{DetailedSessionDto, SessionRequest},
+        Error, Result, contract::{
+            PlayerDto, VersionDto, day::DayDto, session::{DetailedSessionDto, SessionDto, SessionRequest},
         },
-    },
-    bl::features,
-    windows_api,
+    }, bl::features, windows_api,
 };
 
 const WEB_SOCKET_ADDR: &str = "127.0.0.1:49122";
@@ -76,7 +71,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/day/{day}", get(get_day))
 }
 
-async fn get_main_character(State(state): State<AppState>) -> Result<Json<MainCharacterDto>> {
+async fn get_main_character(State(state): State<AppState>) -> Result<Json<PlayerDto>> {
     let main_character = features::get_main_character(&state.db_file_path)?;
     Ok(Json(main_character))
 }
@@ -95,7 +90,7 @@ async fn get_day(State(state): State<AppState>, Path(day): Path<String>) -> Resu
 async fn get_session(
     State(state): State<AppState>,
     Json(request): Json<SessionRequest>,
-) -> Result<Json<DetailedSessionDto>> {
+) -> Result<Json<SessionDto>> {
     if request.match_guids.is_empty() {
         return Err(Error::UserError("Cannot process empty match list".into()));
     }

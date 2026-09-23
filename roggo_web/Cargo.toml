@@ -20,6 +20,7 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg"]
 futures-channel = "0.3.34"
 enum-iterator = "2.3.0"
 jiff = "0.2.35"
+itertools = "0.15.0"
 
 [profile.dev]
 opt-level = 0

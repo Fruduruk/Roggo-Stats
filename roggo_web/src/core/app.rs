@@ -142,7 +142,9 @@ impl RoggoApp {
                     }
                 }
                 (Tab::Session, _changed) => {
-                    if let (Some(detailed_session),Some(player_name)) = (&self.state.session,&self.state.player_name) {
+                    if let (Some(detailed_session), Some(player_name)) =
+                        (&self.state.session, &self.state.player_name)
+                    {
                         SessionPage::default().ui(ui, detailed_session, player_name);
                     }
                 }

@@ -11,13 +11,7 @@ pub struct DayDto {
 #[derive(Debug, Serialize, Deserialize, Hash)]
 pub enum SessionTypeDto {
     Solo,
-    Team(Vec<PlayerDto>),
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub struct PlayerDto {
-    pub primary_id: String,
-    pub display_name: String,
+    Team(Vec<super::PlayerDto>),
 }
 
 #[derive(Debug, Serialize, Deserialize, Hash)]
