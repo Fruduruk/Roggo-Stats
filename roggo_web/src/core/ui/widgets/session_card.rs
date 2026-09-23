@@ -2,8 +2,7 @@ use eframe::egui::{self};
 use jiff::{Timestamp, Zoned, tz::TimeZone};
 
 use crate::core::{
-    contract::{DaySessionDto, SessionTypeDto},
-    ui::theme::colors::colors,
+    contract::day::{DaySessionDto, SessionTypeDto}, ui::theme::colors::colors,
 };
 
 pub fn ui(ui: &mut egui::Ui, session: &DaySessionDto) -> egui::Response {

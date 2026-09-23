@@ -2,7 +2,7 @@ use crate::core::{
     api_result::APIResult,
     app::COMPATIBLE_AGENT_VERSION,
     app_state::{agent_state::AgentState, parameters::Parameters},
-    contract::{AgentErrorDto, DayDto, DetailedSessionDto},
+    contract::{AgentErrorDto, day::DayDto, session::DetailedSessionDto},
 };
 
 pub mod agent_state;

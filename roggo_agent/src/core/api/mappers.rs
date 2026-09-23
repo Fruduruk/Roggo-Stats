@@ -1,6 +1,4 @@
-use crate::core::{
-    api::contract::{DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto},
-};
+use crate::core::api::contract::session::{DetailedAverageAdvancedStatsDto, DetailedAverageCoreStatsDto};
 
 impl DetailedAverageAdvancedStatsDto {
     pub fn from_options(

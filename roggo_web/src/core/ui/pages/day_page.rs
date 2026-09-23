@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::{
     api_result::APIResult,
-    contract::DayDto,
+    contract::day::DayDto,
     tasks,
     ui::{
         components::{full_panel::FullPanel, tab_control::Tab},

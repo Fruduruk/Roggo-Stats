@@ -1,7 +1,6 @@
 use eframe::egui;
 
-use crate::core::contract::MVPType;
-use crate::core::{contract::DetailedSessionDto, ui::components::full_panel::FullPanel};
+use crate::core::{ contract::session::DetailedSessionDto, ui::components::full_panel::FullPanel};
 
 #[derive(Default)]
 pub struct SessionPage {}

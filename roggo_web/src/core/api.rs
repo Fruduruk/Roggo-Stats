@@ -2,11 +2,7 @@ use gloo_net::http::Request;
 use jiff::civil::Date;
 use uuid::Uuid;
 
-use crate::core::contract::{
-    AgentErrorDto, DayDto, DetailedMatchDto, DetailedSessionDto, HideRequest, MainCharacterDto,
-    SessionRequest, SimpleMatchDto, SimpleSessionDto, VersionDto,
-};
-use crate::core::{Error, Result};
+use crate::core::{Error, Result, contract::{AgentErrorDto, MainCharacterDto, VersionDto, day::DayDto, session::{DetailedSessionDto, SessionRequest}}};
 
 const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49122";
 
@@ -23,18 +19,18 @@ pub async fn get_day(date: Date) -> Result<DayDto> {
     }
 }
 
-pub async fn hide_match(match_guid: Uuid, hide: bool) -> Result<()> {
-    let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_match"))
-        .json(&HideRequest { match_guid, hide })?
-        .send()
-        .await?;
+// pub async fn hide_match(match_guid: Uuid, hide: bool) -> Result<()> {
+//     let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_match"))
+//         .json(&HideRequest { match_guid, hide })?
+//         .send()
+//         .await?;
 
-    if response.ok() {
-        Ok(())
-    } else {
-        parse_error(response).await
-    }
-}
+//     if response.ok() {
+//         Ok(())
+//     } else {
+//         parse_error(response).await
+//     }
+// }
 
 pub async fn get_session(match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
     let response = Request::post(&format!("{WEB_SOCKET_ADDR}/session"))
@@ -49,14 +45,14 @@ pub async fn get_session(match_guids: Vec<Uuid>) -> Result<DetailedSessionDto> {
     }
 }
 
-pub async fn get_sessions(pause_ms: i64) -> Result<Vec<SimpleSessionDto>> {
-    let response = request(&format!("sessions/{pause_ms}")).send().await?;
-    if response.ok() {
-        Ok(response.json::<Vec<SimpleSessionDto>>().await?)
-    } else {
-        parse_error(response).await
-    }
-}
+// pub async fn get_sessions(pause_ms: i64) -> Result<Vec<SimpleSessionDto>> {
+//     let response = request(&format!("sessions/{pause_ms}")).send().await?;
+//     if response.ok() {
+//         Ok(response.json::<Vec<SimpleSessionDto>>().await?)
+//     } else {
+//         parse_error(response).await
+//     }
+// }
 
 pub async fn get_version() -> Result<String> {
     let response = request("version").send().await?;
@@ -84,21 +80,21 @@ async fn parse_error<T>(response: gloo_net::http::Response) -> Result<T> {
     Err(Error::AgentError(error_dto))
 }
 
-pub async fn get_matches() -> Result<Vec<SimpleMatchDto>> {
-    let response = request("matches").send().await?;
-    if response.ok() {
-        Ok(response.json::<Vec<SimpleMatchDto>>().await?)
-    } else {
-        parse_error(response).await
-    }
-}
+// pub async fn get_matches() -> Result<Vec<SimpleMatchDto>> {
+//     let response = request("matches").send().await?;
+//     if response.ok() {
+//         Ok(response.json::<Vec<SimpleMatchDto>>().await?)
+//     } else {
+//         parse_error(response).await
+//     }
+// }
 
-pub async fn get_match_by_match_guid(match_guid: Uuid) -> Result<DetailedMatchDto> {
-    let response = request(&format!("matches/{}", match_guid)).send().await?;
+// pub async fn get_match_by_match_guid(match_guid: Uuid) -> Result<DetailedMatchDto> {
+//     let response = request(&format!("matches/{}", match_guid)).send().await?;
 
-    if response.ok() {
-        Ok(response.json::<DetailedMatchDto>().await?)
-    } else {
-        parse_error(response).await
-    }
-}
+//     if response.ok() {
+//         Ok(response.json::<DetailedMatchDto>().await?)
+//     } else {
+//         parse_error(response).await
+//     }
+// }
