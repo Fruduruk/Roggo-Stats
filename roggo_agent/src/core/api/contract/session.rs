@@ -40,12 +40,7 @@ pub struct DetailedAveragePlayerDto {
     pub average_advanced_stats: Option<DetailedAverageAdvancedStatsDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum MVPType {
-    MVP,
-    ACE,
-    Nothing,
-}
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SessionMatchDto {
@@ -53,7 +48,7 @@ pub struct SessionMatchDto {
     pub created_at: i64,
     pub ended_at: i64,
     pub won: Option<bool>,
-    pub mvp_type: MVPType,
+    pub mvp_type: super::MVPType,
     pub hidden: bool,
 }
 
@@ -61,15 +56,3 @@ pub struct SessionMatchDto {
 pub struct SessionRequest {
     pub match_guids: Vec<Uuid>,
 }
-
-// #[derive(Debug, Serialize, Deserialize)]
-// pub struct SimpleSessionDto {
-//     pub match_guids: Vec<Uuid>,
-//     pub match_count: i64,
-//     pub matches_won: i64,
-//     pub created_at: i64,
-//     pub ended_at: i64,
-//     pub own_player_count: i64,
-//     pub enemy_player_count: i64,
-// }
-

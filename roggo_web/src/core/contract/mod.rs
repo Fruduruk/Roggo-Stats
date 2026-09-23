@@ -5,6 +5,13 @@ pub mod single_match;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+pub enum MVPType {
+    MVP,
+    ACE,
+    Nothing,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VersionDto {
     pub version: String,
 }
