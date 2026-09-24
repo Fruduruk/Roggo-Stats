@@ -3,11 +3,8 @@ use jiff::civil::Date;
 use uuid::Uuid;
 
 use crate::core::{
-    Error, Result,
-    contract::{
-        AgentErrorDto, PlayerDto, VersionDto,
-        day::DayDto,
-        session::{DetailedSessionDto, SessionDto, SessionRequest},
+    Error, Result, contract::{
+        AgentErrorDto, PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{DetailedSessionDto, SessionDto, SessionRequest},
     },
 };
 
@@ -47,6 +44,15 @@ pub async fn get_day(date: Date) -> Result<DayDto> {
     let response = request(&format!("day/{}", date)).send().await?;
     if response.ok() {
         Ok(response.json::<DayDto>().await?)
+    } else {
+        parse_error(response).await
+    }
+}
+
+pub async fn get_days_played() -> Result<DaysPlayedDto> {
+    let response = request("days_played").send().await?;
+    if response.ok() {
+        Ok(response.json::<DaysPlayedDto>().await?)
     } else {
         parse_error(response).await
     }

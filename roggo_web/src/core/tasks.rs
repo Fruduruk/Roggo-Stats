@@ -1,8 +1,12 @@
+use std::str::FromStr;
+
 use futures_channel::mpsc::Sender;
+use itertools::Itertools;
 use jiff::civil::Date;
 use uuid::Uuid;
 
 use crate::core::Error;
+use crate::core::Result;
 
 use crate::core::api;
 use crate::core::api_result::APIResult;
@@ -31,12 +35,7 @@ pub fn load_main_character(mut sender: Sender<APIResult>) {
             Ok(name) => {
                 let _ = sender.try_send(APIResult::PlayerName(name));
             }
-            Err(err) => match err {
-                Error::HTTPError(_) => {}
-                Error::AgentError(agent_error_dto) => {
-                    let _ = sender.try_send(APIResult::AgentError(agent_error_dto));
-                }
-            },
+            Err(err) => filter_and_send_agent_error(sender, err),
         }
     });
 }
@@ -48,14 +47,43 @@ pub fn load_day(mut sender: Sender<APIResult>, date: Date) {
             Ok(day) => {
                 let _ = sender.try_send(APIResult::Day(day));
             }
-            Err(err) => match err {
-                Error::HTTPError(_) => {}
-                Error::AgentError(agent_error_dto) => {
-                    let _ = sender.try_send(APIResult::AgentError(agent_error_dto));
-                }
-            },
+            Err(err) => filter_and_send_agent_error(sender, err),
         }
     });
+}
+
+pub fn load_days_played(mut sender: Sender<APIResult>) {
+    wasm_bindgen_futures::spawn_local(async move {
+        match api::get_days_played().await {
+            Ok(days_played) => {
+                let result = days_played
+                    .days
+                    .into_iter()
+                    .map(|day| {
+                        jiff::civil::Date::from_str(&day)
+                            .map_err(|err| Error::GeneralError(err.to_string()))
+                    })
+                    .collect::<Result<Vec<_>>>()
+                    .map(APIResult::DaysPlayed)
+                    .unwrap_or_else(APIResult::GeneralError);
+
+                let _ = sender.try_send(result);
+            }
+            Err(err) => filter_and_send_agent_error(sender, err),
+        }
+    });
+}
+
+fn filter_and_send_agent_error(mut sender: Sender<APIResult>, err: Error) {
+    let result = match err {
+        Error::HTTPError(_) => None,
+        Error::AgentError(agent_error) => Some(APIResult::AgentError(agent_error)),
+        err @ Error::GeneralError(_) => Some(APIResult::GeneralError(err)),
+    };
+
+    if let Some(result) = result {
+        let _ = sender.try_send(result);
+    }
 }
 
 pub fn load_detailed_session(mut sender: Sender<APIResult>, match_guids: Vec<Uuid>) {
@@ -66,12 +94,7 @@ pub fn load_detailed_session(mut sender: Sender<APIResult>, match_guids: Vec<Uui
             Ok(session) => {
                 let _ = sender.try_send(APIResult::DetailedSession(session));
             }
-            Err(err) => match err {
-                Error::HTTPError(_) => {}
-                Error::AgentError(agent_error_dto) => {
-                    let _ = sender.try_send(APIResult::AgentError(agent_error_dto));
-                }
-            },
+            Err(err) => filter_and_send_agent_error(sender, err),
         }
     });
 }

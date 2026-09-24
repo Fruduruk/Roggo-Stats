@@ -15,9 +15,9 @@ fn main() {
     .map(|guid| Uuid::parse_str(guid).unwrap())
     .collect::<Vec<_>>();
 
-    let matches = repo
-        .get_session_enemies(match_guids, 4)
+    let days_played = repo
+        .get_start_times_ms( 4)
         .unwrap();
 
-    println!("{:#?}", matches);
+    println!("{:#?}", days_played);
 }

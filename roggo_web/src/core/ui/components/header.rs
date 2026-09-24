@@ -1,6 +1,13 @@
+use std::ops::Index;
+
 use crate::core::{
-    api_result::APIResult, tasks, ui::{
-        components::tab_control::Tab, theme::colors::colors, widgets::date_control::{self},
+    api_result::APIResult,
+    contract::day::DaysPlayedDto,
+    tasks,
+    ui::{
+        components::tab_control::Tab,
+        theme::colors::colors,
+        widgets::date_control::{self},
     },
 };
 use eframe::egui::{self};
@@ -10,9 +17,10 @@ use jiff::civil::Date;
 pub fn ui(
     ui: &mut egui::Ui,
     player_name: &Option<String>,
+    days_played: &Option<Vec<Date>>,
     date: &mut Date,
     sender: &Sender<APIResult>,
-    current_tab: &mut Tab
+    current_tab: &mut Tab,
 ) {
     egui::Panel::top("header")
         .frame(
@@ -36,24 +44,35 @@ pub fn ui(
 
             mid_rect_scope(ui, egui::vec2(220.0, ui.max_rect().height()), |ui| {
                 ui.horizontal(|ui| {
-                    let past_date = *date;
-                    if ui.button("←").clicked() {
-                        if let Ok(yesterday) = date.yesterday() {
-                            *date = yesterday;
+                    if let Some(days_played) = days_played.as_ref()
+                        && let Some(last) = days_played.last()
+                    {
+                        let current_date = *date;
+                        let days_played_index = days_played
+                            .iter()
+                            .position(|d| d == date)
+                            .unwrap_or(days_played.len() - 1);
+
+                        if ui.button("←").clicked() {
+                            let new_date = days_played.get(days_played_index.saturating_sub(1)).unwrap_or(&current_date);
+                            *date = *new_date;
                         }
-                    }
 
-                    date_control::ui(ui, date);
+                        date_control::ui(ui, date);
 
-                    if ui.button("→").clicked() {
-                        if let Ok(tomorrow) = date.tomorrow() {
-                            *date = tomorrow;
+                        if !days_played.contains(date) {
+                            *date = *last;
                         }
-                    }
 
-                    if past_date != *date {
-                        tasks::load_day(sender.clone(), *date);
-                        *current_tab = Tab::Day;
+                        if ui.button("→").clicked() {
+                            let new_date = days_played.get(days_played_index + 1).unwrap_or(&current_date);
+                            *date = *new_date;
+                        }
+
+                        if current_date != *date {
+                            tasks::load_day(sender.clone(), *date);
+                            *current_tab = Tab::Day;
+                        }
                     }
                 });
             });

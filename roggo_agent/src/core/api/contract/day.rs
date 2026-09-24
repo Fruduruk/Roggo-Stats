@@ -37,8 +37,5 @@ pub struct DayMatchDto {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DaysPlayedDto {
-    days: Vec<String>,
+    pub days: Vec<String>,
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DaysPlayedRequest;

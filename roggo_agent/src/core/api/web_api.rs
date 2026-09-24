@@ -11,7 +11,7 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::core::{
     api::{
         Error, Result, contract::{
-            PlayerDto, VersionDto, day::DayDto, session::{DetailedSessionDto, SessionDto, SessionRequest},
+            PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{DetailedSessionDto, SessionDto, SessionRequest},
         },
     }, bl::features, windows_api,
 };
@@ -69,6 +69,7 @@ fn add_routes(app: Router<AppState>) -> Router<AppState> {
         .route("/version", get(get_version))
         .route("/session", post(get_session))
         .route("/day/{day}", get(get_day))
+        .route("/days_played", get(get_days_played))
 }
 
 async fn get_main_character(State(state): State<AppState>) -> Result<Json<PlayerDto>> {
@@ -85,6 +86,11 @@ async fn get_version(State(_state): State<AppState>) -> Result<Json<VersionDto>>
 async fn get_day(State(state): State<AppState>, Path(day): Path<String>) -> Result<Json<DayDto>> {
     let day = features::day::get(&state.db_file_path, day.parse()?)?;
     Ok(Json(day))
+}
+
+async fn get_days_played(State(state): State<AppState>) -> Result<Json<DaysPlayedDto>> {
+    let days_played = features::day::get_days_played(&state.db_file_path)?;
+    Ok(Json(days_played))
 }
 
 async fn get_session(

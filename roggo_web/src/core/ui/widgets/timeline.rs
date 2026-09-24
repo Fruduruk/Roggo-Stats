@@ -28,7 +28,7 @@ pub fn ui(ui: &mut egui::Ui, session: &SessionDto) -> egui::Response {
 
             Rect::from_min_size(
                 Pos2::new(starting_x, timeline_rect.top()),
-                Vec2::new(width, 52.0),
+                Vec2::new(width, 32.0),
             )
         })
         .collect::<Vec<_>>();

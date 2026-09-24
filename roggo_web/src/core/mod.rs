@@ -1,20 +1,23 @@
-use crate::core::contract::{AgentErrorDto};
-pub mod app;
+use crate::core::contract::AgentErrorDto;
 pub mod api;
-pub mod ui;
+pub mod api_result;
+pub mod app;
+pub mod app_state;
 pub mod contract;
-pub mod time;
 pub mod links;
 pub mod tasks;
-pub mod app_state;
-pub mod api_result;
+pub mod time;
+pub mod ui;
 
-#[derive(thiserror::Error,Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("HTTP error")]
     HTTPError(#[from] gloo_net::Error),
 
     #[error("Agent Error")]
-    AgentError(AgentErrorDto)
+    AgentError(AgentErrorDto),
+
+    #[error("General Error")]
+    GeneralError(String),
 }
 pub type Result<T> = std::result::Result<T, Error>;

@@ -1,9 +1,9 @@
-use crate::core::{app::UI_VERSION, ui::theme::colors::colors};
+use crate::core::{Error, app::UI_VERSION, ui::theme::colors::colors};
 use eframe::egui;
 
 const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
 
-pub fn ui(ui: &mut egui::Ui, agent_version: Option<String>) {
+pub fn ui(ui: &mut egui::Ui, agent_version: Option<String>, general_errors: &Vec<Error>) {
     egui::Panel::bottom("footer")
         .frame(
             egui::Frame::new()
@@ -13,6 +13,8 @@ pub fn ui(ui: &mut egui::Ui, agent_version: Option<String>) {
         .show_separator_line(false)
         .show(ui, |ui| {
             ui.horizontal(|ui| {
+                ui.label(" ")
+                    .on_hover_text(format!("{:#?}", general_errors));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     show_github_button(ui);
                     if agent_version.is_some() {

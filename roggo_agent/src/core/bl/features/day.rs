@@ -2,15 +2,42 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use crate::core::api::contract::PlayerDto;
-use crate::core::api::contract::day::{DayDto, DayMatchDto, DaySessionDto,  SessionTypeDto};
+use crate::core::api::contract::day::{
+    DayDto, DayMatchDto, DaySessionDto, DaysPlayedDto, SessionTypeDto,
+};
 use crate::core::bl::features::{get_most_played_player, is_main_character_team};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
 use crate::core::db::repository_features::day::get_teams_by_match_id;
 use crate::core::db::repository_features::day::{DayMatchRow, get_players_by_team_id};
-use jiff::ToSpan;
 use jiff::civil::Date;
 use jiff::tz::TimeZone;
+use jiff::{Timestamp, ToSpan};
+
+pub fn get_days_played(path: &Path) -> Result<DaysPlayedDto> {
+    let repo = Repository::connect(path)?;
+
+    let main_character = get_most_played_player(&repo)?;
+    let start_times_in_ms = repo.get_start_times_ms(main_character.id)?;
+
+    let mut days = start_times_in_ms
+        .into_iter()
+        .map(|timestamp| {
+            let timestamp = Timestamp::from_millisecond(timestamp)
+                .map_err(|err| Error::CalculationError(err.to_string()))?;
+
+            Ok(timestamp
+                .to_zoned(TimeZone::system())
+                .saturating_sub(4.hours())
+                .date()
+                .to_string())
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    days.dedup();
+
+    Ok(DaysPlayedDto { days })
+}
 
 const SESSION_PAUSE_MS: i64 = 60 * 60 * 1000;
 

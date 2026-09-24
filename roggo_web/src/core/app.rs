@@ -58,12 +58,13 @@ impl eframe::App for RoggoApp {
         header::ui(
             ui,
             &self.state.player_name,
+            &self.state.days_played,
             &mut self.state.parameters.date,
             &self.content_sender,
             &mut self.tab_control.selected,
         );
 
-        footer::ui(ui, agent_version.clone());
+        footer::ui(ui, agent_version.clone(), &self.state.general_errors);
 
         if matches!(self.state.agent_state, AgentState::CheckingAgent) {
             egui::CentralPanel::default().show(ui, |ui| {
@@ -114,6 +115,7 @@ impl RoggoApp {
         let now = ui.ctx().input(|i| i.time);
         if self.last_reload + 1.0 < now {
             tasks::load_day(self.content_sender.clone(), self.state.parameters.date);
+            tasks::load_days_played(self.content_sender.clone());
 
             if self.state.player_name.is_none() {
                 tasks::load_main_character(self.content_sender.clone());

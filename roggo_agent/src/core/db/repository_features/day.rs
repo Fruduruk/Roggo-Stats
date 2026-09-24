@@ -1,6 +1,6 @@
 use crate::core::api::contract::Playlist;
 use crate::core::db::{Repository, Result};
-use rusqlite::{params};
+use rusqlite::params;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -25,6 +25,24 @@ pub struct PlayerRow {
 }
 
 impl Repository {
+    pub fn get_start_times_ms(&self, main_character_global_player_id: i64) -> Result<Vec<i64>> {
+        let mut stmt = self.connection.prepare(
+            "
+            select m.created_at_ms from matches m
+            join players p on p.match_id = m.id
+            join global_players gp on gp.id = p.global_player_id
+            where gp.id = ?1 and duration <> 0
+            order by m.created_at_ms asc
+            ",
+        )?;
+
+        let rows = stmt.query_map([main_character_global_player_id], |row| {
+            row.get("created_at_ms")
+        })?;
+
+        Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
+    }
+
     pub fn get_all_matches_for_day(&self, start_ms: i64, end_ms: i64) -> Result<Vec<DayMatchRow>> {
         let mut stmt = self.connection.prepare(
             "
