@@ -1,6 +1,6 @@
 use crate::core::api::contract::Playlist;
 use crate::core::db::{Repository, Result};
-use rusqlite::{params_from_iter};
+use rusqlite::params_from_iter;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -75,6 +75,29 @@ impl Repository {
                 match_guids,
                 main_character_global_player_id,
                 include_str!("../sql/session_enemies.sql"),
+            )?;
+
+        let rows = stmt.query_map(params_from_iter(params.iter()), |row| {
+            Ok(PlayerRow {
+                match_guid: row.get("match_guid")?,
+                primary_id: row.get("primary_id")?,
+                display_name: row.get("last_username")?,
+            })
+        })?;
+
+        Ok(rows.collect::<rusqlite::Result<Vec<_>>>()?)
+    }
+
+    pub fn get_session_allies(
+        &self,
+        match_guids: Vec<Uuid>,
+        main_character_global_player_id: i64,
+    ) -> Result<Vec<PlayerRow>> {
+        let (mut stmt, params) = self
+            .prepare_statement_and_params_for_match_guids_and_main_character(
+                match_guids,
+                main_character_global_player_id,
+                include_str!("../sql/session_allies.sql"),
             )?;
 
         let rows = stmt.query_map(params_from_iter(params.iter()), |row| {

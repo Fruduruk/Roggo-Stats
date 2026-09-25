@@ -147,7 +147,7 @@ impl RoggoApp {
                     if let (Some(detailed_session), Some(player_name)) =
                         (&self.state.session, &self.state.player_name)
                     {
-                        SessionPage::default().ui(ui, detailed_session, player_name);
+                        SessionPage::default().ui(ui, detailed_session, player_name, &mut self.tab_control.selected);
                     }
                 }
                 (Tab::Match, _changed) => MatchPage::default().ui(ui),

@@ -6,7 +6,7 @@ use crate::core::db::{Repository, Result};
 use crate::core::bl::query_models::{
     F2MatchRow, F2PlayerRow, F2TeamRow, F3MatchRow, F3PlayerRow, F3PlayerStatsRow, F3TeamRow,
     F4MatchRow, F5AverageAdvancedStatsRow, F5AverageCoreStatsRow, F5AveragePlayerStatsRow,
-    F5SessionMatchRow, GlobalPlayerRow,
+    GlobalPlayerRow,
 };
 
 impl Repository {

@@ -1,8 +1,8 @@
 use crate::core::{
     Error, api_result::APIResult, app::COMPATIBLE_AGENT_VERSION, app_state::{agent_state::AgentState, parameters::Parameters}, contract::{
         AgentErrorDto,
-        day::{DayDto, DaysPlayedDto},
-        session::{DetailedSessionDto, SessionDto},
+        day::{DayDto},
+        session::{SessionDto},
     },
 };
 

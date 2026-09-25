@@ -23,6 +23,7 @@ pub struct SessionMatchDto {
     pub overtime: bool,
     pub own_score: i64,
     pub enemy_score: i64,
+    pub allies: Vec<super::PlayerDto>,
     pub enemies: Vec<super::PlayerDto>,
     pub deleted: bool,
 }

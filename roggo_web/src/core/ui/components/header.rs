@@ -1,8 +1,5 @@
-use std::ops::Index;
-
 use crate::core::{
     api_result::APIResult,
-    contract::day::DaysPlayedDto,
     tasks,
     ui::{
         components::tab_control::Tab,

@@ -4,3 +4,4 @@ pub mod live_editor;
 pub mod date_control;
 pub mod session_card;
 pub mod timeline;
+pub mod match_card;

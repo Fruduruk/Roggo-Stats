@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use futures_channel::mpsc::Sender;
-use itertools::Itertools;
 use jiff::civil::Date;
 use uuid::Uuid;
 

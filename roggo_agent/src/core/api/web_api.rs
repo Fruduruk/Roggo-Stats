@@ -11,7 +11,7 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::core::{
     api::{
         Error, Result, contract::{
-            PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{DetailedSessionDto, SessionDto, SessionRequest},
+            PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{SessionDto, SessionRequest},
         },
     }, bl::features, windows_api,
 };

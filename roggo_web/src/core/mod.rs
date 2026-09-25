@@ -8,6 +8,7 @@ pub mod links;
 pub mod tasks;
 pub mod time;
 pub mod ui;
+pub mod icons;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

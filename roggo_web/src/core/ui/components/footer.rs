@@ -1,4 +1,4 @@
-use crate::core::{Error, app::UI_VERSION, ui::theme::colors::colors};
+use crate::core::{Error, app::UI_VERSION, icons, ui::theme::colors::colors};
 use eframe::egui;
 
 const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
@@ -27,8 +27,8 @@ pub fn ui(ui: &mut egui::Ui, agent_version: Option<String>, general_errors: &Vec
 
 fn show_github_button(ui: &mut egui::Ui) {
     let image_source = match ui.theme() {
-        egui::Theme::Dark => egui::include_image!("../../../../assets/github_dark.png"),
-        egui::Theme::Light => egui::include_image!("../../../../assets/github_light.png"),
+        egui::Theme::Dark => icons::GITHUB_DARK,
+        egui::Theme::Light => icons::GITHUB_LIGHT,
     };
 
     let image = egui::Image::new(image_source).fit_to_exact_size(egui::vec2(18.0, 18.0));

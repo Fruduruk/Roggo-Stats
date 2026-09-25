@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use crate::core::api::contract::session::{DetailedSessionDto, SessionDto, SessionMatchDto};
+use crate::core::api::contract::session::{SessionDto, SessionMatchDto};
 use crate::core::api::contract::{MVPType, PlayerDto};
+use crate::core::bl::Result;
 use crate::core::bl::features::get_most_played_player;
-use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;
 use uuid::Uuid;
 
@@ -13,6 +13,7 @@ pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<SessionDto> {
     let main_character = get_most_played_player(&repo)?;
 
     let enemies = repo.get_session_enemies(match_guids.clone(), main_character.id)?;
+    let allies = repo.get_session_allies(match_guids.clone(), main_character.id)?;
 
     let matches = repo
         .get_session_matches(match_guids, main_character.id)?
@@ -37,6 +38,15 @@ pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<SessionDto> {
                 })
                 .collect();
 
+            let match_allies = allies
+                .iter()
+                .filter(|ally| ally.match_guid == row.match_guid)
+                .map(|ally| PlayerDto {
+                    primary_id: ally.primary_id.clone(),
+                    display_name: ally.display_name.clone(),
+                })
+                .collect();
+
             SessionMatchDto {
                 match_guid: row.match_guid,
                 created_at: row.created_at,
@@ -50,6 +60,7 @@ pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<SessionDto> {
                 enemies: match_enemies,
                 deleted: row.deleted,
                 duration: row.duration,
+                allies: match_allies,
             }
         })
         .collect();

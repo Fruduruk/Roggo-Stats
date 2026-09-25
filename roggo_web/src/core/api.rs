@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::core::{
     Error, Result, contract::{
-        AgentErrorDto, PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{DetailedSessionDto, SessionDto, SessionRequest},
+        AgentErrorDto, PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{SessionDto, SessionRequest},
     },
 };
 
