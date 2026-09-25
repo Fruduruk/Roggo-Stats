@@ -9,7 +9,7 @@ use crate::core::{
 };
 
 pub fn ui(ui: &mut egui::Ui, session: &SessionDto, selected_tab: &mut Tab) -> egui::Response {
-    let match_card_min_width = 100.0;
+    let match_card_min_width = 50.0;
 
     let match_card_rects = calculate_match_card_rects(ui, match_card_min_width, &session.matches);
 
@@ -39,70 +39,47 @@ pub fn ui(ui: &mut egui::Ui, session: &SessionDto, selected_tab: &mut Tab) -> eg
 
     timeline_response
 }
-
-fn get_smallest_pause_ms(matches: &[SessionMatchDto]) -> i64 {
-    matches
-        .windows(2)
-        .map(|pair| pair[1].created_at - pair[0].ended_at)
-        .min()
-        .unwrap_or(2)
-}
-
 fn calculate_match_card_rects_timeline(
     ui: &egui::Ui,
-    iteration: i64,
-    match_card_min_width: f32,
+    pixel_per_ms: f32,
     matches: &[SessionMatchDto],
-    smallest_pause_ms: i64,
 ) -> Option<Vec<Rect>> {
-    let (Some(first), Some(last)) = (matches.first(), matches.last()) else {
+    let Some(first) = matches.first() else {
         return Some(vec![]);
     };
 
-    let first_ms = first.created_at;
-    let total_ms = last.ended_at - first.created_at;
+    let starting_pos = ui.cursor().left_top();
+    let available_width = ui.available_width();
+    let max_x = starting_pos.x + available_width;
 
-    let pixel_per_ms =
-        ui.available_width() / (total_ms - iteration * (smallest_pause_ms / 8)) as f32;
-    let mut pause_deletion_offset = 0.0;
     let mut current_row = 0;
+    let mut row_start_ms = first.created_at;
 
     let match_rects = matches
         .iter()
         .map(|sm| {
-            let width = (sm.ended_at - sm.created_at) as f32 * pixel_per_ms;
+            let width =
+                (sm.ended_at - sm.created_at) as f32 * pixel_per_ms;
 
-            if width < match_card_min_width {
+            if width > available_width {
                 return None;
             }
 
-            let time_since_first = (sm.created_at - first_ms) as f32;
+            let time_since_row_start =
+                (sm.created_at - row_start_ms) as f32;
 
-            let starting_pos = ui.cursor().left_top();
-
-            let mut starting_x = starting_pos.x + time_since_first * pixel_per_ms;
-
-            let mut starting_y = starting_pos.y;
-
-            let max_x = ui.cursor().left() + ui.available_width();
-
-            if starting_x > max_x {
-                let offset_from_start = starting_x - starting_pos.x;
-                let row = (offset_from_start / ui.available_width()).floor();
-                starting_y += (32.0 + 5.0) * row; // calc line
-
-                let actual_starting_x = starting_x - (ui.available_width() * row); // shift left
-
-                if current_row < row as i32 {
-                    pause_deletion_offset = actual_starting_x - starting_pos.x;
-                    current_row = row as i32;
-                }
-                starting_x = actual_starting_x - pause_deletion_offset;
-            }
+            let mut starting_x =
+                starting_pos.x + time_since_row_start * pixel_per_ms;
 
             if starting_x + width > max_x {
-                return None;
+                current_row += 1;
+
+                row_start_ms = sm.created_at;
+                starting_x = starting_pos.x;
             }
+
+            let starting_y =
+                starting_pos.y + current_row as f32 * (32.0 + 5.0);
 
             Some(Rect::from_min_size(
                 Pos2::new(starting_x, starting_y),
@@ -116,31 +93,27 @@ fn calculate_match_card_rects_timeline(
 
 fn calculate_match_card_rects(
     ui: &mut egui::Ui,
-    match_card_min_width: f32,
+    min_width: f32,
     matches: &[SessionMatchDto],
 ) -> Vec<Rect> {
-    let smallest_pause_ms = get_smallest_pause_ms(matches);
-    let mut iteration = 0;
+    let match_lengths = matches.iter().map(|m|m.ended_at - m.created_at).collect::<Vec<_>>();
 
-    loop {
-        if let Some(rects) = calculate_match_card_rects_timeline(
-            ui,
-            iteration,
-            match_card_min_width,
-            matches,
-            smallest_pause_ms,
-        ) {
-            ui.label(format!("Iterations: {}", iteration));
-            break rects;
-        }
+    let (Some(shortest_match), Some(longest_match)) = (
+        match_lengths.iter().min(),
+        match_lengths.iter().max(),
+    ) else {
+        return vec![];
+    };
 
-        iteration += 1;
-
-        if iteration > 10000 {
-            ui.label("Iteration overflow");
-            ui.label(format!("Iterations: {}", iteration));
-
-            return vec![];
-        }
+    let min_pixel_per_ms = min_width / *shortest_match as f32;
+    let max_pixel_per_ms = ui.available_width() / *longest_match as f32;
+    
+    if min_pixel_per_ms > max_pixel_per_ms {
+        ui.label("Not enough space for timeline");
+        return vec![];
     }
+
+
+    let rects = calculate_match_card_rects_timeline(ui, min_pixel_per_ms,  matches);
+    rects.unwrap()
 }
