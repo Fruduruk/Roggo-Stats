@@ -1,6 +1,4 @@
-use eframe::egui::{
-    self,  FontFamily, ImageSource, Pos2, Rect, RichText, Vec2, pos2, vec2,
-};
+use eframe::egui::{self, FontFamily, ImageSource, Pos2, Rect, RichText, Vec2, pos2, vec2};
 use egui::{Color32, Mesh, Shape};
 use itertools::Itertools;
 
@@ -8,6 +6,7 @@ use crate::core::{
     contract::{MVPType, session::SessionMatchDto},
     icons,
     links::to_tracker_network_link,
+    time::{format_ms_min_seconds, format_ms_time_without_seconds},
     ui::{components::tab_control::Tab, mappers::map_arena, theme::colors::colors},
 };
 fn paint_custom_mesh(
@@ -109,28 +108,11 @@ pub fn ui(
         ui.painter().rect_filled(rect, 5.0, color);
     }
 
-    let enemy_string = session_match_dto
-        .enemies
-        .iter()
-        .map(|p| p.display_name.clone())
-        .join("\n   ");
+    let hover_text = get_hover_text(session_match_dto);
 
-    let ally_string = session_match_dto
-        .allies
-        .iter()
-        .map(|p| p.display_name.clone())
-        .join("\n   ");
-
-    let hover_text = format!(
-        "Arena: {}\nAllies:\n   {}\nEnemies:\n   {}",
-        map_arena(&session_match_dto.arena),
-        ally_string,
-        enemy_string
+    response.clone().on_hover_text_at_pointer(
+        RichText::new(hover_text).family(FontFamily::Name("player_name".into())),
     );
-
-    response
-        .clone()
-        .on_hover_text_at_pointer(RichText::new(hover_text).family(FontFamily::Name("player_name".into())));
 
     let border_color = if response.hovered() {
         colors(ui).on_panel.gamma_multiply(0.7)
@@ -141,10 +123,7 @@ pub fn ui(
     ui.painter().rect_stroke(
         rect,
         5.0,
-        egui::Stroke::new(
-            1.0,
-            border_color,
-        ),
+        egui::Stroke::new(1.0, border_color),
         egui::StrokeKind::Inside,
     );
 
@@ -174,7 +153,7 @@ pub fn ui(
             .layout(egui::Layout::left_to_right(egui::Align::Center)),
     );
 
-    let button_response = custom_button(&mut card_ui, icons::SMURF.clone());
+    let button_response = custom_button(&mut card_ui, icons::QUESTION_MARK.clone());
 
     if button_response.clicked() {
         for enemy in &session_match_dto.enemies {
@@ -196,6 +175,34 @@ pub fn ui(
     );
 
     response
+}
+
+fn get_hover_text(session_match_dto: &SessionMatchDto) -> String {
+    let enemy_string = session_match_dto
+        .enemies
+        .iter()
+        .map(|p| p.display_name.clone())
+        .join("\n   ");
+
+    let ally_string = session_match_dto
+        .allies
+        .iter()
+        .map(|p| p.display_name.clone())
+        .join("\n   ");
+
+    let time_string = format!(
+        "{} for {}",
+        format_ms_time_without_seconds(session_match_dto.created_at),
+        format_ms_min_seconds(session_match_dto.duration)
+    );
+    let hover_text = format!(
+        "{}\nArena: {}\nAllies:\n   {}\nEnemies:\n   {}",
+        time_string,
+        map_arena(&session_match_dto.arena),
+        ally_string,
+        enemy_string
+    );
+    hover_text
 }
 
 pub fn custom_button(ui: &mut egui::Ui, image_source: ImageSource) -> egui::Response {
