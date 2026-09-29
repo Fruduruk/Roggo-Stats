@@ -102,11 +102,7 @@ pub fn ui(
     //     color
     // };
 
-    if let MVPType::MVP | MVPType::ACE = session_match_dto.mvp_type {
-        paint_custom_mesh(ui, rect, colors(ui).accent, color, 5.0);
-    } else {
-        ui.painter().rect_filled(rect, 5.0, color);
-    }
+    ui.painter().rect_filled(rect, 5.0, color);
 
     let hover_text = get_hover_text(session_match_dto);
 

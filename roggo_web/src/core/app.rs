@@ -21,7 +21,7 @@ use crate::core::{
 use eframe::egui;
 use futures_channel::mpsc::{self, Receiver, Sender};
 pub const UI_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const COMPATIBLE_AGENT_VERSION: &str = "0.7.0";
+pub const COMPATIBLE_AGENT_VERSION: &str = "0.8.0";
 
 #[derive(Default)]
 pub struct Content {
