@@ -1,12 +1,10 @@
-use eframe::egui::{self, ImageSource, Rect, vec2};
-use itertools::Itertools;
+use eframe::egui::{self, Rect, vec2};
 use uuid::Uuid;
 
 use crate::core::{
     contract::{MVPType, session::SessionMatchDto},
     icons,
-    time::{format_ms_min_seconds, format_ms_time_without_seconds},
-    ui::{mappers::map_arena, theme::colors::colors},
+    ui::theme::colors::colors,
 };
 
 pub fn ui(
@@ -26,7 +24,10 @@ pub fn ui(
 
     let (color, border_color) =
         if response.hovered() || &Some(session_match_dto.match_guid) == selected_match_guid {
-            (color.gamma_multiply(0.8), colors(ui).on_panel.gamma_multiply(0.7))
+            (
+                color.gamma_multiply(0.8),
+                colors(ui).on_panel.gamma_multiply(0.7),
+            )
         } else {
             (
                 color.gamma_multiply(0.5),
@@ -70,32 +71,4 @@ pub fn ui(
         egui::StrokeKind::Inside,
     );
     response
-}
-
-fn get_hover_text(session_match_dto: &SessionMatchDto) -> String {
-    let enemy_string = session_match_dto
-        .enemies
-        .iter()
-        .map(|p| p.display_name.clone())
-        .join("\n   ");
-
-    let ally_string = session_match_dto
-        .allies
-        .iter()
-        .map(|p| p.display_name.clone())
-        .join("\n   ");
-
-    let time_string = format!(
-        "{} for {}",
-        format_ms_time_without_seconds(session_match_dto.created_at),
-        format_ms_min_seconds(session_match_dto.duration)
-    );
-    let hover_text = format!(
-        "{}\nArena: {}\nAllies:\n   {}\nEnemies:\n   {}",
-        time_string,
-        map_arena(&session_match_dto.arena),
-        ally_string,
-        enemy_string
-    );
-    hover_text
 }

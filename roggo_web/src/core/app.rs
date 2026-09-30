@@ -62,7 +62,7 @@ impl eframe::App for RoggoApp {
             &self.state.days_played,
             &mut self.state.parameters.date,
             &self.content_sender,
-            &mut self.tab_control.selected,
+            &mut self.tab_control.new_tab,
         );
 
         footer::ui(ui, agent_version.clone(), &self.state.general_errors);
@@ -141,20 +141,17 @@ impl RoggoApp {
                             day,
                             &self.content_sender,
                             &mut self.state.parameters.session_match_list,
-                            &mut self.tab_control.selected,
+                            &mut self.tab_control.new_tab,
                         );
                     }
                 }
-                (Tab::Session, _changed) => {
-                    if let (Some(detailed_session), Some(player_name)) =
-                        (&self.state.session, &self.state.player_name)
-                    {
-                        self.session_page.ui(
-                            ui,
-                            detailed_session,
-                            player_name,
-                            &mut self.tab_control.selected,
-                        );
+                (Tab::Session, changed) => {
+                    if changed {
+                        self.session_page = Default::default();
+                    }
+                    if let Some(detailed_session) = &self.state.session {
+                        self.session_page
+                            .ui(ui, detailed_session, &mut self.tab_control.new_tab);
                     }
                 }
                 (Tab::Match, _changed) => MatchPage::default().ui(ui),

@@ -17,7 +17,7 @@ pub fn ui(
     days_played: &Option<Vec<Date>>,
     date: &mut Date,
     sender: &Sender<APIResult>,
-    current_tab: &mut Tab,
+    new_tab: &mut Option<Tab>,
 ) {
     egui::Panel::top("header")
         .frame(
@@ -68,7 +68,7 @@ pub fn ui(
 
                         if current_date != *date {
                             tasks::load_day(sender.clone(), *date);
-                            *current_tab = Tab::Day;
+                            *new_tab = Some(Tab::Day);
                         }
                     }
                 });

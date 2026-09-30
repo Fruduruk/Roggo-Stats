@@ -22,7 +22,7 @@ impl DayPage {
         day_dto: &DayDto,
         sender: &Sender<APIResult>,
         session_match_list: &mut Vec<Uuid>,
-        selected_tab: &mut Tab,
+        new_tab: &mut Option<Tab>,
     ) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
@@ -33,7 +33,7 @@ impl DayPage {
                         day_dto,
                         sender,
                         session_match_list,
-                        selected_tab,
+                        new_tab,
                     );
                     let right_column_ui = &mut columns[1];
                     self.show_day_stats(right_column_ui, day_dto);
@@ -48,14 +48,14 @@ impl DayPage {
         day_dto: &DayDto,
         sender: &Sender<APIResult>,
         session_match_list: &mut Vec<Uuid>,
-        selected_tab: &mut Tab,
+        new_tab: &mut Option<Tab>,
     ) {
         for session in &day_dto.sessions {
             if session_card::ui(ui, session).clicked() {
                 session_match_list.clear();
                 session_match_list.extend(session.matches.iter().map(|s| s.match_guid));
                 tasks::load_detailed_session(sender.clone(), session_match_list.clone());
-                *selected_tab = Tab::Session;
+                *new_tab = Some(Tab::Session);
             }
         }
     }

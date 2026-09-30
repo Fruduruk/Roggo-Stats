@@ -2,10 +2,9 @@ use eframe::egui::{self};
 use uuid::Uuid;
 
 use crate::core::{
-    contract::{Playlist, session::SessionDto},
+    contract::session::SessionDto,
     ui::{
         components::{full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab},
-        theme::colors::colors,
         widgets::{match_cards, match_details, timeline},
     },
 };
@@ -16,23 +15,17 @@ pub struct SessionPage {
 }
 
 impl SessionPage {
-    pub fn ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        session: &SessionDto,
-        player_name: &str,
-        selected_tab: &mut Tab,
-    ) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, session: &SessionDto, new_tab: &mut Option<Tab>) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.header(ui, session);
                 ui.add_space(10.0);
-                self.body(ui, session, selected_tab);
+                self.body(ui, session, new_tab);
             });
         });
     }
 
-    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto, selected_tab: &mut Tab) {
+    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto, new_tab: &mut Option<Tab>) {
         SplitUi.show(ui, 1.618, |left_ui, right_ui| {
             if let Some((response, match_guid)) =
                 match_cards::ui(left_ui, session, &self.selected_match)
@@ -56,7 +49,7 @@ impl SessionPage {
                 self.selected_match
                     .or(self.hovered_match)
                     .and_then(|selected| session.matches.iter().find(|m| m.match_guid == selected)),
-                selected_tab,
+                new_tab,
             );
         });
     }
@@ -98,11 +91,11 @@ fn playlist_and_players(session: &SessionDto, ui: &mut egui::Ui) {
     });
 }
 
-fn test_outline(ui: &mut egui::Ui, rect: egui::Rect, color: egui::Color32) {
-    ui.painter().rect_stroke(
-        rect,
-        1.0,
-        egui::Stroke::new(1.0, color),
-        egui::StrokeKind::Inside,
-    );
-}
+// fn test_outline(ui: &mut egui::Ui, rect: egui::Rect, color: egui::Color32) {
+//     ui.painter().rect_stroke(
+//         rect,
+//         1.0,
+//         egui::Stroke::new(1.0, color),
+//         egui::StrokeKind::Inside,
+//     );
+// }

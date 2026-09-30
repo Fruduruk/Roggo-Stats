@@ -28,7 +28,8 @@ impl Display for Tab {
 
 #[derive(Default)]
 pub struct TabControl {
-    pub selected: Tab,
+    pub new_tab: Option<Tab>,
+    selected: Tab,
 }
 
 impl TabControl {
@@ -86,6 +87,12 @@ impl TabControl {
     fn show_tab_buttons(&mut self, ui: &mut egui::Ui) -> (Option<egui::Rect>, bool) {
         let mut selected_rect = None;
         let mut changed = false;
+
+        if let Some(new_tab) = self.new_tab.take() {
+            self.selected = new_tab;
+            changed = true;
+        }
+
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 20.0;
             for tab in enum_iterator::all::<Tab>() {
