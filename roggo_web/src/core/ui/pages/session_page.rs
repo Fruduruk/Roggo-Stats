@@ -25,39 +25,73 @@ impl SessionPage {
     ) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
-                // SplitUi.show(ui, 0.618, |left_ui, right_ui| {
-                ui.horizontal(|ui| {
-                    if let Some(m) = session.matches.first() {
-                        ui.heading(format!("{}", m.playlist));
-                    }
-                    ui.add_space(15.0);
-                    // test_outline(right_ui, right_ui.available_rect_before_wrap(), colors(right_ui).error);
-                    timeline::ui(ui, session, &self.hovered_match);
-                });
-                // });
-                ui.add_space(5.0);
-                SplitUi.show(ui, 1.618, |left_ui, right_ui| {
-                    if let Some((response, match_guid)) =
-                        match_cards::ui(left_ui, session, &self.selected_match)
-                    {
-                        if response.hovered() {
-                            self.hovered_match = Some(match_guid);
-                            self.selected_match = Some(match_guid);
-                        }
-                        if response.clicked() {
-                            self.selected_match = Some(match_guid);
-                        }
-                    } else {
-                        self.hovered_match = None;
-                    }
-
-                    if let Some(selected) = self.selected_match {
-                        right_ui.label(format!("{}", selected));
-                    }
-                });
+                self.header(ui, session);
+                ui.add_space(10.0);
+                self.body(ui, session);
             });
         });
     }
+
+    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        SplitUi.show(ui, 1.618, |left_ui, right_ui| {
+            if let Some((response, match_guid)) =
+                match_cards::ui(left_ui, session, &self.selected_match)
+            {
+                if response.hovered() {
+                    self.hovered_match = Some(match_guid);
+                }
+                if response.clicked() {
+                    self.selected_match = if self.selected_match == Some(match_guid) {
+                        None
+                    } else {
+                        Some(match_guid)
+                    };
+                }
+            } else {
+                self.hovered_match = None;
+            }
+
+            if let Some(selected) = self.selected_match.or(self.hovered_match) {
+                right_ui.label(format!("{}", selected));
+            }
+        });
+    }
+
+    fn header(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        ui.horizontal(|ui| {
+            playlist_and_players(session, ui);
+            ui.add_space(15.0);
+            timeline::ui(ui, session, &self.selected_match.or(self.hovered_match));
+        });
+    }
+}
+
+fn playlist_and_players(session: &SessionDto, ui: &mut egui::Ui) {
+    ui.vertical(|ui| {
+        ui.spacing_mut().item_spacing.y = 1.0;
+        if let Some(m) = session.matches.first() {
+            ui.label(
+                egui::RichText::new(format!("{}", m.playlist))
+                    .size(17.0)
+                    .strong(),
+            );
+
+            ui.label(
+                egui::RichText::new(
+                    m.allies
+                        .iter()
+                        .map(|p| p.display_name.as_str())
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                )
+                .font(egui::FontId::new(
+                    12.0,
+                    egui::FontFamily::Name("player_name".into()),
+                ))
+                .color(ui.visuals().weak_text_color()),
+            );
+        }
+    });
 }
 
 fn test_outline(ui: &mut egui::Ui, rect: egui::Rect, color: egui::Color32) {

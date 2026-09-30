@@ -22,17 +22,16 @@ pub fn ui(
         Some(true) => colors(ui).success,
         Some(false) => colors(ui).error,
         None => colors(ui).warning,
-    }
-    .gamma_multiply(0.45);
+    };
 
     let (color, border_color) =
         if response.hovered() || &Some(session_match_dto.match_guid) == selected_match_guid {
-            (
-                color.gamma_multiply(1.2),
-                colors(ui).on_panel.gamma_multiply(0.7),
-            )
+            (color.gamma_multiply(0.8), colors(ui).on_panel.gamma_multiply(0.7))
         } else {
-            (color, colors(ui).on_panel.gamma_multiply(0.2))
+            (
+                color.gamma_multiply(0.5),
+                colors(ui).on_panel.gamma_multiply(0.2),
+            )
         };
 
     let rect = if response.is_pointer_button_down_on() {
