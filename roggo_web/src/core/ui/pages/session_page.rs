@@ -1,9 +1,12 @@
-use eframe::egui;
+use eframe::egui::{self};
 use uuid::Uuid;
 
 use crate::core::{
-    contract::session::{DetailedSessionDto, SessionDto}, links::to_tracker_network_link, time::{format_ms_min_seconds, format_ms_time, format_ms_time_without_seconds}, ui::{
-        components::{full_panel::FullPanel, tab_control::Tab}, mappers::map_arena, theme::colors::colors, widgets::{match_cards, timeline},
+    contract::{Playlist, session::SessionDto},
+    ui::{
+        components::{full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab},
+        theme::colors::colors,
+        widgets::{match_cards, timeline},
     },
 };
 #[derive(Default)]
@@ -22,19 +25,34 @@ impl SessionPage {
     ) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
-                timeline::ui(ui, session, &self.hovered_match);
-
-                ui.columns(2, |columns| {
-                    if let Some((response,match_guid)) = match_cards::ui(&mut columns[0], session) {
+                // SplitUi.show(ui, 0.618, |left_ui, right_ui| {
+                ui.horizontal(|ui| {
+                    if let Some(m) = session.matches.first() {
+                        ui.heading(format!("{}", m.playlist));
+                    }
+                    ui.add_space(15.0);
+                    // test_outline(right_ui, right_ui.available_rect_before_wrap(), colors(right_ui).error);
+                    timeline::ui(ui, session, &self.hovered_match);
+                });
+                // });
+                ui.add_space(5.0);
+                SplitUi.show(ui, 1.618, |left_ui, right_ui| {
+                    if let Some((response, match_guid)) =
+                        match_cards::ui(left_ui, session, &self.selected_match)
+                    {
                         if response.hovered() {
                             self.hovered_match = Some(match_guid);
+                            self.selected_match = Some(match_guid);
                         }
                         if response.clicked() {
                             self.selected_match = Some(match_guid);
                         }
+                    } else {
+                        self.hovered_match = None;
                     }
+
                     if let Some(selected) = self.selected_match {
-                        columns[1].label(format!("{}", selected));
+                        right_ui.label(format!("{}", selected));
                     }
                 });
             });
@@ -42,11 +60,11 @@ impl SessionPage {
     }
 }
 
-fn test_outline(ui: &mut egui::Ui, rect: egui::Rect) {
+fn test_outline(ui: &mut egui::Ui, rect: egui::Rect, color: egui::Color32) {
     ui.painter().rect_stroke(
         rect,
         1.0,
-        egui::Stroke::new(1.0, colors(ui).on_panel),
+        egui::Stroke::new(1.0, color),
         egui::StrokeKind::Inside,
     );
 }

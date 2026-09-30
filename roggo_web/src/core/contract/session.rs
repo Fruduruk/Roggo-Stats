@@ -25,6 +25,7 @@ pub struct SessionMatchDto {
     pub enemy_score: i64,
     pub allies: Vec<super::PlayerDto>,
     pub enemies: Vec<super::PlayerDto>,
+    pub playlist: super::Playlist,
     pub deleted: bool,
 }
 

@@ -3,34 +3,36 @@ use uuid::Uuid;
 
 use crate::core::{
     contract::session::{SessionDto, SessionMatchDto},
-    ui::{ widgets::match_card},
+    ui::widgets::match_card,
 };
 
-pub fn ui(ui: &mut egui::Ui, session: &SessionDto) -> Option<(Response, Uuid)> {
+pub fn ui(
+    ui: &mut egui::Ui,
+    session: &SessionDto,
+    selected_match_guid: &Option<Uuid>,
+) -> Option<(Response, Uuid)> {
     let (rects, bounding) = calculate_match_card_rects(ui, &session.matches);
+    let (_, _) = ui.allocate_exact_size(bounding.size(), egui::Sense::click());
+
     let responses = session
         .matches
         .iter()
         .zip(rects)
-        .map(|(m, mcr)| (m, match_card::ui(ui, mcr, ui.id().with(m.match_guid), m)))
+        .map(|(m, mcr)| {
+            (
+                match_card::ui(ui, mcr, ui.id().with(m.match_guid), m, selected_match_guid),
+                m.match_guid,
+            )
+        })
         .collect::<Vec<_>>();
 
-    let (full_rect, _) = ui.allocate_exact_size(bounding.size(), egui::Sense::click());
-
-    if let Some((interacted_session_match_dto, response)) = responses
+    responses
         .into_iter()
-        .filter(|(_, r)| r.clicked() || r.hovered())
-        .collect::<Vec<_>>()
-        .first()
-    {
-        return Some((response.clone(), interacted_session_match_dto.match_guid));
-    }
-
-    None
+        .find(|(r, _)| r.clicked() || r.hovered())
 }
 
 fn calculate_match_card_rects(ui: &egui::Ui, matches: &[SessionMatchDto]) -> (Vec<Rect>, Rect) {
-    let card_size = vec2(80.0, 50.0);
+    let card_size = vec2(64.0, 40.0);
     let spacing = 5.0;
 
     let start = ui.cursor().left_top();

@@ -61,6 +61,7 @@ pub fn get(path: &Path, match_guids: Vec<Uuid>) -> Result<SessionDto> {
                 deleted: row.deleted,
                 duration: row.duration,
                 allies: match_allies,
+                playlist: row.playlist,
             }
         })
         .collect();

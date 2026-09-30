@@ -7,7 +7,11 @@ use crate::core::{
     ui::theme::colors::colors,
 };
 
-pub fn ui(ui: &mut egui::Ui, session: &SessionDto, hovered_match_guid: &Option<Uuid>) -> Option<Response> {
+pub fn ui(
+    ui: &mut egui::Ui,
+    session: &SessionDto,
+    hovered_match_guid: &Option<Uuid>,
+) -> Option<Response> {
     let spacing = 5.0;
 
     let (timeline_rects, timeline_boundary) = calculate_timeline_rects(ui, &session.matches)?;
