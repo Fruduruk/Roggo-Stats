@@ -99,30 +99,3 @@ fn get_hover_text(session_match_dto: &SessionMatchDto) -> String {
     );
     hover_text
 }
-
-pub fn custom_button(ui: &mut egui::Ui, image_source: ImageSource) -> egui::Response {
-    let size = egui::vec2(15.0, 15.0);
-
-    let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
-
-    let icon_color = if response.hovered() {
-        colors(ui).on_panel.gamma_multiply(0.5)
-    } else {
-        colors(ui).on_panel
-    };
-
-    let icon_color = if response.is_pointer_button_down_on() {
-        colors(ui).on_panel
-    } else {
-        icon_color
-    };
-
-    let icon_rect = egui::Rect::from_center_size(rect.center(), size);
-
-    egui::Image::new(image_source)
-        .fit_to_exact_size(size)
-        .tint(icon_color)
-        .paint_at(ui, icon_rect);
-
-    response
-}

@@ -6,7 +6,7 @@ use crate::core::{
     ui::{
         components::{full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab},
         theme::colors::colors,
-        widgets::{match_cards, timeline},
+        widgets::{match_cards, match_details, timeline},
     },
 };
 #[derive(Default)]
@@ -27,12 +27,12 @@ impl SessionPage {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.header(ui, session);
                 ui.add_space(10.0);
-                self.body(ui, session);
+                self.body(ui, session, selected_tab);
             });
         });
     }
 
-    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto, selected_tab: &mut Tab) {
         SplitUi.show(ui, 1.618, |left_ui, right_ui| {
             if let Some((response, match_guid)) =
                 match_cards::ui(left_ui, session, &self.selected_match)
@@ -51,9 +51,13 @@ impl SessionPage {
                 self.hovered_match = None;
             }
 
-            if let Some(selected) = self.selected_match.or(self.hovered_match) {
-                right_ui.label(format!("{}", selected));
-            }
+            match_details::ui(
+                right_ui,
+                self.selected_match
+                    .or(self.hovered_match)
+                    .and_then(|selected| session.matches.iter().find(|m| m.match_guid == selected)),
+                selected_tab,
+            );
         });
     }
 

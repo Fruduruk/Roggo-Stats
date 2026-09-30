@@ -29,12 +29,11 @@ pub fn ui(ui: &mut egui::Ui, session: &DaySessionDto) -> egui::Response {
 
     {
         let ui = &mut frame.content_ui;
+        ui.spacing_mut().item_spacing.y = 1.0;
 
         header(session, ui);
-        ui.add_space(2.0);
         center(session, won, win_color, ui);
         ui.add_space(8.0);
-        ui.separator();
         ui.add_space(6.0);
 
         footer(session, duration_minutes, ui);
@@ -73,8 +72,6 @@ fn center(session: &DaySessionDto, won: usize, win_color: egui::Color32, ui: &mu
             }
 
             SessionTypeDto::Team(players) => {
-                ui.label(egui::RichText::new("Team").color(colors(ui).text_weak));
-
                 ui.label(
                     egui::RichText::new(
                         players
@@ -83,6 +80,7 @@ fn center(session: &DaySessionDto, won: usize, win_color: egui::Color32, ui: &mu
                             .collect::<Vec<_>>()
                             .join(", "),
                     )
+                    .color(colors(ui).text_weak)
                     .font(egui::FontId::new(
                         13.0,
                         egui::FontFamily::Name("player_name".into()),
