@@ -4,7 +4,7 @@ pub mod single_match;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MVPType {
     MVP,
     ACE,

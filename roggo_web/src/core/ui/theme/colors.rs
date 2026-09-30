@@ -36,7 +36,7 @@ pub const DARK: ThemeColors = ThemeColors {
     on_accent: egui::Color32::WHITE,
 
     panel: egui::Color32::from_rgb(34, 34, 38),
-    on_panel: egui::Color32::WHITE,
+    on_panel: egui::Color32::from_rgb(211,211,211),
     panel_shadow: egui::Color32::from_rgba_unmultiplied_const(13, 13, 24, 120),
 
     text: egui::Color32::from_rgb(235, 235, 235),
@@ -61,7 +61,7 @@ pub const LIGHT: ThemeColors = ThemeColors {
     on_accent: egui::Color32::WHITE,
 
     panel: egui::Color32::from_rgb(209, 209, 209),
-    on_panel: egui::Color32::from_rgb(34, 34, 38),
+    on_panel: egui::Color32::from_rgb(45, 45, 56),
     panel_shadow: egui::Color32::from_rgb(175, 175, 175),
 
     text: egui::Color32::from_rgb(25, 25, 28),

@@ -36,6 +36,7 @@ pub struct RoggoApp {
     last_reload: f64,
     install_ui: InstallUi,
     tab_control: TabControl,
+    session_page: SessionPage,
     state: AppState,
     // development_page: DevelopmentPage,
 }
@@ -106,6 +107,7 @@ impl RoggoApp {
             state: Default::default(),
             // development_page: Default::default(),
             tab_control: Default::default(),
+            session_page: Default::default(),
         }
     }
 
@@ -147,7 +149,12 @@ impl RoggoApp {
                     if let (Some(detailed_session), Some(player_name)) =
                         (&self.state.session, &self.state.player_name)
                     {
-                        SessionPage::default().ui(ui, detailed_session, player_name, &mut self.tab_control.selected);
+                        self.session_page.ui(
+                            ui,
+                            detailed_session,
+                            player_name,
+                            &mut self.tab_control.selected,
+                        );
                     }
                 }
                 (Tab::Match, _changed) => MatchPage::default().ui(ui),

@@ -5,3 +5,5 @@ pub mod date_control;
 pub mod session_card;
 pub mod timeline;
 pub mod match_card;
+pub mod match_details;
+pub mod match_cards;
