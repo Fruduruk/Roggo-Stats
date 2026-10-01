@@ -35,7 +35,7 @@ fn content(
                 ui.spacing_mut().item_spacing.y = 1.0;
                 ui.label(egui::RichText::new(map_arena(&m.arena)).size(14.0).strong());
                 let time_string = format!(
-                    "{} for {}",
+                    "{} for {} min",
                     format_ms_time_without_seconds(m.created_at),
                     format_ms_min_seconds(m.duration)
                 );
@@ -47,7 +47,7 @@ fn content(
             });
         }
 
-        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
             let enabled = session_match_dto.is_some();
 
             if icon_button(
