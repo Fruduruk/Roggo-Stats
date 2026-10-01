@@ -1,14 +1,15 @@
-use crate::core::contract::AgentErrorDto;
 pub mod api;
 pub mod api_result;
 pub mod app;
 pub mod app_state;
-pub mod contract;
 pub mod links;
 pub mod tasks;
 pub mod time;
 pub mod ui;
 pub mod icons;
+
+use roggo_contract::*;
+
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

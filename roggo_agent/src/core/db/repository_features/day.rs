@@ -1,4 +1,4 @@
-use crate::core::api::contract::Playlist;
+use roggo_contract::*;
 use crate::core::db::{Repository, Result};
 use rusqlite::params;
 use uuid::Uuid;

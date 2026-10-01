@@ -1,9 +1,6 @@
-use std::time::Duration;
-
 use crate::core::{
     api_result::APIResult,
     app_state::{AppState, agent_state::AgentState},
-    contract::AgentErrorDto,
     tasks,
     ui::{
         components::{
@@ -20,6 +17,8 @@ use crate::core::{
 };
 use eframe::egui;
 use futures_channel::mpsc::{self, Receiver, Sender};
+use roggo_contract::*;
+use std::time::Duration;
 pub const UI_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const COMPATIBLE_AGENT_VERSION: &str = "0.8.0";
 

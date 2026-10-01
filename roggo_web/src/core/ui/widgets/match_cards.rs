@@ -1,10 +1,7 @@
+use crate::core::ui::widgets::match_card;
 use eframe::egui::{self, Rect, Response, vec2};
+use roggo_contract::*;
 use uuid::Uuid;
-
-use crate::core::{
-    contract::session::{SessionDto, SessionMatchDto},
-    ui::widgets::match_card,
-};
 
 pub fn ui(
     ui: &mut egui::Ui,

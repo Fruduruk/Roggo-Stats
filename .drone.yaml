@@ -43,7 +43,7 @@ steps:
       build_args:
         - APP_VERSION=${DRONE_TAG##roggo-web-v}
       dockerfile: ./roggo_web/Dockerfile
-      context: ./roggo_web/.
+      context: .
 
   - name: deploy staging
     image: appleboy/drone-ssh

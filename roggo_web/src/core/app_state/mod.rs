@@ -1,9 +1,6 @@
+use roggo_contract::*;
 use crate::core::{
-    Error, api_result::APIResult, app::COMPATIBLE_AGENT_VERSION, app_state::{agent_state::AgentState, parameters::Parameters}, contract::{
-        AgentErrorDto,
-        day::{DayDto},
-        session::{SessionDto},
-    },
+    Error, api_result::APIResult, app::COMPATIBLE_AGENT_VERSION, app_state::{agent_state::AgentState, parameters::Parameters},
 };
 
 pub mod agent_state;

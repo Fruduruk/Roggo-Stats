@@ -1,11 +1,7 @@
+use crate::core::{time::format_ms_time_without_seconds, ui::theme::colors::colors};
 use eframe::egui::{self, Color32, Painter, Pos2, Rect, Response, TextStyle, pos2, vec2};
+use roggo_contract::*;
 use uuid::Uuid;
-
-use crate::core::{
-    contract::session::{SessionDto, SessionMatchDto},
-    time::format_ms_time_without_seconds,
-    ui::theme::colors::colors,
-};
 
 const TIMELINE_HEIGHT: f32 = 7.0;
 const TIMELINE_AXIS_SPACING: f32 = 5.0;
@@ -89,7 +85,7 @@ fn calculate_layout(ui: &egui::Ui, matches: &[SessionMatchDto]) -> Option<Timeli
         0..=10 => FIVE_MIN_MS,
         11..=20 => QUARTER_HOUR_MS,
         21..=30 => HALF_HOUR_MS,
-        _ => HOUR_MS
+        _ => HOUR_MS,
     };
 
     let axis = calculate_axis_layout(
@@ -99,7 +95,7 @@ fn calculate_layout(ui: &egui::Ui, matches: &[SessionMatchDto]) -> Option<Timeli
         pos2(origin.x, axis_origin_y),
         width,
         pixel_per_ms,
-        interval
+        interval,
     );
 
     let boundary = timeline_boundary.union(axis.boundary);

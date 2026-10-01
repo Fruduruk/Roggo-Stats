@@ -1,10 +1,7 @@
+use crate::core::ui::theme::colors::colors;
 use eframe::egui::{self};
 use jiff::{Timestamp, Zoned, tz::TimeZone};
-
-use crate::core::{
-    contract::day::{DaySessionDto, SessionTypeDto},
-    ui::theme::colors::colors,
-};
+use roggo_contract::*;
 
 pub fn ui(ui: &mut egui::Ui, session: &DaySessionDto) -> egui::Response {
     let won = session.matches.iter().filter(|m| m.won).count();

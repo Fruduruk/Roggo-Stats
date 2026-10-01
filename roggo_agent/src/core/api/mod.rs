@@ -1,9 +1,5 @@
 use axum::{Json, http, response::IntoResponse};
-
-use crate::core::api::contract::{AgentErrorCode, AgentErrorDto};
-
-pub mod contract;
-pub mod mappers;
+use roggo_contract::*;
 pub mod web_api;
 
 #[derive(thiserror::Error, Debug)]

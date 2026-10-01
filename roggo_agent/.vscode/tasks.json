@@ -10,7 +10,12 @@
         "--bin",
         "roggo_agent_console"
       ],
-      "problemMatcher": ["$rustc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$rustc"
+      ],
       "group": "build"
     },
     {
@@ -23,7 +28,12 @@
         "--bin",
         "roggo_agent_console"
       ],
-      "problemMatcher": ["$rustc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$rustc"
+      ],
       "group": "build"
     }
   ]

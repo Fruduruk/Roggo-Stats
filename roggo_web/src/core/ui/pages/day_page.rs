@@ -1,16 +1,15 @@
-use eframe::egui;
-use futures_channel::mpsc::Sender;
-use uuid::Uuid;
-
 use crate::core::{
     api_result::APIResult,
-    contract::day::DayDto,
     tasks,
     ui::{
         components::{full_panel::FullPanel, tab_control::Tab},
         widgets::session_card,
     },
 };
+use eframe::egui;
+use futures_channel::mpsc::Sender;
+use roggo_contract::*;
+use uuid::Uuid;
 
 #[derive(Default)]
 pub struct DayPage {}

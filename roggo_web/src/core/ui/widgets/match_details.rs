@@ -1,7 +1,6 @@
 use eframe::egui::{self, Image, ImageSource, Rect, RichText, Sense, vec2};
-
+use roggo_contract::*;
 use crate::core::{
-    contract::{PlayerDto, session::SessionMatchDto},
     icons,
     links::to_tracker_network_link,
     time::{format_ms_min_seconds, format_ms_time_without_seconds},

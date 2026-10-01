@@ -1,11 +1,12 @@
+use roggo_contract::*;
+
 use gloo_net::http::Request;
 use jiff::civil::Date;
 use uuid::Uuid;
 
+
 use crate::core::{
-    Error, Result, contract::{
-        AgentErrorDto, PlayerDto, VersionDto, day::{DayDto, DaysPlayedDto}, session::{SessionDto, SessionRequest},
-    },
+    Error, Result,
 };
 
 const WEB_SOCKET_ADDR: &str = "http://127.0.0.1:49122";

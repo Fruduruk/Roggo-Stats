@@ -1,8 +1,7 @@
 use eframe::egui::{self};
 use uuid::Uuid;
-
+use roggo_contract::*;
 use crate::core::{
-    contract::session::SessionDto,
     ui::{
         components::{full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab},
         widgets::{match_cards, match_details, timeline},

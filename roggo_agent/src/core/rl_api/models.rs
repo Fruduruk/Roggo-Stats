@@ -1,4 +1,4 @@
-use crate::core::api::contract::Playlist;
+use roggo_contract::*;
 use crate::core::rl_api::Result;
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer};

@@ -2,6 +2,12 @@ pub mod day;
 pub mod session;
 pub mod single_match;
 
+pub use day::*;
+pub use session::*;
+pub use single_match::*;
+
+
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -220,10 +226,3 @@ impl Playlist {
         )
     }
 }
-
-
-// #[derive(Debug, Serialize, Deserialize)]
-// pub struct HideRequest {
-//     pub match_guid: Uuid,
-//     pub hide: bool,
-// }

@@ -1,11 +1,7 @@
+use crate::core::{icons, ui::theme::colors::colors};
 use eframe::egui::{self, Rect, vec2};
+use roggo_contract::*;
 use uuid::Uuid;
-
-use crate::core::{
-    contract::{MVPType, session::SessionMatchDto},
-    icons,
-    ui::theme::colors::colors,
-};
 
 pub fn ui(
     ui: &mut egui::Ui,

@@ -1,9 +1,9 @@
 pub mod day;
 pub mod session;
 
+use roggo_contract::*;
 use std::path::Path;
 
-use crate::core::api::contract::{PlayerDto, VersionDto};
 use crate::core::bl::query_models::{ GlobalPlayerRow};
 use crate::core::bl::{Error, Result};
 use crate::core::db::Repository;

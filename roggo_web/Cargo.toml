@@ -4,6 +4,8 @@ version = "0.8.0"
 edition = "2024"
 
 [dependencies]
+roggo_contract = { path = "../roggo_contract" }
+
 eframe = "0.36.1"
 serde_json = "1"
 wasm-bindgen-futures = "0.4"
@@ -16,7 +18,10 @@ chrono = "0.4"
 thiserror = "2.0.20"
 egui_extras = { version = "0.36.1", features = ["image", "datepicker", "svg"] }
 egui_commonmark = "0.25"
-image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+image = { version = "0.25", default-features = false, features = [
+    "png",
+    "jpeg",
+] }
 futures-channel = "0.3.34"
 enum-iterator = "2.3.0"
 jiff = "0.2.35"

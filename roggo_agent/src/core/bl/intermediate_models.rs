@@ -1,8 +1,9 @@
+use roggo_contract::*;
 use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::core::{api::contract::Playlist, rl_api::{
+use crate::core::{ rl_api::{
     self, models::Location,
 }};
 

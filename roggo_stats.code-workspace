@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "name": "Agent",
+      "path": "roggo_agent"
+    },
+    {
+      "name": "Web",
+      "path": "roggo_web"
+    },
+    {
+      "name": "Contract",
+      "path": "roggo_contract"
+    }
+  ],
+  "settings": {
+    "sqltools.connections": [
+      {
+        "previewLimit": 50,
+        "driver": "SQLite",
+        "database": "${workspaceFolder:Agent}/test.db",
+        "name": "test"
+      }
+    ]
+  }
+}
