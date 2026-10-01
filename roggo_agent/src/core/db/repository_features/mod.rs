@@ -1,15 +1,13 @@
 pub mod day;
+pub mod full;
 pub mod session;
-
 
 use rusqlite::types::Value;
 use uuid::Uuid;
 
 use crate::core::db::{Repository, Result};
 
-use crate::core::bl::query_models::{
-     GlobalPlayerRow,
-};
+use crate::core::bl::query_models::GlobalPlayerRow;
 
 impl Repository {
     pub fn get_player_with_most_replays(&self) -> Result<GlobalPlayerRow> {
@@ -65,4 +63,43 @@ impl Repository {
         );
         Ok((stmt, params))
     }
+
+    fn prepare_statement_and_params_for_match_guids(
+        &self,
+        match_guids: Vec<Uuid>,
+        rest: &str,
+    ) -> Result<(rusqlite::Statement<'_>, Vec<Value>)> {
+        let values_placeholders = (1..=match_guids.len()) // Start at 2, because player_id is 1
+            .map(|i| format!("(?{i})"))
+            .collect::<Vec<_>>()
+            .join(",");
+        let start = format!(
+            "
+                with selected_matches(match_guid) as (
+                values
+                    {values_placeholders}
+                )
+            "
+        );
+        let stmt = self.connection.prepare(&format!("{start}{rest}"))?;
+        let params = match_guids
+            .into_iter()
+            .map(|guid| Value::Blob(guid.as_bytes().to_vec()))
+            .collect();
+        Ok((stmt, params))
+    }
+}
+
+pub fn create_value_placeholders<T>(
+    values: Vec<T>,
+    start_index: usize,
+    to_value: impl Fn(T) -> Value,
+) -> (String, Vec<Value>) {
+    let value_placeholders = (start_index..=values.len() + (start_index - 1))
+        .map(|i| format!("?{i}"))
+        .collect::<Vec<_>>()
+        .join(",");
+
+    let params = values.into_iter().map(to_value).collect();
+    (format!("({value_placeholders})"), params)
 }

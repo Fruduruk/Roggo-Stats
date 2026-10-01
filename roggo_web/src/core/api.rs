@@ -72,6 +72,19 @@ pub async fn get_session(match_guids: Vec<Uuid>) -> Result<SessionDto> {
     }
 }
 
+pub async fn get_session_details(match_guids: Vec<Uuid>) -> Result<SessionDetails> {
+    let response = Request::post(&format!("{WEB_SOCKET_ADDR}/session_details"))
+        .json(&SessionDetailsRequest { match_guids })?
+        .send()
+        .await?;
+
+    if response.ok() {
+        Ok(response.json::<SessionDetails>().await?)
+    } else {
+        parse_error(response).await
+    }
+}
+
 // pub async fn hide_match(match_guid: Uuid, hide: bool) -> Result<()> {
 //     let response = Request::post(&format!("{WEB_SOCKET_ADDR}/hide_match"))
 //         .json(&HideRequest { match_guid, hide })?

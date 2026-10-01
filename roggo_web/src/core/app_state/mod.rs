@@ -15,6 +15,7 @@ pub struct AppState {
     pub days_played: Option<Vec<jiff::civil::Date>>,
     pub day: Option<DayDto>,
     pub session: Option<SessionDto>,
+    pub session_details: Option<SessionDetails>,
     pub parameters: Parameters,
 }
 
@@ -34,9 +35,10 @@ impl AppState {
                 None => self.agent_state = AgentState::AgentMissing,
             },
             APIResult::Day(day) => self.day = Some(day),
-            APIResult::DetailedSession(session_dto) => self.session = Some(session_dto),
+            APIResult::Session(session_dto) => self.session = Some(session_dto),
             APIResult::DaysPlayed(days_played_dto) => self.days_played = Some(days_played_dto),
             APIResult::GeneralError(error) => self.general_errors.push(error),
+            APIResult::SessionDetails(session_details) => self.session_details = Some(session_details),
         }
     }
 }

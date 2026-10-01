@@ -14,7 +14,7 @@ pub struct SessionPage {
 }
 
 impl SessionPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui, session: &SessionDto, new_tab: &mut Option<Tab>) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, session: &SessionDto,session_details: &Option<SessionDetails>, new_tab: &mut Option<Tab>) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.header(ui, session);

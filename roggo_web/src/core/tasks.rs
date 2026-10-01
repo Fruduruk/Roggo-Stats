@@ -85,13 +85,26 @@ fn filter_and_send_agent_error(mut sender: Sender<APIResult>, err: Error) {
     }
 }
 
-pub fn load_detailed_session(mut sender: Sender<APIResult>, match_guids: Vec<Uuid>) {
+pub fn load_session(mut sender: Sender<APIResult>, match_guids: Vec<Uuid>) {
     wasm_bindgen_futures::spawn_local(async move {
         let result = api::get_session(match_guids).await;
 
         match result {
             Ok(session) => {
-                let _ = sender.try_send(APIResult::DetailedSession(session));
+                let _ = sender.try_send(APIResult::Session(session));
+            }
+            Err(err) => filter_and_send_agent_error(sender, err),
+        }
+    });
+}
+
+pub fn load_session_details(mut sender: Sender<APIResult>, match_guids: Vec<Uuid>) {
+     wasm_bindgen_futures::spawn_local(async move {
+        let result = api::get_session_details(match_guids).await;
+
+        match result {
+            Ok(session) => {
+                let _ = sender.try_send(APIResult::SessionDetails(session));
             }
             Err(err) => filter_and_send_agent_error(sender, err),
         }

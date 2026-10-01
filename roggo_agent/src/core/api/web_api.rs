@@ -64,9 +64,9 @@ pub async fn run(mut shutdown_rx: watch::Receiver<bool>, db_file_path: PathBuf) 
 
 fn add_routes(app: Router<AppState>) -> Router<AppState> {
     app.route("/main_character", get(get_main_character))
-        // .route("/matches/{id}", get(get_match_by_id))
         .route("/version", get(get_version))
         .route("/session", post(get_session))
+        .route("/session_details", post(get_session_details))
         .route("/day/{day}", get(get_day))
         .route("/days_played", get(get_days_played))
 }
@@ -105,6 +105,20 @@ async fn get_session(
     Ok(Json(dto))
 }
 
+
+async fn get_session_details(
+    State(state): State<AppState>,
+    Json(request): Json<SessionDetailsRequest>,
+) -> Result<Json<SessionDetails>> {
+    if request.match_guids.is_empty() {
+        return Err(Error::UserError("Cannot process empty match list".into()));
+    }
+
+    let matches = features::full::get_match_list_by_ids(&state.db_file_path, request.match_guids)?;
+    let dto = SessionDetails { matches };
+
+    Ok(Json(dto))
+}
 // from now on old requests
 
 // async fn get_match_by_id(

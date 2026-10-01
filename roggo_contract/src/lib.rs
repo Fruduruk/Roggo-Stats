@@ -1,11 +1,11 @@
 pub mod day;
 pub mod session;
-pub mod single_match;
+pub mod session_details;
+pub mod full;
 
 pub use day::*;
 pub use session::*;
-pub use single_match::*;
-
+pub use session_details::*;
 
 
 use serde::{Deserialize, Serialize};

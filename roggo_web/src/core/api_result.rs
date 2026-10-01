@@ -4,6 +4,7 @@ pub enum APIResult {
     GeneralError(crate::core::Error),
     Version(Option<String>),
     Day(roggo_contract::DayDto),
-    DetailedSession(roggo_contract::SessionDto),
+    Session(roggo_contract::SessionDto),
+    SessionDetails(roggo_contract::SessionDetails),
     DaysPlayed(Vec<jiff::civil::Date>),
 }

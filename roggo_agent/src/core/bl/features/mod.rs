@@ -1,5 +1,6 @@
 pub mod day;
 pub mod session;
+pub mod full;
 
 use roggo_contract::*;
 use std::path::Path;

@@ -53,7 +53,7 @@ impl DayPage {
             if session_card::ui(ui, session).clicked() {
                 session_match_list.clear();
                 session_match_list.extend(session.matches.iter().map(|s| s.match_guid));
-                tasks::load_detailed_session(sender.clone(), session_match_list.clone());
+                tasks::load_session(sender.clone(), session_match_list.clone());
                 *new_tab = Some(Tab::Session);
             }
         }
