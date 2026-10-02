@@ -2,6 +2,7 @@ use eframe::egui;
 
 pub fn ui<S>(
     ui: &mut egui::Ui,
+    min_left_width: f32,
     state: &mut S,
     mut top_left: impl FnMut(&mut S, &mut egui::Ui),
     mut top_right: impl FnMut(&mut S, &mut egui::Ui),
@@ -11,19 +12,18 @@ pub fn ui<S>(
     let full_rect = ui.available_rect_before_wrap();
 
     let top_left_size = ui
-        .scope_builder(
-            egui::UiBuilder::new()
-                .sizing_pass()
-                .invisible(),
-            |ui| {
-                top_left(state, ui);
-            },
-        )
+        .scope_builder(egui::UiBuilder::new().sizing_pass().invisible(), |ui| {
+            top_left(state, ui);
+        })
         .response
         .rect
         .size();
 
-    let left_width = top_left_size.x;
+    let left_width = if top_left_size.x >= min_left_width {
+        top_left_size.x
+    } else {
+        min_left_width
+    };
     let top_height = top_left_size.y;
 
     let top_left_rect =
@@ -40,10 +40,7 @@ pub fn ui<S>(
     );
 
     let bottom_right_rect = egui::Rect::from_min_max(
-        egui::pos2(
-            full_rect.left() + left_width,
-            full_rect.top() + top_height,
-        ),
+        egui::pos2(full_rect.left() + left_width, full_rect.top() + top_height),
         full_rect.max,
     );
 

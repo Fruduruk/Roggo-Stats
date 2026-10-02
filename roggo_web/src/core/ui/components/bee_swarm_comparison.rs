@@ -16,12 +16,23 @@ pub fn ui(
 ) {
     let player_values = create_player_values(session_details, main_character, value_of);
 
+    let Some(max_value) = player_values
+        .iter()
+        .flat_map(|pv| pv.values.iter())
+        .copied()
+        .max_by(|a, b| a.total_cmp(b))
+    else {
+        return;
+    };
+
+    let max = max_value * 1.1;
+
     ui.horizontal(|ui| {
         for values in player_values {
             ui.vertical(|ui| {
                 ui.label(&values.display_name);
 
-                beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, 15.0);
+                beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, max);
             });
         }
     });

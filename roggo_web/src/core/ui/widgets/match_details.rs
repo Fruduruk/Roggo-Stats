@@ -18,11 +18,10 @@ pub fn ui(
     egui::Frame::new()
         .fill(colors(ui).panel)
         .corner_radius(5.0)
-        .inner_margin(egui::Margin::symmetric(11, 10))
+        .inner_margin(egui::Margin::symmetric(10, 10))
         .stroke(egui::Stroke::new(1.0, colors(ui).border))
         .show(ui, |ui| {
-            ui.set_min_width(ui.available_width());
-            ui.set_min_height(130.0);
+            ui.take_available_space();
             content(ui, session_match_dto, new_tab);
         });
 }

@@ -86,7 +86,11 @@ where
                 ui.visuals().weak_text_color()
             };
 
-            let font_id = egui::TextStyle::Button.resolve(ui.style());
+            let mut font_id = egui::TextStyle::Button.resolve(ui.style());
+
+            if button.response.hovered() {
+                font_id.size += 0.5;
+            }
 
             ui.painter().text(
                 button.rect.center(),
@@ -173,7 +177,7 @@ where
                         );
 
                         let (rect, response) = ui.allocate_exact_size(
-                            egui::vec2(button_width, galley.size().y),
+                            egui::vec2(button_width, ui.spacing().interact_size.y),
                             egui::Sense::click(),
                         );
 
@@ -206,8 +210,10 @@ where
                             ui.visuals().text_color(),
                         );
 
-                        let (rect, response) =
-                            ui.allocate_exact_size(galley.size(), egui::Sense::click());
+                        let (rect, response) = ui.allocate_exact_size(
+                            egui::vec2(ui.available_width(), ui.spacing().interact_size.y),
+                            egui::Sense::click(),
+                        );
 
                         if response.clicked() && self.selected.0 != state {
                             self.selected = (state, true);
