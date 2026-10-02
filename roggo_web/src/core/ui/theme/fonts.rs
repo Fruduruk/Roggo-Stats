@@ -4,6 +4,12 @@ pub fn apply_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
 
     fonts.font_data.insert(
+        "chakra_petch".into(),
+        egui::FontData::from_static(include_bytes!("../../../../assets/ChakraPetch-Medium.ttf"))
+            .into(),
+    );
+
+    fonts.font_data.insert(
         "montserrat".into(),
         egui::FontData::from_static(include_bytes!("../../../../assets/Montserrat-Medium.ttf"))
             .into(),
@@ -33,6 +39,11 @@ pub fn apply_fonts(ctx: &egui::Context) {
         .get_mut(&egui::FontFamily::Proportional)
         .unwrap()
         .insert(0, "montserrat".into());
+
+    fonts.families.insert(
+        egui::FontFamily::Name("title".into()),
+        vec!["chakra_petch".to_owned()],
+    );
 
     fonts.families.insert(
         egui::FontFamily::Name("player_name".into()),

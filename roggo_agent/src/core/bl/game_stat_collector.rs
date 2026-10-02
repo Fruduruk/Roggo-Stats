@@ -281,8 +281,8 @@ impl GameStatCollector {
 }
 
 fn insert_boost_pickup(
-    stats: &mut GameStats,
-    timestamp: i64,
+    _stats: &mut GameStats,
+    _timestamp: i64,
     boost_pickup: BoostPickup,
 ) -> Result<()> {
     tracing::debug!("{:#?}", boost_pickup);

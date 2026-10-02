@@ -4,7 +4,6 @@ use crate::core::{
     ui::{
         components::{
             full_panel::FullPanel,
-            split_ui::{self, SplitUi},
             tab_control::Tab,
         },
         widgets::{date_picker, session_card},
@@ -33,7 +32,7 @@ impl DayPage {
     ) {
         FullPanel.show(ui, |ui| {
             let left_width = 260.0;
-            let min_right_width = 250.0;
+            let min_right_width = 100.0;
 
             if ui.available_width() < left_width + min_right_width {
                 return;
@@ -47,6 +46,8 @@ impl DayPage {
                         top_center_scope(left_ui, egui::vec2(220.0, 30.0), |ui| {
                             date_picker::ui(ui, days_played, sender, new_tab, date);
                         });
+
+                        left_ui.add_space(9.0);
 
                         self.show_day_stats(left_ui, day_dto);
                     });

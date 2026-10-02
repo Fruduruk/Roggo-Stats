@@ -2,9 +2,9 @@ use crate::core::ui::{
     components::{
         bee_swarm_comparison, full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab,
     },
-    widgets::{beeswarm_plot, match_cards, match_details, timeline},
+    widgets::{ match_cards, match_details, timeline},
 };
-use eframe::egui::{self, vec2};
+use eframe::egui::{self};
 use roggo_contract::*;
 use uuid::Uuid;
 #[derive(Default)]

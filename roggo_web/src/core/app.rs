@@ -55,14 +55,14 @@ impl eframe::App for RoggoApp {
             _ => None,
         };
 
-        header::ui(
-            ui,
-            &self.state.main_character,
-            &self.content_sender,
-            &mut self.tab_control.new_tab,
-        );
+        header::ui(ui, &mut self.tab_control);
 
-        footer::ui(ui, agent_version.clone(), &self.state.general_errors);
+        footer::ui(
+            ui,
+            agent_version.clone(),
+            &self.state.general_errors,
+            &self.state.main_character,
+        );
 
         if matches!(self.state.agent_state, AgentState::CheckingAgent) {
             egui::CentralPanel::default().show(ui, |ui| {
@@ -127,7 +127,7 @@ impl RoggoApp {
     fn show_central_panel(&mut self, ui: &mut egui::Ui) {
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(colors(ui).background))
-            .show(ui, |ui| match self.tab_control.ui(ui) {
+            .show(ui, |ui| match self.tab_control.current() {
                 (Tab::Day, changed) => {
                     if changed {
                         tasks::load_day(self.content_sender.clone(), self.state.parameters.date);

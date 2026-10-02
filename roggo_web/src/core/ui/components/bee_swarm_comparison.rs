@@ -67,7 +67,7 @@ fn create_player_values(
                 m.get_enemy_team_of_player_by_primary_id(&main_character.primary_id)?;
 
             Some(
-                enemy_team.players.iter().map(|p| value_of(p)).sum::<f32>()
+                enemy_team.players.iter().map(&value_of).sum::<f32>()
                     / enemy_team.players.len() as f32,
             )
         })

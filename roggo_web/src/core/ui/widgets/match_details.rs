@@ -1,11 +1,14 @@
-use eframe::egui::{self, Image, ImageSource, Rect, RichText, Sense, vec2};
-use roggo_contract::*;
 use crate::core::{
     icons,
     links::to_tracker_network_link,
     time::{format_ms_min_seconds, format_ms_time_without_seconds},
-    ui::{components::tab_control::Tab, mappers::map_arena, theme::colors::colors},
+    ui::{
+        components::tab_control::Tab, mappers::map_arena, theme::colors::colors,
+        widgets::icon_button,
+    },
 };
+use eframe::egui::{self, RichText};
+use roggo_contract::*;
 
 pub fn ui(
     ui: &mut egui::Ui,
@@ -49,7 +52,7 @@ fn content(
         ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
             let enabled = session_match_dto.is_some();
 
-            if icon_button(
+            if icon_button::ui(
                 ui,
                 icons::INSIDE.clone(),
                 20.0,
@@ -98,60 +101,3 @@ fn open_tracker(ui: &egui::Ui, player: &PlayerDto) {
         ui.open_url(egui::OpenUrl { url, new_tab: true });
     }
 }
-
-pub fn icon_button(
-    ui: &mut egui::Ui,
-    image: ImageSource,
-    size: f32,
-    hover_text: &str,
-    enabled: bool,
-) -> egui::Response {
-    let sense = if enabled {
-        Sense::click()
-    } else {
-        Sense::hover()
-    };
-    let (rect, response) = ui.allocate_exact_size(vec2(size, size), sense);
-
-    let color = match (enabled, response.hovered()) {
-        (false, _) => colors(ui).on_panel.gamma_multiply(0.25),
-        (true, true) => colors(ui).on_panel.gamma_multiply(1.4),
-        _ => colors(ui).on_panel,
-    };
-
-    let scale = if response.is_pointer_button_down_on() {
-        0.85
-    } else {
-        1.0
-    };
-
-    let icon_size = vec2(size, size) * scale;
-
-    Image::new(image)
-        .fit_to_exact_size(icon_size)
-        .tint(color)
-        .paint_at(ui, Rect::from_center_size(rect.center(), icon_size));
-
-    response.on_hover_text(hover_text)
-}
-
-// let mut card_ui = ui.new_child(
-//     egui::UiBuilder::new()
-//         .id_salt(id.with("Tracker Button"))
-//         .max_rect(inside_button_rect)
-//         .layout(egui::Layout::left_to_right(egui::Align::Center)),
-// );
-
-// let tracker_button_response = custom_button(&mut card_ui, icons::QUESTION_MARK.clone());
-
-// if tracker_button_response.hovered() {
-//     tracker_button_response.clone().on_hover_text_at_pointer("open Tracker Network profiles for enemies");
-// }
-
-// if tracker_button_response.clicked() {
-//     for enemy in &session_match_dto.enemies {
-//         if let Some(url) = to_tracker_network_link(&enemy.primary_id, &enemy.display_name) {
-//             ui.open_url(egui::OpenUrl { url, new_tab: true });
-//         }
-//     }
-// }

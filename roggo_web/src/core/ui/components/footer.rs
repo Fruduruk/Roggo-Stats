@@ -1,52 +1,47 @@
-use crate::core::{Error, app::UI_VERSION, icons, ui::theme::colors::colors};
+use crate::core::{
+    Error,
+    app::UI_VERSION,
+    icons,
+    ui::{theme::colors::colors, widgets::icon_button},
+};
 use eframe::egui;
+use roggo_contract::PlayerDto;
 
 const GITHUB_URL: &str = "https://github.com/Fruduruk/Roggo-Stats";
 
-pub fn ui(ui: &mut egui::Ui, agent_version: Option<String>, general_errors: &Vec<Error>) {
+pub fn ui(
+    ui: &mut egui::Ui,
+    agent_version: Option<String>,
+    general_errors: &Vec<Error>,
+    player_name: &Option<PlayerDto>,
+) {
     egui::Panel::bottom("footer")
         .frame(
             egui::Frame::new()
                 .fill(colors(ui).background)
-                .inner_margin(5.0),
+                .inner_margin(egui::Margin::symmetric(10, 4)),
         )
         .show_separator_line(false)
         .show(ui, |ui| {
             ui.horizontal(|ui| {
+                if let Some(dto) = player_name {
+                    ui.label(&dto.display_name);
+                }
+
                 ui.label(" ")
                     .on_hover_text(format!("{:#?}", general_errors));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    show_github_button(ui);
+                    if icon_button::ui(ui, icons::GITHUB_DARK, 18.0, GITHUB_URL, true).clicked() {
+                        ui.open_url(egui::OpenUrl {
+                            url: GITHUB_URL.into(),
+                            new_tab: true,
+                        });
+                    }
                     if agent_version.is_some() {
                         ui.label(UI_VERSION.to_string());
                     }
+                    egui::widgets::global_theme_preference_switch(ui);
                 });
             });
         });
-}
-
-fn show_github_button(ui: &mut egui::Ui) {
-    let image_source = match ui.theme() {
-        egui::Theme::Dark => icons::GITHUB_DARK,
-        egui::Theme::Light => icons::GITHUB_LIGHT,
-    };
-
-    let image = egui::Image::new(image_source).fit_to_exact_size(egui::vec2(18.0, 18.0));
-
-    let response = ui
-        .add(
-            egui::Button::image(image)
-                // .min_size(egui::vec2(5.0, 5.0))
-                // .corner_radius(egui::CornerRadius::same(30))
-                .frame(false)
-                .frame_when_inactive(false),
-        )
-        .on_hover_text(GITHUB_URL);
-
-    if response.clicked() {
-        ui.open_url(egui::OpenUrl {
-            url: GITHUB_URL.into(),
-            new_tab: true,
-        });
-    }
 }

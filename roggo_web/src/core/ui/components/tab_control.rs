@@ -30,29 +30,29 @@ impl Display for Tab {
 pub struct TabControl {
     pub new_tab: Option<Tab>,
     selected: Tab,
+    current: (Tab, bool),
 }
 
 impl TabControl {
-    pub fn ui(&mut self, ui: &mut egui::Ui) -> (Tab, bool) {
+    pub fn current(&self) -> (Tab, bool) {
+        self.current
+    }
+
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
         let mut selected_rect = None;
         let mut changed = false;
         egui::Frame::new()
-            .fill(colors(ui).background)
-            .outer_margin(egui::Margin::symmetric(8, 0))
+            .fill(colors(ui).panel)
+            .corner_radius(5.0)
+            .inner_margin(egui::Margin::symmetric(11, 10))
+            .shadow(egui::Shadow {
+                offset: [2, 2],
+                blur: 2,
+                spread: 1,
+                color: colors(ui).panel_shadow,
+            })
             .show(ui, |ui| {
-                egui::Frame::new()
-                    .fill(colors(ui).panel)
-                    .corner_radius(5.0)
-                    .inner_margin(egui::Margin::symmetric(11, 10))
-                    .shadow(egui::Shadow {
-                        offset: [2, 2],
-                        blur: 2,
-                        spread: 1,
-                        color: colors(ui).panel_shadow,
-                    })
-                    .show(ui, |ui| {
-                        (selected_rect, changed) = self.show_tab_buttons(ui);
-                    });
+                (selected_rect, changed) = self.show_tab_buttons(ui);
             });
 
         if let Some(rect) = selected_rect {
@@ -81,7 +81,7 @@ impl TabControl {
             );
         }
 
-        (self.selected, changed)
+        self.current = (self.selected, changed);
     }
 
     fn show_tab_buttons(&mut self, ui: &mut egui::Ui) -> (Option<egui::Rect>, bool) {
