@@ -1,10 +1,12 @@
 use crate::core::ui::{
     components::{
-        bee_swarm_comparison, full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab,
+        bee_swarm_comparison, four_cell_layout, full_panel::FullPanel, split_ui::SplitUi,
+        tab_control::Tab,
     },
-    widgets::{ match_cards, match_details, timeline},
+    theme::colors::colors,
+    widgets::{match_details, match_selector, timeline},
 };
-use eframe::egui::{self};
+use eframe::egui::{self, Rect, UiBuilder, pos2, vec2};
 use roggo_contract::*;
 use uuid::Uuid;
 #[derive(Default)]
@@ -23,58 +25,83 @@ impl SessionPage {
         new_tab: &mut Option<Tab>,
     ) {
         FullPanel.show(ui, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                self.header(ui, session);
-                ui.add_space(10.0);
-                self.match_selector(ui, session, new_tab);
-
-                if let (Some(player), Some(session_details)) = (main_character, session_details) {
-                    bee_swarm_comparison::ui(ui, session_details, player, |p| p.saves as f32);
-                }
-            });
-        });
-    }
-
-    fn match_selector(
-        &mut self,
-        ui: &mut egui::Ui,
-        session: &SessionDto,
-        new_tab: &mut Option<Tab>,
-    ) {
-        SplitUi.show(ui, 1.618, 0.0, 0.0, |left_ui, right_ui| {
-            if let Some((response, match_guid)) =
-                match_cards::ui(left_ui, session, &self.selected_match)
-            {
-                if response.hovered() {
-                    self.hovered_match = Some(match_guid);
-                }
-                if response.clicked() {
-                    self.selected_match = if self.selected_match == Some(match_guid) {
-                        None
-                    } else {
-                        Some(match_guid)
-                    };
-                }
-            } else {
-                self.hovered_match = None;
-            }
-
-            match_details::ui(
-                right_ui,
-                self.selected_match
-                    .or(self.hovered_match)
-                    .and_then(|selected| session.matches.iter().find(|m| m.match_guid == selected)),
-                new_tab,
+            four_cell_layout::ui(
+                ui,
+                self,
+                |this, ui| {
+                    egui::Frame::new()
+                        .inner_margin(5.0)
+                        // .stroke(egui::Stroke::new(1.0, colors(ui).border))
+                        .corner_radius(5)
+                        .show(ui, |ui| {
+                            this.top_left(ui, session);
+                        });
+                },
+                |this, ui| {
+                    egui::Frame::new()
+                        .inner_margin(5.0)
+                        // .stroke(egui::Stroke::new(1.0, colors(ui).border))
+                        .corner_radius(5)
+                        .show(ui, |ui| {
+                            ui.take_available_space();
+                            this.top_right(ui, session);
+                        });
+                },
+                |this, ui| {
+                    this.bottom_left(ui, session);
+                },
+                |this, ui| {
+                    egui::Frame::new()
+                        .inner_margin(5.0)
+                        // .stroke(egui::Stroke::new(1.0, colors(ui).border))
+                        .corner_radius(5)
+                        .show(ui, |ui| {
+                            ui.take_available_space();
+                            this.bottom_right(ui);
+                        });
+                },
             );
         });
     }
 
-    fn header(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
-        ui.horizontal(|ui| {
-            playlist_and_players(session, ui);
-            ui.add_space(15.0);
-            timeline::ui(ui, session, &self.selected_match.or(self.hovered_match));
-        });
+    fn top_left(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        playlist_and_players(session, ui);
+    }
+
+    fn top_right(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        timeline::ui(ui, session, &self.selected_match.or(self.hovered_match));
+    }
+
+    fn bottom_left(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        egui::Frame::new()
+            .inner_margin(5.0)
+            .stroke(egui::Stroke::new(1.0, colors(ui).border))
+            .corner_radius(5)
+            .show(ui, |ui| {
+                ui.take_available_space();
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    if let Some((response, match_guid)) =
+                        match_selector::ui(ui, session, &self.selected_match)
+                    {
+                        if response.hovered() {
+                            self.hovered_match = Some(match_guid);
+                        }
+                        if response.clicked() {
+                            self.selected_match = if self.selected_match == Some(match_guid) {
+                                None
+                            } else {
+                                Some(match_guid)
+                            };
+                        }
+                    } else {
+                        self.hovered_match = None;
+                    }
+                });
+            });
+    }
+
+    fn bottom_right(&mut self, ui: &mut egui::Ui) {
+        ui.label("Session Analysis");
     }
 }
 

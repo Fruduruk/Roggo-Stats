@@ -6,7 +6,7 @@ pub mod session_card;
 pub mod timeline;
 pub mod match_card;
 pub mod match_details;
-pub mod match_cards;
+pub mod match_selector;
 pub mod beeswarm_plot;
 pub mod date_picker;
 pub mod icon_button;

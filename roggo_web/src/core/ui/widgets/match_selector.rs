@@ -29,7 +29,7 @@ pub fn ui(
 }
 
 fn calculate_match_card_rects(ui: &egui::Ui, matches: &[SessionMatchDto]) -> (Vec<Rect>, Rect) {
-    let card_size = vec2(64.0, 40.0);
+    let card_size = vec2(ui.available_width(), 20.0);
     let spacing = 5.0;
 
     let start = ui.cursor().left_top();
