@@ -11,7 +11,7 @@ use crate::core::{
         },
     },
     rl_api::models::{
-        BallHit, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player,
+        BallHit, BoostPickup, ClockUpdatedSeconds, CrossbarHit, Event, GoalScored, Player,
         StatfeedEvent, UpdateState,
     },
 };
@@ -24,6 +24,8 @@ pub struct GameStatCollector {
     ball_hit_buffer: Vec<(i64, BallHit)>,
     crossbar_hit_buffer: Vec<(i64, CrossbarHit)>,
     statfeed_event_buffer: Vec<(i64, StatfeedEvent)>,
+    boost_pickup_buffer: Vec<(i64, BoostPickup)>,
+
     goal_scored_buffer: Vec<(i64, GoalScored)>,
     player_stats_buffer: HashMap<String, Vec<(i64, StatSnapshot)>>,
 }
@@ -39,6 +41,7 @@ impl GameStatCollector {
             statfeed_event_buffer: vec![],
             goal_scored_buffer: vec![],
             player_stats_buffer: HashMap::new(),
+            boost_pickup_buffer: vec![],
         }
     }
 
@@ -56,6 +59,7 @@ impl GameStatCollector {
             statfeed_event_buffer,
             goal_scored_buffer,
             player_stats_buffer: _,
+            boost_pickup_buffer,
         } = self;
 
         let mut errors = vec![];
@@ -80,6 +84,11 @@ impl GameStatCollector {
                 errors.push(error);
             }
         }
+        for (timestamp, boost_pickup) in boost_pickup_buffer {
+            if let Err(error) = insert_boost_pickup(&mut stats, timestamp, boost_pickup) {
+                errors.push(error);
+            }
+        }
         (stats, errors)
     }
 
@@ -92,6 +101,7 @@ impl GameStatCollector {
         self.insert_count += 1;
         self.state.timestamp = Some(timestamp);
         // println!("{:#?}", self.state);
+        // println!("{:#?}", event);
         match event {
             Event::UpdateState(update_state) => self.insert_update_state(update_state),
             Event::BallHit(ball_hit) => self.push_ball_hit(ball_hit),
@@ -112,6 +122,10 @@ impl GameStatCollector {
                 self.state.round_started_once = true;
             }
             Event::StatfeedEvent(statfeed_event) => self.push_stat_feed_event(statfeed_event),
+            Event::BoostPickup(boost_pickup) => {
+                println!("picked up boost {:#?}", boost_pickup);
+                self.push_boost_pickup(boost_pickup)
+            }
             _ => (),
         }
     }
@@ -254,6 +268,25 @@ impl GameStatCollector {
             self.statfeed_event_buffer.push((timestamp, statfeed_event));
         }
     }
+
+    fn push_boost_pickup(&mut self, boost_pickup: BoostPickup) {
+        if self.state.in_replay {
+            return;
+        }
+
+        if let Some(timestamp) = self.state.timestamp {
+            self.boost_pickup_buffer.push((timestamp, boost_pickup))
+        }
+    }
+}
+
+fn insert_boost_pickup(
+    stats: &mut GameStats,
+    timestamp: i64,
+    boost_pickup: BoostPickup,
+) -> Result<()> {
+    tracing::debug!("{:#?}", boost_pickup);
+    Ok(())
 }
 
 fn insert_goal_scored(

@@ -29,14 +29,14 @@
       "args": [],
       "cwd": "${workspaceFolder}",
       "environment": [
-        {
-          "name": "import_path",
-          "value": "captures/0.7.0/replay_input.7z"
-        },
-        {
-          "name": "capture_input",
-          "value": "false"
-        }
+        // {
+        //   "name": "import_path",
+        //   "value": "captures/0.7.0/ranked_1v1_real.7z"
+        // },
+        // {
+        //   "name": "capture_input",
+        //   "value": "true"
+        // }
       ],
       "preLaunchTask": "build console release",
       "console": "integratedTerminal"

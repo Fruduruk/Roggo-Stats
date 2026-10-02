@@ -75,6 +75,7 @@ impl PacketCollector {
 
     pub fn finish(mut self) -> io::Result<()> {
         if let Some(writer) = self.writer.take() {
+            tracing::debug!("Finishing input capture...");
             writer.finish()?;
         }
 

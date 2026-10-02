@@ -101,6 +101,7 @@ async fn send_packets(
     any_match_saved: Arc<AtomicBool>,
 ) -> Result<()> {
     if let Ok(path) = std::env::var("import_path") {
+        tracing::debug!("reading packets from archive: {path}");
         crate::core::debug::test_file_reader::read_test_files_from_7z(
             path,
             tx,
@@ -125,6 +126,7 @@ async fn receive_packets(
     let mut collector = (std::env::var("capture_input")
         .is_ok_and(|value| value.eq_ignore_ascii_case("true")))
     .then(|| {
+        tracing::debug!("Capturing input...");
         let path = format!("captures/new/input {}.7z", now().unwrap());
         crate::core::debug::packet_collector::PacketCollector::new(path).unwrap()
     });
@@ -134,7 +136,7 @@ async fn receive_packets(
 
     while let Some((timestamp, bytes)) = rx.recv().await {
         if *shutdown_rx.borrow() {
-            return Ok(());
+            break;
         }
 
         print!("\rReceiving packet number {}", count);
