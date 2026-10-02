@@ -11,7 +11,6 @@ const ANIMATION_TIME: f32 = 0.25;
 
 struct Button<T> {
     state: T,
-    text: String,
     rect: egui::Rect,
     response: egui::Response,
 }
@@ -67,7 +66,7 @@ where
 
         if let Some(animated_rect) = self.get_animated_rect(ui, &buttons) {
             ui.painter()
-                .rect_filled(animated_rect, CORNER_RADIUS, ui.visuals().selection.bg_fill);
+                .rect_filled(animated_rect.expand(0.3), CORNER_RADIUS, ui.visuals().selection.bg_fill);
 
             ui.painter().rect_stroke(
                 animated_rect,
@@ -88,14 +87,14 @@ where
 
             let mut font_id = egui::TextStyle::Button.resolve(ui.style());
 
-            if button.response.hovered() {
+            if button.response.hovered() || selected {
                 font_id.size += 0.5;
             }
 
             ui.painter().text(
                 button.rect.center(),
                 egui::Align2::CENTER_CENTER,
-                button.text,
+                button.state.to_string(),
                 font_id,
                 text_color,
             );
@@ -166,16 +165,6 @@ where
                     let button_width = (available_width - total_spacing) / button_count as f32;
 
                     for state in states {
-                        let text = state.to_string();
-
-                        let font_id = egui::TextStyle::Button.resolve(ui.style());
-
-                        let galley = ui.painter().layout_no_wrap(
-                            text.clone(),
-                            font_id,
-                            ui.visuals().text_color(),
-                        );
-
                         let (rect, response) = ui.allocate_exact_size(
                             egui::vec2(button_width, ui.spacing().interact_size.y),
                             egui::Sense::click(),
@@ -187,7 +176,6 @@ where
 
                         buttons.push(Button {
                             state,
-                            text,
                             rect,
                             response,
                         });
@@ -200,16 +188,6 @@ where
                     ui.spacing_mut().item_spacing.y = ITEM_SPACING;
 
                     for state in states {
-                        let text = state.to_string();
-
-                        let font_id = egui::TextStyle::Button.resolve(ui.style());
-
-                        let galley = ui.painter().layout_no_wrap(
-                            text.clone(),
-                            font_id,
-                            ui.visuals().text_color(),
-                        );
-
                         let (rect, response) = ui.allocate_exact_size(
                             egui::vec2(ui.available_width(), ui.spacing().interact_size.y),
                             egui::Sense::click(),
@@ -221,7 +199,6 @@ where
 
                         buttons.push(Button {
                             state,
-                            text,
                             rect,
                             response,
                         });

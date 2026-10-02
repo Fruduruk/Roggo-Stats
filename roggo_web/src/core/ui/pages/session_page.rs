@@ -170,10 +170,16 @@ impl SessionPage {
 
     fn bottom_left(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
         ui.vertical_centered(|ui| {
-            egui::Frame::new().inner_margin(5.0).show(ui, |ui| {
-                self.session_view_mode_toggle
-                    .ui(ui, Orientation::Horizontal);
-            });
+            egui::Frame::new()
+                .inner_margin(egui::Margin {
+                    top: 10,
+                    bottom: 5,
+                    ..Default::default()
+                })
+                .show(ui, |ui| {
+                    self.session_view_mode_toggle
+                        .ui(ui, Orientation::Horizontal);
+                });
         });
         egui::Frame::new()
             .inner_margin(5.0)
@@ -228,7 +234,10 @@ impl SessionPage {
             .selected_match
             .or(self.hovered_match)
             .and_then(|match_guid| session.matches.iter().find(|m| m.match_guid == match_guid));
-        match_details::ui(ui, session_match_dto, new_tab);
+
+        egui::Frame::new().inner_margin(5.0).show(ui, |ui| {
+            match_details::ui(ui, session_match_dto, new_tab);
+        });
     }
 
     fn show_analysis(

@@ -56,7 +56,7 @@ pub const LIGHT: ThemeColors = ThemeColors {
     surface_alt: egui::Color32::from_rgb(238, 238, 242),
     surface_hover: egui::Color32::from_rgb(228, 228, 233),
 
-    accent: egui::Color32::from_rgb(20, 145, 160),
+    accent: egui::Color32::from_rgb(163, 97, 161),
     accent_hover: egui::Color32::from_rgb(15, 125, 140),
     on_accent: egui::Color32::WHITE,
 
