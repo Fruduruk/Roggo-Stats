@@ -146,7 +146,7 @@ impl RoggoApp {
                 }
                 (Tab::Session, changed) => {
                     if changed {
-                        self.session_page = Default::default();
+                        self.session_page.reset();
                     }
                     if let Some(session) = &self.state.session {
                         self.session_page.ui(

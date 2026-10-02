@@ -1,21 +1,47 @@
+use std::fmt::Display;
+
 use crate::core::ui::{
-    components::{
-        bee_swarm_comparison, four_cell_layout, full_panel::FullPanel, split_ui::SplitUi,
-        tab_control::Tab,
-    },
+    components::{four_cell_layout, full_panel::FullPanel, tab_control::Tab},
     theme::colors::colors,
-    widgets::{match_details, match_selector, timeline},
+    widgets::{
+        match_selector,
+        multi_toggle::{self, MultiToggle, Orientation},
+        timeline,
+    },
 };
-use eframe::egui::{self, Rect, UiBuilder, pos2, vec2};
+use eframe::egui::{self};
 use roggo_contract::*;
 use uuid::Uuid;
+
+#[derive(Default, Copy, Clone, PartialEq, enum_iterator::Sequence)]
+pub enum SessionMode {
+    #[default]
+    Details,
+    Analysis,
+}
+
+impl Display for SessionMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Details => write!(f, "Details"),
+            Self::Analysis => write!(f, "Analysis"),
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct SessionPage {
     selected_match: Option<Uuid>,
     hovered_match: Option<Uuid>,
+    multi_toggle: MultiToggle<SessionMode>,
 }
 
 impl SessionPage {
+    pub fn reset(&mut self) {
+        self.selected_match = None;
+        self.hovered_match = None;
+    }
+
     pub fn ui(
         &mut self,
         ui: &mut egui::Ui,
@@ -73,6 +99,9 @@ impl SessionPage {
     }
 
     fn bottom_left(&mut self, ui: &mut egui::Ui, session: &SessionDto) {
+        ui.vertical_centered(|ui| {
+            self.multi_toggle.ui(ui, Orientation::Horizontal);
+        });
         egui::Frame::new()
             .inner_margin(5.0)
             .stroke(egui::Stroke::new(1.0, colors(ui).border))
@@ -100,9 +129,7 @@ impl SessionPage {
             });
     }
 
-    fn bottom_right(&mut self, ui: &mut egui::Ui) {
-        ui.label("Session Analysis");
-    }
+    fn bottom_right(&mut self, ui: &mut egui::Ui) {}
 }
 
 fn playlist_and_players(session: &SessionDto, ui: &mut egui::Ui) {
