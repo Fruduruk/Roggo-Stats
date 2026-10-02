@@ -3,6 +3,10 @@ use eframe::egui::{self, Stroke, Vec2, pos2};
 use crate::core::ui::theme::colors::colors;
 
 pub fn ui(ui: &mut egui::Ui, values: &[f32], size: Vec2, min_value: f32, max_value: f32) {
+    if values.is_empty() {
+        return;
+    }
+
     let (rect, _) = ui.allocate_exact_size(size, egui::Sense::hover());
     let painter = ui.painter_at(rect);
 
@@ -18,6 +22,15 @@ pub fn ui(ui: &mut egui::Ui, values: &[f32], size: Vec2, min_value: f32, max_val
     painter.line_segment(
         [pos2(x, rect.top()), pos2(x, rect.bottom())],
         Stroke::new(1.0, colors(ui).on_panel),
+    );
+
+
+    let average = values.iter().copied().sum::<f32>() / values.len() as f32;
+    let average_y = egui::remap(average, min_value..=max_value,rect.bottom()..=rect.top());
+
+    painter.line_segment(
+        [pos2(rect.left(),average_y), pos2(rect.right(),average_y)],
+        Stroke::new(1.0, colors(ui).accent), 
     );
 
     let radius = 4.0;

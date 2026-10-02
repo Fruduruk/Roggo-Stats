@@ -258,7 +258,7 @@ impl SessionPage {
                 strip.cell(|left_ui| {
                     egui::Frame::new().inner_margin(5.0).show(left_ui, |ui| {
                         self.filter_toggle.ui(ui, Orientation::Horizontal);
-
+                        ui.add_space(5.0);
                         bee_swarm_comparison::ui(ui, session_details, main_character, |p| {
                             map_statistic(self.statistic_toggle.get_state().0, p)
                         });

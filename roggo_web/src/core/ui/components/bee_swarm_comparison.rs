@@ -25,14 +25,13 @@ pub fn ui(
         return;
     };
 
-    let max = max_value * 1.1;
+    let max = (max_value * 1.1).max(0.0001);
 
-    ui.horizontal(|ui| {
+    ui.horizontal_centered(|ui| {
         for values in player_values {
             ui.vertical(|ui| {
-                ui.label(&values.display_name);
-
                 beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, max);
+                ui.label(&values.display_name);
             });
         }
     });
