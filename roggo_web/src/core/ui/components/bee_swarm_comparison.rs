@@ -1,5 +1,5 @@
 use crate::core::ui::widgets::beeswarm_plot;
-use eframe::egui::{self, vec2};
+use eframe::egui::{self, FontId, RichText, vec2};
 use roggo_contract::{full::Player, *};
 
 pub struct PlayerValues {
@@ -27,10 +27,42 @@ pub fn ui(
 
     let max = (max_value * 1.1).max(0.0001);
 
+    let plot_size = vec2(100.0, 200.0);
+
     ui.horizontal_centered(|ui| {
+        ui.vertical(|ui| {
+            ui.allocate_ui_with_layout(
+                vec2(30.0, plot_size.y),
+                egui::Layout::top_down(egui::Align::RIGHT),
+                |ui| {
+                    let accuracy = if max < 10.0 {
+                        2
+                    } else if max < 1000.0 {
+                        1
+                    } else {
+                        0
+                    };
+                    ui.label(
+                        RichText::new(format!("{max:.accuracy$}"))
+                            .font(FontId::new(10.0, egui::FontFamily::Proportional)),
+                    );
+
+                    ui.with_layout(egui::Layout::bottom_up(egui::Align::RIGHT), |ui| {
+                        ui.label(
+                            RichText::new("0")
+                                .font(FontId::new(10.0, egui::FontFamily::Proportional)),
+                        );
+                    });
+                },
+            );
+
+            ui.label("");
+        });
+
         for values in player_values {
             ui.vertical(|ui| {
-                beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, max);
+                beeswarm_plot::ui(ui, &values.values, plot_size, 0.0, max);
+
                 ui.label(&values.display_name);
             });
         }

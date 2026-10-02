@@ -5,7 +5,7 @@ use crate::core::ui::{
     theme::colors::colors,
     widgets::{
         match_details, match_selector,
-        multi_toggle::{self, MultiToggle, Orientation},
+        multi_toggle::{MultiToggle, Orientation},
         timeline,
     },
 };
