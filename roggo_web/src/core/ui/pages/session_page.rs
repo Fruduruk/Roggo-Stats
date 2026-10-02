@@ -1,12 +1,12 @@
-use eframe::egui::{self};
-use uuid::Uuid;
-use roggo_contract::*;
-use crate::core::{
-    ui::{
-        components::{full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab},
-        widgets::{match_cards, match_details, timeline},
+use crate::core::ui::{
+    components::{
+        bee_swarm_comparison, full_panel::FullPanel, split_ui::SplitUi, tab_control::Tab,
     },
+    widgets::{beeswarm_plot, match_cards, match_details, timeline},
 };
+use eframe::egui::{self, vec2};
+use roggo_contract::*;
+use uuid::Uuid;
 #[derive(Default)]
 pub struct SessionPage {
     selected_match: Option<Uuid>,
@@ -14,17 +14,33 @@ pub struct SessionPage {
 }
 
 impl SessionPage {
-    pub fn ui(&mut self, ui: &mut egui::Ui, session: &SessionDto,session_details: &Option<SessionDetails>, new_tab: &mut Option<Tab>) {
+    pub fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        main_character: &Option<PlayerDto>,
+        session: &SessionDto,
+        session_details: &Option<SessionDetails>,
+        new_tab: &mut Option<Tab>,
+    ) {
         FullPanel.show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.header(ui, session);
                 ui.add_space(10.0);
-                self.body(ui, session, new_tab);
+                self.match_selector(ui, session, new_tab);
+
+                if let (Some(player), Some(session_details)) = (main_character, session_details) {
+                    bee_swarm_comparison::ui(ui, session_details, player, |p| p.goals as f32);
+                }
             });
         });
     }
 
-    fn body(&mut self, ui: &mut egui::Ui, session: &SessionDto, new_tab: &mut Option<Tab>) {
+    fn match_selector(
+        &mut self,
+        ui: &mut egui::Ui,
+        session: &SessionDto,
+        new_tab: &mut Option<Tab>,
+    ) {
         SplitUi.show(ui, 1.618, |left_ui, right_ui| {
             if let Some((response, match_guid)) =
                 match_cards::ui(left_ui, session, &self.selected_match)

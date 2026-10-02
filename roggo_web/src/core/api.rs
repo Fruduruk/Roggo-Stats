@@ -25,11 +25,11 @@ pub async fn get_version() -> Result<String> {
     }
 }
 
-pub async fn get_main_character() -> Result<String> {
+pub async fn get_main_character() -> Result<PlayerDto> {
     let response = request("main_character").send().await?;
 
     if response.ok() {
-        Ok(response.json::<PlayerDto>().await?.display_name)
+        Ok(response.json::<PlayerDto>().await?)
     } else {
         parse_error(response).await
     }

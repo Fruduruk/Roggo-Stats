@@ -54,6 +54,7 @@ impl DayPage {
                 session_match_list.clear();
                 session_match_list.extend(session.matches.iter().map(|s| s.match_guid));
                 tasks::load_session(sender.clone(), session_match_list.clone());
+                tasks::load_session_details(sender.clone(), session_match_list.clone());
                 *new_tab = Some(Tab::Session);
             }
         }

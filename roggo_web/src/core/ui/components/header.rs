@@ -10,10 +10,11 @@ use crate::core::{
 use eframe::egui::{self};
 use futures_channel::mpsc::Sender;
 use jiff::civil::Date;
+use roggo_contract::PlayerDto;
 
 pub fn ui(
     ui: &mut egui::Ui,
-    player_name: &Option<String>,
+    player_name: &Option<PlayerDto>,
     days_played: &Option<Vec<Date>>,
     date: &mut Date,
     sender: &Sender<APIResult>,
@@ -31,8 +32,8 @@ pub fn ui(
                 ui.heading("Roggo Stats");
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if let Some(name) = player_name {
-                        ui.label(name);
+                    if let Some(dto) = player_name {
+                        ui.label(&dto.display_name);
                     }
 
                     egui::widgets::global_theme_preference_switch(ui);

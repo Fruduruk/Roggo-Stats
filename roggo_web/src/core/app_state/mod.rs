@@ -9,7 +9,7 @@ pub mod parameters;
 #[derive(Default)]
 pub struct AppState {
     pub agent_state: AgentState,
-    pub player_name: Option<String>,
+    pub main_character: Option<PlayerDto>,
     pub errors: Vec<AgentErrorDto>,
     pub general_errors: Vec<Error>,
     pub days_played: Option<Vec<jiff::civil::Date>>,
@@ -22,7 +22,7 @@ pub struct AppState {
 impl AppState {
     pub fn insert(&mut self, api_result: APIResult) {
         match api_result {
-            APIResult::PlayerName(name) => self.player_name = Some(name),
+            APIResult::PlayerName(player_dto) => self.main_character = Some(player_dto),
             APIResult::AgentError(agent_error_dto) => self.errors.push(agent_error_dto),
             APIResult::Version(version) => match version {
                 Some(version) => {

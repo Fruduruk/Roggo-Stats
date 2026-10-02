@@ -1,5 +1,5 @@
 pub enum APIResult {
-    PlayerName(String),
+    PlayerName(roggo_contract::PlayerDto),
     AgentError(roggo_contract::AgentErrorDto),
     GeneralError(crate::core::Error),
     Version(Option<String>),
