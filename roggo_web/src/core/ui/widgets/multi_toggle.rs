@@ -72,7 +72,7 @@ where
             ui.painter().rect_stroke(
                 animated_rect,
                 CORNER_RADIUS,
-                Stroke::new(1.0, colors(ui).border),
+                Stroke::new(2.0, colors(ui).border),
                 egui::StrokeKind::Outside,
             );
         }

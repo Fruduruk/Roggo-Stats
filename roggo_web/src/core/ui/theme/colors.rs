@@ -31,7 +31,7 @@ pub const DARK: ThemeColors = ThemeColors {
     surface_alt: egui::Color32::from_rgb(53, 53, 60),
     surface_hover: egui::Color32::from_rgb(42, 42, 47),
 
-    accent: egui::Color32::from_rgb(146, 102, 37),
+    accent: egui::Color32::from_rgb(96, 77, 121),
     accent_hover: egui::Color32::from_rgb(70, 210, 220),
     on_accent: egui::Color32::WHITE,
 
