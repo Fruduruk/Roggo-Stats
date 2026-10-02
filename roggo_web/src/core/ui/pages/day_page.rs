@@ -2,12 +2,18 @@ use crate::core::{
     api_result::APIResult,
     tasks,
     ui::{
-        components::{full_panel::FullPanel, tab_control::Tab},
-        widgets::session_card,
+        components::{
+            full_panel::FullPanel,
+            split_ui::{self, SplitUi},
+            tab_control::Tab,
+        },
+        widgets::{date_picker, session_card},
     },
 };
 use eframe::egui;
+use egui_extras::{Size, StripBuilder};
 use futures_channel::mpsc::Sender;
+use jiff::civil::Date;
 use roggo_contract::*;
 use uuid::Uuid;
 
@@ -19,25 +25,44 @@ impl DayPage {
         &mut self,
         ui: &mut egui::Ui,
         day_dto: &DayDto,
+        days_played: &Option<Vec<Date>>,
+        date: &mut Date,
         sender: &Sender<APIResult>,
         session_match_list: &mut Vec<Uuid>,
         new_tab: &mut Option<Tab>,
     ) {
         FullPanel.show(ui, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                ui.columns(2, |columns| {
-                    let left_column_ui = &mut columns[0];
-                    self.show_session_cards(
-                        left_column_ui,
-                        day_dto,
-                        sender,
-                        session_match_list,
-                        new_tab,
-                    );
-                    let right_column_ui = &mut columns[1];
-                    self.show_day_stats(right_column_ui, day_dto);
+            let left_width = 260.0;
+            let min_right_width = 250.0;
+
+            if ui.available_width() < left_width + min_right_width {
+                return;
+            }
+
+            StripBuilder::new(ui)
+                .size(Size::exact(left_width))
+                .size(Size::remainder())
+                .horizontal(|mut strip| {
+                    strip.cell(|left_ui| {
+                        top_center_scope(left_ui, egui::vec2(220.0, 30.0), |ui| {
+                            date_picker::ui(ui, days_played, sender, new_tab, date);
+                        });
+
+                        self.show_day_stats(left_ui, day_dto);
+                    });
+
+                    strip.cell(|right_ui| {
+                        egui::ScrollArea::vertical().show(right_ui, |ui: &mut egui::Ui| {
+                            self.show_session_cards(
+                                ui,
+                                day_dto,
+                                sender,
+                                session_match_list,
+                                new_tab,
+                            );
+                        });
+                    });
                 });
-            });
         });
     }
 
@@ -88,38 +113,34 @@ impl DayPage {
             .max()
             .unwrap_or(0);
 
-        egui::Frame::new()
-            .inner_margin(egui::Margin::symmetric(16, 0))
+        egui::Grid::new("day_stats")
+            .num_columns(2)
+            .spacing([24.0, 8.0])
+            .striped(true)
             .show(ui, |ui| {
-                egui::Grid::new("day_stats")
-                    .num_columns(2)
-                    .spacing([24.0, 8.0])
-                    .striped(true)
-                    .show(ui, |ui| {
-                        ui.label("Matches");
-                        ui.strong(match_count.to_string());
-                        ui.end_row();
+                ui.label("Matches");
+                ui.strong(match_count.to_string());
+                ui.end_row();
 
-                        ui.label("Record");
-                        ui.strong(format!("{won} won - {lost} lost"));
-                        ui.end_row();
+                ui.label("Record");
+                ui.strong(format!("{won} won - {lost} lost"));
+                ui.end_row();
 
-                        ui.label("Winrate");
-                        ui.strong(format!("{winrate:.0}%"));
-                        ui.end_row();
+                ui.label("Winrate");
+                ui.strong(format!("{winrate:.0}%"));
+                ui.end_row();
 
-                        ui.label("Playtime");
-                        ui.strong(format_duration(total_minutes));
-                        ui.end_row();
+                ui.label("Playtime");
+                ui.strong(format_duration(total_minutes));
+                ui.end_row();
 
-                        ui.label("Sessions");
-                        ui.strong(day_dto.sessions.len().to_string());
-                        ui.end_row();
+                ui.label("Sessions");
+                ui.strong(day_dto.sessions.len().to_string());
+                ui.end_row();
 
-                        ui.label("Longest session");
-                        ui.strong(format_duration(longest_session_minutes));
-                        ui.end_row();
-                    });
+                ui.label("Longest session");
+                ui.strong(format_duration(longest_session_minutes));
+                ui.end_row();
             });
     }
 }
@@ -132,4 +153,18 @@ fn format_duration(minutes: i64) -> String {
     } else {
         format!("{minutes} min")
     }
+}
+fn top_center_scope<R>(
+    ui: &mut egui::Ui,
+    size: egui::Vec2,
+    add_contents: impl FnOnce(&mut egui::Ui) -> R,
+) -> egui::InnerResponse<R> {
+    let available = ui.available_rect_before_wrap();
+
+    let rect = egui::Rect::from_min_size(
+        egui::pos2(available.center().x - size.x / 2.0, available.top()),
+        size,
+    );
+
+    ui.scope_builder(egui::UiBuilder::new().max_rect(rect), add_contents)
 }

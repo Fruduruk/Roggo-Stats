@@ -29,7 +29,7 @@ impl SessionPage {
                 self.match_selector(ui, session, new_tab);
 
                 if let (Some(player), Some(session_details)) = (main_character, session_details) {
-                    bee_swarm_comparison::ui(ui, session_details, player, |p| p.goals as f32);
+                    bee_swarm_comparison::ui(ui, session_details, player, |p| p.saves as f32);
                 }
             });
         });
@@ -41,7 +41,7 @@ impl SessionPage {
         session: &SessionDto,
         new_tab: &mut Option<Tab>,
     ) {
-        SplitUi.show(ui, 1.618, |left_ui, right_ui| {
+        SplitUi.show(ui, 1.618, 0.0, 0.0, |left_ui, right_ui| {
             if let Some((response, match_guid)) =
                 match_cards::ui(left_ui, session, &self.selected_match)
             {

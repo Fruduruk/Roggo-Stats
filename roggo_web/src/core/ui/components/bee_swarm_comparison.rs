@@ -21,7 +21,7 @@ pub fn ui(
             ui.vertical(|ui| {
                 ui.label(&values.display_name);
 
-                beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, 10.0);
+                beeswarm_plot::ui(ui, &values.values, vec2(100.0, 200.0), 0.0, 15.0);
             });
         }
     });

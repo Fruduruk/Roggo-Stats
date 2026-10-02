@@ -8,3 +8,4 @@ pub mod match_card;
 pub mod match_details;
 pub mod match_cards;
 pub mod beeswarm_plot;
+pub mod date_picker;

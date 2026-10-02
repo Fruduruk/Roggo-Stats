@@ -58,8 +58,6 @@ impl eframe::App for RoggoApp {
         header::ui(
             ui,
             &self.state.main_character,
-            &self.state.days_played,
-            &mut self.state.parameters.date,
             &self.content_sender,
             &mut self.tab_control.new_tab,
         );
@@ -138,6 +136,8 @@ impl RoggoApp {
                         DayPage::default().ui(
                             ui,
                             day,
+                            &self.state.days_played,
+                            &mut self.state.parameters.date,
                             &self.content_sender,
                             &mut self.state.parameters.session_match_list,
                             &mut self.tab_control.new_tab,

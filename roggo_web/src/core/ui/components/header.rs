@@ -15,8 +15,6 @@ use roggo_contract::PlayerDto;
 pub fn ui(
     ui: &mut egui::Ui,
     player_name: &Option<PlayerDto>,
-    days_played: &Option<Vec<Date>>,
-    date: &mut Date,
     sender: &Sender<APIResult>,
     new_tab: &mut Option<Tab>,
 ) {
@@ -39,57 +37,6 @@ pub fn ui(
                     egui::widgets::global_theme_preference_switch(ui);
                 });
             });
-
-            mid_rect_scope(ui, egui::vec2(220.0, ui.max_rect().height()), |ui| {
-                ui.horizontal(|ui| {
-                    if let Some(days_played) = days_played.as_ref()
-                        && let Some(last) = days_played.last()
-                    {
-                        let current_date = *date;
-                        let days_played_index = days_played
-                            .iter()
-                            .position(|d| d == date)
-                            .unwrap_or(days_played.len() - 1);
-
-                        if ui.button("←").clicked() {
-                            let new_date = days_played.get(days_played_index.saturating_sub(1)).unwrap_or(&current_date);
-                            *date = *new_date;
-                        }
-
-                        date_control::ui(ui, date);
-
-                        if !days_played.contains(date) {
-                            *date = *last;
-                        }
-
-                        if ui.button("→").clicked() {
-                            let new_date = days_played.get(days_played_index + 1).unwrap_or(&current_date);
-                            *date = *new_date;
-                        }
-
-                        if current_date != *date {
-                            tasks::load_day(sender.clone(), *date);
-                            *new_tab = Some(Tab::Day);
-                        }
-                    }
-                });
-            });
         });
 }
 
-fn mid_rect_scope<R>(
-    ui: &mut egui::Ui,
-    rect: egui::Vec2,
-    add_contents: impl FnOnce(&mut egui::Ui) -> R,
-) -> egui::InnerResponse<R> {
-    let center_rect = egui::Rect::from_center_size(ui.max_rect().center(), rect);
-
-    ui.scope_builder(
-        egui::UiBuilder::new()
-            .max_rect(center_rect)
-            .layout(egui::Layout::centered_and_justified(
-                egui::Direction::LeftToRight,
-            )),
-        |ui| add_contents(ui),
-    )
-}
