@@ -1,8 +1,15 @@
-use eframe::egui::{self, Stroke, Vec2, pos2};
+use eframe::egui::{self, Color32, Stroke, Vec2, pos2};
 
 use crate::core::ui::theme::colors::colors;
 
-pub fn ui(ui: &mut egui::Ui, values: &[f32], size: Vec2, min_value: f32, max_value: f32) {
+#[derive(Default, Copy, Clone)]
+pub struct DisplayValue {
+    pub value: f32,
+    pub color: Color32,
+    pub emphasized: bool,
+}
+
+pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32, max_value: f32) {
     if values.is_empty() {
         return;
     }
@@ -24,21 +31,40 @@ pub fn ui(ui: &mut egui::Ui, values: &[f32], size: Vec2, min_value: f32, max_val
         Stroke::new(1.0, colors(ui).on_panel),
     );
 
-
-    let average = values.iter().copied().sum::<f32>() / values.len() as f32;
-    let average_y = egui::remap(average, min_value..=max_value,rect.bottom()..=rect.top());
+    let average = values.iter().map(|dv| &dv.value).copied().sum::<f32>() / values.len() as f32;
+    let average_y = egui::remap(average, min_value..=max_value, rect.bottom()..=rect.top());
 
     painter.line_segment(
-        [pos2(rect.left(),average_y), pos2(rect.right(),average_y)],
-        Stroke::new(1.0, colors(ui).accent), 
+        [pos2(rect.left(), average_y), pos2(rect.right(), average_y)],
+        Stroke::new(1.0, colors(ui).accent),
+    );
+
+    let accuracy = if max_value < 10.0 {
+        2
+    } else if max_value < 1000.0 {
+        1
+    } else {
+        0
+    };
+
+    painter.text(
+        pos2(rect.left() + 4.0, average_y - 2.0),
+        egui::Align2::LEFT_BOTTOM,
+        format!("{average:.accuracy$}"),
+        egui::FontId::new(10.0, egui::FontFamily::Proportional),
+        colors(ui).accent,
     );
 
     let radius = 4.0;
     let spacing = radius * 2.0;
     let mut placed = Vec::<egui::Pos2>::new();
 
-    for &value in values {
-        let y = egui::remap(value, min_value..=max_value, rect.bottom()..=rect.top());
+    for &display_value in values {
+        let y = egui::remap(
+            display_value.value,
+            min_value..=max_value,
+            rect.bottom()..=rect.top(),
+        );
 
         let mut step = 0;
 
@@ -58,7 +84,15 @@ pub fn ui(ui: &mut egui::Ui, values: &[f32], size: Vec2, min_value: f32, max_val
             step += 1;
         };
 
-        painter.circle_filled(pos, radius, ui.visuals().text_color());
+        painter.circle_filled(pos, radius, display_value.color);
+        if display_value.emphasized {
+            painter.circle(
+                pos,
+                radius + 1.0,
+                colors(ui).accent,
+                Stroke::new(1.0, display_value.color),
+            );
+        }
         placed.push(pos);
     }
 }

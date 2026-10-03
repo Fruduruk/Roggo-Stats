@@ -102,7 +102,6 @@ impl RoggoApp {
             last_reload: Default::default(),
             install_ui: Default::default(),
             state: Default::default(),
-            // development_page: Default::default(),
             tab_control: Default::default(),
             session_page: Default::default(),
         }

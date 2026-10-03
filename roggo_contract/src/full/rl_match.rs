@@ -28,14 +28,32 @@ impl RLMatch {
     }
 
     pub fn get_team_of_player_by_primary_id(&self, primary_id: &str) -> Option<&Team> {
-        self.teams.iter().find(|t| {
-            t.get_player_by_primary_id(primary_id).is_some()
-        })
+        self.teams
+            .iter()
+            .find(|t| t.get_player_by_primary_id(primary_id).is_some())
     }
 
     pub fn get_enemy_team_of_player_by_primary_id(&self, primary_id: &str) -> Option<&Team> {
-        self.teams.iter().find(|t| {
-            t.get_player_by_primary_id(primary_id).is_none()
-        })
+        self.teams
+            .iter()
+            .find(|t| t.get_player_by_primary_id(primary_id).is_none())
+    }
+
+    pub fn won_by_player_primary_id(&self, primary_id: &str) -> Option<bool> {
+        let players_team = self.get_team_of_player_by_primary_id(primary_id)?;
+        let enemy_team = self.get_enemy_team_of_player_by_primary_id(primary_id)?;
+        if players_team.score == enemy_team.score {
+            return None;
+        }
+        Some(players_team.score > enemy_team.score)
+    }
+
+    pub fn primary_id_was_mvp(&self, primary_id: &str) -> Option<bool> {
+        let players_team = self.get_team_of_player_by_primary_id(primary_id)?;
+        let mvp = players_team
+            .players
+            .iter()
+            .max_by(|p, p2| p.score.cmp(&p2.score))?;
+        Some(mvp.primary_id == primary_id)
     }
 }
