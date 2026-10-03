@@ -10,6 +10,7 @@ use crate::core::ui::{
     theme::colors::colors,
     widgets::{
         match_details, match_selector,
+        mate_score_difference_plot::{self, create_mate_score_difference_values},
         multi_toggle::{MultiToggle, Orientation},
         timeline,
     },
@@ -202,16 +203,28 @@ impl SessionPage {
             .horizontal(|mut strip| {
                 strip.cell(|left_ui| {
                     egui::Frame::new().inner_margin(5.0).show(left_ui, |ui| {
-                        self.filter_toggle.ui(ui, Orientation::Horizontal);
-                        ui.add_space(5.0);
-                        bee_swarm_comparison::ui(
-                            ui,
-                            session_details,
-                            main_character,
-                            self.statistic_toggle.get_state(),
-                            self.filter_toggle.get_state(),
-                            self.selected_match.or(self.hovered_match),
-                        );
+                        if ui.available_width() > 150.0 {
+                            self.filter_toggle.ui(ui, Orientation::Horizontal);
+                            ui.add_space(5.0);
+                            bee_swarm_comparison::ui(
+                                ui,
+                                session_details,
+                                main_character,
+                                self.statistic_toggle.get_state(),
+                                self.filter_toggle.get_state(),
+                                self.selected_match.or(self.hovered_match),
+                            );
+
+                            let (my_team, enemy_team) = create_mate_score_difference_values(
+                                session_details,
+                                main_character,
+                                self.filter_toggle.get_state().0,
+                                self.selected_match.or(self.hovered_match),
+                                colors(ui),
+                            );
+
+                            mate_score_difference_plot::ui(ui, &my_team, &enemy_team);
+                        }
                     });
                 });
 

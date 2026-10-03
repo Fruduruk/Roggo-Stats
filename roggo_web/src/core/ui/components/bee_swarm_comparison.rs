@@ -4,7 +4,7 @@ use crate::core::ui::{
 };
 use eframe::egui::{self, Color32, FontId, RichText, vec2};
 
-use roggo_contract::{full::Player, *};
+use roggo_contract::*;
 use uuid::Uuid;
 
 #[derive(Default, Copy, Clone, PartialEq, enum_iterator::Sequence)]
@@ -90,11 +90,12 @@ pub fn ui(
         colors(ui),
     );
 
-
-    if let Some(main_character_index) = player_values.iter().position(|pv|pv.primary_id == main_character.primary_id) {
+    if let Some(main_character_index) = player_values
+        .iter()
+        .position(|pv| pv.primary_id == main_character.primary_id)
+    {
         player_values.swap(0, main_character_index);
     }
-
 
     let Some(max_value) = player_values
         .iter()
@@ -106,13 +107,18 @@ pub fn ui(
     };
 
     let max = (max_value * 1.1).max(0.0001);
+    const AXIS_WIDTH: f32 = 30.0;
 
-    let plot_size = vec2(100.0, 160.0);
+    let plot_width = (ui.available_width()
+        - (AXIS_WIDTH + (ui.spacing().item_spacing.x * (player_values.len()) as f32)))
+        / player_values.len() as f32;
+
+    let plot_size = vec2(plot_width, 160.0);
 
     ui.horizontal_centered(|ui| {
         ui.vertical(|ui| {
             ui.allocate_ui_with_layout(
-                vec2(30.0, plot_size.y),
+                vec2(AXIS_WIDTH, plot_size.y),
                 egui::Layout::top_down(egui::Align::RIGHT),
                 |ui| {
                     let accuracy = if max < 10.0 {
@@ -258,18 +264,18 @@ fn create_player_values(
 }
 
 fn is_global_statistic(statistic: Statistic) -> bool {
-    match statistic {
-        Statistic::PercentBoosting => false,
-        Statistic::PercentDemolished => false,
-        Statistic::PercentOnGround => false,
-        Statistic::PercentOnWall => false,
-        Statistic::PercentPowersliding => false,
-        Statistic::PercentSupersonic => false,
-        _ => true,
-    }
+    !matches!(
+        statistic,
+        Statistic::PercentBoosting
+            | Statistic::PercentDemolished
+            | Statistic::PercentOnGround
+            | Statistic::PercentOnWall
+            | Statistic::PercentPowersliding
+            | Statistic::PercentSupersonic
+    )
 }
 
-fn create_display_value(
+pub fn create_display_value(
     main_character: &PlayerDto,
     filter: Filter,
     selected_match_guid: Option<Uuid>,

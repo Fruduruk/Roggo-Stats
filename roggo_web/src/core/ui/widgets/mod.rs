@@ -11,3 +11,4 @@ pub mod beeswarm_plot;
 pub mod date_picker;
 pub mod icon_button;
 pub mod multi_toggle;
+pub mod mate_score_difference_plot;

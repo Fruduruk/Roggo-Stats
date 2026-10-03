@@ -7,7 +7,7 @@ use eframe::egui;
 
 pub fn apply_theme(ctx: &egui::Context) {
     ctx.set_theme(egui::Theme::Dark);
-    ctx.set_pixels_per_point(2.0);
+    ctx.set_pixels_per_point(1.8);
 
     colors::save_default_palette_in_ctx_data(ctx);
 

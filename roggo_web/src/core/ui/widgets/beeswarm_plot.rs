@@ -24,14 +24,19 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         egui::StrokeKind::Inside,
     );
 
-    let x = rect.center().x;
+    let center_x = rect.center().x;
 
     painter.line_segment(
-        [pos2(x, rect.top()), pos2(x, rect.bottom())],
+        [pos2(center_x, rect.top()), pos2(center_x, rect.bottom())],
         Stroke::new(1.0, colors(ui).on_panel),
     );
 
-    
+    let zero_line_y = rect.bottom() - 5.0;    
+
+    painter.line_segment(
+        [pos2(rect.left(), zero_line_y), pos2(rect.right(), zero_line_y)],
+        Stroke::new(1.0, colors(ui).text_weak),
+    );
 
     let radius = 4.0;
     let spacing = radius * 2.0;
@@ -41,7 +46,7 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         let y = egui::remap(
             display_value.value,
             min_value..=max_value,
-            rect.bottom()..=rect.top(),
+            zero_line_y..=rect.top(),
         );
 
         let mut step = 0;
@@ -53,7 +58,7 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
                 n => -(n / 2) as f32 * spacing,
             };
 
-            let pos = pos2(x + offset, y);
+            let pos = pos2(center_x + offset, y);
 
             if placed.iter().all(|p| p.distance(pos) >= spacing) {
                 break pos;
@@ -66,16 +71,16 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         if display_value.emphasized {
             painter.circle(
                 pos,
-                radius + 1.0,
-                colors(ui).accent,
-                Stroke::new(1.0, display_value.color),
+                radius + 3.0,
+                display_value.color.gamma_multiply(1.2),
+                Stroke::new(2.0, colors(ui).on_panel),
             );
         }
         placed.push(pos);
     }
 
     let average = values.iter().map(|dv| &dv.value).copied().sum::<f32>() / values.len() as f32;
-    let average_y = egui::remap(average, min_value..=max_value, rect.bottom()..=rect.top());
+    let average_y = egui::remap(average, min_value..=max_value, zero_line_y..=rect.top());
 
     painter.line_segment(
         [pos2(rect.left(), average_y), pos2(rect.right(), average_y)],

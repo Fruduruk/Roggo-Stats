@@ -1,11 +1,7 @@
 use crate::core::{
-    icons,
     links::to_tracker_network_link,
     time::{format_ms_min_seconds, format_ms_time_without_seconds},
-    ui::{
-        components::tab_control::Tab, mappers::map_arena, theme::colors::colors,
-        widgets::icon_button,
-    },
+    ui::{components::tab_control::Tab, mappers::map_arena, theme::colors::colors},
 };
 use eframe::egui::{self, RichText};
 use roggo_contract::*;
@@ -28,7 +24,7 @@ pub fn ui(
 fn content(
     ui: &mut egui::Ui,
     session_match_dto: Option<&SessionMatchDto>,
-    new_tab: &mut Option<Tab>,
+    _new_tab: &mut Option<Tab>,
 ) {
     ui.horizontal(|ui| {
         if let Some(m) = session_match_dto {

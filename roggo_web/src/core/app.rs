@@ -8,10 +8,7 @@ use crate::core::{
             tab_control::{Tab, TabControl},
         },
         install_ui::InstallUi,
-        pages::{
-            all_time_page::AllTimePage, day_page::DayPage, match_page::MatchPage,
-            session_page::SessionPage,
-        },
+        pages::{day_page::DayPage, session_page::SessionPage},
         theme::{apply_theme, colors::colors},
     },
 };
@@ -156,9 +153,8 @@ impl RoggoApp {
                             &mut self.tab_control.new_tab,
                         );
                     }
-                }
-                // (Tab::Match, _changed) => MatchPage::default().ui(ui),
-                (Tab::AllTime, _changed) => AllTimePage::default().ui(ui),
+                } // (Tab::Match, _changed) => MatchPage::default().ui(ui),
+                  // (Tab::AllTime, _changed) => AllTimePage::default().ui(ui),
             });
     }
 }

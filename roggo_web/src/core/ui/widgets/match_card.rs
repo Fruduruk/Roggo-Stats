@@ -21,12 +21,18 @@ pub fn ui(
     let (color, border_color) =
         if response.hovered() || &Some(session_match_dto.match_guid) == selected_match_guid {
             (
-                color.gamma_multiply(0.8),
+                match ui.theme() {
+                    egui::Theme::Dark => color.gamma_multiply(0.8),
+                    egui::Theme::Light => color.gamma_multiply(1.2),
+                },
                 colors(ui).on_panel.gamma_multiply(0.7),
             )
         } else {
             (
-                color.gamma_multiply(0.5),
+                match ui.theme() {
+                    egui::Theme::Dark => color.gamma_multiply(0.5),
+                    egui::Theme::Light => color.gamma_multiply(0.8),
+                },
                 colors(ui).on_panel.gamma_multiply(0.2),
             )
         };
@@ -56,7 +62,10 @@ pub fn ui(
 
         egui::Image::new(icons::STAR)
             .fit_to_exact_size(mvp_icon_size)
-            .tint(colors(ui).warning)
+            .tint(match ui.theme() {
+                egui::Theme::Dark => colors(ui).warning,
+                egui::Theme::Light => egui::Color32::from_rgb(239, 173, 7),
+            })
             .paint_at(ui, mvp_rect);
     }
 

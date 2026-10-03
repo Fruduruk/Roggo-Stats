@@ -12,7 +12,7 @@ pub enum Tab {
     Day,
     Session,
     // Match,
-    AllTime,
+    // AllTime,
 }
 
 impl Display for Tab {
@@ -21,7 +21,7 @@ impl Display for Tab {
             Tab::Day => write!(f, "Day"),
             Tab::Session => write!(f, "Session"),
             // Tab::Match => write!(f, "Match"),
-            Tab::AllTime => write!(f, "All Time"),
+            // Tab::AllTime => write!(f, "All Time"),
         }
     }
 }
@@ -44,7 +44,7 @@ impl TabControl {
         egui::Frame::new()
             .fill(colors(ui).panel)
             .corner_radius(5.0)
-            .inner_margin(egui::Margin::symmetric(11, 10))
+            .inner_margin(egui::Margin::symmetric(20, 10))
             .shadow(egui::Shadow {
                 offset: [2, 2],
                 blur: 2,
@@ -52,6 +52,7 @@ impl TabControl {
                 color: colors(ui).panel_shadow,
             })
             .show(ui, |ui| {
+                ui.take_available_width();
                 (selected_rect, changed) = self.show_tab_buttons(ui);
             });
 
@@ -77,7 +78,7 @@ impl TabControl {
 
             ui.painter().line_segment(
                 [egui::pos2(left, y), egui::pos2(right, y)],
-                egui::Stroke::new(2.0, ui.visuals().selection.bg_fill),
+                egui::Stroke::new(3.0, ui.visuals().selection.bg_fill),
             );
         }
 
@@ -96,14 +97,14 @@ impl TabControl {
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 20.0;
             for tab in enum_iterator::all::<Tab>() {
-                let response = if tab == Tab::AllTime {
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        tab_button(ui, tab.to_string(), self.selected == tab)
-                    })
-                    .inner
-                } else {
-                    tab_button(ui, tab.to_string(), self.selected == tab)
-                };
+                // let response = if tab == Tab::AllTime {
+                //     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                //         tab_button(ui, tab.to_string(), self.selected == tab)
+                //     })
+                //     .inner
+                // } else {
+                let response = tab_button(ui, tab.to_string(), self.selected == tab);
+                // };
 
                 if response.clicked() {
                     if self.selected != tab {
