@@ -11,7 +11,7 @@ pub enum Tab {
     #[default]
     Day,
     Session,
-    Match,
+    // Match,
     AllTime,
 }
 
@@ -20,7 +20,7 @@ impl Display for Tab {
         match self {
             Tab::Day => write!(f, "Day"),
             Tab::Session => write!(f, "Session"),
-            Tab::Match => write!(f, "Match"),
+            // Tab::Match => write!(f, "Match"),
             Tab::AllTime => write!(f, "All Time"),
         }
     }

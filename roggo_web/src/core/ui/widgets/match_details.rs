@@ -48,21 +48,22 @@ fn content(
             });
         }
 
-        ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
-            let enabled = session_match_dto.is_some();
+        // later
+        // ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
+        //     let enabled = session_match_dto.is_some();
 
-            if icon_button::ui(
-                ui,
-                icons::INSIDE.clone(),
-                20.0,
-                "Open match details",
-                enabled,
-            )
-            .clicked()
-            {
-                *new_tab = Some(Tab::Match);
-            }
-        });
+        //     if icon_button::ui(
+        //         ui,
+        //         icons::INSIDE.clone(),
+        //         20.0,
+        //         "Open match details",
+        //         enabled,
+        //     )
+        //     .clicked()
+        //     {
+        //         *new_tab = Some(Tab::Match);
+        //     }
+        // });
     });
 
     let Some(m) = session_match_dto else {

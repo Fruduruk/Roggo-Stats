@@ -31,29 +31,7 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         Stroke::new(1.0, colors(ui).on_panel),
     );
 
-    let average = values.iter().map(|dv| &dv.value).copied().sum::<f32>() / values.len() as f32;
-    let average_y = egui::remap(average, min_value..=max_value, rect.bottom()..=rect.top());
-
-    painter.line_segment(
-        [pos2(rect.left(), average_y), pos2(rect.right(), average_y)],
-        Stroke::new(1.0, colors(ui).accent),
-    );
-
-    let accuracy = if max_value < 10.0 {
-        2
-    } else if max_value < 1000.0 {
-        1
-    } else {
-        0
-    };
-
-    painter.text(
-        pos2(rect.left() + 4.0, average_y - 2.0),
-        egui::Align2::LEFT_BOTTOM,
-        format!("{average:.accuracy$}"),
-        egui::FontId::new(10.0, egui::FontFamily::Proportional),
-        colors(ui).accent,
-    );
+    
 
     let radius = 4.0;
     let spacing = radius * 2.0;
@@ -95,4 +73,28 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         }
         placed.push(pos);
     }
+
+    let average = values.iter().map(|dv| &dv.value).copied().sum::<f32>() / values.len() as f32;
+    let average_y = egui::remap(average, min_value..=max_value, rect.bottom()..=rect.top());
+
+    painter.line_segment(
+        [pos2(rect.left(), average_y), pos2(rect.right(), average_y)],
+        Stroke::new(1.0, colors(ui).accent),
+    );
+
+    let accuracy = if max_value < 10.0 {
+        2
+    } else if max_value < 1000.0 {
+        1
+    } else {
+        0
+    };
+
+    painter.text(
+        pos2(rect.left() + 4.0, average_y - 2.0),
+        egui::Align2::LEFT_BOTTOM,
+        format!("{average:.accuracy$}"),
+        egui::FontId::new(10.0, egui::FontFamily::Proportional),
+        colors(ui).accent,
+    );
 }

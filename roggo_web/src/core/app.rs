@@ -157,7 +157,7 @@ impl RoggoApp {
                         );
                     }
                 }
-                (Tab::Match, _changed) => MatchPage::default().ui(ui),
+                // (Tab::Match, _changed) => MatchPage::default().ui(ui),
                 (Tab::AllTime, _changed) => AllTimePage::default().ui(ui),
             });
     }
