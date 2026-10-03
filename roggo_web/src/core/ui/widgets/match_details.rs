@@ -90,6 +90,31 @@ fn content(
             }
         }
     });
+
+    ui.add_space(8.0);
+
+    let enemies = ui.link("Allies").on_hover_text("Open all enemy profiles");
+
+    if enemies.clicked() {
+        for ally in &m.allies {
+            open_tracker(ui, ally);
+        }
+    }
+
+    ui.indent("allies", |ui| {
+        for ally in &m.allies {
+            let text = RichText::new(&ally.display_name)
+                .font(egui::FontId::new(
+                    12.0,
+                    egui::FontFamily::Name("player_name".into()),
+                ))
+                .color(colors(ui).accent);
+
+            if ui.link(text).clicked() {
+                open_tracker(ui, ally);
+            }
+        }
+    });
 }
 
 fn open_tracker(ui: &egui::Ui, player: &PlayerDto) {

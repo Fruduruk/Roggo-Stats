@@ -91,6 +91,10 @@ where
                 font_id.size += 0.5;
             }
 
+            if button.response.is_pointer_button_down_on() {
+                font_id.size -= 0.5;
+            }
+
             ui.painter().text(
                 button.rect.center(),
                 egui::Align2::CENTER_CENTER,

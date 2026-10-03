@@ -31,10 +31,13 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
         Stroke::new(1.0, colors(ui).on_panel),
     );
 
-    let zero_line_y = rect.bottom() - 5.0;    
+    let zero_line_y = rect.bottom() - 5.0;
 
     painter.line_segment(
-        [pos2(rect.left(), zero_line_y), pos2(rect.right(), zero_line_y)],
+        [
+            pos2(rect.left(), zero_line_y),
+            pos2(rect.right(), zero_line_y),
+        ],
         Stroke::new(1.0, colors(ui).text_weak),
     );
 
@@ -66,8 +69,13 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
 
             step += 1;
         };
+        
+        let rect = egui::Rect::from_center_size(pos, egui::vec2(radius * 2.0, radius * 2.0));
+
+        let response = ui.interact(rect, ui.id().with(format!("{rect}")), egui::Sense::hover());
 
         painter.circle_filled(pos, radius, display_value.color);
+
         if display_value.emphasized {
             painter.circle(
                 pos,
@@ -76,6 +84,8 @@ pub fn ui(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2, min_value: f32
                 Stroke::new(2.0, colors(ui).on_panel),
             );
         }
+
+        response.on_hover_text_at_pointer(format!("{:.2}", display_value.value));
         placed.push(pos);
     }
 

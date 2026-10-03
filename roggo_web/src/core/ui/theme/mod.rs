@@ -1,13 +1,17 @@
-pub mod geometry;
 pub mod colors;
 pub mod fonts;
+pub mod geometry;
 
 use eframe::egui;
-
 
 pub fn apply_theme(ctx: &egui::Context) {
     ctx.set_theme(egui::Theme::Dark);
     ctx.set_pixels_per_point(1.8);
+
+    ctx.all_styles_mut(|style| {
+        style.interaction.tooltip_delay = 0.0;
+        style.interaction.show_tooltips_only_when_still = false;
+    });
 
     colors::save_default_palette_in_ctx_data(ctx);
 
@@ -15,4 +19,3 @@ pub fn apply_theme(ctx: &egui::Context) {
     colors::apply_theme_colors(ctx);
     geometry::apply_size_spacing_corners(ctx);
 }
-

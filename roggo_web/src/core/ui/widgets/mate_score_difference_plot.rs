@@ -1,4 +1,4 @@
-use eframe::egui::{self, FontId, RichText, Stroke, Vec2, pos2, vec2};
+use eframe::egui::{self, FontId, RichText, Stroke, Vec2, pos2, response, vec2};
 use roggo_contract::{PlayerDto, SessionDetails};
 use uuid::Uuid;
 
@@ -62,7 +62,8 @@ fn draw_row(ui: &mut egui::Ui, label: &str, values: &[DisplayValue], size: Vec2)
             |ui| {
                 ui.label(
                     RichText::new(label).font(FontId::new(11.0, egui::FontFamily::Proportional)),
-                );
+                )
+                .on_hover_text_at_pointer("(max score - min score) / max score");
             },
         );
 
@@ -139,6 +140,10 @@ fn draw_plot(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2) {
             step += 1;
         };
 
+        let rect = egui::Rect::from_center_size(pos, egui::vec2(RADIUS * 2.0, RADIUS * 2.0));
+
+        let response = ui.interact(rect, ui.id().with(format!("{rect}")), egui::Sense::hover());
+
         painter.circle_filled(pos, RADIUS, display_value.color);
 
         if display_value.emphasized {
@@ -149,6 +154,8 @@ fn draw_plot(ui: &mut egui::Ui, values: &[DisplayValue], size: Vec2) {
                 Stroke::new(2.0, colors(ui).on_panel),
             );
         }
+
+        response.on_hover_text_at_pointer(format!("{:.2}", display_value.value));
 
         placed.push(pos);
     }

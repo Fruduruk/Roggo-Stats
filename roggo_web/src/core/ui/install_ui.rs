@@ -2,7 +2,7 @@ use eframe::egui;
 
 use crate::core::{app::COMPATIBLE_AGENT_VERSION, ui::patchnotes_ui::PatchNotesUi};
 
-pub const DOWNLOAD_URL: &str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.6.0/RoggoAgentSetup_0.6.0.exe";
+pub const DOWNLOAD_URL: &str = "https://github.com/Fruduruk/Roggo-Stats/releases/download/roggo-agent-v0.8.0/RoggoAgentSetup_0.8.0.exe";
 
 #[derive(Default)]
 enum ViewMode {
