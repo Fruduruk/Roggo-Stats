@@ -141,7 +141,7 @@ impl ApplicationHandler<UserEvent> for TrayApp {
 
                 if let Some(settings_item) = &self.settings_item {
                     if id == settings_item.id() {
-                        let result = Command::new("roggo-settings.exe").spawn();
+                        let result = Command::new("roggo_settings.exe").spawn();
                         if let Err(err) = result {
                             tracing::error!(error=%err, "Could not run roggo settings");
                         }
